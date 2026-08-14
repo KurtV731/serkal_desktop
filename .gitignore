@@ -4,6 +4,7 @@ node_modules/
 # build
 dist/
 build/
+out/
 
 # benutzerdaten
 3 data/archiv/
@@ -16,3 +17,8 @@ build/
 # windows
 Thumbs.db
 Desktop.ini
+
+# lokale arbeits- und austauschdateien
+part.zip
+serkal_desktop.zip
+tasklist.txt

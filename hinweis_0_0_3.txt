@@ -1,0 +1,18 @@
+SERKAL Desktop 0.0.3 – Kalender kommt zurück
+
+Neu:
+- Kalender-Grundeinrichtung beim Erstlauf.
+- Auswahl: Google Kalender / ICS / kein Kalender / „mach, was du denkst“.
+- Google-Kalender-ID wird lokal in settings.json gespeichert.
+- Der Kalender-Button öffnet bei Google-Auswahl gezielt den gewählten Kalender im Windows-Standardbrowser.
+- Keine persönliche Kalender-ID ist fest im Programmcode eingebaut.
+- Vollbild, UI, Light/Dark und Sprachumschaltung aus 0.0.2 bleiben erhalten.
+
+Bewusste Grenze:
+- Automatisches Ermitteln der Google-Kalender-ID über Google OAuth/API folgt später.
+- ICS kann ausgewählt werden; der eigentliche ICS-Export folgt später.
+
+Kalenderfix:
+- settings.json wurde zuvor mit den sichtbaren Zeichen \\n abgeschlossen.
+- Dadurch war sie beim erneuten Lesen kein gueltiges JSON.
+- Jetzt wird ein echtes Zeilenende geschrieben.
