@@ -138,6 +138,45 @@ function installIpc_() {
     });
 }
 
+function installTmdbTestButton_(hauptfenster) {
+    const js = `
+(() => {
+  if (document.getElementById('serkalTmdb004Test')) return;
+  const btn = document.createElement('button');
+  btn.id = 'serkalTmdb004Test';
+  btn.textContent = 'TMDB 0.0.4 TEST';
+  btn.title = 'TMDB-Key einrichten und aktuelle Titelsuche direkt ueber TMDB testen';
+  Object.assign(btn.style, {
+    position:'fixed', right:'18px', top:'18px', zIndex:'2147483647',
+    padding:'10px 14px', borderRadius:'12px', border:'1px solid #5b6cff',
+    background:'#eef0ff', fontWeight:'800', cursor:'pointer', boxShadow:'0 4px 14px rgba(0,0,0,.18)'
+  });
+  btn.addEventListener('click', async () => {
+    try {
+      const status = await window.serkal.tmdb.status();
+      if (!status.configured) {
+        const key = window.prompt('TMDB API-Key einmalig lokal eingeben:');
+        if (!key) return;
+        await window.serkal.tmdb.saveKey(key);
+      }
+      const test = await window.serkal.tmdb.test();
+      if (!test.ok) { window.alert('TMDB-Verbindung fehlgeschlagen: ' + (test.message || test.code || 'unbekannt')); return; }
+      const titleEl = document.getElementById('inpTitle') || document.querySelector('input[type="text"]');
+      const query = titleEl ? String(titleEl.value || '').trim() : '';
+      if (!query) { window.alert('TMDB-Verbindung funktioniert. Bitte links einen Serientitel eingeben und den TMDB-Test erneut klicken.'); return; }
+      const res = await window.serkal.tmdb.searchTv(query);
+      if (!res.ok) { window.alert('TMDB-Suche fehlgeschlagen: ' + (res.message || res.code || 'unbekannt')); return; }
+      const rows = (res.results || []).slice(0, 5).map((x,i) => (i+1) + '. ' + (x.name || x.originalName || '?') + (x.firstAirDate ? ' (' + x.firstAirDate.slice(0,4) + ')' : '') + '  [TMDB ' + x.id + ']');
+      window.alert(rows.length ? 'TMDB-Treffer fuer "' + query + '":\\n\\n' + rows.join('\\n') : 'TMDB: kein Treffer fuer "' + query + '".');
+    } catch (e) {
+      window.alert('TMDB-0.0.4-Testfehler: ' + (e && e.message ? e.message : String(e)));
+    }
+  });
+  document.body.appendChild(btn);
+})();`;
+    hauptfenster.webContents.executeJavaScript(js).catch(err => console.error("SERKAL TMDB-Testbutton:", err));
+}
+
 function erstelleHauptfenster() {
     const hauptfenster = new BrowserWindow({
         width:1280, height:820, minWidth:900, minHeight:600, show:false,
@@ -145,7 +184,11 @@ function erstelleHauptfenster() {
         webPreferences:{ preload:path.join(__dirname,"..","common","preload.js"), contextIsolation:true, nodeIntegration:false }
     });
     hauptfenster.loadFile(path.join(__dirname,"..","frontend","index.html"));
-    hauptfenster.once("ready-to-show",()=>{ hauptfenster.maximize(); hauptfenster.show(); });
+    hauptfenster.once("ready-to-show",()=>{
+        hauptfenster.maximize();
+        hauptfenster.show();
+        installTmdbTestButton_(hauptfenster);
+    });
     hauptfenster.setMenuBarVisibility(false);
 }
 
