@@ -10,7 +10,7 @@ contextBridge.exposeInMainWorld("serkal", {
         status:()=>ipcRenderer.invoke("serkal:tmdb:status"),
         saveKey:(apiKey)=>ipcRenderer.invoke("serkal:tmdb:saveKey",apiKey),
         test:()=>ipcRenderer.invoke("serkal:tmdb:test"),
-        searchTv:(query)=>ipcRenderer.invoke("serkal:tmdb:searchTv",query)
+        searchTv:(query,lang)=>ipcRenderer.invoke("serkal:tmdb:searchTv",query,lang)
     },
     calendar:{ open:(settings)=>ipcRenderer.invoke("serkal:calendar:open",settings) }
 });
