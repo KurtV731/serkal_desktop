@@ -5,7 +5,7 @@
  Datei      : main.js
  Version    : 0.0.4
  Aufgabe    : Startet Electron, verwaltet lokale Grundeinstellungen,
-              oeffnet den Kalender und stellt den TMDB-Grundanschluss bereit.
+              oeffnet den Kalender und stellt die TMDB-Anbindung bereit.
 ===============================================================================
 */
 
@@ -76,21 +76,59 @@ function writeTmdbKey_(apiKey) {
 
 async function tmdbRequest_(pathname, params) {
     const apiKey = readTmdbKey_();
-    if (!apiKey) return { ok:false, code:"NO_KEY", message:"TMDB API-Key ist noch nicht eingerichtet." };
+    if (!apiKey) return { ok:false, code:"TMDB_KEY_MISSING", message:"TMDB ist noch nicht eingerichtet. Bitte zuerst den TMDB API-Key eintragen." };
+
     const url = new URL("https://api.themoviedb.org/3" + pathname);
     url.searchParams.set("api_key", apiKey);
-    url.searchParams.set("language", "de-DE");
     for (const [key, value] of Object.entries(params || {})) {
         if (value !== undefined && value !== null && String(value) !== "") url.searchParams.set(key, String(value));
     }
+
     try {
         const response = await fetch(url, { headers:{ accept:"application/json" } });
         const data = await response.json().catch(() => null);
-        if (!response.ok) return { ok:false, code:"TMDB_HTTP", status:response.status, message:(data && data.status_message) || "TMDB-Anfrage fehlgeschlagen." };
+        if (!response.ok) {
+            const code = (response.status === 401) ? "TMDB_KEY_INVALID" : "TMDB_HTTP";
+            return { ok:false, code, status:response.status, message:(data && data.status_message) || "TMDB-Anfrage fehlgeschlagen." };
+        }
         return { ok:true, data };
     } catch (err) {
-        return { ok:false, code:"NETWORK", message:String(err && err.message || err) };
+        return { ok:false, code:"NETWORK", message:"Keine Verbindung zu TMDB. Bitte Internetverbindung prüfen." };
     }
+}
+
+function tmdbLang_(lang) {
+    return String(lang || "").toLowerCase().startsWith("en") ? "en-US" : "de-DE";
+}
+
+async function tmdbSearchTv_(query, lang) {
+    const q = String(query || "").trim();
+    if (!q) return { ok:false, code:"NO_QUERY", message:"Serientitel fehlt." };
+    const res = await tmdbRequest_("/search/tv", {
+        query:q,
+        language:tmdbLang_(lang),
+        include_adult:"false",
+        page:"1"
+    });
+    if (!res.ok) return res;
+
+    const results = Array.isArray(res.data && res.data.results) ? res.data.results.slice(0, 10).map(x => ({
+        id:x.id,
+        tmdbId:x.id,
+        name:x.name || "",
+        title:x.name || "",
+        originalName:x.original_name || "",
+        original_name:x.original_name || "",
+        firstAirDate:x.first_air_date || "",
+        first_air_date:x.first_air_date || "",
+        year:String(x.first_air_date || "").slice(0,4),
+        overview:x.overview || "",
+        descDE:tmdbLang_(lang) === "de-DE" ? (x.overview || "") : "",
+        descEN:tmdbLang_(lang) === "en-US" ? (x.overview || "") : "",
+        posterPath:x.poster_path || "",
+        poster_path:x.poster_path || ""
+    })) : [];
+    return { ok:true, results };
 }
 
 function googleCalendarUrl_(calendarId) {
@@ -102,27 +140,13 @@ function googleCalendarUrl_(calendarId) {
 function installIpc_() {
     ipcMain.handle("serkal:settings:get", () => readSettings_());
     ipcMain.handle("serkal:settings:save", (_event, settings) => writeSettings_(settings));
-    ipcMain.handle("serkal:tmdb:status", () => ({ configured:!!readTmdbKey_(), configFile:tmdbConfigPath_() }));
+    ipcMain.handle("serkal:tmdb:status", () => ({ configured:!!readTmdbKey_() }));
     ipcMain.handle("serkal:tmdb:saveKey", (_event, apiKey) => writeTmdbKey_(apiKey));
     ipcMain.handle("serkal:tmdb:test", async () => {
         const res = await tmdbRequest_("/configuration", {});
         return res.ok ? { ok:true, message:"TMDB-Verbindung funktioniert." } : res;
     });
-    ipcMain.handle("serkal:tmdb:searchTv", async (_event, query) => {
-        const q = String(query || "").trim();
-        if (!q) return { ok:false, code:"NO_QUERY", message:"Serientitel fehlt." };
-        const res = await tmdbRequest_("/search/tv", { query:q, include_adult:"false", page:"1" });
-        if (!res.ok) return res;
-        const results = Array.isArray(res.data && res.data.results) ? res.data.results.slice(0, 10).map(x => ({
-            id:x.id,
-            name:x.name || "",
-            originalName:x.original_name || "",
-            firstAirDate:x.first_air_date || "",
-            overview:x.overview || "",
-            posterPath:x.poster_path || ""
-        })) : [];
-        return { ok:true, results };
-    });
+    ipcMain.handle("serkal:tmdb:searchTv", async (_event, query, lang) => tmdbSearchTv_(query, lang));
     ipcMain.handle("serkal:calendar:open", async (_event, settingsFromUi) => {
         const settings = settingsFromUi ? normalizeSettings_(settingsFromUi) : readSettings_();
         let mode = settings.calendar.mode;
@@ -138,43 +162,88 @@ function installIpc_() {
     });
 }
 
-function installTmdbTestButton_(hauptfenster) {
+function installDesktopTmdbBridge_(hauptfenster) {
     const js = `
 (() => {
-  if (document.getElementById('serkalTmdb004Test')) return;
-  const btn = document.createElement('button');
-  btn.id = 'serkalTmdb004Test';
-  btn.textContent = 'TMDB 0.0.4 TEST';
-  btn.title = 'TMDB-Key einrichten und aktuelle Titelsuche direkt ueber TMDB testen';
-  Object.assign(btn.style, {
-    position:'fixed', right:'18px', top:'18px', zIndex:'2147483647',
-    padding:'10px 14px', borderRadius:'12px', border:'1px solid #5b6cff',
-    background:'#eef0ff', fontWeight:'800', cursor:'pointer', boxShadow:'0 4px 14px rgba(0,0,0,.18)'
-  });
-  btn.addEventListener('click', async () => {
-    try {
-      const status = await window.serkal.tmdb.status();
-      if (!status.configured) {
-        const key = window.prompt('TMDB API-Key einmalig lokal eingeben:');
-        if (!key) return;
-        await window.serkal.tmdb.saveKey(key);
+  function askTmdbKey_() {
+    return new Promise((resolve) => {
+      const old = document.getElementById('skTmdbKeyOverlay');
+      if (old) old.remove();
+
+      const overlay = document.createElement('div');
+      overlay.id = 'skTmdbKeyOverlay';
+      overlay.className = 'skDialogOverlay sk-open';
+      overlay.setAttribute('aria-hidden', 'false');
+      overlay.innerHTML = '<section class="skDialogBox" role="dialog" aria-modal="true" data-kind="info">' +
+        '<div class="skDialogHead"><div class="skDialogIcon">🔑</div><h2 class="skDialogTitle">TMDB einrichten</h2></div>' +
+        '<div class="skDialogText">Für die Seriensuche benötigt SERKAL einmalig Ihren TMDB API-Key.<br><br>' +
+        '<input id="skTmdbKeyInput" type="text" autocomplete="off" spellcheck="false" placeholder="TMDB API-Key" style="width:100%;box-sizing:border-box;padding:10px 12px;border-radius:10px;border:1px solid #cbd5e1;font:inherit">' +
+        '<div id="skTmdbKeyError" style="display:none;margin-top:10px;color:#b91c1c;font-weight:700"></div></div>' +
+        '<div class="skDialogActions"><button id="skTmdbKeyCancel" type="button">Abbrechen</button><button id="skTmdbKeySave" class="skDialogPrimary" type="button">Speichern und suchen</button></div>' +
+        '</section>';
+      document.body.appendChild(overlay);
+
+      const input = document.getElementById('skTmdbKeyInput');
+      const error = document.getElementById('skTmdbKeyError');
+      const finish = (value) => { overlay.remove(); resolve(value); };
+      document.getElementById('skTmdbKeyCancel').onclick = () => finish('');
+      document.getElementById('skTmdbKeySave').onclick = async () => {
+        const key = String(input.value || '').trim();
+        if (!key) { error.textContent='Bitte TMDB API-Key eingeben.'; error.style.display='block'; input.focus(); return; }
+        try {
+          await window.serkal.tmdb.saveKey(key);
+          const test = await window.serkal.tmdb.test();
+          if (!test.ok) {
+            error.textContent = test.code === 'NETWORK' ? 'Keine Verbindung zu TMDB. Bitte Internetverbindung prüfen.' : 'Der TMDB API-Key funktioniert nicht. Bitte prüfen.';
+            error.style.display='block'; input.focus(); input.select(); return;
+          }
+          finish(key);
+        } catch (e) {
+          error.textContent='TMDB-Einrichtung fehlgeschlagen.'; error.style.display='block';
+        }
+      };
+      input.addEventListener('keydown', (ev) => { if (ev.key === 'Enter') document.getElementById('skTmdbKeySave').click(); });
+      setTimeout(() => input.focus(), 50);
+    });
+  }
+
+  function runner_() {
+    let success = function(){};
+    let failure = function(){};
+    const chain = {
+      withSuccessHandler(fn) { success = typeof fn === 'function' ? fn : success; return chain; },
+      withFailureHandler(fn) { failure = typeof fn === 'function' ? fn : failure; return chain; },
+      async apiSucheSerieKomplett(query, lang, options) {
+        try {
+          let res = await window.serkal.tmdb.searchTv(query, lang);
+          if (!res.ok && res.code === 'TMDB_KEY_MISSING') {
+            const key = await askTmdbKey_();
+            if (!key) { failure({message:'TMDB ist noch nicht eingerichtet. Bitte zuerst den TMDB API-Key eintragen.'}); return; }
+            res = await window.serkal.tmdb.searchTv(query, lang);
+          }
+          if (!res.ok) { failure({message:res.message || 'TMDB-Suche fehlgeschlagen.', code:res.code}); return; }
+          let rows = Array.isArray(res.results) ? res.results : [];
+          const year = options && Number(options.yearOverride || 0);
+          if (year) rows = rows.filter(x => Number(x.year || 0) === year);
+          success(rows);
+        } catch (e) { failure({message:(e && e.message) ? e.message : String(e)}); }
       }
-      const test = await window.serkal.tmdb.test();
-      if (!test.ok) { window.alert('TMDB-Verbindung fehlgeschlagen: ' + (test.message || test.code || 'unbekannt')); return; }
-      const titleEl = document.getElementById('inpTitle') || document.querySelector('input[type="text"]');
-      const query = titleEl ? String(titleEl.value || '').trim() : '';
-      if (!query) { window.alert('TMDB-Verbindung funktioniert. Bitte links einen Serientitel eingeben und den TMDB-Test erneut klicken.'); return; }
-      const res = await window.serkal.tmdb.searchTv(query);
-      if (!res.ok) { window.alert('TMDB-Suche fehlgeschlagen: ' + (res.message || res.code || 'unbekannt')); return; }
-      const rows = (res.results || []).slice(0, 5).map((x,i) => (i+1) + '. ' + (x.name || x.originalName || '?') + (x.firstAirDate ? ' (' + x.firstAirDate.slice(0,4) + ')' : '') + '  [TMDB ' + x.id + ']');
-      window.alert(rows.length ? 'TMDB-Treffer fuer "' + query + '":\\n\\n' + rows.join('\\n') : 'TMDB: kein Treffer fuer "' + query + '".');
-    } catch (e) {
-      window.alert('TMDB-0.0.4-Testfehler: ' + (e && e.message ? e.message : String(e)));
-    }
-  });
-  document.body.appendChild(btn);
+    };
+    return chain;
+  }
+
+  const oldGoogle = window.google || {};
+  const oldScript = oldGoogle.script || {};
+  const desktopRun = new Proxy({}, { get(_target, prop) {
+    const chain = runner_();
+    if (prop in chain) return chain[prop].bind(chain);
+    const oldRun = oldScript.run;
+    if (oldRun && oldRun[prop]) return oldRun[prop];
+    return undefined;
+  }});
+  window.google = Object.assign({}, oldGoogle, { script:Object.assign({}, oldScript, { run:desktopRun }) });
 })();`;
-    hauptfenster.webContents.executeJavaScript(js).catch(err => console.error("SERKAL TMDB-Testbutton:", err));
+    return hauptfenster.webContents.executeJavaScript(js);
 }
 
 function erstelleHauptfenster() {
@@ -184,10 +253,11 @@ function erstelleHauptfenster() {
         webPreferences:{ preload:path.join(__dirname,"..","common","preload.js"), contextIsolation:true, nodeIntegration:false }
     });
     hauptfenster.loadFile(path.join(__dirname,"..","frontend","index.html"));
-    hauptfenster.once("ready-to-show",()=>{
+    hauptfenster.once("ready-to-show", async ()=>{
+        try { await installDesktopTmdbBridge_(hauptfenster); }
+        catch (err) { console.error("SERKAL Desktop TMDB-Bridge:", err); }
         hauptfenster.maximize();
         hauptfenster.show();
-        installTmdbTestButton_(hauptfenster);
     });
     hauptfenster.setMenuBarVisibility(false);
 }
