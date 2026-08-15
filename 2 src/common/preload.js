@@ -9,15 +9,20 @@ try {
     SERKAL_VERSION = String(packageInfo && packageInfo.version || SERKAL_VERSION);
 } catch (_e) {}
 
-window.addEventListener("DOMContentLoaded", () => {
+function applyDesktopIdentity_() {
     try {
         document.title = "SERKAL Desktop " + SERKAL_VERSION;
 
-        const style = document.createElement("style");
-        style.textContent = ".topBuildBar{display:none !important;}";
-        document.head.appendChild(style);
+        /* Die alte Apps-Script-UI hatte eine eigene Build-Zeile.
+           Im Desktop ist sie doppelt, weil Electron bereits die Titelleiste hat.
+           Deshalb nicht nur verstecken, sondern aus dem DOM entfernen. */
+        const topBuildBar = document.querySelector(".topBuildBar");
+        if (topBuildBar) topBuildBar.remove();
     } catch (_e) {}
-});
+}
+
+window.addEventListener("DOMContentLoaded", applyDesktopIdentity_);
+window.addEventListener("load", applyDesktopIdentity_);
 
 contextBridge.exposeInMainWorld("serkal", {
     name:"SERKAL Desktop",
