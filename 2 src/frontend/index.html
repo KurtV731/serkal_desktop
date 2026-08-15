@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
 
-  <title>SERKAL Desktop 0.0.3</title>
+  <title>SERKAL Desktop 0.0.4</title>
 
   <style>
     /* ============== Grundlayout (kein Seitenscroll) ============== */
@@ -1873,7 +1873,7 @@
 
 
 
-  <!-- SERKAL Desktop 0.0.3 – Kalender-Grundeinrichtung -->
+  <!-- SERKAL Desktop 0.0.4 – Kalender-Grundeinrichtung -->
   <style>
     .skCalendarSetupOverlay{position:fixed;inset:0;z-index:20000;display:none;align-items:center;justify-content:center;padding:24px;background:rgba(15,23,42,.62)}
     .skCalendarSetupOverlay.sk-open{display:flex}
@@ -1890,7 +1890,7 @@
       <h2 id="skCalendarSetupTitle">Kalender einrichten</h2>
       <p class="skCalendarSetupIntro">Wie soll SERKAL mit deinem Kalender umgehen? Die Auswahl wird lokal gespeichert.</p>
       <label class="skCalendarChoice"><input type="radio" name="skCalendarMode" value="google"><strong>Google Kalender</strong> – meinen ausgewählten Kalender öffnen</label>
-      <div id="skCalendarGoogleData" class="skCalendarGoogleData"><label for="skCalendarGoogleId">Google Kalender-ID</label><input id="skCalendarGoogleId" type="text" placeholder="…@group.calendar.google.com"><div class="skCalendarHint">Für 0.0.3 wird die ID einmal eingetragen und lokal gespeichert. Automatisches Ermitteln über Google-Anmeldung/API kommt später.</div></div>
+      <div id="skCalendarGoogleData" class="skCalendarGoogleData"><label for="skCalendarGoogleId">Google Kalender-ID</label><input id="skCalendarGoogleId" type="text" placeholder="…@group.calendar.google.com"><div class="skCalendarHint">Für 0.0.4 wird die ID einmal eingetragen und lokal gespeichert. Automatisches Ermitteln über Google-Anmeldung/API kommt später.</div></div>
       <label class="skCalendarChoice"><input type="radio" name="skCalendarMode" value="ics"><strong>ICS-Datei / anderer Kalender</strong></label>
       <label class="skCalendarChoice"><input type="radio" name="skCalendarMode" value="none"><strong>Keinen Kalender verwenden</strong></label>
       <label class="skCalendarChoice"><input type="radio" name="skCalendarMode" value="auto"><strong>Keine Ahnung, was du von mir willst – mach, was du denkst. 😏</strong></label>
@@ -1920,7 +1920,7 @@
   </script>
 
   <!-- ============================================================
-       SERKAL DESKTOP 0.0.3
+       SERKAL DESKTOP 0.0.4
        Übergangsbrücke für die reine UI-Übernahme.
        Sie verhindert Fehler durch google.script.run, solange die
        eigentlichen Backend-Funktionen noch nicht nach Electron
@@ -1929,7 +1929,7 @@
   <script>
     (function () {
       const desktopResponses = {
-        apiGetBuildInfo: { ok: true, daten: { version: 'SERKAL Desktop 0.0.3' } },
+        apiGetBuildInfo: { ok: true, daten: { version: 'SERKAL Desktop 0.0.4' } },
         apiLadeArchivDaten: { ok: true, entries: [] }
       };
 
@@ -1994,7 +1994,7 @@
       }
 
       window.SERKAL_DESKTOP = {
-        version: '0.0.3',
+        version: '0.0.4',
         mode: 'ui-transfer'
       };
     })();
