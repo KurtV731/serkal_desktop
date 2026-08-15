@@ -38,19 +38,17 @@ Vorhanden bzw. getestet:
 
 Solltest für die Suche: `Wednesday` / TMDB 119051. Erwartet wird sinngemäß die bereits bekannte SERKAL-Darstellung mit S02, 8 Episoden, Terminen und Hinweis auf S03 angekündigt.
 
-## 3. Versionsnummer – letzter Fix von 0.0.4
+## 3. Versionsnummer – tatsächlicher Endstand 0.0.4
 
-Beim ersten Installer-Test zeigte die installierte Anwendung trotz Paketversion 0.0.4 noch sichtbar 0.0.3. Ursache: die übernommene HTML-UI besitzt noch eine alte feste Dokument-Titelangabe.
+Beim Installer-Test zeigte die Anwendung trotz Paketversion 0.0.4 sichtbar noch 0.0.3. Die entscheidende Ursache waren feste `0.0.3`-Angaben in der übernommenen `2 src/frontend/index.html`.
 
-Der Fix ist jetzt in `2 src/common/preload.js` umgesetzt:
+Der erfolgreiche praktische Fix für 0.0.4 war bewusst einfach: Kurt hat die verbliebenen `0.0.3`-Angaben in `index.html` auf `0.0.4` geändert und den funktionierenden Stand nach GitHub gepusht. `npm start` zeigte danach korrekt `SERKAL Desktop 0.0.4`.
 
-- Versionsquelle ist `package.json`.
-- `preload.js` liest die Paketversion und setzt daraus den sichtbaren Dokument-/Fenstertitel.
-- `window.serkal.version` und `window.serkal.build` werden ebenfalls aus derselben Paketversion gespeist.
+Wichtig für den Nachfolger: Nicht erneut versuchen, solche Altangaben nur per CSS oder nachträglichem DOM-Trick zu überdecken. Bei Versionsproblemen zuerst projektweit nach der alten Versionszeichenfolge suchen und die tatsächlichen Quellen prüfen.
 
-Damit soll künftig eine Änderung der `package.json`-Version automatisch die sichtbare Desktop-Version mitführen. Keine manuelle Doppelpflege mehr.
+Die langfristig saubere Lösung bleibt: **eine einzige Versionsquelle**, vorzugsweise `package.json` bzw. Electron `app.getVersion()`, aus der Fenstertitel und alle ggf. sichtbaren Versionsangaben gespeist werden. `preload.js` enthält bereits einen Ansatz dazu; dieser ist vor weiterer Änderung zusammen mit der UI zu prüfen.
 
-Hinweis: In `main.js` steht derzeit ebenfalls ein 0.0.4-Fenstertitel. Für eine spätere Aufräumrunde sollte auch dieser auf `app.getVersion()` umgestellt werden; sichtbar wird die Version jetzt bereits aus `package.json` gesetzt.
+Noch offen: Die UI zeigt derzeit zusätzlich zur Electron-Titelleiste eine zweite interne Versions-/Build-Zeile. Kurt möchte keine doppelten Angaben. Diese zweite Zeile soll der Nachfolger sauber an ihrer Quelle entfernen; sie ist kein Grund, den funktionierenden 0.0.4-Stand erneut umzubauen.
 
 ## 4. Build / Installer
 
@@ -133,6 +131,8 @@ GitHub soll die gemeinsame technische Wahrheit sein, damit keine manuellen Zwisc
 ## 10. Arbeitsweise mit Kurt
 
 Für technische Änderungen möglichst vollständige Dateien/saubere GitHub-Commits statt Patch-Fragmente. Kleine, nachvollziehbare Schritte sind besser als große Umbauten. Bei bestehenden SERKAL-Funktionen zuerst Quellcode studieren, dann handeln.
+
+Praktische Zusatzregel aus dem letzten 0.0.4-Test: Bei einem offensichtlich verbliebenen Textwert zuerst schlicht projektweit nach diesem exakten Wert suchen, bevor eine komplizierte technische Ursache konstruiert wird.
 
 Kernregel für den Nachfolger:
 
