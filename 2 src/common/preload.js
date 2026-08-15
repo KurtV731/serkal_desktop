@@ -1,5 +1,14 @@
 /* SERKAL Desktop 0.0.4 – sichere Renderer-Bruecke */
 const { contextBridge, ipcRenderer } = require("electron");
+
+window.addEventListener("DOMContentLoaded", () => {
+    try {
+        const style = document.createElement("style");
+        style.textContent = ".topBuildBar{display:none !important;}";
+        document.head.appendChild(style);
+    } catch (_e) {}
+});
+
 contextBridge.exposeInMainWorld("serkal", {
     name:"SERKAL Desktop", version:"0.0.4", build:"0004",
     settings:{
