@@ -1,8 +1,18 @@
-/* SERKAL Desktop 0.0.4 – sichere Renderer-Bruecke */
+/* SERKAL Desktop – sichere Renderer-Bruecke
+   Versionsquelle: package.json (keine manuell gepflegte sichtbare Versionsnummer) */
+const path = require("node:path");
 const { contextBridge, ipcRenderer } = require("electron");
+
+let SERKAL_VERSION = "0.0.0";
+try {
+    const packageInfo = require(path.join(__dirname, "..", "..", "package.json"));
+    SERKAL_VERSION = String(packageInfo && packageInfo.version || SERKAL_VERSION);
+} catch (_e) {}
 
 window.addEventListener("DOMContentLoaded", () => {
     try {
+        document.title = "SERKAL Desktop " + SERKAL_VERSION;
+
         const style = document.createElement("style");
         style.textContent = ".topBuildBar{display:none !important;}";
         document.head.appendChild(style);
@@ -10,7 +20,9 @@ window.addEventListener("DOMContentLoaded", () => {
 });
 
 contextBridge.exposeInMainWorld("serkal", {
-    name:"SERKAL Desktop", version:"0.0.4", build:"0004",
+    name:"SERKAL Desktop",
+    version:SERKAL_VERSION,
+    build:SERKAL_VERSION,
     settings:{
         get:()=>ipcRenderer.invoke("serkal:settings:get"),
         save:(settings)=>ipcRenderer.invoke("serkal:settings:save",settings)
