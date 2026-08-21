@@ -1,13 +1,10 @@
 /* SERKAL Desktop – sichere Renderer-Bruecke
    Versionsquelle: package.json (keine manuell gepflegte sichtbare Versionsnummer) */
-const path = require("node:path");
 const { contextBridge, ipcRenderer } = require("electron");
 
-let SERKAL_VERSION = "0.0.0";
-try {
-    const packageInfo = require(path.join(__dirname, "..", "..", "package.json"));
-    SERKAL_VERSION = String(packageInfo && packageInfo.version || SERKAL_VERSION);
-} catch (_e) {}
+/* Sandboxed Preloads duerfen keine beliebigen Node-Module wie node:path laden.
+   Die Versionsangabe wird fuer diese Baustellenversion bewusst lokal gehalten. */
+const SERKAL_VERSION = "0.0.5";
 
 function applyDesktopIdentity_() {
     try {
