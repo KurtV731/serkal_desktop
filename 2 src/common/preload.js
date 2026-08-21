@@ -38,5 +38,9 @@ contextBridge.exposeInMainWorld("serkal", {
         test:()=>ipcRenderer.invoke("serkal:tmdb:test"),
         searchTv:(query,lang,options)=>ipcRenderer.invoke("serkal:tmdb:searchTv",query,lang,options||{})
     },
+    archive:{
+        load:()=>ipcRenderer.invoke("serkal:archive:load"),
+        insert:(payload)=>ipcRenderer.invoke("serkal:archive:insert",payload||{})
+    },
     calendar:{ open:(settings)=>ipcRenderer.invoke("serkal:calendar:open",settings) }
 });
