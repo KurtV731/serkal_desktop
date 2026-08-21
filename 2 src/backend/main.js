@@ -671,6 +671,9 @@ function installDesktopTmdbBridge_(hauptfenster) {
     return undefined;
   }});
   window.google = Object.assign({}, oldGoogle, { script:Object.assign({}, oldScript, { run:desktopRun }) });
+  setTimeout(() => {
+    if (typeof window.loadArchiv === "function") window.loadArchiv();
+  }, 0);
 })();`;
     return hauptfenster.webContents.executeJavaScript(js);
 }
