@@ -655,7 +655,11 @@ function installDesktopTmdbBridge_(hauptfenster) {
         try {
           const res = await window.serkal.archive.load();
           success(res);
-        } catch (e) { failure({message:(e && e.message) ? e.message : String(e)}); }
+        } catch (e) {
+          const detail = (e && e.message) ? e.message : String(e);
+          console.error('SERKAL Archiv laden:', e);
+          success({ok:false, message:'Archiv konnte nicht geladen werden: ' + detail, daten:{entries:[]}, count:0});
+        }
       }
     };
     return chain;
