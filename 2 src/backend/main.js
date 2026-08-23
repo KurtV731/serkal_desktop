@@ -692,7 +692,19 @@ function installDesktopTmdbBridge_(hauptfenster) {
       },
       async apiHoleArchivPoster(tmdbId, lang) {
         try {
-          const res = await window.serkal.tmdb.poster(tmdbId, lang || 'de');
+          let res = await window.serkal.tmdb.poster(tmdbId, lang || 'de');
+          if (!res.ok && res.code === 'TMDB_KEY_MISSING') {
+            const key = await askTmdbKey_();
+            if (!key) {
+              failure({message:'TMDB ist noch nicht eingerichtet.'});
+              return;
+            }
+            res = await window.serkal.tmdb.poster(tmdbId, lang || 'de');
+          }
+          if (!res.ok) {
+            failure({message:res.message || 'TMDB-Poster konnte nicht geladen werden.', code:res.code});
+            return;
+          }
           success(res);
         } catch (e) {
           failure({message:(e && e.message) ? e.message : String(e)});
