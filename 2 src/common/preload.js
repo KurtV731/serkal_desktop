@@ -33,7 +33,8 @@ contextBridge.exposeInMainWorld("serkal", {
         status:()=>ipcRenderer.invoke("serkal:tmdb:status"),
         saveKey:(apiKey)=>ipcRenderer.invoke("serkal:tmdb:saveKey",apiKey),
         test:()=>ipcRenderer.invoke("serkal:tmdb:test"),
-        searchTv:(query,lang,options)=>ipcRenderer.invoke("serkal:tmdb:searchTv",query,lang,options||{})
+        searchTv:(query,lang,options)=>ipcRenderer.invoke("serkal:tmdb:searchTv",query,lang,options||{}),
+        poster:(id,lang)=>ipcRenderer.invoke("serkal:tmdb:poster",id,lang||"de")
     },
     archive:{
         load:()=>ipcRenderer.invoke("serkal:archive:load"),
