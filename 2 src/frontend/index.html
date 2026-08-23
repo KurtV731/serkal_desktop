@@ -5938,6 +5938,8 @@ function renderArchivList() {
         try {
           it.buttonPressed = 1;
           it.seen = 1;
+          it.status = 4;
+          it.statusText = 'geschaut';
           setDirtyForEntry_(it, { seen: 1 });
           renderArchivList();
           if (state.archivSelected && entryKeyFromArchiv_(state.archivSelected) === entryKeyFromArchiv_(it)) {
