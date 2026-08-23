@@ -811,6 +811,15 @@
       margin-right: 2px;
     }
 
+    .langFlag {
+      width: 26px;
+      height: 18px;
+      display: block;
+      border-radius: 2px;
+      box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.22);
+      pointer-events: none;
+    }
+
 
 
     /* ===== Archiv: Count-Pill ===== */
@@ -1786,12 +1795,25 @@
     <!-- ===================== Status-/Schalterleiste unten ===================== -->
     <div class="debugDock" id="dbgDock">
       <div class="langSwitch" id="langSwitch" aria-label="Sprache / Language">
-        <span class="dockLabel">🌐</span>
-        <button id="btnLangDe" class="langBtn" type="button" title="Deutsch">🇩🇪</button>
+        <button id="btnLangDe" class="langBtn" type="button" title="Deutsch" aria-label="Deutsch">
+          <svg class="langFlag" viewBox="0 0 30 18" aria-hidden="true">
+            <rect width="30" height="6" y="0" fill="#000"></rect>
+            <rect width="30" height="6" y="6" fill="#dd0000"></rect>
+            <rect width="30" height="6" y="12" fill="#ffce00"></rect>
+          </svg>
+        </button>
         <div id="langToggleTrack" class="langToggleTrack" title="Sprache umschalten">
           <div id="langToggleKnob" class="langToggleKnob"></div>
         </div>
-        <button id="btnLangEn" class="langBtn" type="button" title="English">🇬🇧</button>
+        <button id="btnLangEn" class="langBtn" type="button" title="English" aria-label="English">
+          <svg class="langFlag" viewBox="0 0 60 36" aria-hidden="true">
+            <rect width="60" height="36" fill="#012169"></rect>
+            <path d="M0 0L60 36M60 0L0 36" stroke="#fff" stroke-width="8"></path>
+            <path d="M0 0L60 36M60 0L0 36" stroke="#c8102e" stroke-width="4"></path>
+            <path d="M30 0V36M0 18H60" stroke="#fff" stroke-width="12"></path>
+            <path d="M30 0V36M0 18H60" stroke="#c8102e" stroke-width="7"></path>
+          </svg>
+        </button>
       </div>
 
       <button id="btnWartung" class="btnSmall" type="button" title="Wartung / Maintenance">🔧 Wartung</button>
