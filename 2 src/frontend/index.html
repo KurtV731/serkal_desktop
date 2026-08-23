@@ -5937,6 +5937,7 @@ function renderArchivList() {
         ev.stopPropagation();
         try {
           it.buttonPressed = 1;
+          it.seen = 1;
           setDirtyForEntry_(it, { seen: 1 });
           renderArchivList();
           if (state.archivSelected && entryKeyFromArchiv_(state.archivSelected) === entryKeyFromArchiv_(it)) {
