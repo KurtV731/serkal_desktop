@@ -261,6 +261,77 @@ function archiveInsert_(payload) {
     }
 }
 
+function archiveSetField_(line, key, value) {
+    const escaped = String(key || "").replace(/[.*+?^$(){}|[\]\\]/g, "\\async function tmdbRequest_(pathname, params) {");
+    const re = new RegExp("((?:^|[;|]\\s*)" + escaped + "=)[^;|]*", "i");
+    if (re.test(line)) return String(line).replace(re, "$1" + String(value));
+    const delimiter = String(line).includes(";") ? "; " : " | ";
+    return String(line).trim() + delimiter + String(key) + "=" + String(value);
+}
+
+function archiveSaveChanges_(dirtyMap) {
+    try {
+        const changes = dirtyMap && typeof dirtyMap === "object" ? Object.values(dirtyMap) : [];
+        if (!changes.length) return { ok:true, savedCount:0, daten:archiveLoad_().daten };
+
+        const folder = archiveFolderPath_();
+        if (!folder || !fs.existsSync(folder)) return { ok:false, message:"Archivordner nicht gefunden: " + folder };
+
+        let savedCount = 0;
+        const byFile = new Map();
+        for (const patch of changes) {
+            const fileName = String(patch && patch.fileName || "").trim();
+            const staffelLabel = String(patch && patch.staffelLabel || "").trim().toUpperCase();
+            if (!fileName || path.basename(fileName) !== fileName || !fileName.toLowerCase().endsWith(".txt")) {
+                return { ok:false, message:"Ungültiger Archivdateiname." };
+            }
+            if (!/^S\d{1,2}$/.test(staffelLabel)) return { ok:false, message:"Ungültige Staffelkennung." };
+            if (!byFile.has(fileName)) byFile.set(fileName, []);
+            byFile.get(fileName).push(Object.assign({}, patch, { staffelLabel }));
+        }
+
+        for (const [fileName, patches] of byFile.entries()) {
+            const fullPath = path.join(folder, fileName);
+            if (!fs.existsSync(fullPath)) return { ok:false, message:"Archivdatei nicht gefunden: " + fileName };
+            const original = fs.readFileSync(fullPath, "utf8");
+            const hadFinalNewline = /\r?\n$/.test(original);
+            const lines = original.split(/\r?\n/);
+            let changed = false;
+
+            for (const patch of patches) {
+                const lineIndex = lines.findIndex(line => new RegExp("^" + patch.staffelLabel + "(?:\\b|;|\\|)", "i").test(String(line || "").trim()));
+                if (lineIndex < 0) return { ok:false, message:"Staffel nicht gefunden: " + fileName + " / " + patch.staffelLabel };
+
+                let line = String(lines[lineIndex] || "").trim();
+                if (Object.prototype.hasOwnProperty.call(patch, "seen")) {
+                    line = archiveSetField_(line, "seen", Number(patch.seen) === 1 ? "1" : "0");
+                }
+                if (Object.prototype.hasOwnProperty.call(patch, "note")) {
+                    line = archiveSetField_(line, "note", archiveEncode_(patch.note));
+                }
+                if (line !== String(lines[lineIndex] || "").trim()) {
+                    lines[lineIndex] = line;
+                    changed = true;
+                    savedCount++;
+                }
+            }
+
+            if (changed) {
+                const text = lines.join("\n").replace(/\n+$/, "") + (hadFinalNewline ? "\n" : "");
+                const tempPath = fullPath + ".serkal-tmp";
+                fs.writeFileSync(tempPath, text, "utf8");
+                fs.renameSync(tempPath, fullPath);
+            }
+        }
+
+        const loaded = archiveLoad_();
+        if (!loaded.ok) return loaded;
+        return { ok:true, savedCount, daten:loaded.daten, count:loaded.count };
+    } catch (err) {
+        return { ok:false, message:"Archivänderungen konnten nicht gespeichert werden: " + err.message };
+    }
+}
+
 async function tmdbRequest_(pathname, params) {
     const apiKey = readTmdbKey_();
     if (!apiKey) return { ok:false, code:"TMDB_KEY_MISSING", message:"TMDB ist noch nicht eingerichtet. Bitte zuerst den TMDB API-Key eintragen." };
@@ -585,6 +656,7 @@ function installIpc_() {
     ipcMain.handle("serkal:tmdb:poster", async (_event, id, lang) => tmdbPoster_(id, lang));
     ipcMain.handle("serkal:archive:load", () => archiveLoad_());
     ipcMain.handle("serkal:archive:insert", (_event, payload) => archiveInsert_(payload));
+    ipcMain.handle("serkal:archive:saveChanges", (_event, dirtyMap) => archiveSaveChanges_(dirtyMap));
     ipcMain.handle("serkal:calendar:open", async (_event, settingsFromUi) => {
         const settings = settingsFromUi ? normalizeSettings_(settingsFromUi) : readSettings_();
         let mode = settings.calendar.mode;
@@ -688,6 +760,14 @@ function installDesktopTmdbBridge_(hauptfenster) {
           const detail = (e && e.message) ? e.message : String(e);
           console.error('SERKAL Archiv laden:', e);
           success({ok:false, message:'Archiv konnte nicht geladen werden: ' + detail, daten:{entries:[]}, count:0});
+        }
+      },
+      async apiSpeichereArchivAenderungen(dirtyMap) {
+        try {
+          const res = await window.serkal.archive.saveChanges(dirtyMap || {});
+          success(res);
+        } catch (e) {
+          failure({message:(e && e.message) ? e.message : String(e)});
         }
       },
       async apiHoleArchivPoster(tmdbId, lang) {
