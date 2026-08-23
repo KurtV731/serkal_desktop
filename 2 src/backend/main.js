@@ -342,6 +342,34 @@ async function tmdbSeasonDetails_(id, seasonNumber, lang) {
     return tmdbRequest_("/tv/" + encodeURIComponent(String(id)) + "/season/" + encodeURIComponent(String(seasonNumber)), { language:tmdbLang_(lang) });
 }
 
+async function tmdbPoster_(id, lang) {
+    const tvId = Number(id || 0);
+    if (!Number.isFinite(tvId) || tvId <= 0) return { ok:false, nopic:true, message:"TMDB-ID fehlt." };
+
+    const details = await tmdbTvDetails_(tvId, lang);
+    if (!details.ok) return details;
+
+    const posterPath = String(details.data && details.data.poster_path || "").trim();
+    if (!posterPath) return { ok:true, nopic:true, tmdbId:tvId };
+
+    try {
+        const url = "https://image.tmdb.org/t/p/w342" + posterPath;
+        const response = await fetch(url, { headers:{ accept:"image/*" } });
+        if (!response.ok) return { ok:false, nopic:true, message:"TMDB-Poster konnte nicht geladen werden." };
+        const mime = String(response.headers.get("content-type") || "image/jpeg").split(";")[0];
+        const bytes = Buffer.from(await response.arrayBuffer());
+        return {
+            ok:true,
+            nopic:false,
+            tmdbId:tvId,
+            posterPath,
+            dataUrl:"data:" + mime + ";base64," + bytes.toString("base64")
+        };
+    } catch (_err) {
+        return { ok:false, nopic:true, message:"Keine Verbindung zum TMDB-Bildserver." };
+    }
+}
+
 function analyseSeason_(seasonJson) {
     const eps = seasonJson && Array.isArray(seasonJson.episodes) ? seasonJson.episodes : [];
     const episodeDates = eps.map(e => e && e.air_date ? String(e.air_date) : "").filter(d => /^\d{4}-\d{2}-\d{2}$/.test(d));
@@ -554,6 +582,7 @@ function installIpc_() {
         return res.ok ? { ok:true, message:"TMDB-Verbindung funktioniert." } : res;
     });
     ipcMain.handle("serkal:tmdb:searchTv", async (_event, query, lang, options) => serkalSearchComplete_(query, lang, options));
+    ipcMain.handle("serkal:tmdb:poster", async (_event, id, lang) => tmdbPoster_(id, lang));
     ipcMain.handle("serkal:archive:load", () => archiveLoad_());
     ipcMain.handle("serkal:archive:insert", (_event, payload) => archiveInsert_(payload));
     ipcMain.handle("serkal:calendar:open", async (_event, settingsFromUi) => {
@@ -659,6 +688,14 @@ function installDesktopTmdbBridge_(hauptfenster) {
           const detail = (e && e.message) ? e.message : String(e);
           console.error('SERKAL Archiv laden:', e);
           success({ok:false, message:'Archiv konnte nicht geladen werden: ' + detail, daten:{entries:[]}, count:0});
+        }
+      },
+      async apiHoleArchivPoster(tmdbId, lang) {
+        try {
+          const res = await window.serkal.tmdb.poster(tmdbId, lang || 'de');
+          success(res);
+        } catch (e) {
+          failure({message:(e && e.message) ? e.message : String(e)});
         }
       }
     };
