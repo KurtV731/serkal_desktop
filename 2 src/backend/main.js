@@ -637,6 +637,157 @@ async function serkalSearchComplete_(query, lang, options) {
     return { ok:true, anzahl:out.length, results:out, treffer:out, daten:out };
 }
 
+
+function calendarPad2_(value) {
+    return String(Number(value || 0)).padStart(2, "0");
+}
+
+function calendarBlocks_(termindaten) {
+    const blocks = [];
+    let lastDate = null;
+    let from = 1;
+    let to = 1;
+    for (let i = 0; i < termindaten.length; i++) {
+        const date = String(termindaten[i] || "").trim();
+        if (!date) continue;
+        const episode = i + 1;
+        if (lastDate === null) {
+            lastDate = date;
+            from = episode;
+            to = episode;
+        } else if (date === lastDate) {
+            to = episode;
+        } else {
+            blocks.push({ date:lastDate, eFrom:from, eTo:to });
+            lastDate = date;
+            from = episode;
+            to = episode;
+        }
+    }
+    if (lastDate !== null) blocks.push({ date:lastDate, eFrom:from, eTo:to });
+    return blocks;
+}
+
+function calendarIcsEscape_(value) {
+    return String(value == null ? "" : value)
+        .replace(/\\/g, "\\\\")
+        .replace(/\r?\n/g, "\\n")
+        .replace(/,/g, "\\,")
+        .replace(/;/g, "\\;");
+}
+
+function calendarIcsFold_(line) {
+    let text = String(line == null ? "" : line);
+    const out = [];
+    while (text.length > 73) {
+        out.push(text.substring(0, 73));
+        text = " " + text.substring(73);
+    }
+    out.push(text);
+    return out.join("\r\n");
+}
+
+function calendarIcsNextDay_(iso) {
+    const match = String(iso || "").match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!match) return "";
+    const date = new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3])));
+    date.setUTCDate(date.getUTCDate() + 1);
+    return String(date.getUTCFullYear()) + "-" +
+        String(date.getUTCMonth() + 1).padStart(2, "0") + "-" +
+        String(date.getUTCDate()).padStart(2, "0");
+}
+
+function calendarIcsFileName_(value) {
+    return String(value || "SerKal")
+        .replace(/[\\/:*?"<>|]/g, "_")
+        .replace(/\s+/g, " ")
+        .trim()
+        .substring(0, 100) || "SerKal";
+}
+
+function calendarUtcStamp_() {
+    const date = new Date();
+    return String(date.getUTCFullYear()) +
+        String(date.getUTCMonth() + 1).padStart(2, "0") +
+        String(date.getUTCDate()).padStart(2, "0") + "T" +
+        String(date.getUTCHours()).padStart(2, "0") +
+        String(date.getUTCMinutes()).padStart(2, "0") +
+        String(date.getUTCSeconds()).padStart(2, "0") + "Z";
+}
+
+function calendarCreateIcs_(payload) {
+    try {
+        const data = payload || {};
+        const title = String(data.titel || data.title || data.name || "").trim();
+        const year = String(data.jahrOverride || data.jahr || data.year || "").trim();
+        const seasonNumber = Number(data.staffelOverride || data.staffelNummer || data.seasonNumber ||
+            String(data.staffelLabel || data.seasonLabel || "").replace(/\D/g, ""));
+        const tmdbId = Number(data.tmdbId || data.id || 0) || 0;
+        const dates = (Array.isArray(data.termindaten) ? data.termindaten :
+            (Array.isArray(data.episodeDates) ? data.episodeDates : []))
+            .map(value => String(value || "").trim())
+            .filter(value => /^\d{4}-\d{2}-\d{2}$/.test(value));
+
+        if (!title || !/^\d{4}$/.test(year) || !Number.isFinite(seasonNumber) || seasonNumber <= 0) {
+            return { ok:false, message:"ICS: Titel, Jahr oder Staffel fehlt." };
+        }
+        if (!dates.length) return { ok:false, message:"ICS: Keine gültigen Termine vorhanden." };
+
+        const seasonLabel = "S" + calendarPad2_(seasonNumber);
+        const blocks = calendarBlocks_(dates);
+        if (!blocks.length) return { ok:false, message:"ICS: Keine Terminblöcke vorhanden." };
+
+        const stamp = calendarUtcStamp_();
+        const lines = [
+            "BEGIN:VCALENDAR",
+            "VERSION:2.0",
+            "PRODID:-//SerKal Desktop//0.0.5//DE",
+            "CALSCALE:GREGORIAN",
+            "METHOD:PUBLISH",
+            "X-WR-TIMEZONE:Europe/Berlin",
+            "X-WR-CALNAME:" + calendarIcsEscape_("SerKal – " + title + " " + seasonLabel)
+        ];
+
+        for (const block of blocks) {
+            const startCompact = block.date.replace(/-/g, "");
+            const endCompact = calendarIcsNextDay_(block.date).replace(/-/g, "");
+            const summary = title + " (" + year + ") " + seasonLabel + "E" + calendarPad2_(block.eFrom) +
+                (block.eTo !== block.eFrom ? ("–E" + calendarPad2_(block.eTo)) : "");
+            const uidBase = tmdbId ? ("tmdb-" + tmdbId) :
+                calendarIcsFileName_(title + "-" + year).toLowerCase().replace(/[^a-z0-9]+/g, "-");
+            const uid = "serkal-desktop-" + uidBase + "-" + seasonLabel.toLowerCase() +
+                "-e" + calendarPad2_(block.eFrom) + "-e" + calendarPad2_(block.eTo) + "@serkal.de";
+
+            lines.push("BEGIN:VEVENT");
+            lines.push("UID:" + uid);
+            lines.push("DTSTAMP:" + stamp);
+            lines.push("CREATED:" + stamp);
+            lines.push("LAST-MODIFIED:" + stamp);
+            lines.push("SEQUENCE:0");
+            lines.push("DTSTART;VALUE=DATE:" + startCompact);
+            lines.push("DTEND;VALUE=DATE:" + endCompact);
+            lines.push("SUMMARY:" + calendarIcsEscape_(summary));
+            lines.push("DESCRIPTION:SerKal");
+            lines.push("TRANSP:TRANSPARENT");
+            lines.push("END:VEVENT");
+        }
+
+        lines.push("END:VCALENDAR");
+        const content = lines.map(calendarIcsFold_).join("\r\n") + "\r\n";
+        const fileName = calendarIcsFileName_(title) + "_" + year + "_" + seasonLabel + ".ics";
+        return {
+            ok:true,
+            fileName,
+            mimeType:"text/calendar;charset=utf-8",
+            base64:Buffer.from(content, "utf8").toString("base64"),
+            events:blocks.length,
+            importUrl:"https://calendar.google.com/calendar/u/0/r/settings/export"
+        };
+    } catch (err) {
+        return { ok:false, message:"ICS-Erzeugung fehlgeschlagen: " + err.message };
+    }
+}
+
 function googleCalendarUrl_(calendarId) {
     const id = String(calendarId || "").trim();
     if (!id) return "https://calendar.google.com/";
@@ -657,6 +808,14 @@ function installIpc_() {
     ipcMain.handle("serkal:archive:load", () => archiveLoad_());
     ipcMain.handle("serkal:archive:insert", (_event, payload) => archiveInsert_(payload));
     ipcMain.handle("serkal:archive:saveChanges", (_event, dirtyMap) => archiveSaveChanges_(dirtyMap));
+    ipcMain.handle("serkal:calendar:createIcs", async (_event, payload) => {
+        const result = calendarCreateIcs_(payload);
+        if (result.ok) {
+            try { await shell.openExternal(result.importUrl); }
+            catch (err) { result.openWarning = "Google Kalender konnte nicht automatisch geöffnet werden: " + err.message; }
+        }
+        return result;
+    });
     ipcMain.handle("serkal:calendar:open", async (_event, settingsFromUi) => {
         const settings = settingsFromUi ? normalizeSettings_(settingsFromUi) : readSettings_();
         let mode = settings.calendar.mode;
