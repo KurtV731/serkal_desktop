@@ -911,6 +911,14 @@ function installDesktopTmdbBridge_(hauptfenster) {
           success(res);
         } catch (e) { failure({message:(e && e.message) ? e.message : String(e)}); }
       },
+      async apiErzeugeIcsFuerAuswahl(payload) {
+        try {
+          const res = await window.serkal.calendar.createIcs(payload || {});
+          success(res);
+        } catch (e) {
+          failure({message:(e && e.message) ? e.message : String(e)});
+        }
+      },
       async apiLadeArchivDaten() {
         try {
           const res = await window.serkal.archive.load();
