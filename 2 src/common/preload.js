@@ -41,5 +41,8 @@ contextBridge.exposeInMainWorld("serkal", {
         insert:(payload)=>ipcRenderer.invoke("serkal:archive:insert",payload||{}),
         saveChanges:(dirtyMap)=>ipcRenderer.invoke("serkal:archive:saveChanges",dirtyMap||{})
     },
-    calendar:{ open:(settings)=>ipcRenderer.invoke("serkal:calendar:open",settings) }
+    calendar:{
+        open:(settings)=>ipcRenderer.invoke("serkal:calendar:open",settings),
+        createIcs:(payload)=>ipcRenderer.invoke("serkal:calendar:createIcs",payload||{})
+    }
 });
