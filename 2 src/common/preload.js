@@ -43,6 +43,7 @@ contextBridge.exposeInMainWorld("serkal", {
     },
     calendar:{
         open:(settings)=>ipcRenderer.invoke("serkal:calendar:open",settings),
+        insertSeason:(payload)=>ipcRenderer.invoke("serkal:calendar:insertSeason",payload||{}),
         createIcs:(payload)=>ipcRenderer.invoke("serkal:calendar:createIcs",payload||{})
     }
 });
