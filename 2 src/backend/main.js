@@ -12,6 +12,8 @@
 
 const path = require("node:path");
 const fs = require("node:fs");
+const http = require("node:http");
+const crypto = require("node:crypto");
 const { app, BrowserWindow, ipcMain, shell } = require("electron");
 
 const DEFAULT_SETTINGS = {
@@ -788,6 +790,272 @@ function calendarCreateIcs_(payload) {
     }
 }
 
+
+const GOOGLE_CALENDAR_SCOPE = "https://www.googleapis.com/auth/calendar.events";
+
+function googleOauthTokenPath_() {
+    return path.join(app.getPath("userData"), "google_calendar_token.json");
+}
+
+function googleOauthCredentialsPath_() {
+    const candidates = [
+        String(process.env.SERKAL_GOOGLE_OAUTH_FILE || "").trim(),
+        path.resolve(app.getAppPath(), "..", "serkal_private", "google_oauth_client.json"),
+        "C:\\serkal_dev\\serkal_private\\google_oauth_client.json"
+    ].filter(Boolean);
+    for (const candidate of candidates) {
+        try {
+            if (fs.existsSync(candidate)) return candidate;
+        } catch (_err) {}
+    }
+    return candidates[0] || "";
+}
+
+function googleOauthClientConfig_() {
+    const file = googleOauthCredentialsPath_();
+    if (!file || !fs.existsSync(file)) {
+        throw new Error("Google-OAuth-Datei nicht gefunden: C:\\serkal_dev\\serkal_private\\google_oauth_client.json");
+    }
+    const raw = JSON.parse(fs.readFileSync(file, "utf8"));
+    const cfg = raw.installed || raw.web || raw;
+    const clientId = String(cfg.client_id || "").trim();
+    const clientSecret = String(cfg.client_secret || "").trim();
+    if (!clientId) throw new Error("Google-OAuth-Datei enthält keine Client-ID.");
+    return { clientId, clientSecret, file };
+}
+
+function googleOauthReadToken_() {
+    try {
+        const file = googleOauthTokenPath_();
+        if (!fs.existsSync(file)) return null;
+        const token = JSON.parse(fs.readFileSync(file, "utf8"));
+        return token && typeof token === "object" ? token : null;
+    } catch (_err) {
+        return null;
+    }
+}
+
+function googleOauthWriteToken_(token) {
+    const file = googleOauthTokenPath_();
+    fs.mkdirSync(path.dirname(file), { recursive:true });
+    fs.writeFileSync(file, JSON.stringify(token, null, 2) + "\n", "utf8");
+}
+
+async function googleOauthTokenRequest_(params) {
+    const response = await fetch("https://oauth2.googleapis.com/token", {
+        method:"POST",
+        headers:{ "content-type":"application/x-www-form-urlencoded" },
+        body:new URLSearchParams(params)
+    });
+    const data = await response.json().catch(() => null);
+    if (!response.ok || !data || !data.access_token) {
+        throw new Error((data && (data.error_description || data.error)) || "Google-Anmeldung fehlgeschlagen.");
+    }
+    return data;
+}
+
+async function googleOauthRefresh_(cfg, token) {
+    if (!token || !token.refresh_token) return null;
+    const data = await googleOauthTokenRequest_({
+        client_id:cfg.clientId,
+        client_secret:cfg.clientSecret,
+        refresh_token:String(token.refresh_token),
+        grant_type:"refresh_token"
+    });
+    const merged = Object.assign({}, token, data, {
+        expiry_date:Date.now() + (Number(data.expires_in || 3600) * 1000)
+    });
+    googleOauthWriteToken_(merged);
+    return merged;
+}
+
+function googleOauthBrowserLogin_(cfg) {
+    return new Promise((resolve, reject) => {
+        const state = crypto.randomBytes(24).toString("hex");
+        const verifier = crypto.randomBytes(48).toString("base64url");
+        const challenge = crypto.createHash("sha256").update(verifier).digest("base64url");
+        let finished = false;
+        let timeout = null;
+
+        const finish = (err, token, server) => {
+            if (finished) return;
+            finished = true;
+            if (timeout) clearTimeout(timeout);
+            try { server.close(); } catch (_closeErr) {}
+            if (err) reject(err);
+            else resolve(token);
+        };
+
+        const server = http.createServer(async (req, res) => {
+            try {
+                const callback = new URL(req.url || "/", "http://127.0.0.1");
+                if (callback.searchParams.get("state") !== state) {
+                    res.writeHead(400, { "content-type":"text/plain; charset=utf-8" });
+                    res.end("Ungültige Google-Anmeldung.");
+                    return;
+                }
+                const oauthError = callback.searchParams.get("error");
+                const code = callback.searchParams.get("code");
+                if (oauthError || !code) {
+                    res.writeHead(400, { "content-type":"text/html; charset=utf-8" });
+                    res.end("<h2>SerKal wurde nicht mit Google verbunden.</h2><p>Dieses Fenster kann geschlossen werden.</p>");
+                    finish(new Error(oauthError || "Google hat keinen Anmeldecode geliefert."), null, server);
+                    return;
+                }
+
+                const redirectUri = "http://127.0.0.1:" + server.address().port;
+                const data = await googleOauthTokenRequest_({
+                    client_id:cfg.clientId,
+                    client_secret:cfg.clientSecret,
+                    code,
+                    code_verifier:verifier,
+                    grant_type:"authorization_code",
+                    redirect_uri:redirectUri
+                });
+                const token = Object.assign({}, data, {
+                    expiry_date:Date.now() + (Number(data.expires_in || 3600) * 1000)
+                });
+                googleOauthWriteToken_(token);
+                res.writeHead(200, { "content-type":"text/html; charset=utf-8" });
+                res.end("<!doctype html><meta charset='utf-8'><title>SerKal verbunden</title><body style='font:20px Arial;padding:40px;background:#f6f3ff;color:#172033'><h1>SerKal ist mit Google Kalender verbunden.</h1><p>Dieses Fenster kann jetzt geschlossen werden.</p></body>");
+                finish(null, token, server);
+            } catch (err) {
+                try {
+                    res.writeHead(500, { "content-type":"text/plain; charset=utf-8" });
+                    res.end("SerKal-Google-Anmeldung fehlgeschlagen.");
+                } catch (_responseErr) {}
+                finish(err, null, server);
+            }
+        });
+
+        server.on("error", err => finish(err, null, server));
+        server.listen(0, "127.0.0.1", async () => {
+            const redirectUri = "http://127.0.0.1:" + server.address().port;
+            const authUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth");
+            authUrl.searchParams.set("client_id", cfg.clientId);
+            authUrl.searchParams.set("redirect_uri", redirectUri);
+            authUrl.searchParams.set("response_type", "code");
+            authUrl.searchParams.set("scope", GOOGLE_CALENDAR_SCOPE);
+            authUrl.searchParams.set("access_type", "offline");
+            authUrl.searchParams.set("prompt", "consent");
+            authUrl.searchParams.set("state", state);
+            authUrl.searchParams.set("code_challenge", challenge);
+            authUrl.searchParams.set("code_challenge_method", "S256");
+            try { await shell.openExternal(authUrl.toString()); }
+            catch (err) { finish(err, null, server); }
+        });
+
+        timeout = setTimeout(() => {
+            finish(new Error("Google-Anmeldung wurde nach fünf Minuten abgebrochen."), null, server);
+        }, 5 * 60 * 1000);
+    });
+}
+
+async function googleOauthAccessToken_() {
+    const cfg = googleOauthClientConfig_();
+    let token = googleOauthReadToken_();
+    if (token && token.access_token && Number(token.expiry_date || 0) > Date.now() + 60000) {
+        return String(token.access_token);
+    }
+    if (token && token.refresh_token) {
+        try {
+            token = await googleOauthRefresh_(cfg, token);
+            return String(token.access_token);
+        } catch (err) {
+            console.warn("SERKAL Google-Token erneuern:", err);
+        }
+    }
+    token = await googleOauthBrowserLogin_(cfg);
+    return String(token.access_token);
+}
+
+async function googleCalendarApi_(method, calendarId, eventId, event) {
+    const accessToken = await googleOauthAccessToken_();
+    const base = "https://www.googleapis.com/calendar/v3/calendars/" +
+        encodeURIComponent(calendarId) + "/events";
+    const url = eventId ? (base + "/" + encodeURIComponent(eventId)) : base;
+    const response = await fetch(url, {
+        method,
+        headers:{
+            authorization:"Bearer " + accessToken,
+            "content-type":"application/json"
+        },
+        body:event ? JSON.stringify(event) : undefined
+    });
+    const data = await response.json().catch(() => null);
+    return { ok:response.ok, status:response.status, data };
+}
+
+function googleCalendarEventId_(payload, block) {
+    const identity = [
+        Number(payload.tmdbId || payload.id || 0) || 0,
+        Number(payload.staffelOverride || payload.staffelNummer || payload.seasonNumber || 0) || 0,
+        Number(block.eFrom || 0),
+        Number(block.eTo || block.eFrom || 0)
+    ].join(":");
+    return "serkal" + crypto.createHash("sha1").update(identity).digest("hex");
+}
+
+async function googleCalendarInsertSeason_(payload) {
+    try {
+        const settings = readSettings_();
+        const calendarId = String(settings.calendar.googleCalendarId || "").trim();
+        if (!calendarId) return { ok:false, message:"Google-Kalender-ID fehlt." };
+
+        const data = payload || {};
+        const title = String(data.titel || data.title || data.name || "").trim();
+        const year = String(data.jahrOverride || data.jahr || data.year || "").trim();
+        const seasonNumber = Number(data.staffelOverride || data.staffelNummer || data.seasonNumber ||
+            String(data.staffelLabel || data.seasonLabel || "").replace(/\D/g, ""));
+        const dates = (Array.isArray(data.termindaten) ? data.termindaten :
+            (Array.isArray(data.episodeDates) ? data.episodeDates : []))
+            .map(value => String(value || "").trim())
+            .filter(value => /^\d{4}-\d{2}-\d{2}$/.test(value));
+
+        if (!title || !/^\d{4}$/.test(year) || !seasonNumber || !dates.length) {
+            return { ok:false, message:"Kalendereintrag unvollständig." };
+        }
+
+        const seasonLabel = "S" + calendarPad2_(seasonNumber);
+        const blocks = calendarBlocks_(dates);
+        let created = 0;
+        let updated = 0;
+
+        for (const block of blocks) {
+            const summary = title + " (" + year + ") " + seasonLabel + "E" + calendarPad2_(block.eFrom) +
+                (block.eTo !== block.eFrom ? ("–E" + calendarPad2_(block.eTo)) : "");
+            const eventId = googleCalendarEventId_(data, block);
+            const event = {
+                id:eventId,
+                summary,
+                description:"SerKal",
+                start:{ date:block.date },
+                end:{ date:calendarIcsNextDay_(block.date) },
+                transparency:"transparent",
+                extendedProperties:{ private:{ serkal:"1", tmdbId:String(data.tmdbId || data.id || "") } }
+            };
+
+            let result = await googleCalendarApi_("POST", calendarId, "", event);
+            if (result.status === 409) {
+                const updateEvent = Object.assign({}, event);
+                delete updateEvent.id;
+                result = await googleCalendarApi_("PUT", calendarId, eventId, updateEvent);
+                if (result.ok) updated++;
+            } else if (result.ok) {
+                created++;
+            }
+            if (!result.ok) {
+                const detail = result.data && (result.data.error && result.data.error.message || result.data.error_description);
+                throw new Error(detail || ("Google Kalender antwortete mit Fehler " + result.status + "."));
+            }
+        }
+
+        return { ok:true, mode:"google", created, updated, events:blocks.length, calendarId };
+    } catch (err) {
+        return { ok:false, message:"Google-Kalendereintrag fehlgeschlagen: " + err.message };
+    }
+}
+
 function googleCalendarUrl_(calendarId) {
     const id = String(calendarId || "").trim();
     if (!id) return "https://calendar.google.com/";
@@ -808,6 +1076,7 @@ function installIpc_() {
     ipcMain.handle("serkal:archive:load", () => archiveLoad_());
     ipcMain.handle("serkal:archive:insert", (_event, payload) => archiveInsert_(payload));
     ipcMain.handle("serkal:archive:saveChanges", (_event, dirtyMap) => archiveSaveChanges_(dirtyMap));
+    ipcMain.handle("serkal:calendar:insertSeason", async (_event, payload) => googleCalendarInsertSeason_(payload));
     ipcMain.handle("serkal:calendar:createIcs", async (_event, payload) => {
         const result = calendarCreateIcs_(payload);
         if (result.ok) {
@@ -906,9 +1175,32 @@ function installDesktopTmdbBridge_(hauptfenster) {
       },
       async verarbeiteTmdbAuswahl(payload) {
         try {
-          const res = await window.serkal.archive.insert(payload || {});
-          if (!res || res.ok === false) { success(res || {ok:false,message:'Archiv konnte nicht gespeichert werden.'}); return; }
-          success(res);
+          const archiveRes = await window.serkal.archive.insert(payload || {});
+          if (!archiveRes || archiveRes.ok === false) {
+            success(archiveRes || {ok:false,message:'Archiv konnte nicht gespeichert werden.'});
+            return;
+          }
+
+          const settings = await window.serkal.settings.get();
+          const calendarMode = String(settings && settings.calendar && settings.calendar.mode || '');
+          if (calendarMode === 'google') {
+            const calendarRes = await window.serkal.calendar.insertSeason(payload || {});
+            if (!calendarRes || calendarRes.ok === false) {
+              success({
+                ok:false,
+                archiveSaved:true,
+                message:'Archiv wurde gespeichert, aber ' + String(calendarRes && calendarRes.message || 'der Google-Kalendereintrag ist fehlgeschlagen.')
+              });
+              return;
+            }
+            success(Object.assign({}, archiveRes, {
+              calendarMode:'google',
+              calendar:calendarRes,
+              message:'Archiv und Google Kalender wurden gespeichert.'
+            }));
+            return;
+          }
+          success(Object.assign({}, archiveRes, { calendarMode:calendarMode || 'none' }));
         } catch (e) { failure({message:(e && e.message) ? e.message : String(e)}); }
       },
       async apiErzeugeIcsFuerAuswahl(payload) {
