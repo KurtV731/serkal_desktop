@@ -22,3 +22,5 @@ Desktop.ini
 part.zip
 serkal_desktop.zip
 tasklist.txt
+# Private lokale Google-OAuth-Zugangsdaten (niemals nach GitHub)
+3 data/private/
