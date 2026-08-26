@@ -6793,7 +6793,19 @@ function nextResult() {
             uiStatus(t('STATUS_INSERT_DONE'), {spinner:false, kind:'info'});
             try { uiLogAction_('Eintrag abgeschlossen', uiActionEntryInfo_(cur)); } catch (_eAction) {}
             uiSetReadyState_({ clearTitle: true, clearDetails: true });
-            offerIcsDownloadAfterInsert_(icsPayload);
+            if (res && res.calendarMode === 'google') {
+              var cal = res.calendar || {};
+              uiStatus('Archiv und Google Kalender gespeichert (' +
+                Number(cal.created || 0) + ' neu, ' + Number(cal.updated || 0) + ' aktualisiert).',
+                {spinner:false, kind:'info'});
+              try { uiLogAction_('Google-Kalender direkt gespeichert', {
+                erstellt:Number(cal.created || 0),
+                aktualisiert:Number(cal.updated || 0),
+                events:Number(cal.events || 0)
+              }); } catch (_eGoogleLog) {}
+            } else {
+              offerIcsDownloadAfterInsert_(icsPayload);
+            }
           })
           .withFailureHandler(function(err) {
             state.insertLock = false;
