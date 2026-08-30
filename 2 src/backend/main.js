@@ -263,6 +263,95 @@ function archiveInsert_(payload) {
     }
 }
 
+
+async function archiveDeleteSeries_(payload) {
+    try {
+        const data = payload || {};
+        const fileName = String(data.fileName || "").trim();
+        if (!fileName || path.basename(fileName) !== fileName || !fileName.toLowerCase().endsWith(".txt")) {
+            return { ok:false, message:"Ungültiger Archivdateiname." };
+        }
+
+        const folder = archiveFolderPath_();
+        if (!folder || !fs.existsSync(folder)) {
+            return { ok:false, message:"Archivordner nicht gefunden: " + folder };
+        }
+
+        const fullPath = path.join(folder, fileName);
+        if (!fs.existsSync(fullPath)) {
+            return { ok:false, message:"Archivdatei nicht gefunden: " + fileName };
+        }
+
+        const stats = fs.statSync(fullPath);
+        if (!stats.isFile()) return { ok:false, message:"Archivdatei ist keine Datei: " + fileName };
+
+        const lines = fs.readFileSync(fullPath, "utf8")
+            .split(/\r?\n/)
+            .map(line => String(line || "").trim())
+            .filter(Boolean);
+        const entries = lines
+            .map(line => archiveEntryFromLine_(fileName, stats, line))
+            .filter(Boolean);
+
+        const settings = readSettings_();
+        const calendarMode = String(settings.calendar.mode || "").toLowerCase();
+        let calendarDeleted = 0;
+
+        if (calendarMode === "ics") {
+            return {
+                ok:false,
+                message:"ICS-Kalendertermine können nicht automatisch gelöscht werden. Archivdatei wurde nicht gelöscht."
+            };
+        }
+
+        if (calendarMode === "google") {
+            const calendarId = String(settings.calendar.googleCalendarId || "").trim();
+            if (!calendarId) {
+                return { ok:false, message:"Google-Kalender-ID fehlt. Archivdatei wurde nicht gelöscht." };
+            }
+
+            for (const entry of entries) {
+                const seasonNumber = Number(String(entry.staffelLabel || "").replace(/\D/g, ""));
+                const dates = Array.isArray(entry.activeDates) ? entry.activeDates : [];
+                const blocks = calendarBlocks_(dates);
+                for (const block of blocks) {
+                    const eventId = googleCalendarEventId_({
+                        tmdbId:entry.tmdbId,
+                        staffelNummer:seasonNumber
+                    }, block);
+                    const result = await googleCalendarApi_("DELETE", calendarId, eventId, null);
+                    if (result.ok) {
+                        calendarDeleted++;
+                        continue;
+                    }
+                    if (result.status === 404 || result.status === 410) continue;
+                    const detail = result.data && (result.data.error && result.data.error.message || result.data.error_description);
+                    return {
+                        ok:false,
+                        message:"Google-Kalendertermin konnte nicht gelöscht werden: " +
+                            (detail || ("Fehler " + result.status)) +
+                            ". Archivdatei wurde nicht gelöscht."
+                    };
+                }
+            }
+        }
+
+        fs.unlinkSync(fullPath);
+        const loaded = archiveLoad_();
+        return {
+            ok:true,
+            message:"Serie gelöscht: " + fileName,
+            fileName,
+            calendarMode:calendarMode || "none",
+            calendarDeleted,
+            daten:loaded.daten,
+            count:loaded.count
+        };
+    } catch (err) {
+        return { ok:false, message:"Serie konnte nicht gelöscht werden: " + err.message };
+    }
+}
+
 function archiveSetField_(line, key, value) {
     const escaped = String(key || "").replace(/[.*+?^$(){}|[\]\\]/g, "\\async function tmdbRequest_(pathname, params) {");
     const re = new RegExp("((?:^|[;|]\\s*)" + escaped + "=)[^;|]*", "i");
@@ -1076,6 +1165,7 @@ function installIpc_() {
     ipcMain.handle("serkal:archive:load", () => archiveLoad_());
     ipcMain.handle("serkal:archive:insert", (_event, payload) => archiveInsert_(payload));
     ipcMain.handle("serkal:archive:saveChanges", (_event, dirtyMap) => archiveSaveChanges_(dirtyMap));
+    ipcMain.handle("serkal:archive:deleteSeries", (_event, payload) => archiveDeleteSeries_(payload));
     ipcMain.handle("serkal:calendar:insertSeason", async (_event, payload) => googleCalendarInsertSeason_(payload));
     ipcMain.handle("serkal:calendar:createIcs", async (_event, payload) => {
         const result = calendarCreateIcs_(payload);
@@ -1224,6 +1314,14 @@ function installDesktopTmdbBridge_(hauptfenster) {
       async apiSpeichereArchivAenderungen(dirtyMap) {
         try {
           const res = await window.serkal.archive.saveChanges(dirtyMap || {});
+          success(res);
+        } catch (e) {
+          failure({message:(e && e.message) ? e.message : String(e)});
+        }
+      },
+      async apiLoescheArchivEintrag(payload) {
+        try {
+          const res = await window.serkal.archive.deleteSeries(payload || {});
           success(res);
         } catch (e) {
           failure({message:(e && e.message) ? e.message : String(e)});
