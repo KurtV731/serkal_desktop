@@ -42,6 +42,12 @@ contextBridge.exposeInMainWorld("serkal", {
         saveChanges:(dirtyMap)=>ipcRenderer.invoke("serkal:archive:saveChanges",dirtyMap||{}),
         deleteSeries:(payload)=>ipcRenderer.invoke("serkal:archive:deleteSeries",payload||{})
     },
+    log:{
+        write:(level,tag,text,object)=>ipcRenderer.invoke("serkal:log:write",level,tag,text,object),
+        read:(maxLines,day)=>ipcRenderer.invoke("serkal:log:read",maxLines,day),
+        saveText:(day,text)=>ipcRenderer.invoke("serkal:log:saveText",day,text),
+        clear:(day)=>ipcRenderer.invoke("serkal:log:clear",day)
+    },
     calendar:{
         open:(settings)=>ipcRenderer.invoke("serkal:calendar:open",settings),
         insertSeason:(payload)=>ipcRenderer.invoke("serkal:calendar:insertSeason",payload||{}),
