@@ -1321,10 +1321,14 @@ function installDesktopTmdbBridge_(hauptfenster) {
       },
       async apiLoescheArchivEintrag(payload) {
         try {
+          if (!window.serkal || !window.serkal.archive || typeof window.serkal.archive.deleteSeries !== 'function') {
+            success({ok:false, message:'Die neue Lösch-Brücke ist in dieser laufenden SerKal-Instanz noch nicht geladen. Bitte alle SerKal-/Electron-Fenster schließen und SerKal neu starten.'});
+            return;
+          }
           const res = await window.serkal.archive.deleteSeries(payload || {});
           success(res);
         } catch (e) {
-          failure({message:(e && e.message) ? e.message : String(e)});
+          success({ok:false, message:(e && e.message) ? e.message : String(e)});
         }
       },
       async apiHoleArchivPoster(tmdbId, lang) {

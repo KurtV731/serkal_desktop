@@ -7006,7 +7006,8 @@ function nextResult() {
           })
           .withFailureHandler(function(err) {
             uiSetBusy_(false);
-            setHint(archivHint, 'Löschen fehlgeschlagen.', {kind:'error', sound:true, spinner:false});
+            const detail = String((err && (err.message || err)) || 'unbekannter Fehler');
+            setHint(archivHint, 'Löschen fehlgeschlagen: ' + detail, {kind:'error', sound:true, spinner:false});
           })
           // Backend: ganze Serie löschen
           .apiLoescheArchivEintrag({
