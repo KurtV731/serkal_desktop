@@ -5,10 +5,13 @@ module.exports = {
   packagerConfig: {
     asar: true,
 
-    // SERKAL Desktop 0.0.4:
+    // SERKAL Desktop 0.0.5:
     // Nur Laufzeit-Abhaengigkeiten ins Paket nehmen. Forge/Electron-
     // Entwicklungswerkzeuge gehoeren nicht in app.asar.
     prune: true,
+
+    // Eigenes SERKAL-Programmsymbol fuer Windows-EXE, Taskleiste und Verknuepfungen.
+    icon: '4 assets/icon/serkal',
 
     // Entwicklungs- und Hilfsdateien nicht an den Endnutzer ausliefern.
     // 3 data bleibt absichtlich enthalten: Das Archiv wird in 0.0.5
@@ -29,7 +32,13 @@ module.exports = {
   makers: [
     {
       name: '@electron-forge/maker-squirrel',
-      config: {},
+      config: {
+        name: 'SerKalDesktop',
+        authors: 'Kurt Vogelsaenger',
+        description: 'SERKAL Desktop – Serienkalender',
+        setupExe: 'SerKal_0.0.5_Setup.exe',
+        setupIcon: '4 assets/icon/serkal.ico',
+      },
     },
     {
       name: '@electron-forge/maker-zip',

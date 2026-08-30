@@ -1,0 +1,12 @@
+SerKal Desktop 0.0.5 – Installer-Arbeitsstand
+
+Dieser Stand bereitet den Endnutzer-Installer vor.
+
+Geaendert:
+- eigenes SerKal-Windows-Icon A2
+- Produktname "SerKal Desktop"
+- Squirrel-Setup-Dateiname "SerKal_0.0.5_Setup.exe"
+- Setup-Icon fuer den Windows-Installer
+
+Build wie bisher:
+npm run make
