@@ -1,0 +1,1 @@
+SerKal A2 icon compatibility: ICO regenerated as BMP-based multi-size resource (16/24/32/48/64/128) for rcedit/Squirrel.Windows. The actual binary remains 4 assets/icon/serkal.ico.
