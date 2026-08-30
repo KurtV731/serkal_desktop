@@ -1,0 +1,12 @@
+Buildfehler beim ersten Endnutzer-Installer-Test:
+
+Electron Forge / Squirrel.Windows:
+Fatal error: Unable to set icon
+
+Bewertung:
+Der Fehler entsteht in der Squirrel-/rcedit-Phase beim Setzen des Icons und ist nicht mit der npm-Versionsmeldung zu verwechseln.
+
+Geplante Korrektur:
+- Windows-ICO in konservativerem Mehrfachgroessenformat neu erzeugen.
+- skipUpdateIcon aktivieren, damit Squirrel Update.exe nicht mit demselben Icon patchen muss; Setup.exe behält setupIcon.
+- Programmsymbol bleibt ueber packagerConfig.icon gesetzt.
