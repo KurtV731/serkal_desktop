@@ -1,9 +1,13 @@
+const path = require('path');
 const { FusesPlugin } = require('@electron-forge/plugin-fuses');
 const { FuseV1Options, FuseVersion } = require('@electron/fuses');
+
+const serkalIcon = path.join(__dirname, '4 assets', 'icon', 'serkal.ico');
 
 module.exports = {
   packagerConfig: {
     asar: true,
+    icon: serkalIcon,
 
     // SERKAL Desktop 0.0.4:
     // Nur Laufzeit-Abhaengigkeiten ins Paket nehmen. Forge/Electron-
@@ -29,7 +33,9 @@ module.exports = {
   makers: [
     {
       name: '@electron-forge/maker-squirrel',
-      config: {},
+      config: {
+        setupIcon: serkalIcon,
+      },
     },
     {
       name: '@electron-forge/maker-zip',
