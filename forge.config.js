@@ -38,6 +38,13 @@ module.exports = {
         description: 'SERKAL Desktop – Serienkalender',
         setupExe: 'SerKal_0.0.5_Setup.exe',
         setupIcon: '4 assets/icon/serkal.ico',
+
+        // Squirrel versucht sonst zusaetzlich, Update.exe mit demselben Icon
+        // per rcedit zu patchen. Das ist fuer SERKAL nicht erforderlich und
+        // kann mit "Fatal error: Unable to set icon" abbrechen.
+        // Das Setup selbst behaelt setupIcon; das Programm-Icon kommt aus
+        // packagerConfig.icon.
+        skipUpdateIcon: true,
       },
     },
     {
