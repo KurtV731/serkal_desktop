@@ -1478,8 +1478,16 @@ function installDesktopTmdbBridge_(hauptfenster) {
           }
           const res = await window.serkal.archive.deleteSeries(payload || {});
           try {
-            await window.serkal.log.write(res && res.ok ? 'ACTION' : 'ERROR', 'DELETE',
-              res && res.ok ? 'Löschen abgeschlossen' : 'Löschen fehlgeschlagen', res || {});
+            const logSummary = {
+              ok:!!(res && res.ok),
+              message:String(res && res.message || ''),
+              fileName:String(res && res.fileName || payload && payload.fileName || ''),
+              calendarMode:String(res && res.calendarMode || ''),
+              calendarDeleted:Number(res && res.calendarDeleted || 0),
+              archiveCount:Number(res && res.count || 0)
+            };
+            await window.serkal.log.write(logSummary.ok ? 'ACTION' : 'ERROR', 'DELETE',
+              logSummary.ok ? 'Löschen abgeschlossen' : 'Löschen fehlgeschlagen', logSummary);
           } catch (_logErr) {}
           success(res);
         } catch (e) {
