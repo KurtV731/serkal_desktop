@@ -16,6 +16,66 @@ const http = require("node:http");
 const crypto = require("node:crypto");
 const { app, BrowserWindow, ipcMain, shell } = require("electron");
 
+function configureSharedUserData_() {
+    try {
+        const appData = app.getPath("appData");
+        const previousUserData = app.getPath("userData");
+        const target = path.join(appData, "SerKal");
+        const candidates = Array.from(new Set([
+            previousUserData,
+            path.join(appData, "SerKal Desktop"),
+            path.join(appData, "serkal_desktop")
+        ])).filter(folder => path.resolve(folder) !== path.resolve(target));
+
+        fs.mkdirSync(target, { recursive:true });
+
+        const files = ["settings.json", "tmdb.json", "google_calendar_token.json"];
+        for (const fileName of files) {
+            const targetFile = path.join(target, fileName);
+            if (fs.existsSync(targetFile)) continue;
+
+            const available = candidates.map(folder => path.join(folder, fileName)).filter(file => {
+                try { return fs.existsSync(file) && fs.statSync(file).isFile(); }
+                catch (_err) { return false; }
+            });
+            if (!available.length) continue;
+
+            available.sort((a, b) => {
+                if (fileName === "settings.json") {
+                    const score = file => {
+                        try {
+                            const value = JSON.parse(fs.readFileSync(file, "utf8"));
+                            const calendar = value && value.calendar || {};
+                            return (String(calendar.googleCalendarId || "").trim() ? 100 : 0) +
+                                (String(calendar.mode || "").toLowerCase() === "google" ? 20 : 0) +
+                                (value && value.setupDone === true ? 10 : 0);
+                        } catch (_err) { return -1; }
+                    };
+                    const scoreDiff = score(b) - score(a);
+                    if (scoreDiff) return scoreDiff;
+                }
+                return fs.statSync(b).mtimeMs - fs.statSync(a).mtimeMs;
+            });
+            fs.copyFileSync(available[0], targetFile);
+        }
+
+        app.setPath("userData", target);
+    } catch (err) {
+        console.error("SERKAL gemeinsamer Einstellungsordner:", err);
+    }
+}
+
+configureSharedUserData_();
+
+function serkalBuildChannel_() {
+    return app.isPackaged ? "INSTALLIERT" : "ENTWICKLUNG";
+}
+
+function serkalWindowTitle_() {
+    return "SERKAL Desktop " + app.getVersion() + " – " + serkalBuildChannel_();
+}
+
+
 const DEFAULT_SETTINGS = {
     setupDone: false,
     archive: { folderPath: "G:\\Meine Ablage\\Serkal_Haupt\\SerKal_Archivdaten" },
@@ -80,6 +140,93 @@ function writeTmdbKey_(apiKey) {
     fs.mkdirSync(path.dirname(file), { recursive: true });
     fs.writeFileSync(file, JSON.stringify({ apiKey:key }, null, 2) + "\n", "utf8");
     return { ok:true, configured:true };
+}
+
+
+const LOG_WEEKDAYS = { so:0, mo:1, di:2, mi:3, do:4, fr:5, sa:6 };
+
+function logDateForDay_(day) {
+    const key = String(day || "today").trim().toLowerCase();
+    const now = new Date();
+    const date = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    if (Object.prototype.hasOwnProperty.call(LOG_WEEKDAYS, key)) {
+        let diff = date.getDay() - LOG_WEEKDAYS[key];
+        if (diff < 0) diff += 7;
+        date.setDate(date.getDate() - diff);
+    } else if (/^\d{4}-\d{2}-\d{2}$/.test(key)) {
+        return key;
+    }
+    return String(date.getFullYear()) + "-" + String(date.getMonth() + 1).padStart(2, "0") + "-" +
+        String(date.getDate()).padStart(2, "0");
+}
+
+function logFilePath_(day) {
+    const folder = archiveFolderPath_();
+    if (!folder) throw new Error("Archivordner für das Log ist nicht eingerichtet.");
+    if (!fs.existsSync(folder)) throw new Error("Archivordner für das Log wurde nicht gefunden: " + folder);
+    return path.join(folder, "!!SERKAL_LOG_" + logDateForDay_(day) + ".txt");
+}
+
+function logSafeObject_(value) {
+    if (value === undefined || value === null || value === "") return "";
+    try { return JSON.stringify(value); }
+    catch (_err) { return String(value); }
+}
+
+function logWrite_(level, tag, text, object) {
+    try {
+        const now = new Date();
+        const record = {
+            zeit:now.toLocaleTimeString("de-DE", { hour12:false }),
+            level:String(level || "INFO").toUpperCase(),
+            tag:String(tag || "SYSTEM"),
+            text:String(text || ""),
+            objekt:logSafeObject_(object)
+        };
+        fs.appendFileSync(logFilePath_("today"), JSON.stringify(record) + "\n", "utf8");
+        return { ok:true };
+    } catch (err) {
+        return { ok:false, message:"Log konnte nicht geschrieben werden: " + err.message };
+    }
+}
+
+function logRead_(maxLines, day) {
+    try {
+        const file = logFilePath_(day);
+        if (!fs.existsSync(file)) return { ok:true, lines:[], fileName:path.basename(file) };
+        const rawLines = fs.readFileSync(file, "utf8").split(/\r?\n/).filter(Boolean);
+        const limit = Math.max(1, Math.min(5000, Number(maxLines || 500)));
+        const lines = rawLines.slice(-limit).map(line => {
+            try {
+                const parsed = JSON.parse(line);
+                if (parsed && typeof parsed === "object") return parsed;
+            } catch (_err) {}
+            return { zeit:"", level:"", tag:"", text:String(line), objekt:"" };
+        });
+        return { ok:true, lines, fileName:path.basename(file), count:lines.length };
+    } catch (err) {
+        return { ok:false, message:"Log konnte nicht gelesen werden: " + err.message, lines:[] };
+    }
+}
+
+function logSaveText_(day, text) {
+    try {
+        const file = logFilePath_(day);
+        fs.writeFileSync(file, String(text || "").replace(/\r?\n/g, "\n"), "utf8");
+        return { ok:true, message:"Log gespeichert.", fileName:path.basename(file) };
+    } catch (err) {
+        return { ok:false, message:"Log konnte nicht gespeichert werden: " + err.message };
+    }
+}
+
+function logClear_(day) {
+    try {
+        const file = logFilePath_(day);
+        fs.writeFileSync(file, "", "utf8");
+        return { ok:true, message:"Log geleert.", fileName:path.basename(file) };
+    } catch (err) {
+        return { ok:false, message:"Log konnte nicht geleert werden: " + err.message };
+    }
 }
 
 function archiveFolderPath_() {
@@ -260,6 +407,95 @@ function archiveInsert_(payload) {
         return { ok:true, message:"Archiv gespeichert: "+fileName+" / "+label, fileName, staffelLabel:label, archiv:archiveLoad_() };
     } catch (err) {
         return { ok:false, message:"Archiv konnte nicht gespeichert werden: "+err.message };
+    }
+}
+
+
+async function archiveDeleteSeries_(payload) {
+    try {
+        const data = payload || {};
+        const fileName = String(data.fileName || "").trim();
+        if (!fileName || path.basename(fileName) !== fileName || !fileName.toLowerCase().endsWith(".txt")) {
+            return { ok:false, message:"Ungültiger Archivdateiname." };
+        }
+
+        const folder = archiveFolderPath_();
+        if (!folder || !fs.existsSync(folder)) {
+            return { ok:false, message:"Archivordner nicht gefunden: " + folder };
+        }
+
+        const fullPath = path.join(folder, fileName);
+        if (!fs.existsSync(fullPath)) {
+            return { ok:false, message:"Archivdatei nicht gefunden: " + fileName };
+        }
+
+        const stats = fs.statSync(fullPath);
+        if (!stats.isFile()) return { ok:false, message:"Archivdatei ist keine Datei: " + fileName };
+
+        const lines = fs.readFileSync(fullPath, "utf8")
+            .split(/\r?\n/)
+            .map(line => String(line || "").trim())
+            .filter(Boolean);
+        const entries = lines
+            .map(line => archiveEntryFromLine_(fileName, stats, line))
+            .filter(Boolean);
+
+        const settings = readSettings_();
+        const calendarMode = String(settings.calendar.mode || "").toLowerCase();
+        let calendarDeleted = 0;
+
+        if (calendarMode === "ics") {
+            return {
+                ok:false,
+                message:"ICS-Kalendertermine können nicht automatisch gelöscht werden. Archivdatei wurde nicht gelöscht."
+            };
+        }
+
+        if (calendarMode === "google") {
+            const calendarId = String(settings.calendar.googleCalendarId || "").trim();
+            if (!calendarId) {
+                return { ok:false, message:"Google-Kalender-ID fehlt. Archivdatei wurde nicht gelöscht." };
+            }
+
+            for (const entry of entries) {
+                const seasonNumber = Number(String(entry.staffelLabel || "").replace(/\D/g, ""));
+                const dates = Array.isArray(entry.activeDates) ? entry.activeDates : [];
+                const blocks = calendarBlocks_(dates);
+                for (const block of blocks) {
+                    const eventId = googleCalendarEventId_({
+                        tmdbId:entry.tmdbId,
+                        staffelNummer:seasonNumber
+                    }, block);
+                    const result = await googleCalendarApi_("DELETE", calendarId, eventId, null);
+                    if (result.ok) {
+                        calendarDeleted++;
+                        continue;
+                    }
+                    if (result.status === 404 || result.status === 410) continue;
+                    const detail = result.data && (result.data.error && result.data.error.message || result.data.error_description);
+                    return {
+                        ok:false,
+                        message:"Google-Kalendertermin konnte nicht gelöscht werden: " +
+                            (detail || ("Fehler " + result.status)) +
+                            ". Archivdatei wurde nicht gelöscht."
+                    };
+                }
+            }
+        }
+
+        fs.unlinkSync(fullPath);
+        const loaded = archiveLoad_();
+        return {
+            ok:true,
+            message:"Serie gelöscht: " + fileName,
+            fileName,
+            calendarMode:calendarMode || "none",
+            calendarDeleted,
+            daten:loaded.daten,
+            count:loaded.count
+        };
+    } catch (err) {
+        return { ok:false, message:"Serie konnte nicht gelöscht werden: " + err.message };
     }
 }
 
@@ -1076,6 +1312,11 @@ function installIpc_() {
     ipcMain.handle("serkal:archive:load", () => archiveLoad_());
     ipcMain.handle("serkal:archive:insert", (_event, payload) => archiveInsert_(payload));
     ipcMain.handle("serkal:archive:saveChanges", (_event, dirtyMap) => archiveSaveChanges_(dirtyMap));
+    ipcMain.handle("serkal:archive:deleteSeries", (_event, payload) => archiveDeleteSeries_(payload));
+    ipcMain.handle("serkal:log:write", (_event, level, tag, text, object) => logWrite_(level, tag, text, object));
+    ipcMain.handle("serkal:log:read", (_event, maxLines, day) => logRead_(maxLines, day));
+    ipcMain.handle("serkal:log:saveText", (_event, day, text) => logSaveText_(day, text));
+    ipcMain.handle("serkal:log:clear", (_event, day) => logClear_(day));
     ipcMain.handle("serkal:calendar:insertSeason", async (_event, payload) => googleCalendarInsertSeason_(payload));
     ipcMain.handle("serkal:calendar:createIcs", async (_event, payload) => {
         const result = calendarCreateIcs_(payload);
@@ -1229,6 +1470,46 @@ function installDesktopTmdbBridge_(hauptfenster) {
           failure({message:(e && e.message) ? e.message : String(e)});
         }
       },
+      async apiLoescheArchivEintrag(payload) {
+        try {
+          if (!window.serkal || !window.serkal.archive || typeof window.serkal.archive.deleteSeries !== 'function') {
+            success({ok:false, message:'Die neue Lösch-Brücke ist in dieser laufenden SerKal-Instanz noch nicht geladen. Bitte alle SerKal-/Electron-Fenster schließen und SerKal neu starten.'});
+            return;
+          }
+          const res = await window.serkal.archive.deleteSeries(payload || {});
+          try {
+            await window.serkal.log.write(res && res.ok ? 'ACTION' : 'ERROR', 'DELETE',
+              res && res.ok ? 'Löschen abgeschlossen' : 'Löschen fehlgeschlagen', res || {});
+          } catch (_logErr) {}
+          success(res);
+        } catch (e) {
+          success({ok:false, message:(e && e.message) ? e.message : String(e)});
+        }
+      },
+      async LOG_INFO(tag, text, object) {
+        try { success(await window.serkal.log.write('INFO', tag || 'UI', text || '', object)); }
+        catch (e) { failure({message:(e && e.message) ? e.message : String(e)}); }
+      },
+      async apiLogUserAction(action, object) {
+        try { success(await window.serkal.log.write('ACTION', 'UI', action || 'Aktion', object)); }
+        catch (e) { failure({message:(e && e.message) ? e.message : String(e)}); }
+      },
+      async apiLogViewportInfo(info) {
+        try { success(await window.serkal.log.write('INFO', 'VIEWPORT', 'Fenstergröße erkannt', info)); }
+        catch (e) { failure({message:(e && e.message) ? e.message : String(e)}); }
+      },
+      async apiHoleLogZeilen(maxLines, day) {
+        try { success(await window.serkal.log.read(maxLines || 500, day || 'today')); }
+        catch (e) { failure({message:(e && e.message) ? e.message : String(e)}); }
+      },
+      async apiSpeichereLogText(day, text) {
+        try { success(await window.serkal.log.saveText(day || 'today', text || '')); }
+        catch (e) { failure({message:(e && e.message) ? e.message : String(e)}); }
+      },
+      async apiLoescheLog(day) {
+        try { success(await window.serkal.log.clear(day || 'today')); }
+        catch (e) { failure({message:(e && e.message) ? e.message : String(e)}); }
+      },
       async apiHoleArchivPoster(tmdbId, lang) {
         try {
           let res = await window.serkal.tmdb.poster(tmdbId, lang || 'de');
@@ -1270,11 +1551,31 @@ function installDesktopTmdbBridge_(hauptfenster) {
     return hauptfenster.webContents.executeJavaScript(js);
 }
 
+let serkalMainWindow_ = null;
+
+function bringSerkalToFront_() {
+    const win = serkalMainWindow_;
+    if (!win || win.isDestroyed()) return false;
+    if (win.isMinimized()) win.restore();
+    if (!win.isVisible()) win.show();
+    win.focus();
+    return true;
+}
+
 function erstelleHauptfenster() {
     const hauptfenster = new BrowserWindow({
         width:1280, height:820, minWidth:900, minHeight:600, show:false,
-        title:"SERKAL Desktop 0.0.5", backgroundColor:"#f6f3ff",
-        webPreferences:{ preload:path.join(__dirname,"..","common","preload.js"), contextIsolation:true, nodeIntegration:false }
+        title:serkalWindowTitle_(), backgroundColor:"#f6f3ff",
+        webPreferences:{
+            preload:path.join(__dirname,"..","common","preload.js"),
+            contextIsolation:true,
+            nodeIntegration:false,
+            additionalArguments:[app.isPackaged ? "--serkal-installed" : "--serkal-development"]
+        }
+    });
+    serkalMainWindow_ = hauptfenster;
+    hauptfenster.on("closed", () => {
+        if (serkalMainWindow_ === hauptfenster) serkalMainWindow_ = null;
     });
     hauptfenster.loadFile(path.join(__dirname,"..","frontend","index.html"));
     hauptfenster.once("ready-to-show", async ()=>{
@@ -1286,8 +1587,22 @@ function erstelleHauptfenster() {
     hauptfenster.setMenuBarVisibility(false);
 }
 
-app.whenReady().then(()=>{
-    installIpc_(); erstelleHauptfenster();
-    app.on("activate",()=>{ if (BrowserWindow.getAllWindows().length===0) erstelleHauptfenster(); });
-});
-app.on("window-all-closed",()=>{ if (process.platform!=="darwin") app.quit(); });
+const serkalHasSingleInstanceLock_ = app.requestSingleInstanceLock();
+
+if (!serkalHasSingleInstanceLock_) {
+    app.quit();
+} else {
+    app.on("second-instance", () => {
+        bringSerkalToFront_();
+    });
+
+    app.whenReady().then(()=>{
+        installIpc_();
+        erstelleHauptfenster();
+        app.on("activate",()=>{
+            if (!bringSerkalToFront_() && BrowserWindow.getAllWindows().length===0) erstelleHauptfenster();
+        });
+    });
+
+    app.on("window-all-closed",()=>{ if (process.platform!=="darwin") app.quit(); });
+}
