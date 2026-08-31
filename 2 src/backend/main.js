@@ -1246,10 +1246,6 @@ function googleCalendarEventIdCandidates_(payload, block) {
 
 async function googleCalendarInsertSeason_(payload) {
     try {
-        const settings = readSettings_();
-        const calendarId = String(settings.calendar.googleCalendarId || "").trim();
-        if (!calendarId) return { ok:false, message:"Google-Kalender-ID fehlt." };
-
         const data = payload || {};
         const title = String(data.titel || data.title || data.name || "").trim();
         const year = String(data.jahrOverride || data.jahr || data.year || "").trim();
@@ -1260,9 +1256,58 @@ async function googleCalendarInsertSeason_(payload) {
             .map(value => String(value || "").trim())
             .filter(value => /^\d{4}-\d{2}-\d{2}$/.test(value));
 
+        /*
+         * Originalregel aus SerKal 2.5 / modul5-kalender.gs:
+         * Erst die letzte echte Episode bestimmen. Liegt sie vor dem
+         * aktuellen Jahr, wird Google ueberhaupt nicht angesprochen.
+         * Liegt sie im aktuellen Jahr oder spaeter, wird die ganze Staffel
+         * eingetragen. Diese Pruefung muss vor Kalender-ID und OAuth stehen.
+         */
         if (!title || !/^\d{4}$/.test(year) || !seasonNumber || !dates.length) {
-            return { ok:false, message:"Kalendereintrag unvollständig." };
+            return { ok:false, message:"Kalendereintrag unvollständig.", reason:"invalid_input" };
         }
+
+        let lastDate = null;
+        let lastIso = "";
+        for (const iso of dates) {
+            const parsed = new Date(iso + "T00:00:00");
+            if (Number.isNaN(parsed.getTime())) continue;
+            if (!lastDate || parsed.getTime() > lastDate.getTime()) {
+                lastDate = parsed;
+                lastIso = iso;
+            }
+        }
+        if (!lastDate) {
+            return { ok:false, message:"Keine gültigen Kalendertage vorhanden.", reason:"no_valid_dates" };
+        }
+
+        const currentYear = new Date().getFullYear();
+        if (lastDate.getFullYear() < currentYear) {
+            logWrite_("INFO", "KAL",
+                "Kalender-Eintrag übersprungen: letzte Episode liegt vor dem aktuellen Jahr.",
+                {
+                    titel:title,
+                    jahr:year,
+                    staffel:"S" + calendarPad2_(seasonNumber),
+                    lastDate:lastIso,
+                    currentYear
+                });
+            return {
+                ok:true,
+                mode:"google",
+                skipped:true,
+                reason:"past_season",
+                created:0,
+                updated:0,
+                events:0,
+                lastDate:lastIso,
+                currentYear
+            };
+        }
+
+        const settings = readSettings_();
+        const calendarId = String(settings.calendar.googleCalendarId || "").trim();
+        if (!calendarId) return { ok:false, message:"Google-Kalender-ID fehlt.", reason:"calendar_missing" };
 
         const seasonLabel = "S" + calendarPad2_(seasonNumber);
         const blocks = calendarBlocks_(dates);
