@@ -1212,21 +1212,62 @@ async function googleOauthAccessToken_() {
     return String(token.access_token);
 }
 
+function googleCalendarIdForLog_(calendarId) {
+    const value = String(calendarId || "").trim();
+    if (!value) return "(leer)";
+    if (value.length <= 12) return value;
+    return value.slice(0, 6) + "…" + value.slice(-6);
+}
+
 async function googleCalendarApi_(method, calendarId, eventId, event) {
-    const accessToken = await googleOauthAccessToken_();
-    const base = "https://www.googleapis.com/calendar/v3/calendars/" +
-        encodeURIComponent(calendarId) + "/events";
-    const url = eventId ? (base + "/" + encodeURIComponent(eventId)) : base;
-    const response = await fetch(url, {
-        method,
-        headers:{
-            authorization:"Bearer " + accessToken,
-            "content-type":"application/json"
-        },
-        body:event ? JSON.stringify(event) : undefined
-    });
-    const data = await response.json().catch(() => null);
-    return { ok:response.ok, status:response.status, data };
+    const trace = {
+        method:String(method || ""),
+        kalender:googleCalendarIdForLog_(calendarId),
+        eventId:eventId ? String(eventId).slice(0, 18) + "…" : "(neu)",
+        summary:event && event.summary ? String(event.summary) : ""
+    };
+    logWrite_("TRACE", "GOOGLE", "API-Aufruf vorbereitet", trace);
+    try {
+        const accessToken = await googleOauthAccessToken_();
+        logWrite_("TRACE", "GOOGLE", "OAuth-Token für API-Aufruf verfügbar", {
+            method:trace.method,
+            kalender:trace.kalender,
+            tokenVorhanden:Boolean(accessToken)
+        });
+        const base = "https://www.googleapis.com/calendar/v3/calendars/" +
+            encodeURIComponent(calendarId) + "/events";
+        const url = eventId ? (base + "/" + encodeURIComponent(eventId)) : base;
+        const response = await fetch(url, {
+            method,
+            headers:{
+                authorization:"Bearer " + accessToken,
+                "content-type":"application/json"
+            },
+            body:event ? JSON.stringify(event) : undefined
+        });
+        const data = await response.json().catch(() => null);
+        const googleMessage = data && data.error && data.error.message ?
+            String(data.error.message) : "";
+        logWrite_(response.ok ? "TRACE" : "ERROR", "GOOGLE", "API-Antwort erhalten", {
+            method:trace.method,
+            kalender:trace.kalender,
+            eventId:trace.eventId,
+            summary:trace.summary,
+            httpStatus:response.status,
+            ok:response.ok,
+            googleMessage
+        });
+        return { ok:response.ok, status:response.status, data };
+    } catch (err) {
+        logWrite_("ERROR", "GOOGLE", "API-Aufruf mit Ausnahme abgebrochen", {
+            method:trace.method,
+            kalender:trace.kalender,
+            eventId:trace.eventId,
+            summary:trace.summary,
+            fehler:String(err && err.message || err)
+        });
+        throw err;
+    }
 }
 
 function googleCalendarEventId_(payload, block) {
@@ -1255,6 +1296,16 @@ async function googleCalendarInsertSeason_(payload) {
             (Array.isArray(data.episodeDates) ? data.episodeDates : []))
             .map(value => String(value || "").trim())
             .filter(value => /^\d{4}-\d{2}-\d{2}$/.test(value));
+
+        logWrite_("TRACE", "KAL", "Kalenderverarbeitung gestartet", {
+            titel:title,
+            jahr:year,
+            staffel:seasonNumber,
+            tmdbId:Number(data.tmdbId || data.id || 0) || null,
+            termine:dates.length,
+            ersterTermin:dates[0] || "",
+            letzterGelieferterTermin:dates.length ? dates[dates.length - 1] : ""
+        });
 
         /*
          * Originalregel aus SerKal 2.5 / modul5-kalender.gs:
@@ -1307,14 +1358,36 @@ async function googleCalendarInsertSeason_(payload) {
 
         const settings = readSettings_();
         const calendarId = String(settings.calendar.googleCalendarId || "").trim();
+        logWrite_("TRACE", "KAL", "Google-Ziel vor Eintrag geprüft", {
+            kalenderModus:String(settings && settings.calendar && settings.calendar.mode || ""),
+            kalender:googleCalendarIdForLog_(calendarId),
+            kalenderIdVorhanden:Boolean(calendarId),
+            letzterTermin:lastIso,
+            aktuellesJahr:currentYear
+        });
         if (!calendarId) return { ok:false, message:"Google-Kalender-ID fehlt.", reason:"calendar_missing" };
 
         const seasonLabel = "S" + calendarPad2_(seasonNumber);
         const blocks = calendarBlocks_(dates);
+        logWrite_("TRACE", "KAL", "Terminblöcke für Google erzeugt", {
+            titel:title,
+            staffel:seasonLabel,
+            blockAnzahl:blocks.length,
+            bloecke:blocks.map(block => ({
+                datum:block.date,
+                episodeVon:block.eFrom,
+                episodeBis:block.eTo
+            }))
+        });
         let created = 0;
         let updated = 0;
 
         for (const block of blocks) {
+            logWrite_("TRACE", "KAL", "Google-Terminblock beginnt", {
+                datum:block.date,
+                episodeVon:block.eFrom,
+                episodeBis:block.eTo
+            });
             const summary = title + " (" + year + ") " + seasonLabel + "E" + calendarPad2_(block.eFrom) +
                 (block.eTo !== block.eFrom ? ("–E" + calendarPad2_(block.eTo)) : "");
             const eventBase = {
@@ -1358,6 +1431,9 @@ async function googleCalendarInsertSeason_(payload) {
 
         return { ok:true, mode:"google", created, updated, events:blocks.length, calendarId };
     } catch (err) {
+        logWrite_("ERROR", "KAL", "Google-Kalendereintrag endgültig fehlgeschlagen", {
+            fehler:String(err && err.message || err)
+        });
         return { ok:false, message:"Google-Kalendereintrag fehlgeschlagen: " + err.message };
     }
 }
@@ -1378,14 +1454,44 @@ function installIpc_() {
     ipcMain.handle("serkal:tmdb:searchTv", async (_event, query, lang, options) => serkalSearchComplete_(query, lang, options));
     ipcMain.handle("serkal:tmdb:poster", async (_event, id, lang) => tmdbPoster_(id, lang));
     ipcMain.handle("serkal:archive:load", () => archiveLoad_());
-    ipcMain.handle("serkal:archive:insert", (_event, payload) => archiveInsert_(payload));
+    ipcMain.handle("serkal:archive:insert", (_event, payload) => {
+        logWrite_("TRACE", "PIPELINE", "IPC Archiv-Eintrag empfangen", {
+            titel:String(payload && (payload.titel || payload.title || payload.name) || ""),
+            jahr:String(payload && (payload.jahr || payload.year) || ""),
+            staffel:Number(payload && (payload.staffelNummer || payload.seasonNumber) || 0),
+            termine:Array.isArray(payload && (payload.termindaten || payload.episodeDates)) ?
+                (payload.termindaten || payload.episodeDates).length : 0
+        });
+        const result = archiveInsert_(payload);
+        logWrite_(result && result.ok ? "TRACE" : "ERROR", "PIPELINE", "IPC Archiv-Eintrag abgeschlossen", {
+            ok:Boolean(result && result.ok),
+            fileName:String(result && result.fileName || ""),
+            message:String(result && result.message || "")
+        });
+        return result;
+    });
     ipcMain.handle("serkal:archive:saveChanges", (_event, dirtyMap) => archiveSaveChanges_(dirtyMap));
     ipcMain.handle("serkal:archive:deleteSeries", (_event, payload) => archiveDeleteSeries_(payload));
     ipcMain.handle("serkal:log:write", (_event, level, tag, text, object) => logWrite_(level, tag, text, object));
     ipcMain.handle("serkal:log:read", (_event, maxLines, day) => logRead_(maxLines, day));
     ipcMain.handle("serkal:log:saveText", (_event, day, text) => logSaveText_(day, text));
     ipcMain.handle("serkal:log:clear", (_event, day) => logClear_(day));
-    ipcMain.handle("serkal:calendar:insertSeason", async (_event, payload) => googleCalendarInsertSeason_(payload));
+    ipcMain.handle("serkal:calendar:insertSeason", async (_event, payload) => {
+        logWrite_("TRACE", "PIPELINE", "IPC Kalender-Eintrag empfangen", {
+            titel:String(payload && (payload.titel || payload.title || payload.name) || ""),
+            tmdbId:Number(payload && (payload.tmdbId || payload.id) || 0) || null
+        });
+        const result = await googleCalendarInsertSeason_(payload);
+        logWrite_(result && result.ok ? "TRACE" : "ERROR", "PIPELINE", "IPC Kalender-Eintrag abgeschlossen", {
+            ok:Boolean(result && result.ok),
+            skipped:Boolean(result && result.skipped),
+            reason:String(result && result.reason || ""),
+            created:Number(result && result.created || 0),
+            updated:Number(result && result.updated || 0),
+            message:String(result && result.message || "")
+        });
+        return result;
+    });
     ipcMain.handle("serkal:calendar:createIcs", async (_event, payload) => {
         const result = calendarCreateIcs_(payload);
         if (result.ok) {
@@ -1659,6 +1765,10 @@ function erstelleHauptfenster() {
         catch (err) { console.error("SERKAL Desktop TMDB-Bridge:", err); }
         hauptfenster.maximize();
         hauptfenster.show();
+        if (String(process.env.SERKAL_DEBUG || "") === "1") {
+            logWrite_("INFO", "DEBUG", "Electron-Entwicklerwerkzeuge automatisch geöffnet", {});
+            hauptfenster.webContents.openDevTools({ mode:"detach" });
+        }
     });
     hauptfenster.setMenuBarVisibility(false);
 }
