@@ -462,23 +462,30 @@ async function archiveDeleteSeries_(payload) {
                 const dates = Array.isArray(entry.activeDates) ? entry.activeDates : [];
                 const blocks = calendarBlocks_(dates);
                 for (const block of blocks) {
-                    const eventId = googleCalendarEventId_({
+                    let deletedCandidate = false;
+                    const idPayload = {
                         tmdbId:entry.tmdbId,
                         staffelNummer:seasonNumber
-                    }, block);
-                    const result = await googleCalendarApi_("DELETE", calendarId, eventId, null);
-                    if (result.ok) {
-                        calendarDeleted++;
-                        continue;
-                    }
-                    if (result.status === 404 || result.status === 410) continue;
-                    const detail = result.data && (result.data.error && result.data.error.message || result.data.error_description);
-                    return {
-                        ok:false,
-                        message:"Google-Kalendertermin konnte nicht gelöscht werden: " +
-                            (detail || ("Fehler " + result.status)) +
-                            ". Archivdatei wurde nicht gelöscht."
                     };
+                    for (const eventId of googleCalendarEventIdCandidates_(idPayload, block)) {
+                        const result = await googleCalendarApi_("DELETE", calendarId, eventId, null);
+                        if (result.ok) {
+                            calendarDeleted++;
+                            deletedCandidate = true;
+                            continue;
+                        }
+                        if (result.status === 404 || result.status === 410) {
+                            if (deletedCandidate) break;
+                            continue;
+                        }
+                        const detail = result.data && (result.data.error && result.data.error.message || result.data.error_description);
+                        return {
+                            ok:false,
+                            message:"Google-Kalendertermin konnte nicht gelöscht werden: " +
+                                (detail || ("Fehler " + result.status)) +
+                                ". Archivdatei wurde nicht gelöscht."
+                        };
+                    }
                 }
             }
         }
@@ -1232,6 +1239,11 @@ function googleCalendarEventId_(payload, block) {
     return "serkal" + crypto.createHash("sha1").update(identity).digest("hex");
 }
 
+function googleCalendarEventIdCandidates_(payload, block) {
+    const baseId = googleCalendarEventId_(payload, block);
+    return Array.from({length:10}, (_unused, index) => index ? (baseId + String(index)) : baseId);
+}
+
 async function googleCalendarInsertSeason_(payload) {
     try {
         const settings = readSettings_();
@@ -1260,9 +1272,7 @@ async function googleCalendarInsertSeason_(payload) {
         for (const block of blocks) {
             const summary = title + " (" + year + ") " + seasonLabel + "E" + calendarPad2_(block.eFrom) +
                 (block.eTo !== block.eFrom ? ("–E" + calendarPad2_(block.eTo)) : "");
-            const eventId = googleCalendarEventId_(data, block);
-            const event = {
-                id:eventId,
+            const eventBase = {
                 summary,
                 description:"SerKal",
                 start:{ date:block.date },
@@ -1271,18 +1281,33 @@ async function googleCalendarInsertSeason_(payload) {
                 extendedProperties:{ private:{ serkal:"1", tmdbId:String(data.tmdbId || data.id || "") } }
             };
 
-            let result = await googleCalendarApi_("POST", calendarId, "", event);
-            if (result.status === 409) {
-                const updateEvent = Object.assign({}, event);
-                delete updateEvent.id;
-                result = await googleCalendarApi_("PUT", calendarId, eventId, updateEvent);
-                if (result.ok) updated++;
-            } else if (result.ok) {
-                created++;
-            }
-            if (!result.ok) {
+            let stored = false;
+            for (const eventId of googleCalendarEventIdCandidates_(data, block)) {
+                const event = Object.assign({id:eventId}, eventBase);
+                let result = await googleCalendarApi_("POST", calendarId, "", event);
+                if (result.ok) {
+                    created++;
+                    stored = true;
+                    break;
+                }
+                if (result.status !== 409) {
+                    const detail = result.data && (result.data.error && result.data.error.message || result.data.error_description);
+                    throw new Error(detail || ("Google Kalender antwortete mit Fehler " + result.status + "."));
+                }
+
+                result = await googleCalendarApi_("PUT", calendarId, eventId, eventBase);
+                if (result.ok) {
+                    updated++;
+                    stored = true;
+                    break;
+                }
+                if (result.status === 404 || result.status === 410) continue;
+
                 const detail = result.data && (result.data.error && result.data.error.message || result.data.error_description);
                 throw new Error(detail || ("Google Kalender antwortete mit Fehler " + result.status + "."));
+            }
+            if (!stored) {
+                throw new Error("Der frühere Google-Termin ist gelöscht und konnte nicht neu angelegt werden.");
             }
         }
 
@@ -1292,10 +1317,8 @@ async function googleCalendarInsertSeason_(payload) {
     }
 }
 
-function googleCalendarUrl_(calendarId) {
-    const id = String(calendarId || "").trim();
-    if (!id) return "https://calendar.google.com/";
-    return "https://calendar.google.com/calendar/u/0/r?cid=" + encodeURIComponent(id);
+function googleCalendarUrl_(_calendarId) {
+    return "https://calendar.google.com/calendar/u/0/r";
 }
 
 function installIpc_() {
