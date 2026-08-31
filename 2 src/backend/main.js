@@ -1551,6 +1551,17 @@ function installDesktopTmdbBridge_(hauptfenster) {
     return hauptfenster.webContents.executeJavaScript(js);
 }
 
+let serkalMainWindow_ = null;
+
+function bringSerkalToFront_() {
+    const win = serkalMainWindow_;
+    if (!win || win.isDestroyed()) return false;
+    if (win.isMinimized()) win.restore();
+    if (!win.isVisible()) win.show();
+    win.focus();
+    return true;
+}
+
 function erstelleHauptfenster() {
     const hauptfenster = new BrowserWindow({
         width:1280, height:820, minWidth:900, minHeight:600, show:false,
@@ -1562,6 +1573,10 @@ function erstelleHauptfenster() {
             additionalArguments:[app.isPackaged ? "--serkal-installed" : "--serkal-development"]
         }
     });
+    serkalMainWindow_ = hauptfenster;
+    hauptfenster.on("closed", () => {
+        if (serkalMainWindow_ === hauptfenster) serkalMainWindow_ = null;
+    });
     hauptfenster.loadFile(path.join(__dirname,"..","frontend","index.html"));
     hauptfenster.once("ready-to-show", async ()=>{
         try { await installDesktopTmdbBridge_(hauptfenster); }
@@ -1572,8 +1587,22 @@ function erstelleHauptfenster() {
     hauptfenster.setMenuBarVisibility(false);
 }
 
-app.whenReady().then(()=>{
-    installIpc_(); erstelleHauptfenster();
-    app.on("activate",()=>{ if (BrowserWindow.getAllWindows().length===0) erstelleHauptfenster(); });
-});
-app.on("window-all-closed",()=>{ if (process.platform!=="darwin") app.quit(); });
+const serkalHasSingleInstanceLock_ = app.requestSingleInstanceLock();
+
+if (!serkalHasSingleInstanceLock_) {
+    app.quit();
+} else {
+    app.on("second-instance", () => {
+        bringSerkalToFront_();
+    });
+
+    app.whenReady().then(()=>{
+        installIpc_();
+        erstelleHauptfenster();
+        app.on("activate",()=>{
+            if (!bringSerkalToFront_() && BrowserWindow.getAllWindows().length===0) erstelleHauptfenster();
+        });
+    });
+
+    app.on("window-all-closed",()=>{ if (process.platform!=="darwin") app.quit(); });
+}
