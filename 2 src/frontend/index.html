@@ -6795,14 +6795,24 @@ function nextResult() {
             uiSetReadyState_({ clearTitle: true, clearDetails: true });
             if (res && res.calendarMode === 'google') {
               var cal = res.calendar || {};
-              uiStatus('Archiv und Google Kalender gespeichert (' +
-                Number(cal.created || 0) + ' neu, ' + Number(cal.updated || 0) + ' aktualisiert).',
-                {spinner:false, kind:'info'});
-              try { uiLogAction_('Google-Kalender direkt gespeichert', {
-                erstellt:Number(cal.created || 0),
-                aktualisiert:Number(cal.updated || 0),
-                events:Number(cal.events || 0)
-              }); } catch (_eGoogleLog) {}
+              if (cal.skipped === true && cal.reason === 'past_season') {
+                uiStatus('Archiv gespeichert. Kein Kalendereintrag: Die letzte Episode liegt vor dem aktuellen Jahr.',
+                  {spinner:false, kind:'info'});
+                try { uiLogAction_('Kalender nach Originalregel übersprungen', {
+                  grund:'past_season',
+                  letzterTermin:String(cal.lastDate || ''),
+                  aktuellesJahr:Number(cal.currentYear || 0)
+                }); } catch (_eGoogleSkipLog) {}
+              } else {
+                uiStatus('Archiv und Google Kalender gespeichert (' +
+                  Number(cal.created || 0) + ' neu, ' + Number(cal.updated || 0) + ' aktualisiert).',
+                  {spinner:false, kind:'info'});
+                try { uiLogAction_('Google-Kalender direkt gespeichert', {
+                  erstellt:Number(cal.created || 0),
+                  aktualisiert:Number(cal.updated || 0),
+                  events:Number(cal.events || 0)
+                }); } catch (_eGoogleLog) {}
+              }
             } else {
               offerIcsDownloadAfterInsert_(icsPayload);
             }
