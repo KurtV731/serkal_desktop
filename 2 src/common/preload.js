@@ -5,10 +5,12 @@ const { contextBridge, ipcRenderer } = require("electron");
 /* Sandboxed Preloads duerfen keine beliebigen Node-Module wie node:path laden.
    Die Versionsangabe wird fuer diese Baustellenversion bewusst lokal gehalten. */
 const SERKAL_VERSION = "0.0.5";
+const SERKAL_CHANNEL = process.argv.includes("--serkal-installed") ? "INSTALLIERT" : "ENTWICKLUNG";
+const SERKAL_WINDOW_TITLE = "SERKAL Desktop " + SERKAL_VERSION + " – " + SERKAL_CHANNEL;
 
 function applyDesktopIdentity_() {
     try {
-        document.title = "SERKAL Desktop " + SERKAL_VERSION;
+        document.title = SERKAL_WINDOW_TITLE;
 
         /* Die alte Apps-Script-UI hatte eine eigene Build-Zeile.
            Im Desktop ist sie doppelt, weil Electron bereits die Titelleiste hat.
@@ -25,6 +27,7 @@ contextBridge.exposeInMainWorld("serkal", {
     name:"SERKAL Desktop",
     version:SERKAL_VERSION,
     build:SERKAL_VERSION,
+    channel:SERKAL_CHANNEL,
     settings:{
         get:()=>ipcRenderer.invoke("serkal:settings:get"),
         save:(settings)=>ipcRenderer.invoke("serkal:settings:save",settings)

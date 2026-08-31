@@ -16,6 +16,66 @@ const http = require("node:http");
 const crypto = require("node:crypto");
 const { app, BrowserWindow, ipcMain, shell } = require("electron");
 
+function configureSharedUserData_() {
+    try {
+        const appData = app.getPath("appData");
+        const previousUserData = app.getPath("userData");
+        const target = path.join(appData, "SerKal");
+        const candidates = Array.from(new Set([
+            previousUserData,
+            path.join(appData, "SerKal Desktop"),
+            path.join(appData, "serkal_desktop")
+        ])).filter(folder => path.resolve(folder) !== path.resolve(target));
+
+        fs.mkdirSync(target, { recursive:true });
+
+        const files = ["settings.json", "tmdb.json", "google_calendar_token.json"];
+        for (const fileName of files) {
+            const targetFile = path.join(target, fileName);
+            if (fs.existsSync(targetFile)) continue;
+
+            const available = candidates.map(folder => path.join(folder, fileName)).filter(file => {
+                try { return fs.existsSync(file) && fs.statSync(file).isFile(); }
+                catch (_err) { return false; }
+            });
+            if (!available.length) continue;
+
+            available.sort((a, b) => {
+                if (fileName === "settings.json") {
+                    const score = file => {
+                        try {
+                            const value = JSON.parse(fs.readFileSync(file, "utf8"));
+                            const calendar = value && value.calendar || {};
+                            return (String(calendar.googleCalendarId || "").trim() ? 100 : 0) +
+                                (String(calendar.mode || "").toLowerCase() === "google" ? 20 : 0) +
+                                (value && value.setupDone === true ? 10 : 0);
+                        } catch (_err) { return -1; }
+                    };
+                    const scoreDiff = score(b) - score(a);
+                    if (scoreDiff) return scoreDiff;
+                }
+                return fs.statSync(b).mtimeMs - fs.statSync(a).mtimeMs;
+            });
+            fs.copyFileSync(available[0], targetFile);
+        }
+
+        app.setPath("userData", target);
+    } catch (err) {
+        console.error("SERKAL gemeinsamer Einstellungsordner:", err);
+    }
+}
+
+configureSharedUserData_();
+
+function serkalBuildChannel_() {
+    return app.isPackaged ? "INSTALLIERT" : "ENTWICKLUNG";
+}
+
+function serkalWindowTitle_() {
+    return "SERKAL Desktop " + app.getVersion() + " – " + serkalBuildChannel_();
+}
+
+
 const DEFAULT_SETTINGS = {
     setupDone: false,
     archive: { folderPath: "G:\\Meine Ablage\\Serkal_Haupt\\SerKal_Archivdaten" },
@@ -1494,8 +1554,13 @@ function installDesktopTmdbBridge_(hauptfenster) {
 function erstelleHauptfenster() {
     const hauptfenster = new BrowserWindow({
         width:1280, height:820, minWidth:900, minHeight:600, show:false,
-        title:"SERKAL Desktop 0.0.5", backgroundColor:"#f6f3ff",
-        webPreferences:{ preload:path.join(__dirname,"..","common","preload.js"), contextIsolation:true, nodeIntegration:false }
+        title:serkalWindowTitle_(), backgroundColor:"#f6f3ff",
+        webPreferences:{
+            preload:path.join(__dirname,"..","common","preload.js"),
+            contextIsolation:true,
+            nodeIntegration:false,
+            additionalArguments:[app.isPackaged ? "--serkal-installed" : "--serkal-development"]
+        }
     });
     hauptfenster.loadFile(path.join(__dirname,"..","frontend","index.html"));
     hauptfenster.once("ready-to-show", async ()=>{
