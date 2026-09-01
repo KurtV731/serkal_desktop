@@ -1566,6 +1566,159 @@ async function googleCalendarInsertSeason_(payload) {
     }
 }
 
+let maintenanceRunning_ = false;
+let maintenanceStatus_ = {
+    ok:true,
+    phase:"bereit",
+    text:"Wartung ist bereit.",
+    datei:"",
+    nr:0,
+    gesamt:0
+};
+
+function maintenanceSetStatus_(phase, textValue, entry, nr, total) {
+    maintenanceStatus_ = {
+        ok:phase !== "fehler",
+        phase:String(phase || ""),
+        text:String(textValue || ""),
+        datei:String(entry && entry.fileName || ""),
+        fileName:String(entry && entry.fileName || ""),
+        nr:Number(nr || 0),
+        gesamt:Number(total || 0)
+    };
+    return maintenanceStatus_;
+}
+
+function maintenanceGetStatus_() {
+    return Object.assign({}, maintenanceStatus_, { running:maintenanceRunning_ });
+}
+
+/*
+ * Desktop-Port des alten Modul-10-Grundgedankens:
+ * Das lokale Archiv ist die Quelle. Für alle Staffeln mit Terminen im
+ * aktuellen Jahr oder später wird der sichtbare SerKal-Kalender
+ * idempotent abgeglichen. Die vorhandenen stabilen Event-IDs sorgen dafür,
+ * dass bestehende Termine aktualisiert und fehlende Termine ergänzt werden.
+ */
+async function maintenanceRun_() {
+    if (maintenanceRunning_) {
+        return { ok:false, message:"Die Wartung läuft bereits." };
+    }
+
+    maintenanceRunning_ = true;
+    let checked = 0;
+    let eligible = 0;
+    let repairedSeries = 0;
+    let created = 0;
+    let updated = 0;
+    let skipped = 0;
+    const errors = [];
+
+    try {
+        const loaded = archiveLoad_();
+        if (!loaded || loaded.ok === false) {
+            throw new Error(String(loaded && loaded.message || "Archiv konnte nicht geladen werden."));
+        }
+
+        const entries = Array.isArray(loaded && loaded.daten && loaded.daten.entries)
+            ? loaded.daten.entries : [];
+        const currentYear = new Date().getFullYear();
+        const candidates = entries.filter(entry => {
+            const dates = Array.isArray(entry && entry.termindaten) ? entry.termindaten : [];
+            return dates.some(value => {
+                const match = String(value || "").match(/^(\d{4})-/);
+                return match && Number(match[1]) >= currentYear;
+            });
+        });
+
+        maintenanceSetStatus_("start", "Wartung startet.", null, 0, candidates.length);
+        logWrite_("INFO", "WARTUNG", "Desktop-Wartung gestartet", {
+            archivEintraege:entries.length,
+            kalenderKandidaten:candidates.length,
+            aktuellesJahr:currentYear
+        });
+
+        for (let index = 0; index < candidates.length; index++) {
+            const entry = candidates[index];
+            checked++;
+            eligible++;
+            maintenanceSetStatus_("pruefe", "Kalender wird abgeglichen.", entry, index + 1, candidates.length);
+
+            const payload = {
+                titel:String(entry.titel || entry.title || ""),
+                title:String(entry.titel || entry.title || ""),
+                jahr:String(entry.jahr || entry.year || ""),
+                staffelLabel:String(entry.staffelLabel || entry.seasonLabel || entry.staffel || ""),
+                staffelNummer:Number(String(entry.staffelLabel || entry.seasonLabel || entry.staffel || "").replace(/\D/g, "")),
+                tmdbId:Number(entry.tmdbId || 0) || null,
+                termindaten:Array.isArray(entry.termindaten) ? entry.termindaten.slice() : []
+            };
+
+            try {
+                const result = await googleCalendarInsertSeason_(payload);
+                if (!result || result.ok === false) {
+                    throw new Error(String(result && result.message || "Kalenderabgleich fehlgeschlagen."));
+                }
+                if (result.skipped) {
+                    skipped++;
+                    continue;
+                }
+                const made = Number(result.created || 0);
+                const changed = Number(result.updated || 0);
+                created += made;
+                updated += changed;
+                if (made || changed) repairedSeries++;
+                logWrite_("INFO", "WARTUNG", "Kalenderstaffel abgeglichen", {
+                    titel:payload.titel,
+                    staffel:payload.staffelLabel,
+                    erstellt:made,
+                    aktualisiert:changed
+                });
+            } catch (errEntry) {
+                const detail = String(errEntry && errEntry.message || errEntry);
+                errors.push({ fileName:String(entry.fileName || ""), message:detail });
+                logWrite_("ERROR", "WARTUNG", "Kalenderstaffel konnte nicht abgeglichen werden", {
+                    fileName:String(entry.fileName || ""),
+                    fehler:detail
+                });
+            }
+        }
+
+        const ok = errors.length === 0;
+        const result = {
+            ok,
+            message:ok ? "Wartung abgeschlossen." : ("Wartung mit " + errors.length + " Fehler(n) abgeschlossen."),
+            geprueftDateien:checked,
+            geprueftStaffeln:eligible,
+            geaendertDateien:repairedSeries,
+            created,
+            updated,
+            skipped,
+            errors
+        };
+        maintenanceSetStatus_(ok ? "ende" : "fehler", result.message, null, checked, candidates.length);
+        logWrite_(ok ? "INFO" : "ERROR", "WARTUNG", "Desktop-Wartung abgeschlossen", result);
+        return result;
+    } catch (err) {
+        const message = "Wartung fehlgeschlagen: " + String(err && err.message || err);
+        maintenanceSetStatus_("fehler", message, null, checked, 0);
+        logWrite_("ERROR", "WARTUNG", "Desktop-Wartung fehlgeschlagen", { fehler:message });
+        return {
+            ok:false,
+            message,
+            geprueftDateien:checked,
+            geprueftStaffeln:eligible,
+            geaendertDateien:repairedSeries,
+            created,
+            updated,
+            skipped,
+            errors
+        };
+    } finally {
+        maintenanceRunning_ = false;
+    }
+}
+
 function googleCalendarUrl_(_calendarId) {
     return "https://calendar.google.com/calendar/u/0/r";
 }
@@ -1620,6 +1773,8 @@ function installIpc_() {
         });
         return result;
     });
+    ipcMain.handle("serkal:maintenance:status", () => maintenanceGetStatus_());
+    ipcMain.handle("serkal:maintenance:run", async () => maintenanceRun_());
     ipcMain.handle("serkal:calendar:createIcs", async (_event, payload) => {
         const result = calendarCreateIcs_(payload);
         if (result.ok) {
@@ -1745,6 +1900,28 @@ function installDesktopTmdbBridge_(hauptfenster) {
           }
           success(Object.assign({}, archiveRes, { calendarMode:calendarMode || 'none' }));
         } catch (e) { failure({message:(e && e.message) ? e.message : String(e)}); }
+      },
+      async apiWartungStatus() {
+        try {
+          if (!window.serkal || !window.serkal.maintenance) {
+            success({ok:false, phase:'fehler', text:'Desktop-Wartungsbrücke ist nicht geladen.'});
+            return;
+          }
+          success(await window.serkal.maintenance.status());
+        } catch (e) {
+          failure({message:(e && e.message) ? e.message : String(e)});
+        }
+      },
+      async apiStarteZukunftspruefung() {
+        try {
+          if (!window.serkal || !window.serkal.maintenance) {
+            success({ok:false, message:'Desktop-Wartungsbrücke ist nicht geladen.'});
+            return;
+          }
+          success(await window.serkal.maintenance.run());
+        } catch (e) {
+          failure({message:(e && e.message) ? e.message : String(e)});
+        }
       },
       async apiErzeugeIcsFuerAuswahl(payload) {
         try {
