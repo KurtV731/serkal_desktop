@@ -76,9 +76,13 @@ function serkalWindowTitle_() {
 }
 
 
+function defaultArchiveFolder_() {
+    return path.join(app.getPath("documents"), "SerKal", "Archiv");
+}
+
 const DEFAULT_SETTINGS = {
     setupDone: false,
-    archive: { folderPath: "G:\\Meine Ablage\\Serkal_Haupt\\SerKal_Archivdaten" },
+    archive: { folderPath: defaultArchiveFolder_() },
     calendar: { mode: "", googleCalendarId: "" }
 };
 
