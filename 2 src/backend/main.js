@@ -237,6 +237,23 @@ function archiveFolderPath_() {
     return String(readSettings_().archive.folderPath || "").trim();
 }
 
+function archiveEnsureFolder_(folder) {
+    const target = String(folder || "").trim();
+    if (!target) return false;
+    if (fs.existsSync(target)) return true;
+
+    // Nur den SerKal-Standardordner eines neuen Benutzers automatisch
+    // anlegen. Ein verschwundener, bewusst gewaehlter Fremdpfad bleibt
+    // weiterhin ein Fehler und wird nicht stillschweigend neu erzeugt.
+    if (path.resolve(target) !== path.resolve(defaultArchiveFolder_())) return false;
+
+    fs.mkdirSync(target, { recursive:true });
+    logWrite_("INFO", "ARCHIV", "Standard-Archivordner beim Erststart angelegt", {
+        folderPath:target
+    });
+    return fs.existsSync(target);
+}
+
 function archiveSafeTitle_(value) {
     return String(value || "")
         .replace(/[\\/:*?"<>|]/g, "")
@@ -427,7 +444,7 @@ function archiveLoad_() {
     const folder = archiveFolderPath_();
     if (!folder) return { ok:false, message:"Archivordner ist nicht eingerichtet.", daten:{entries:[],meta:{source:"no-folder"}}, count:0 };
     try {
-        if (!fs.existsSync(folder)) return { ok:false, message:"Archivordner nicht gefunden: " + folder, daten:{entries:[],meta:{source:"missing-folder"}}, count:0 };
+        if (!archiveEnsureFolder_(folder)) return { ok:false, message:"Archivordner nicht gefunden: " + folder, daten:{entries:[],meta:{source:"missing-folder"}}, count:0 };
         const entries = [];
         for (const fileName of fs.readdirSync(folder)) {
             const lower = fileName.toLowerCase();
@@ -462,7 +479,7 @@ function archiveInsert_(payload) {
         if (!seasonNumber || (!dates.length && !episodeCount)) return { ok:false, message:"Eintrag unvollständig (Staffel/Termine/Episoden fehlen)." };
         const folder = archiveFolderPath_();
         if (!folder) return { ok:false, message:"Archivordner ist nicht eingerichtet." };
-        if (!fs.existsSync(folder)) return { ok:false, message:"Archivordner nicht gefunden: " + folder };
+        if (!archiveEnsureFolder_(folder)) return { ok:false, message:"Archivordner nicht gefunden: " + folder };
         const fileName = archiveFileName_(title,year);
         const fullPath = path.join(folder,fileName);
         const label = "S" + String(seasonNumber).padStart(2,"0");
@@ -515,7 +532,7 @@ async function archiveDeleteSeries_(payload) {
         }
 
         const folder = archiveFolderPath_();
-        if (!folder || !fs.existsSync(folder)) {
+        if (!folder || !archiveEnsureFolder_(folder)) {
             return { ok:false, message:"Archivordner nicht gefunden: " + folder };
         }
 
@@ -613,7 +630,7 @@ function archiveSaveChanges_(dirtyMap) {
         if (!changes.length) return { ok:true, savedCount:0, daten:archiveLoad_().daten };
 
         const folder = archiveFolderPath_();
-        if (!folder || !fs.existsSync(folder)) return { ok:false, message:"Archivordner nicht gefunden: " + folder };
+        if (!folder || !archiveEnsureFolder_(folder)) return { ok:false, message:"Archivordner nicht gefunden: " + folder };
 
         let savedCount = 0;
         const byFile = new Map();
