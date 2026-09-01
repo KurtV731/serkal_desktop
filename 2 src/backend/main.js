@@ -1969,6 +1969,36 @@ function maintenanceDatesEqual_(left, right) {
     return a.length === b.length && a.every((value, index) => value === b[index]);
 }
 
+function maintenanceEntryDates_(entry) {
+    return Array.isArray(entry && entry.datesOriginal) && entry.datesOriginal.length
+        ? entry.datesOriginal.map(String)
+        : (Array.isArray(entry && entry.termindaten) ? entry.termindaten.map(String) : []);
+}
+
+function maintenanceSeasonIsComplete_(analysed) {
+    const count = Number(analysed && analysed.episodeCount || 0);
+    const dates = Array.isArray(analysed && analysed.episodeDates) ? analysed.episodeDates : [];
+    return count > 0 && dates.length === count &&
+        dates.every(value => /^\d{4}-\d{2}-\d{2}$/.test(String(value || "")));
+}
+
+// Originalregel aus SerKal 2.5:
+// unvollstaendige oder noch laufende letzte Archivstaffel verhindert eine
+// automatische Uebernahme der naechsten Staffel.
+function maintenanceArchiveLatestSeasonRunning_(entries, maxSeason) {
+    const today = new Date().toISOString().slice(0, 10);
+    for (const entry of Array.isArray(entries) ? entries : []) {
+        if (maintenanceSeasonNumber_(entry) !== Number(maxSeason || 0)) continue;
+        const episodeCount = Number(entry && (entry.episoden || entry.eps) || 0);
+        const dates = maintenanceEntryDates_(entry);
+        if (episodeCount && dates.length && dates.length < episodeCount) return true;
+        if (!dates.length) return true;
+        const last = String(dates[dates.length - 1] || "");
+        if (/^\d{4}-\d{2}-\d{2}$/.test(last) && last >= today) return true;
+    }
+    return false;
+}
+
 function maintenanceAnalyse_(groups, snapshot) {
     const findings = [];
 
@@ -1977,17 +2007,44 @@ function maintenanceAnalyse_(groups, snapshot) {
         if (!record || record.ok === false || !record.tv) continue;
 
         const tv = record.tv;
+        const title = String(tv.name || group.entries[0] && group.entries[0].titel || "");
         const maxArchiveSeason = group.entries.reduce((max, entry) =>
             Math.max(max, maintenanceSeasonNumber_(entry)), 0);
         const maxTmdbSeason = Number(tv.number_of_seasons || 0) || 0;
 
         if (maxTmdbSeason > maxArchiveSeason) {
+            const seasonRecord = record.seasons && record.seasons[String(maxTmdbSeason)];
+            const seasonData = seasonRecord && seasonRecord.ok && seasonRecord.data
+                ? seasonRecord.data : null;
+            const analysed = seasonData ? analyseSeason_(seasonData) : null;
+            const complete = maintenanceSeasonIsComplete_(analysed);
+            const previousRunning = maintenanceArchiveLatestSeasonRunning_(group.entries, maxArchiveSeason);
+            let type = "NEW_SEASON_ANNOUNCED";
+            let action = "observe";
+            let reason = "Staffel ist angekündigt, aber TMDB liefert noch keine vollständigen Episoden und Termine.";
+
+            if (complete && previousRunning) {
+                type = "NEW_SEASON_REVIEW";
+                action = "review";
+                reason = "Neue Staffel ist vollständig, aber die bisher letzte Archivstaffel wirkt noch laufend.";
+            } else if (complete) {
+                type = "NEW_SEASON_READY";
+                action = "apply";
+                reason = "Neue Staffel besitzt für jede Episode einen vollständigen TMDB-Termin.";
+            }
+
             findings.push({
-                type:"NEW_SEASON",
+                type,
+                action,
+                reason,
                 tmdbId:group.tmdbId,
-                title:String(tv.name || group.entries[0] && group.entries[0].titel || ""),
+                title,
+                fileName:String(group.entries[0] && group.entries[0].fileName || ""),
                 archiveSeason:maxArchiveSeason,
-                tmdbSeason:maxTmdbSeason
+                tmdbSeason:maxTmdbSeason,
+                episodeCount:Number(analysed && analysed.episodeCount || 0),
+                dateCount:Array.isArray(analysed && analysed.episodeDates) ? analysed.episodeDates.length : 0,
+                previousSeasonRunning:previousRunning
             });
         }
 
@@ -1997,30 +2054,52 @@ function maintenanceAnalyse_(groups, snapshot) {
             if (!season || season.ok === false || !season.data) continue;
 
             const analysed = analyseSeason_(season.data);
+            const seasonComplete = maintenanceSeasonIsComplete_(analysed);
+            const flags = Number(entry.manualFlags || 0);
             const archiveEpisodes = Number(entry && (entry.episoden || entry.eps) || 0);
+
             if (analysed.episodeCount && analysed.episodeCount !== archiveEpisodes) {
+                const manualProtected = Boolean(flags & SERKAL_MANUAL_EPISODES);
                 findings.push({
-                    type:"EPISODE_COUNT",
+                    type:manualProtected ? "EPISODE_COUNT_PROTECTED" : "EPISODE_COUNT_READY",
+                    action:manualProtected ? "protected" : (seasonComplete ? "apply" : "observe"),
+                    reason:manualProtected
+                        ? "Episodenzahl wurde manuell geschützt und bleibt unangetastet."
+                        : (seasonComplete
+                            ? "Vollständige TMDB-Staffel weicht bei der Episodenzahl ab."
+                            : "TMDB-Staffel ist noch unvollständig; keine Änderung."),
                     tmdbId:group.tmdbId,
+                    title,
                     fileName:String(entry.fileName || ""),
                     seasonNumber,
                     archiveValue:archiveEpisodes,
                     tmdbValue:analysed.episodeCount,
-                    manualProtected:Boolean(Number(entry.manualFlags || 0) & SERKAL_MANUAL_EPISODES)
+                    manualProtected,
+                    tmdbComplete:seasonComplete
                 });
             }
 
-            const archiveDates = Array.isArray(entry.datesOriginal) && entry.datesOriginal.length
-                ? entry.datesOriginal : (Array.isArray(entry.termindaten) ? entry.termindaten : []);
+            const archiveDates = maintenanceEntryDates_(entry);
             if (analysed.episodeDates.length && !maintenanceDatesEqual_(archiveDates, analysed.episodeDates)) {
+                const manualProtected = Boolean(flags & SERKAL_MANUAL_CALENDAR);
                 findings.push({
-                    type:"DATES",
+                    type:manualProtected ? "DATES_PROTECTED" : "DATES_READY",
+                    action:manualProtected ? "protected" : (seasonComplete ? "apply" : "observe"),
+                    reason:manualProtected
+                        ? "Kalendertermine wurden manuell geschützt und bleiben unangetastet."
+                        : (seasonComplete
+                            ? "Vollständige TMDB-Termine weichen vom Archiv ab."
+                            : "TMDB-Termine sind noch unvollständig; keine Änderung."),
                     tmdbId:group.tmdbId,
+                    title,
                     fileName:String(entry.fileName || ""),
                     seasonNumber,
                     archiveCount:archiveDates.length,
                     tmdbCount:analysed.episodeDates.length,
-                    manualProtected:Boolean(Number(entry.manualFlags || 0) & SERKAL_MANUAL_CALENDAR)
+                    archiveDates,
+                    tmdbDates:analysed.episodeDates.map(String),
+                    manualProtected,
+                    tmdbComplete:seasonComplete
                 });
             }
         }
@@ -2175,6 +2254,14 @@ async function maintenanceRun_() {
 
         maintenanceSetStatus_("auswertung", "TMDB-Prüfbestand wird mit dem Archiv verglichen.", null, groups.length, groups.length);
         const findings = maintenanceAnalyse_(groups, snapshot);
+        const decisionCounts = findings.reduce((counts, finding) => {
+            const action = String(finding && finding.action || "observe");
+            if (action === "apply") counts.ready++;
+            else if (action === "review") counts.review++;
+            else if (action === "protected") counts.protected++;
+            else counts.observe++;
+            return counts;
+        }, { ready:0, review:0, observe:0, protected:0 });
 
         for (const finding of findings) {
             logWrite_("INFO", "WARTUNG", "TMDB-Abweichung festgestellt", finding);
@@ -2203,6 +2290,10 @@ async function maintenanceRun_() {
             angekuendigtOhneDetails:counters.pendingSeasons,
             ohneTmdbId:grouped.withoutTmdbId.length,
             auffaellig:findings.length,
+            uebernehmbar:decisionCounts.ready,
+            rueckfragen:decisionCounts.review,
+            beobachten:decisionCounts.observe,
+            geschuetzt:decisionCounts.protected,
             geaendertDateien:0,
             created:0,
             updated:0,
