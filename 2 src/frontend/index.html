@@ -1911,8 +1911,8 @@
     <section class="skCalendarSetupBox" role="dialog" aria-modal="true" aria-labelledby="skCalendarSetupTitle">
       <h2 id="skCalendarSetupTitle">Kalender einrichten</h2>
       <p class="skCalendarSetupIntro">Wie soll SERKAL mit deinem Kalender umgehen? Die Auswahl wird lokal gespeichert.</p>
-      <label class="skCalendarChoice"><input type="radio" name="skCalendarMode" value="google"><strong>Google Kalender</strong> – meinen ausgewählten Kalender öffnen</label>
-      <div id="skCalendarGoogleData" class="skCalendarGoogleData"><label for="skCalendarGoogleId">Google Kalender-ID</label><input id="skCalendarGoogleId" type="text" placeholder="…@group.calendar.google.com"><div class="skCalendarHint">Für 0.0.5 wird die ID einmal eingetragen und lokal gespeichert. Automatisches Ermitteln über Google-Anmeldung/API kommt später.</div></div>
+      <label class="skCalendarChoice"><input type="radio" name="skCalendarMode" value="google"><strong>Google Kalender</strong> – Kalender „SerKal“ automatisch verwenden</label>
+      <div id="skCalendarGoogleData" class="skCalendarGoogleData"><div class="skCalendarHint">SerKal sucht den passenden Google-Kalender automatisch und legt ihn bei Bedarf an. Eine Kalender-ID muss nicht eingegeben werden.</div></div>
       <label class="skCalendarChoice"><input type="radio" name="skCalendarMode" value="ics"><strong>ICS-Datei / anderer Kalender</strong></label>
       <label class="skCalendarChoice"><input type="radio" name="skCalendarMode" value="none"><strong>Keinen Kalender verwenden</strong></label>
       <label class="skCalendarChoice"><input type="radio" name="skCalendarMode" value="auto"><strong>Keine Ahnung, was du von mir willst – mach, was du denkst. 😏</strong></label>
@@ -1934,7 +1934,6 @@
     document.getElementById('skCalendarSetupSave').addEventListener('click',async function(){
       var m=mode(),id=googleId?String(googleId.value||'').trim():'';
       if(!m){alert('Bitte eine Kalender-Option auswählen.');return}
-      if(m==='google'&&!id){alert('Bitte die Google Kalender-ID eintragen.');if(googleId)googleId.focus();return}
       try{await window.serkal.settings.save({setupDone:true,calendar:{mode:m,googleCalendarId:id}});hide()}catch(e){alert('Einstellungen konnten nicht gespeichert werden: '+String(e||''))}
     });
     document.addEventListener('DOMContentLoaded',async function(){var s=await getSettings();if(s&&s.setupDone!==true)show(s)});
