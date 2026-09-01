@@ -1399,6 +1399,32 @@ async function googleCalendarApi_(method, calendarId, eventId, event) {
     }
 }
 
+async function googleCalendarFindExactEvents_(calendarId, summary, dateIso) {
+    const base = "https://www.googleapis.com/calendar/v3/calendars/" +
+        encodeURIComponent(calendarId) + "/events";
+    const url = new URL(base);
+    url.searchParams.set("singleEvents", "true");
+    url.searchParams.set("showDeleted", "false");
+    url.searchParams.set("timeMin", dateIso + "T00:00:00Z");
+    url.searchParams.set("timeMax", calendarIcsNextDay_(dateIso) + "T00:00:00Z");
+    url.searchParams.set("maxResults", "250");
+
+    const result = await googleCalendarJsonRequest_("GET", url.toString());
+    if (!result.ok) {
+        const detail = result.data && result.data.error && result.data.error.message;
+        throw new Error(detail || ("Google-Termine konnten nicht geprüft werden (" + result.status + ")."));
+    }
+
+    const wantedSummary = String(summary || "").trim();
+    return (Array.isArray(result.data && result.data.items) ? result.data.items : [])
+        .filter(item => {
+            const itemSummary = String(item && item.summary || "").trim();
+            const itemDate = String(item && item.start && (item.start.date || item.start.dateTime) || "").slice(0, 10);
+            return itemSummary === wantedSummary && itemDate === dateIso && String(item && item.status || "") !== "cancelled";
+        })
+        .sort((a, b) => String(a && a.created || "").localeCompare(String(b && b.created || "")));
+}
+
 function googleCalendarEventId_(payload, block) {
     const identity = [
         Number(payload.tmdbId || payload.id || 0) || 0,
@@ -1509,6 +1535,7 @@ async function googleCalendarInsertSeason_(payload) {
         });
         let created = 0;
         let updated = 0;
+        let duplicatesRemoved = 0;
 
         for (const block of blocks) {
             logWrite_("TRACE", "KAL", "Google-Terminblock beginnt", {
@@ -1526,6 +1553,42 @@ async function googleCalendarInsertSeason_(payload) {
                 transparency:"transparent",
                 extendedProperties:{ private:{ serkal:"1", tmdbId:String(data.tmdbId || data.id || "") } }
             };
+
+            /*
+             * Wichtig: Alte SerKal-Versionen haben andere Google-Event-IDs
+             * verwendet. Deshalb vor einer Neuanlage fachlich nach dem
+             * exakten Titel am exakten Tag suchen.
+             */
+            const exactEvents = await googleCalendarFindExactEvents_(calendarId, summary, block.date);
+            if (exactEvents.length) {
+                const keep = exactEvents[0];
+                const keepId = String(keep && keep.id || "");
+                if (!keepId) throw new Error("Vorhandener Google-Termin besitzt keine Event-ID.");
+
+                const updateResult = await googleCalendarApi_("PUT", calendarId, keepId, eventBase);
+                if (!updateResult.ok) {
+                    const detail = updateResult.data && updateResult.data.error && updateResult.data.error.message;
+                    throw new Error(detail || ("Vorhandener Google-Termin konnte nicht aktualisiert werden (" + updateResult.status + ")."));
+                }
+                updated++;
+
+                for (const duplicate of exactEvents.slice(1)) {
+                    const duplicateId = String(duplicate && duplicate.id || "");
+                    if (!duplicateId || duplicateId === keepId) continue;
+                    const deleteResult = await googleCalendarApi_("DELETE", calendarId, duplicateId, null);
+                    if (!deleteResult.ok && deleteResult.status !== 404 && deleteResult.status !== 410) {
+                        const detail = deleteResult.data && deleteResult.data.error && deleteResult.data.error.message;
+                        throw new Error(detail || ("Doppeltermin konnte nicht entfernt werden (" + deleteResult.status + ")."));
+                    }
+                    duplicatesRemoved++;
+                    logWrite_("INFO", "WARTUNG", "Exakter Kalender-Doppeltermin entfernt", {
+                        titel:summary,
+                        datum:block.date,
+                        eventId:duplicateId.slice(0, 18) + "…"
+                    });
+                }
+                continue;
+            }
 
             let stored = false;
             for (const eventId of googleCalendarEventIdCandidates_(data, block)) {
@@ -1557,7 +1620,7 @@ async function googleCalendarInsertSeason_(payload) {
             }
         }
 
-        return { ok:true, mode:"google", created, updated, events:blocks.length, calendarId };
+        return { ok:true, mode:"google", created, updated, duplicatesRemoved, events:blocks.length, calendarId };
     } catch (err) {
         logWrite_("ERROR", "KAL", "Google-Kalendereintrag endgültig fehlgeschlagen", {
             fehler:String(err && err.message || err)
