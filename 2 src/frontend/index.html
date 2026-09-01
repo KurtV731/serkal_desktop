@@ -4906,8 +4906,11 @@ function runMaintenance_() {
         var progress = isSnapshot
           ? ('TMDB-Prüfung: ' + String(res.gepruefteSerien || 0) + ' Serien, ' +
              String(res.tmdbAnfragen || 0) + ' TMDB-Anfragen, ' +
-             String(res.ausCache || 0) + ' aus Cache, ' +
-             String(res.auffaellig || 0) + ' Auffälligkeiten. Archiv und Kalender unverändert.')
+             String(res.ausCache || 0) + ' aus Cache. Bewertung: ' +
+             String(res.uebernehmbar || 0) + ' übernehmbar, ' +
+             String(res.rueckfragen || 0) + ' Rückfrage, ' +
+             String(res.beobachten || 0) + ' beobachten, ' +
+             String(res.geschuetzt || 0) + ' geschützt. Archiv und Kalender unverändert.')
           : t('MAINT_PROGRESS', {
               files: String(res.geprueftDateien || 0),
               seasons: String(res.geprueftStaffeln || 0),
@@ -4922,6 +4925,10 @@ function runMaintenance_() {
             tmdbAnfragen: res && res.tmdbAnfragen || 0,
             ausCache: res && res.ausCache || 0,
             auffaellig: res && res.auffaellig || 0,
+            uebernehmbar: res && res.uebernehmbar || 0,
+            rueckfragen: res && res.rueckfragen || 0,
+            beobachten: res && res.beobachten || 0,
+            geschuetzt: res && res.geschuetzt || 0,
             geaendertDateien: res && res.geaendertDateien || 0,
             readOnly: !!(res && res.readOnly)
           });
