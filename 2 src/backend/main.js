@@ -2017,11 +2017,17 @@ function maintenanceAnalyse_(groups, snapshot) {
             const seasonData = seasonRecord && seasonRecord.ok && seasonRecord.data
                 ? seasonRecord.data : null;
             const analysed = seasonData ? analyseSeason_(seasonData) : null;
-            const complete = maintenanceSeasonIsComplete_(analysed);
+            const episodeCount = Number(analysed && analysed.episodeCount || 0);
+            // Schutz gegen vorläufige TMDB-Platzhalter:
+            // 1 Episode + 1 Termin ist formal vollständig, aber für eine neu
+            // angekündigte Staffel noch kein belastbarer Staffelbestand.
+            const complete = maintenanceSeasonIsComplete_(analysed) && episodeCount > 1;
             const previousRunning = maintenanceArchiveLatestSeasonRunning_(group.entries, maxArchiveSeason);
             let type = "NEW_SEASON_ANNOUNCED";
             let action = "observe";
-            let reason = "Staffel ist angekündigt, aber TMDB liefert noch keine vollständigen Episoden und Termine.";
+            let reason = episodeCount === 1
+                ? "Staffel besitzt bei TMDB bisher nur eine vorläufig erfasste Episode und bleibt unter Beobachtung."
+                : "Staffel ist angekündigt, aber TMDB liefert noch keine vollständigen Episoden und Termine.";
 
             if (complete && previousRunning) {
                 type = "NEW_SEASON_REVIEW";
