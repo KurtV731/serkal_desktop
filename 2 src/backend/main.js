@@ -1279,9 +1279,13 @@ async function googleResolveSerkalCalendar_() {
 
     if (matches.length) {
         const roleRank = { owner:4, writer:3, reader:2, freeBusyReader:1 };
-        matches.sort((a, b) =>
-            Number(roleRank[String(b && b.accessRole || "")] || 0) -
-            Number(roleRank[String(a && a.accessRole || "")] || 0));
+        const calendarRank = item => {
+            const role = Number(roleRank[String(item && item.accessRole || "")] || 0);
+            const visible = item && item.hidden === true ? 0 : 100;
+            const selectedInUi = item && item.selected === true ? 50 : 0;
+            return visible + selectedInUi + role;
+        };
+        matches.sort((a, b) => calendarRank(b) - calendarRank(a));
         const selected = matches[0];
         const calendarId = String(selected && selected.id || "").trim();
         if (!calendarId) throw new Error("Kalender SerKal wurde gefunden, besitzt aber keine Google-ID.");
@@ -1289,7 +1293,10 @@ async function googleResolveSerkalCalendar_() {
         logWrite_("INFO", "GOOGLE", "Kalender SerKal automatisch gefunden", {
             kalender:googleCalendarIdForLog_(calendarId),
             zugriffsrolle:String(selected.accessRole || ""),
-            treffer:matches.length
+            sichtbar:selected.hidden !== true,
+            inGoogleAusgewaehlt:selected.selected === true,
+            treffer:matches.length,
+            davonAusgeblendet:matches.filter(item => item && item.hidden === true).length
         });
 
         const settings = readSettings_();
