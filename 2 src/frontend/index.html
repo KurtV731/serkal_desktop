@@ -4111,12 +4111,40 @@ function normalizeNoteControlWord_(word) {
     .replace(/_/g, '')
     .replace(/-/g, '');
 
-  if (compact === 'terminede' || compact === 'terminede') return 'Termine DE';
-  if (compact === 'terminede') return 'Termine DE';
-  if (compact === 'termine') return 'Termine DE';
+  if (compact === 'terminede' || compact === 'termine') return 'Termine DE';
   if (compact === 'offsetde' || compact === 'offset') return 'OffsetDE';
   if (compact === 'terminoffset' || compact === 'deoffset' || compact === 'offsetdeutsch') return 'OffsetDE';
   return '';
+}
+
+function parseNoteControlLine_(line) {
+  var raw = String(line || '');
+  var leadMatch = raw.match(/^(\s*)/);
+  var lead = leadMatch ? leadMatch[1] : '';
+  var body = raw.trim();
+  if (!body) return { recognized:false, canonical:raw };
+
+  var offset = body.match(/^(?:offset(?:\s*de)?|termin\s*offset|de\s*offset|offset\s*deutsch)\s*:?\s*([+-]?\d+)\s*d?\s*$/i);
+  if (offset) {
+    return {
+      recognized:true,
+      type:'OffsetDE',
+      value:parseInt(offset[1], 10),
+      canonical:lead + 'OffsetDE: ' + String(parseInt(offset[1], 10)) + 'D'
+    };
+  }
+
+  var dates = body.match(/^termine(?:\s*de)?\s*:\s*(.+)$/i);
+  if (dates) {
+    return {
+      recognized:true,
+      type:'TermineDE',
+      value:String(dates[1] || '').trim(),
+      canonical:lead + 'Termine DE: ' + String(dates[1] || '').trim()
+    };
+  }
+
+  return { recognized:false, canonical:raw };
 }
 
 /**
@@ -4140,14 +4168,8 @@ function canonicalizeNoteText_(text) {
   var src = String(text || '');
   if (!src) return '';
   return src.split(/\r?\n/).map(function(line) {
-    var m = String(line).match(/^(\s*)([^:\n]+)\s*:\s*(.*)$/);
-    if (!m) return line;
-    var lead = m[1] || '';
-    var word = String(m[2] || '').trim();
-    var rest = String(m[3] || '');
-    var normalized = normalizeNoteControlWord_(word);
-    if (!normalized) return line;
-    return lead + normalized + ': ' + rest.trim();
+    var parsed = parseNoteControlLine_(line);
+    return parsed.recognized ? parsed.canonical : line;
   }).join('\n');
 }
 
@@ -4173,29 +4195,25 @@ function validateNoteText_(text) {
   var problems = [];
   var canonical = canonicalizeNoteText_(src);
 
-  canonical.split(/\r?\n/).forEach(function(line, idx) {
+  src.split(/\r?\n/).forEach(function(line, idx) {
     var s = String(line || '').trim();
     if (!s) return;
-    var m = s.match(/^([^:\n]+)\s*:\s*(.*)$/);
-    if (!m) return;
+    if (parseNoteControlLine_(line).recognized) return;
 
-    var word = String(m[1] || '').trim();
-    var normalized = normalizeNoteControlWord_(word);
-    if (normalized) return;
-
-    var compact = word.toLowerCase().replace(/\s+/g, '');
-    if (/(termin|offset|de)/.test(compact)) {
+    /* Freier Romantext bleibt erlaubt. Nur offensichtlich als
+       Steuerzeile begonnene, aber fehlerhafte Eingaben werden beanstandet. */
+    if (/^offset/i.test(s) || (/^termine?\s*(?:de)?\s*:/i.test(s))) {
       problems.push({
-        line: idx + 1,
-        word: word
+        line:idx + 1,
+        word:s
       });
     }
   });
 
   return {
-    ok: problems.length === 0,
-    canonical: canonical,
-    problems: problems
+    ok:problems.length === 0,
+    canonical:canonical,
+    problems:problems
   };
 }
 
@@ -6397,14 +6415,37 @@ function fillDetailsFromArchiv_(it) {
     if (dirtyPatch && Object.prototype.hasOwnProperty.call(dirtyPatch, 'note')) {
       ta.style.boxShadow = '0 0 0 2px rgba(231,111,81,0.22) inset';
     }
+    var noteHelp = document.createElement('div');
+    noteHelp.id = 'detailsNoteSyntaxHelp';
+    noteHelp.style.display = 'none';
+    noteHelp.style.marginTop = '8px';
+    noteHelp.style.padding = '9px 11px';
+    noteHelp.style.borderRadius = '9px';
+    noteHelp.style.background = 'rgba(99,102,241,0.08)';
+    noteHelp.style.border = '1px solid rgba(99,102,241,0.22)';
+    noteHelp.style.fontSize = '0.92em';
+    noteHelp.style.lineHeight = '1.45';
+    noteHelp.innerHTML =
+      '<b>Auswertbare Notizzeilen:</b><br>' +
+      '<code>Offset 1D</code> – alle deutschen Termine 1 Tag später<br>' +
+      '<code>Offset +2D</code> – alle deutschen Termine 2 Tage später<br>' +
+      '<code>Offset -2D</code> – alle deutschen Termine 2 Tage früher<br>' +
+      '<code>Termine DE: 14.09., 21.09., 28.09.</code> – einzelne Termine festlegen<br>' +
+      '<span style="opacity:.78">Groß-/Kleinschreibung ist egal. Alle anderen Texte bleiben freie Notizen.</span>';
+
+    ta.addEventListener('focus', function() {
+      noteHelp.style.display = 'block';
+    });
     ta.addEventListener('input', function() {
       setDirtyForEntry_(it, { note: String(ta.value || '') });
       ta.style.boxShadow = '0 0 0 2px rgba(231,111,81,0.22) inset';
     });
     ta.addEventListener('blur', function() {
       applyNoteAutofill_(ta, it);
+      noteHelp.style.display = 'none';
     });
     note.appendChild(ta);
+    note.appendChild(noteHelp);
   }
 
   try {
