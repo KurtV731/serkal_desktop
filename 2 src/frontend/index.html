@@ -4902,14 +4902,33 @@ function runMaintenance_() {
           uiStatus(msgBad, { spinner:false, kind:'error', sound:true });
           return;
         }
-        var progress = t('MAINT_PROGRESS', {
-          files: String(res.geprueftDateien || 0),
-          seasons: String(res.geprueftStaffeln || 0),
-          changed: String(res.geaendertDateien || 0)
-        });
-        uiStatus(t('MAINT_DONE'), { spinner:false, kind:'info' });
-        try { uiLogAction_('Wartung abgeschlossen', { ok: true, geprueftDateien: res && res.geprueftDateien || 0, geaendertDateien: res && res.geaendertDateien || 0 }); } catch (_eAction) {}
-        try { loadArchiv(); } catch(_eLoad) {}
+        var isSnapshot = !!(res && res.readOnly && res.phase === 'tmdb_snapshot');
+        var progress = isSnapshot
+          ? ('TMDB-Prüfung: ' + String(res.gepruefteSerien || 0) + ' Serien, ' +
+             String(res.tmdbAnfragen || 0) + ' TMDB-Anfragen, ' +
+             String(res.ausCache || 0) + ' aus Cache, ' +
+             String(res.auffaellig || 0) + ' Auffälligkeiten. Archiv und Kalender unverändert.')
+          : t('MAINT_PROGRESS', {
+              files: String(res.geprueftDateien || 0),
+              seasons: String(res.geprueftStaffeln || 0),
+              changed: String(res.geaendertDateien || 0)
+            });
+        uiStatus(progress || t('MAINT_DONE'), { spinner:false, kind:'info' });
+        try {
+          uiLogAction_('Wartung abgeschlossen', {
+            ok: true,
+            geprueftDateien: res && res.geprueftDateien || 0,
+            gepruefteSerien: res && res.gepruefteSerien || 0,
+            tmdbAnfragen: res && res.tmdbAnfragen || 0,
+            ausCache: res && res.ausCache || 0,
+            auffaellig: res && res.auffaellig || 0,
+            geaendertDateien: res && res.geaendertDateien || 0,
+            readOnly: !!(res && res.readOnly)
+          });
+        } catch (_eAction) {}
+        if (!isSnapshot) {
+          try { loadArchiv(); } catch(_eLoad) {}
+        }
       })
       .withFailureHandler(function(err){
         stopMaintenanceStatusPolling_();
