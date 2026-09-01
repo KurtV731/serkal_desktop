@@ -452,10 +452,8 @@ async function archiveDeleteSeries_(payload) {
         }
 
         if (calendarMode === "google") {
-            const calendarId = String(settings.calendar.googleCalendarId || "").trim();
-            if (!calendarId) {
-                return { ok:false, message:"Google-Kalender-ID fehlt. Archivdatei wurde nicht gelöscht." };
-            }
+            const resolvedCalendar = await googleResolveSerkalCalendar_();
+            const calendarId = String(resolvedCalendar.id || "").trim();
 
             for (const entry of entries) {
                 const seasonNumber = Number(String(entry.staffelLabel || "").replace(/\D/g, ""));
@@ -1034,7 +1032,14 @@ function calendarCreateIcs_(payload) {
 }
 
 
-const GOOGLE_CALENDAR_SCOPE = "https://www.googleapis.com/auth/calendar.events";
+/* Originalverhalten aus modul5-kalender.gs benötigt:
+   Kalender "SerKal" suchen, bei Bedarf anlegen und danach Events verwalten. */
+const GOOGLE_CALENDAR_SCOPE = "https://www.googleapis.com/auth/calendar";
+
+function googleOauthTokenHasRequiredScope_(token) {
+    const scopes = String(token && token.scope || "").split(/\s+/).filter(Boolean);
+    return scopes.includes(GOOGLE_CALENDAR_SCOPE);
+}
 
 function googleOauthTokenPath_() {
     return path.join(app.getPath("userData"), "google_calendar_token.json");
@@ -1197,6 +1202,18 @@ function googleOauthBrowserLogin_(cfg) {
 async function googleOauthAccessToken_() {
     const cfg = googleOauthClientConfig_();
     let token = googleOauthReadToken_();
+
+    /* Ein alter 0.0.5-Token besitzt nur calendar.events.
+       Damit kann Google zwar Termine bearbeiten, aber SerKal kann seinen
+       Zielkalender nicht wie das Original selbst suchen oder anlegen.
+       In diesem Fall einmalig eine neue Zustimmung anfordern. */
+    if (token && !googleOauthTokenHasRequiredScope_(token)) {
+        logWrite_("INFO", "GOOGLE",
+            "Vorhandene Google-Anmeldung besitzt noch nicht die Berechtigung zur automatischen Kalenderwahl. Neuanmeldung wird geöffnet.",
+            { vorhandeneScopes:String(token.scope || "") });
+        token = null;
+    }
+
     if (token && token.access_token && Number(token.expiry_date || 0) > Date.now() + 60000) {
         return String(token.access_token);
     }
@@ -1210,6 +1227,111 @@ async function googleOauthAccessToken_() {
     }
     token = await googleOauthBrowserLogin_(cfg);
     return String(token.access_token);
+}
+
+async function googleCalendarJsonRequest_(method, url, body) {
+    const accessToken = await googleOauthAccessToken_();
+    const response = await fetch(url, {
+        method,
+        headers:{
+            authorization:"Bearer " + accessToken,
+            "content-type":"application/json"
+        },
+        body:body === undefined ? undefined : JSON.stringify(body)
+    });
+    const data = await response.json().catch(() => null);
+    return { ok:response.ok, status:response.status, data };
+}
+
+/* Desktop-Entsprechung zu holeSerkalKalender_() aus modul5-kalender.gs.
+   Der sichtbare Kalendername ist die fachliche Wahrheit; die technische
+   Google-ID wird automatisch ermittelt und nur lokal zwischengespeichert. */
+async function googleResolveSerkalCalendar_() {
+    logWrite_("TRACE", "GOOGLE", "Automatische Suche nach Kalender SerKal gestartet", {});
+
+    let pageToken = "";
+    const matches = [];
+    do {
+        const listUrl = new URL("https://www.googleapis.com/calendar/v3/users/me/calendarList");
+        listUrl.searchParams.set("maxResults", "250");
+        listUrl.searchParams.set("showDeleted", "false");
+        listUrl.searchParams.set("showHidden", "true");
+        if (pageToken) listUrl.searchParams.set("pageToken", pageToken);
+
+        const listResult = await googleCalendarJsonRequest_("GET", listUrl.toString());
+        if (!listResult.ok) {
+            const detail = listResult.data && listResult.data.error && listResult.data.error.message;
+            logWrite_("ERROR", "GOOGLE", "Google-Kalenderliste konnte nicht gelesen werden", {
+                httpStatus:listResult.status,
+                googleMessage:String(detail || "")
+            });
+            throw new Error(detail || ("Google-Kalenderliste antwortete mit Fehler " + listResult.status + "."));
+        }
+
+        const items = Array.isArray(listResult.data && listResult.data.items) ?
+            listResult.data.items : [];
+        for (const item of items) {
+            const visibleName = String(item && (item.summaryOverride || item.summary) || "").trim();
+            if (visibleName.toLocaleLowerCase("de-DE") === "serkal") matches.push(item);
+        }
+        pageToken = String(listResult.data && listResult.data.nextPageToken || "");
+    } while (pageToken);
+
+    if (matches.length) {
+        const roleRank = { owner:4, writer:3, reader:2, freeBusyReader:1 };
+        matches.sort((a, b) =>
+            Number(roleRank[String(b && b.accessRole || "")] || 0) -
+            Number(roleRank[String(a && a.accessRole || "")] || 0));
+        const selected = matches[0];
+        const calendarId = String(selected && selected.id || "").trim();
+        if (!calendarId) throw new Error("Kalender SerKal wurde gefunden, besitzt aber keine Google-ID.");
+
+        logWrite_("INFO", "GOOGLE", "Kalender SerKal automatisch gefunden", {
+            kalender:googleCalendarIdForLog_(calendarId),
+            zugriffsrolle:String(selected.accessRole || ""),
+            treffer:matches.length
+        });
+
+        const settings = readSettings_();
+        if (String(settings.calendar.googleCalendarId || "") !== calendarId) {
+            settings.calendar.googleCalendarId = calendarId;
+            writeSettings_(settings);
+            logWrite_("INFO", "GOOGLE", "Ermittelte Kalender-ID lokal gespeichert", {
+                kalender:googleCalendarIdForLog_(calendarId)
+            });
+        }
+        return { id:calendarId, created:false, matches:matches.length };
+    }
+
+    logWrite_("INFO", "GOOGLE", "Kalender SerKal nicht vorhanden; Neuanlage beginnt", {});
+    const createResult = await googleCalendarJsonRequest_(
+        "POST",
+        "https://www.googleapis.com/calendar/v3/calendars",
+        {
+            summary:"SerKal",
+            description:"SerKal – Serienkalender",
+            timeZone:Intl.DateTimeFormat().resolvedOptions().timeZone || "Europe/Berlin"
+        }
+    );
+    if (!createResult.ok) {
+        const detail = createResult.data && createResult.data.error && createResult.data.error.message;
+        logWrite_("ERROR", "GOOGLE", "Kalender SerKal konnte nicht angelegt werden", {
+            httpStatus:createResult.status,
+            googleMessage:String(detail || "")
+        });
+        throw new Error(detail || ("Google konnte den Kalender SerKal nicht anlegen (Fehler " + createResult.status + ")."));
+    }
+
+    const calendarId = String(createResult.data && createResult.data.id || "").trim();
+    if (!calendarId) throw new Error("Google hat den Kalender SerKal ohne Kalender-ID angelegt.");
+
+    const settings = readSettings_();
+    settings.calendar.googleCalendarId = calendarId;
+    writeSettings_(settings);
+    logWrite_("INFO", "GOOGLE", "Kalender SerKal wurde angelegt und lokal gespeichert", {
+        kalender:googleCalendarIdForLog_(calendarId)
+    });
+    return { id:calendarId, created:true, matches:0 };
 }
 
 function googleCalendarIdForLog_(calendarId) {
@@ -1357,15 +1479,14 @@ async function googleCalendarInsertSeason_(payload) {
         }
 
         const settings = readSettings_();
-        const calendarId = String(settings.calendar.googleCalendarId || "").trim();
-        logWrite_("TRACE", "KAL", "Google-Ziel vor Eintrag geprüft", {
+        logWrite_("TRACE", "KAL", "Google-Ziel vor Eintrag wird automatisch ermittelt", {
             kalenderModus:String(settings && settings.calendar && settings.calendar.mode || ""),
-            kalender:googleCalendarIdForLog_(calendarId),
-            kalenderIdVorhanden:Boolean(calendarId),
+            bisherGespeichert:googleCalendarIdForLog_(settings && settings.calendar && settings.calendar.googleCalendarId),
             letzterTermin:lastIso,
             aktuellesJahr:currentYear
         });
-        if (!calendarId) return { ok:false, message:"Google-Kalender-ID fehlt.", reason:"calendar_missing" };
+        const resolvedCalendar = await googleResolveSerkalCalendar_();
+        const calendarId = String(resolvedCalendar.id || "").trim();
 
         const seasonLabel = "S" + calendarPad2_(seasonNumber);
         const blocks = calendarBlocks_(dates);
