@@ -2075,8 +2075,23 @@ async function maintenanceFetchGroup_(group, cache, snapshot, counters) {
                 status:Number(seasonResult && seasonResult.status || 0),
                 message:String(seasonResult && seasonResult.message || "TMDB-Staffeldaten konnten nicht geladen werden.")
             };
-            seasons[String(seasonNumber)] = { ok:false, error };
-            counters.errors.push(error);
+            const isAnnouncedWithoutDetails = Number(error.status || 0) === 404 &&
+                seasonNumber > maxArchiveSeason;
+            seasons[String(seasonNumber)] = {
+                ok:false,
+                pending:isAnnouncedWithoutDetails,
+                error
+            };
+            if (isAnnouncedWithoutDetails) {
+                counters.pendingSeasons++;
+                logWrite_("INFO", "WARTUNG", "Neue Staffel angekündigt, Detaildaten bei TMDB noch nicht verfügbar", {
+                    tmdbId:group.tmdbId,
+                    staffel:"S" + String(seasonNumber).padStart(2, "0"),
+                    fileName:error.fileName
+                });
+            } else {
+                counters.errors.push(error);
+            }
         }
     }
 
@@ -2130,6 +2145,7 @@ async function maintenanceRun_() {
         requests:0,
         cacheHits:0,
         networkSeries:0,
+        pendingSeasons:0,
         errors:[]
     };
 
@@ -2184,6 +2200,7 @@ async function maintenanceRun_() {
             tmdbAnfragen:counters.requests,
             ausCache:counters.cacheHits,
             neuVonTmdb:counters.networkSeries,
+            angekuendigtOhneDetails:counters.pendingSeasons,
             ohneTmdbId:grouped.withoutTmdbId.length,
             auffaellig:findings.length,
             geaendertDateien:0,
