@@ -342,6 +342,26 @@ function archiveParseNoteRules_(noteText, startOriginal, originalDates) {
     return result;
 }
 
+const SERKAL_MANUAL_TITLE = 1;
+const SERKAL_MANUAL_DESC_DE = 2;
+const SERKAL_MANUAL_DESC_EN = 4;
+const SERKAL_MANUAL_START = 8;
+const SERKAL_MANUAL_DATES = 16;
+const SERKAL_MANUAL_EPISODES = 32;
+const SERKAL_MANUAL_POSTER = 64;
+const SERKAL_MANUAL_NOTES = 128;
+const SERKAL_MANUAL_CALENDAR = SERKAL_MANUAL_START | SERKAL_MANUAL_DATES;
+
+function archiveManualFlags_(line, noteText, startOriginal, originalDates) {
+    let flags = Number(archiveField_(line, "manualFlags") || 0) || 0;
+    const noteRule = archiveParseNoteRules_(noteText, startOriginal, originalDates);
+    if (noteRule.rule) {
+        flags |= SERKAL_MANUAL_NOTES;
+        flags |= SERKAL_MANUAL_CALENDAR;
+    }
+    return flags;
+}
+
 function archiveStatus_(dates, seen) {
     if (Number(seen || 0) === 1) return 4;
     const list = Array.isArray(dates) ? dates.filter(Boolean) : [];
@@ -370,6 +390,8 @@ function archiveEntryFromLine_(fileName, stats, line) {
     const datesDE = archiveExpandDates_(archiveField_(line,"datesDE").split(",").filter(Boolean),startDE);
     const activeDates = datesDE.length ? datesDE : (datesOriginal.length ? datesOriginal : (startDE ? [startDE] : (startOriginal ? [startOriginal] : [])));
     const seen = Number(archiveField_(line,"seen") || archiveField_(line,"buttonPressed") || 0) || 0;
+    const noteText = archiveDecode_(archiveField_(line,"note"));
+    const manualFlags = archiveManualFlags_(line, noteText, startOriginal, datesOriginal);
     const status = archiveStatus_(activeDates,seen);
     const updated = stats && stats.mtime ? stats.mtime : new Date(0);
     return {
@@ -382,7 +404,16 @@ function archiveEntryFromLine_(fileName, stats, line) {
         termindaten:activeDates, dates:activeDates, datesOriginal, datesDE, activeDates, termCount:activeDates.length,
         descDE:archiveDecode_(archiveField_(line,"descDE") || archiveField_(line,"ov_de")),
         descEN:archiveDecode_(archiveField_(line,"descEN") || archiveField_(line,"ov_en")),
-        note:archiveDecode_(archiveField_(line,"note")), flags:Number(archiveField_(line,"flags") || 0) || 0,
+        note:noteText, flags:Number(archiveField_(line,"flags") || 0) || 0,
+        manualFlags,
+        manualTitle:Boolean(manualFlags & SERKAL_MANUAL_TITLE),
+        manualDescDE:Boolean(manualFlags & SERKAL_MANUAL_DESC_DE),
+        manualDescEN:Boolean(manualFlags & SERKAL_MANUAL_DESC_EN),
+        manualStart:Boolean(manualFlags & SERKAL_MANUAL_START),
+        manualDates:Boolean(manualFlags & SERKAL_MANUAL_DATES),
+        manualEpisodes:Boolean(manualFlags & SERKAL_MANUAL_EPISODES),
+        manualPoster:Boolean(manualFlags & SERKAL_MANUAL_POSTER),
+        manualNotes:Boolean(manualFlags & SERKAL_MANUAL_NOTES),
         buttonPressed:seen, seen, status, statusText:archiveStatusText_(status), raw:String(line || ""),
         updated:updated.toISOString(), updatedMs:updated.getTime(), updatedText:updated.toLocaleString("de-DE")
     };
@@ -613,7 +644,10 @@ function archiveSaveChanges_(dirtyMap) {
                         startOriginal
                     );
                     const noteRule = archiveParseNoteRules_(noteText, startOriginal, datesOriginal);
+                    let manualFlags = Number(archiveField_(line, "manualFlags") || 0) || 0;
+                    manualFlags |= SERKAL_MANUAL_NOTES;
                     if (noteRule.rule) {
+                        manualFlags |= SERKAL_MANUAL_CALENDAR;
                         line = archiveSetField_(line, "datesDE", archiveCompactDates_(noteRule.datesDE).join(","));
                         line = archiveSetField_(line, "startDE", noteRule.startDE);
                         if (noteRule.rule === "OffsetDE") {
@@ -621,6 +655,7 @@ function archiveSaveChanges_(dirtyMap) {
                         } else {
                             line = archiveSetField_(line, "offsetDE", "");
                         }
+                        line = archiveSetField_(line, "manualFlags", String(manualFlags));
                         logWrite_("INFO", "NOTES", "Notiz-Steuerregel ausgewertet", {
                             fileName,
                             staffelLabel:patch.staffelLabel,
@@ -628,6 +663,8 @@ function archiveSaveChanges_(dirtyMap) {
                             offsetDE:noteRule.offsetDE,
                             termineDE:noteRule.datesDE.length
                         });
+                    } else {
+                        line = archiveSetField_(line, "manualFlags", String(manualFlags));
                     }
                 }
                 if (line !== String(lines[lineIndex] || "").trim()) {
@@ -1784,6 +1821,16 @@ async function maintenanceRun_() {
             checked++;
             eligible++;
             maintenanceSetStatus_("pruefe", "Kalender wird abgeglichen.", entry, index + 1, candidates.length);
+
+            if ((Number(entry && entry.manualFlags || 0) & SERKAL_MANUAL_CALENDAR) !== 0) {
+                skipped++;
+                logWrite_("INFO", "WARTUNG", "Kalenderabgleich wegen manueller Änderung geschützt", {
+                    fileName:String(entry && entry.fileName || ""),
+                    staffel:String(entry && entry.staffelLabel || ""),
+                    manualFlags:Number(entry && entry.manualFlags || 0)
+                });
+                continue;
+            }
 
             const payload = {
                 titel:String(entry.titel || entry.title || ""),
