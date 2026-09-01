@@ -292,6 +292,56 @@ function archiveExpandDates_(tokens, startIso) {
     return out;
 }
 
+function archiveShiftDates_(dates, offsetDays) {
+    const offset = Number(offsetDays);
+    if (!Number.isFinite(offset)) return [];
+    return (Array.isArray(dates) ? dates : []).map(value => {
+        const match = String(value || "").match(/^(\d{4})-(\d{2})-(\d{2})$/);
+        if (!match) return "";
+        const date = new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3])));
+        date.setUTCDate(date.getUTCDate() + offset);
+        return date.toISOString().slice(0, 10);
+    }).filter(Boolean);
+}
+
+function archiveParseNoteRules_(noteText, startOriginal, originalDates) {
+    const result = {
+        rule:"",
+        offsetDE:null,
+        termineDECompact:[],
+        datesDE:[],
+        startDE:""
+    };
+    const lines = String(noteText || "").split(/\r?\n/);
+
+    for (const rawLine of lines) {
+        const line = String(rawLine || "").trim();
+        if (!line) continue;
+
+        const offsetMatch = line.match(/^(?:offset(?:\s*de)?|termin\s*offset|de\s*offset|offset\s*deutsch)\s*:?\s*([+-]?\d+)\s*d?\s*$/i);
+        if (offsetMatch) {
+            result.offsetDE = Number(offsetMatch[1]);
+            continue;
+        }
+
+        const datesMatch = line.match(/^termine(?:\s*de)?\s*:\s*(.+)$/i);
+        if (datesMatch) {
+            result.termineDECompact = String(datesMatch[1] || "")
+                .split(",").map(value => String(value || "").trim()).filter(Boolean);
+        }
+    }
+
+    if (result.termineDECompact.length) {
+        result.datesDE = archiveExpandDates_(result.termineDECompact, startOriginal || "");
+        result.rule = "TermineDE";
+    } else if (result.offsetDE !== null && Array.isArray(originalDates) && originalDates.length) {
+        result.datesDE = archiveShiftDates_(originalDates, result.offsetDE);
+        result.rule = "OffsetDE";
+    }
+    result.startDE = result.datesDE[0] || "";
+    return result;
+}
+
 function archiveStatus_(dates, seen) {
     if (Number(seen || 0) === 1) return 4;
     const list = Array.isArray(dates) ? dates.filter(Boolean) : [];
@@ -550,7 +600,35 @@ function archiveSaveChanges_(dirtyMap) {
                     line = archiveSetField_(line, "seen", Number(patch.seen) === 1 ? "1" : "0");
                 }
                 if (Object.prototype.hasOwnProperty.call(patch, "note")) {
-                    line = archiveSetField_(line, "note", archiveEncode_(patch.note));
+                    const noteText = String(patch.note || "");
+                    line = archiveSetField_(line, "note", archiveEncode_(noteText));
+
+                    /*
+                     * Nur ausdrücklich erkannte Steuerzeilen werden fachlich
+                     * ausgewertet. Beliebiger übriger Notiztext bleibt frei.
+                     */
+                    const startOriginal = archiveField_(line, "startOriginal") || archiveField_(line, "start");
+                    const datesOriginal = archiveExpandDates_(
+                        archiveField_(line, "dates").split(",").filter(Boolean),
+                        startOriginal
+                    );
+                    const noteRule = archiveParseNoteRules_(noteText, startOriginal, datesOriginal);
+                    if (noteRule.rule) {
+                        line = archiveSetField_(line, "datesDE", archiveCompactDates_(noteRule.datesDE).join(","));
+                        line = archiveSetField_(line, "startDE", noteRule.startDE);
+                        if (noteRule.rule === "OffsetDE") {
+                            line = archiveSetField_(line, "offsetDE", String(noteRule.offsetDE));
+                        } else {
+                            line = archiveSetField_(line, "offsetDE", "");
+                        }
+                        logWrite_("INFO", "NOTES", "Notiz-Steuerregel ausgewertet", {
+                            fileName,
+                            staffelLabel:patch.staffelLabel,
+                            regel:noteRule.rule,
+                            offsetDE:noteRule.offsetDE,
+                            termineDE:noteRule.datesDE.length
+                        });
+                    }
                 }
                 if (line !== String(lines[lineIndex] || "").trim()) {
                     lines[lineIndex] = line;
