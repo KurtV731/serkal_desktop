@@ -466,6 +466,11 @@ function archiveInsert_(payload) {
         const oldLines = oldText.split(/\r?\n/).map(x=>String(x||"").trim()).filter(Boolean);
         const oldLine = oldLines.find(x=>new RegExp("^"+label+"(?:\\b|;|\\|)","i").test(x)) || "";
         let flags = Number(archiveField_(oldLine,"flags") || 0) || 0;
+        const manualFlags = Number(archiveField_(oldLine,"manualFlags") || 0) || 0;
+        const oldNote = archiveField_(oldLine,"note");
+        const oldStartDE = archiveField_(oldLine,"startDE");
+        const oldDatesDE = archiveField_(oldLine,"datesDE");
+        const oldOffsetDE = archiveField_(oldLine,"offsetDE");
         const descDE = String(data.descDE || "").trim();
         const descEN = String(data.descEN || "").trim();
         if (descDE && descEN) flags |= 32;
@@ -477,7 +482,12 @@ function archiveInsert_(payload) {
         if (dates.length) parts.push("dates="+archiveCompactDates_(dates).join(","));
         if (descDE) parts.push("descDE="+archiveEncode_(descDE));
         if (descEN) parts.push("descEN="+archiveEncode_(descEN));
+        if (oldStartDE) parts.push("startDE="+oldStartDE);
+        if (oldDatesDE) parts.push("datesDE="+oldDatesDE);
+        if (oldOffsetDE !== "") parts.push("offsetDE="+oldOffsetDE);
+        if (oldNote) parts.push("note="+oldNote);
         parts.push("flags="+flags);
+        if (manualFlags) parts.push("manualFlags="+manualFlags);
         const newLine = parts.join("; ");
         const kept = oldLines.filter(x=>!new RegExp("^"+label+"(?:\\b|;|\\|)","i").test(x));
         kept.push(newLine);
