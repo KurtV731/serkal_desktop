@@ -3,7 +3,7 @@
   "productName": "SerKal Desktop",
   "version": "0.0.5",
   "description": "SERKAL Desktop – lokales Archiv",
-  "main": "2 src/backend/main.js",
+  "main": "2 src/backend/installer-main.js",
   "scripts": {
     "start": "electron-forge start",
     "package": "electron-forge package",
@@ -20,7 +20,6 @@
     "@electron-forge/maker-zip": "^7.11.2",
     "@electron-forge/plugin-auto-unpack-natives": "^7.11.2",
     "@electron-forge/plugin-fuses": "^7.11.2",
-    "@electron/fuses": "^1.8.0",
     "electron": "^43.2.0"
   },
   "dependencies": {
