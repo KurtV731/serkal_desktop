@@ -1864,25 +1864,274 @@ function maintenanceGetStatus_() {
 }
 
 /*
- * Desktop-Port des alten Modul-10-Grundgedankens:
- * Das lokale Archiv ist die Quelle. Für alle Staffeln mit Terminen im
- * aktuellen Jahr oder später wird der sichtbare SerKal-Kalender
- * idempotent abgeglichen. Die vorhandenen stabilen Event-IDs sorgen dafür,
- * dass bestehende Termine aktualisiert und fehlende Termine ergänzt werden.
+ * Desktop-Port des alten Modul-10-Grundgedankens.
+ *
+ * Sicherheitsreihenfolge:
+ *   1. Archiv nur lesen und eindeutige TMDB-IDs sammeln.
+ *   2. Einen gemeinsamen TMDB-Pruefbestand im Arbeitsspeicher aufbauen.
+ *   3. Gueltige Cache-Daten wiederverwenden; nur faellige Serien abfragen.
+ *   4. Archiv/TMDB vergleichen und Abweichungen protokollieren.
+ *
+ * Dieser Hauptlauf schreibt bewusst weder Archiv noch Kalender. Die spaetere
+ * Uebernahme bleibt ein eigener, nachgelagerter Schritt mit ManualFlags- und
+ * Kalenderschutz. Damit kann ein unvollstaendiger TMDB-Lauf nichts veraendern.
  */
+
+const MAINTENANCE_CACHE_VERSION = 1;
+const MAINTENANCE_MAX_PARALLEL = 3;
+const MAINTENANCE_DAY_MS = 24 * 60 * 60 * 1000;
+
+function maintenanceCachePath_() {
+    return path.join(app.getPath("userData"), "maintenance_tmdb_cache.json");
+}
+
+function maintenanceReadCache_() {
+    try {
+        const file = maintenanceCachePath_();
+        if (!fs.existsSync(file)) return { version:MAINTENANCE_CACHE_VERSION, series:{} };
+        const data = JSON.parse(fs.readFileSync(file, "utf8"));
+        if (!data || typeof data !== "object" || !data.series || typeof data.series !== "object") {
+            return { version:MAINTENANCE_CACHE_VERSION, series:{} };
+        }
+        return { version:MAINTENANCE_CACHE_VERSION, series:data.series };
+    } catch (err) {
+        logWrite_("WARN", "WARTUNG", "TMDB-Wartungscache konnte nicht gelesen werden", {
+            fehler:String(err && err.message || err)
+        });
+        return { version:MAINTENANCE_CACHE_VERSION, series:{} };
+    }
+}
+
+function maintenanceWriteCache_(cache) {
+    const file = maintenanceCachePath_();
+    fs.mkdirSync(path.dirname(file), { recursive:true });
+    fs.writeFileSync(file, JSON.stringify({
+        version:MAINTENANCE_CACHE_VERSION,
+        updatedAt:new Date().toISOString(),
+        series:cache && cache.series || {}
+    }, null, 2) + "\n", "utf8");
+}
+
+function maintenanceSeasonNumber_(entry) {
+    return Number(String(entry && (entry.staffelLabel || entry.seasonLabel || entry.staffel) || "").replace(/\D/g, "")) || 0;
+}
+
+function maintenanceLastDate_(entries) {
+    let last = "";
+    for (const entry of Array.isArray(entries) ? entries : []) {
+        const dates = Array.isArray(entry && entry.termindaten) ? entry.termindaten : [];
+        for (const value of dates) {
+            const date = String(value || "");
+            if (/^\d{4}-\d{2}-\d{2}$/.test(date) && date > last) last = date;
+        }
+    }
+    return last;
+}
+
+function maintenanceCacheMaxAgeMs_(entries) {
+    const last = maintenanceLastDate_(entries);
+    const today = new Date().toISOString().slice(0, 10);
+    const currentYear = new Date().getFullYear();
+
+    if (last && last >= today) return MAINTENANCE_DAY_MS;
+    if (last && Number(last.slice(0, 4)) >= currentYear - 1) return 7 * MAINTENANCE_DAY_MS;
+    return 90 * MAINTENANCE_DAY_MS;
+}
+
+function maintenanceCacheIsFresh_(cached, entries) {
+    const fetchedAt = Date.parse(String(cached && cached.fetchedAt || ""));
+    return Number.isFinite(fetchedAt) &&
+        (Date.now() - fetchedAt) >= 0 &&
+        (Date.now() - fetchedAt) < maintenanceCacheMaxAgeMs_(entries);
+}
+
+function maintenanceGroups_(entries) {
+    const groups = new Map();
+    const withoutTmdbId = [];
+
+    for (const entry of Array.isArray(entries) ? entries : []) {
+        const tmdbId = Number(entry && entry.tmdbId || 0);
+        if (!tmdbId) {
+            withoutTmdbId.push(entry);
+            continue;
+        }
+        const key = String(tmdbId);
+        if (!groups.has(key)) groups.set(key, { tmdbId, entries:[] });
+        groups.get(key).entries.push(entry);
+    }
+
+    return { groups:Array.from(groups.values()), withoutTmdbId };
+}
+
+function maintenanceDatesEqual_(left, right) {
+    const a = (Array.isArray(left) ? left : []).map(String);
+    const b = (Array.isArray(right) ? right : []).map(String);
+    return a.length === b.length && a.every((value, index) => value === b[index]);
+}
+
+function maintenanceAnalyse_(groups, snapshot) {
+    const findings = [];
+
+    for (const group of groups) {
+        const record = snapshot.get(String(group.tmdbId));
+        if (!record || record.ok === false || !record.tv) continue;
+
+        const tv = record.tv;
+        const maxArchiveSeason = group.entries.reduce((max, entry) =>
+            Math.max(max, maintenanceSeasonNumber_(entry)), 0);
+        const maxTmdbSeason = Number(tv.number_of_seasons || 0) || 0;
+
+        if (maxTmdbSeason > maxArchiveSeason) {
+            findings.push({
+                type:"NEW_SEASON",
+                tmdbId:group.tmdbId,
+                title:String(tv.name || group.entries[0] && group.entries[0].titel || ""),
+                archiveSeason:maxArchiveSeason,
+                tmdbSeason:maxTmdbSeason
+            });
+        }
+
+        for (const entry of group.entries) {
+            const seasonNumber = maintenanceSeasonNumber_(entry);
+            const season = record.seasons && record.seasons[String(seasonNumber)];
+            if (!season || season.ok === false || !season.data) continue;
+
+            const analysed = analyseSeason_(season.data);
+            const archiveEpisodes = Number(entry && (entry.episoden || entry.eps) || 0);
+            if (analysed.episodeCount && analysed.episodeCount !== archiveEpisodes) {
+                findings.push({
+                    type:"EPISODE_COUNT",
+                    tmdbId:group.tmdbId,
+                    fileName:String(entry.fileName || ""),
+                    seasonNumber,
+                    archiveValue:archiveEpisodes,
+                    tmdbValue:analysed.episodeCount,
+                    manualProtected:Boolean(Number(entry.manualFlags || 0) & SERKAL_MANUAL_EPISODES)
+                });
+            }
+
+            const archiveDates = Array.isArray(entry.datesOriginal) && entry.datesOriginal.length
+                ? entry.datesOriginal : (Array.isArray(entry.termindaten) ? entry.termindaten : []);
+            if (analysed.episodeDates.length && !maintenanceDatesEqual_(archiveDates, analysed.episodeDates)) {
+                findings.push({
+                    type:"DATES",
+                    tmdbId:group.tmdbId,
+                    fileName:String(entry.fileName || ""),
+                    seasonNumber,
+                    archiveCount:archiveDates.length,
+                    tmdbCount:analysed.episodeDates.length,
+                    manualProtected:Boolean(Number(entry.manualFlags || 0) & SERKAL_MANUAL_CALENDAR)
+                });
+            }
+        }
+    }
+
+    return findings;
+}
+
+async function maintenanceFetchGroup_(group, cache, snapshot, counters) {
+    const key = String(group.tmdbId);
+    const cached = cache.series[key];
+
+    if (maintenanceCacheIsFresh_(cached, group.entries)) {
+        snapshot.set(key, Object.assign({}, cached, { ok:true, source:"cache" }));
+        counters.cacheHits++;
+        return;
+    }
+
+    const tvResult = await tmdbTvDetails_(group.tmdbId, "de");
+    counters.requests++;
+    if (!tvResult || tvResult.ok === false) {
+        const error = {
+            tmdbId:group.tmdbId,
+            fileName:String(group.entries[0] && group.entries[0].fileName || ""),
+            code:String(tvResult && tvResult.code || "TMDB"),
+            status:Number(tvResult && tvResult.status || 0),
+            message:String(tvResult && tvResult.message || "TMDB-Seriendaten konnten nicht geladen werden.")
+        };
+        snapshot.set(key, { ok:false, source:"network", error });
+        counters.errors.push(error);
+        return;
+    }
+
+    const tv = tvResult.data || {};
+    const seasonNumbers = new Set(group.entries.map(maintenanceSeasonNumber_).filter(Boolean));
+    const maxArchiveSeason = Math.max(0, ...Array.from(seasonNumbers));
+    const maxTmdbSeason = Number(tv.number_of_seasons || 0) || 0;
+    if (maxTmdbSeason > maxArchiveSeason) seasonNumbers.add(maxTmdbSeason);
+
+    const seasons = {};
+    for (const seasonNumber of Array.from(seasonNumbers).sort((a, b) => a - b)) {
+        const seasonResult = await tmdbSeasonDetails_(group.tmdbId, seasonNumber, "de");
+        counters.requests++;
+        if (seasonResult && seasonResult.ok) {
+            seasons[String(seasonNumber)] = { ok:true, data:seasonResult.data || {} };
+        } else {
+            const error = {
+                tmdbId:group.tmdbId,
+                seasonNumber,
+                fileName:String(group.entries[0] && group.entries[0].fileName || ""),
+                code:String(seasonResult && seasonResult.code || "TMDB"),
+                status:Number(seasonResult && seasonResult.status || 0),
+                message:String(seasonResult && seasonResult.message || "TMDB-Staffeldaten konnten nicht geladen werden.")
+            };
+            seasons[String(seasonNumber)] = { ok:false, error };
+            counters.errors.push(error);
+        }
+    }
+
+    const record = {
+        ok:true,
+        source:"network",
+        fetchedAt:new Date().toISOString(),
+        tmdbId:group.tmdbId,
+        tv,
+        seasons
+    };
+    cache.series[key] = record;
+    snapshot.set(key, record);
+    counters.networkSeries++;
+}
+
+async function maintenanceFetchAll_(groups, cache, snapshot, counters) {
+    let nextIndex = 0;
+
+    async function worker_() {
+        while (true) {
+            const index = nextIndex++;
+            if (index >= groups.length) return;
+            const group = groups[index];
+            maintenanceSetStatus_(
+                "tmdb",
+                "TMDB-Prüfbestand wird aufgebaut.",
+                group.entries[0] || null,
+                index + 1,
+                groups.length
+            );
+            await maintenanceFetchGroup_(group, cache, snapshot, counters);
+
+            if (counters.errors.some(error => Number(error.status || 0) === 429)) {
+                throw new Error("TMDB hat die Anfragezahl vorübergehend begrenzt. Wartung wurde sicher beendet.");
+            }
+        }
+    }
+
+    const workerCount = Math.min(MAINTENANCE_MAX_PARALLEL, Math.max(1, groups.length));
+    await Promise.all(Array.from({ length:workerCount }, () => worker_()));
+}
+
 async function maintenanceRun_() {
     if (maintenanceRunning_) {
         return { ok:false, message:"Die Wartung läuft bereits." };
     }
 
     maintenanceRunning_ = true;
-    let checked = 0;
-    let eligible = 0;
-    let repairedSeries = 0;
-    let created = 0;
-    let updated = 0;
-    let skipped = 0;
-    const errors = [];
+    const counters = {
+        requests:0,
+        cacheHits:0,
+        networkSeries:0,
+        errors:[]
+    };
 
     try {
         const loaded = archiveLoad_();
@@ -1892,107 +2141,83 @@ async function maintenanceRun_() {
 
         const entries = Array.isArray(loaded && loaded.daten && loaded.daten.entries)
             ? loaded.daten.entries : [];
-        const currentYear = new Date().getFullYear();
-        const candidates = entries.filter(entry => {
-            const dates = Array.isArray(entry && entry.termindaten) ? entry.termindaten : [];
-            return dates.some(value => {
-                const match = String(value || "").match(/^(\d{4})-/);
-                return match && Number(match[1]) >= currentYear;
-            });
-        });
+        const grouped = maintenanceGroups_(entries);
+        const groups = grouped.groups;
+        const cache = maintenanceReadCache_();
+        const snapshot = new Map();
 
-        maintenanceSetStatus_("start", "Wartung startet.", null, 0, candidates.length);
+        maintenanceSetStatus_("start", "Wartung liest Archiv und plant TMDB-Prüfung.", null, 0, groups.length);
         logWrite_("INFO", "WARTUNG", "Desktop-Wartung gestartet", {
             archivEintraege:entries.length,
-            kalenderKandidaten:candidates.length,
-            aktuellesJahr:currentYear
+            eindeutigeTmdbSerien:groups.length,
+            ohneTmdbId:grouped.withoutTmdbId.length,
+            maxParallel:MAINTENANCE_MAX_PARALLEL
         });
 
-        for (let index = 0; index < candidates.length; index++) {
-            const entry = candidates[index];
-            checked++;
-            eligible++;
-            maintenanceSetStatus_("pruefe", "Kalender wird abgeglichen.", entry, index + 1, candidates.length);
+        await maintenanceFetchAll_(groups, cache, snapshot, counters);
+        maintenanceWriteCache_(cache);
 
-            if ((Number(entry && entry.manualFlags || 0) & SERKAL_MANUAL_CALENDAR) !== 0) {
-                skipped++;
-                logWrite_("INFO", "WARTUNG", "Kalenderabgleich wegen manueller Änderung geschützt", {
-                    fileName:String(entry && entry.fileName || ""),
-                    staffel:String(entry && entry.staffelLabel || ""),
-                    manualFlags:Number(entry && entry.manualFlags || 0)
-                });
-                continue;
-            }
+        maintenanceSetStatus_("auswertung", "TMDB-Prüfbestand wird mit dem Archiv verglichen.", null, groups.length, groups.length);
+        const findings = maintenanceAnalyse_(groups, snapshot);
 
-            const payload = {
-                titel:String(entry.titel || entry.title || ""),
-                title:String(entry.titel || entry.title || ""),
-                jahr:String(entry.jahr || entry.year || ""),
-                staffelLabel:String(entry.staffelLabel || entry.seasonLabel || entry.staffel || ""),
-                staffelNummer:Number(String(entry.staffelLabel || entry.seasonLabel || entry.staffel || "").replace(/\D/g, "")),
-                tmdbId:Number(entry.tmdbId || 0) || null,
-                termindaten:Array.isArray(entry.termindaten) ? entry.termindaten.slice() : []
-            };
-
-            try {
-                const result = await googleCalendarInsertSeason_(payload);
-                if (!result || result.ok === false) {
-                    throw new Error(String(result && result.message || "Kalenderabgleich fehlgeschlagen."));
-                }
-                if (result.skipped) {
-                    skipped++;
-                    continue;
-                }
-                const made = Number(result.created || 0);
-                const changed = Number(result.updated || 0);
-                created += made;
-                updated += changed;
-                if (made || changed) repairedSeries++;
-                logWrite_("INFO", "WARTUNG", "Kalenderstaffel abgeglichen", {
-                    titel:payload.titel,
-                    staffel:payload.staffelLabel,
-                    erstellt:made,
-                    aktualisiert:changed
-                });
-            } catch (errEntry) {
-                const detail = String(errEntry && errEntry.message || errEntry);
-                errors.push({ fileName:String(entry.fileName || ""), message:detail });
-                logWrite_("ERROR", "WARTUNG", "Kalenderstaffel konnte nicht abgeglichen werden", {
-                    fileName:String(entry.fileName || ""),
-                    fehler:detail
-                });
-            }
+        for (const finding of findings) {
+            logWrite_("INFO", "WARTUNG", "TMDB-Abweichung festgestellt", finding);
+        }
+        for (const entry of grouped.withoutTmdbId) {
+            logWrite_("WARN", "WARTUNG", "Archivstaffel ohne TMDB-ID übersprungen", {
+                fileName:String(entry && entry.fileName || ""),
+                staffel:String(entry && entry.staffelLabel || "")
+            });
         }
 
-        const ok = errors.length === 0;
+        const ok = counters.errors.length === 0;
         const result = {
             ok,
-            message:ok ? "Wartung abgeschlossen." : ("Wartung mit " + errors.length + " Fehler(n) abgeschlossen."),
-            geprueftDateien:checked,
-            geprueftStaffeln:eligible,
-            geaendertDateien:repairedSeries,
-            created,
-            updated,
-            skipped,
-            errors
+            readOnly:true,
+            phase:"tmdb_snapshot",
+            message:ok
+                ? "TMDB-Prüfung abgeschlossen. Archiv und Kalender wurden nicht verändert."
+                : ("TMDB-Prüfung mit " + counters.errors.length + " Fehler(n) abgeschlossen. Archiv und Kalender wurden nicht verändert."),
+            geprueftDateien:entries.length,
+            geprueftStaffeln:entries.length,
+            gepruefteSerien:groups.length,
+            tmdbAnfragen:counters.requests,
+            ausCache:counters.cacheHits,
+            neuVonTmdb:counters.networkSeries,
+            ohneTmdbId:grouped.withoutTmdbId.length,
+            auffaellig:findings.length,
+            geaendertDateien:0,
+            created:0,
+            updated:0,
+            skipped:grouped.withoutTmdbId.length,
+            findings,
+            errors:counters.errors
         };
-        maintenanceSetStatus_(ok ? "ende" : "fehler", result.message, null, checked, candidates.length);
+
+        maintenanceSetStatus_(ok ? "ende" : "fehler", result.message, null, groups.length, groups.length);
         logWrite_(ok ? "INFO" : "ERROR", "WARTUNG", "Desktop-Wartung abgeschlossen", result);
         return result;
     } catch (err) {
-        const message = "Wartung fehlgeschlagen: " + String(err && err.message || err);
-        maintenanceSetStatus_("fehler", message, null, checked, 0);
-        logWrite_("ERROR", "WARTUNG", "Desktop-Wartung fehlgeschlagen", { fehler:message });
+        const message = "Wartung sicher beendet: " + String(err && err.message || err);
+        maintenanceSetStatus_("fehler", message, null, 0, 0);
+        logWrite_("ERROR", "WARTUNG", "Desktop-Wartung sicher beendet", {
+            fehler:message,
+            tmdbAnfragen:counters.requests,
+            ausCache:counters.cacheHits
+        });
         return {
             ok:false,
+            readOnly:true,
             message,
-            geprueftDateien:checked,
-            geprueftStaffeln:eligible,
-            geaendertDateien:repairedSeries,
-            created,
-            updated,
-            skipped,
-            errors
+            geprueftDateien:0,
+            geprueftStaffeln:0,
+            geaendertDateien:0,
+            created:0,
+            updated:0,
+            skipped:0,
+            tmdbAnfragen:counters.requests,
+            ausCache:counters.cacheHits,
+            errors:counters.errors
         };
     } finally {
         maintenanceRunning_ = false;
