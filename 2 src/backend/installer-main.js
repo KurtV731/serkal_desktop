@@ -12,6 +12,18 @@ const fs = require("node:fs");
 const { spawnSync } = require("node:child_process");
 const { app } = require("electron");
 
+function configureBundledGoogleOauth_() {
+    if (!app.isPackaged) return;
+
+    // Die Hersteller-OAuth-Konfiguration wird beim Installerbau als interne
+    // Ressource neben app.asar abgelegt. Der Endnutzer muss weder eine JSON-
+    // Datei beschaffen noch Google Cloud oeffnen.
+    process.env.SERKAL_GOOGLE_OAUTH_FILE = path.join(
+        process.resourcesPath,
+        "google_oauth_client.json"
+    );
+}
+
 function serkalProtocolExe_() {
     const currentExe = process.execPath;
     const currentDir = path.dirname(currentExe);
@@ -52,10 +64,11 @@ function registerSerkalProtocol_() {
 }
 
 // Squirrel-Ereignisse zuerst sauber abfangen. Bei normalem installierten Start
-// wird danach die Protokollzuordnung auf den aktuellen stabilen Pfad repariert.
+// werden danach interne Herstellerressourcen und die Protokollzuordnung gesetzt.
 if (require("electron-squirrel-startup")) {
     app.quit();
 } else {
+    configureBundledGoogleOauth_();
     registerSerkalProtocol_();
     require("./main.js");
 }
