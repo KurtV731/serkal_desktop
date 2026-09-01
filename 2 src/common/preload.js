@@ -55,5 +55,9 @@ contextBridge.exposeInMainWorld("serkal", {
         open:(settings)=>ipcRenderer.invoke("serkal:calendar:open",settings),
         insertSeason:(payload)=>ipcRenderer.invoke("serkal:calendar:insertSeason",payload||{}),
         createIcs:(payload)=>ipcRenderer.invoke("serkal:calendar:createIcs",payload||{})
+    },
+    maintenance:{
+        status:()=>ipcRenderer.invoke("serkal:maintenance:status"),
+        run:()=>ipcRenderer.invoke("serkal:maintenance:run")
     }
 });

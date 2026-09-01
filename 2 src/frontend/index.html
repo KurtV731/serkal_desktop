@@ -1911,8 +1911,8 @@
     <section class="skCalendarSetupBox" role="dialog" aria-modal="true" aria-labelledby="skCalendarSetupTitle">
       <h2 id="skCalendarSetupTitle">Kalender einrichten</h2>
       <p class="skCalendarSetupIntro">Wie soll SERKAL mit deinem Kalender umgehen? Die Auswahl wird lokal gespeichert.</p>
-      <label class="skCalendarChoice"><input type="radio" name="skCalendarMode" value="google"><strong>Google Kalender</strong> – meinen ausgewählten Kalender öffnen</label>
-      <div id="skCalendarGoogleData" class="skCalendarGoogleData"><label for="skCalendarGoogleId">Google Kalender-ID</label><input id="skCalendarGoogleId" type="text" placeholder="…@group.calendar.google.com"><div class="skCalendarHint">Für 0.0.5 wird die ID einmal eingetragen und lokal gespeichert. Automatisches Ermitteln über Google-Anmeldung/API kommt später.</div></div>
+      <label class="skCalendarChoice"><input type="radio" name="skCalendarMode" value="google"><strong>Google Kalender</strong> – Kalender „SerKal“ automatisch verwenden</label>
+      <div id="skCalendarGoogleData" class="skCalendarGoogleData"><div class="skCalendarHint">SerKal sucht den passenden Google-Kalender automatisch und legt ihn bei Bedarf an. Eine Kalender-ID muss nicht eingegeben werden.</div></div>
       <label class="skCalendarChoice"><input type="radio" name="skCalendarMode" value="ics"><strong>ICS-Datei / anderer Kalender</strong></label>
       <label class="skCalendarChoice"><input type="radio" name="skCalendarMode" value="none"><strong>Keinen Kalender verwenden</strong></label>
       <label class="skCalendarChoice"><input type="radio" name="skCalendarMode" value="auto"><strong>Keine Ahnung, was du von mir willst – mach, was du denkst. 😏</strong></label>
@@ -1934,7 +1934,6 @@
     document.getElementById('skCalendarSetupSave').addEventListener('click',async function(){
       var m=mode(),id=googleId?String(googleId.value||'').trim():'';
       if(!m){alert('Bitte eine Kalender-Option auswählen.');return}
-      if(m==='google'&&!id){alert('Bitte die Google Kalender-ID eintragen.');if(googleId)googleId.focus();return}
       try{await window.serkal.settings.save({setupDone:true,calendar:{mode:m,googleCalendarId:id}});hide()}catch(e){alert('Einstellungen konnten nicht gespeichert werden: '+String(e||''))}
     });
     document.addEventListener('DOMContentLoaded',async function(){var s=await getSettings();if(s&&s.setupDone!==true)show(s)});
@@ -3413,7 +3412,7 @@ const I18N = {
     ERR_BAD_ENTRY: 'Kein gültiger Archiv-Eintrag gewählt (fileName fehlt).',
     HINT_NONE_SELECTED: 'Kein Eintrag gewählt.',
     CONF_DELETE_TITLE: 'Wirklich löschen?',
-    CONF_DELETE_BODY: '{title}\n(Datei: {file})\n\nHinweis: In dieser Baustellen-Phase wird die ganze Serie inkl. SerKal-Kalender-Events entfernt.',
+    CONF_DELETE_BODY: '{title}\n(Datei: {file})',
     TT_PREV: 'Vorheriger Treffer',
     TT_NEXT: 'Nächster Treffer',
     TT_YEAR_OPT: 'Optional: Jahr (YYYY) – schränkt Treffer ein',
@@ -3514,7 +3513,7 @@ const I18N = {
     ERR_BAD_ENTRY: 'No valid archive entry selected (missing fileName).',
     HINT_NONE_SELECTED: 'No entry selected.',
     CONF_DELETE_TITLE: 'Delete 🗑',
-    CONF_DELETE_BODY: '{title}\n(File: {file})\n\nNote: In this build, the whole series incl. SerKal calendar events will be removed.',
+    CONF_DELETE_BODY: '{title}\n(File: {file})',
     BTN_PREV: '◀',
     BTN_NEXT: '▶',
     TT_PREV: 'Previous result',
@@ -4112,12 +4111,40 @@ function normalizeNoteControlWord_(word) {
     .replace(/_/g, '')
     .replace(/-/g, '');
 
-  if (compact === 'terminede' || compact === 'terminede') return 'Termine DE';
-  if (compact === 'terminede') return 'Termine DE';
-  if (compact === 'termine') return 'Termine DE';
+  if (compact === 'terminede' || compact === 'termine') return 'Termine DE';
   if (compact === 'offsetde' || compact === 'offset') return 'OffsetDE';
   if (compact === 'terminoffset' || compact === 'deoffset' || compact === 'offsetdeutsch') return 'OffsetDE';
   return '';
+}
+
+function parseNoteControlLine_(line) {
+  var raw = String(line || '');
+  var leadMatch = raw.match(/^(\s*)/);
+  var lead = leadMatch ? leadMatch[1] : '';
+  var body = raw.trim();
+  if (!body) return { recognized:false, canonical:raw };
+
+  var offset = body.match(/^(?:offset(?:\s*de)?|termin\s*offset|de\s*offset|offset\s*deutsch)\s*:?\s*([+-]?\d+)\s*d?\s*$/i);
+  if (offset) {
+    return {
+      recognized:true,
+      type:'OffsetDE',
+      value:parseInt(offset[1], 10),
+      canonical:lead + 'OffsetDE: ' + String(parseInt(offset[1], 10)) + 'D'
+    };
+  }
+
+  var dates = body.match(/^termine(?:\s*de)?\s*:\s*(.+)$/i);
+  if (dates) {
+    return {
+      recognized:true,
+      type:'TermineDE',
+      value:String(dates[1] || '').trim(),
+      canonical:lead + 'Termine DE: ' + String(dates[1] || '').trim()
+    };
+  }
+
+  return { recognized:false, canonical:raw };
 }
 
 /**
@@ -4141,14 +4168,8 @@ function canonicalizeNoteText_(text) {
   var src = String(text || '');
   if (!src) return '';
   return src.split(/\r?\n/).map(function(line) {
-    var m = String(line).match(/^(\s*)([^:\n]+)\s*:\s*(.*)$/);
-    if (!m) return line;
-    var lead = m[1] || '';
-    var word = String(m[2] || '').trim();
-    var rest = String(m[3] || '');
-    var normalized = normalizeNoteControlWord_(word);
-    if (!normalized) return line;
-    return lead + normalized + ': ' + rest.trim();
+    var parsed = parseNoteControlLine_(line);
+    return parsed.recognized ? parsed.canonical : line;
   }).join('\n');
 }
 
@@ -4174,29 +4195,25 @@ function validateNoteText_(text) {
   var problems = [];
   var canonical = canonicalizeNoteText_(src);
 
-  canonical.split(/\r?\n/).forEach(function(line, idx) {
+  src.split(/\r?\n/).forEach(function(line, idx) {
     var s = String(line || '').trim();
     if (!s) return;
-    var m = s.match(/^([^:\n]+)\s*:\s*(.*)$/);
-    if (!m) return;
+    if (parseNoteControlLine_(line).recognized) return;
 
-    var word = String(m[1] || '').trim();
-    var normalized = normalizeNoteControlWord_(word);
-    if (normalized) return;
-
-    var compact = word.toLowerCase().replace(/\s+/g, '');
-    if (/(termin|offset|de)/.test(compact)) {
+    /* Freier Romantext bleibt erlaubt. Nur offensichtlich als
+       Steuerzeile begonnene, aber fehlerhafte Eingaben werden beanstandet. */
+    if (/^offset/i.test(s) || (/^termine?\s*(?:de)?\s*:/i.test(s))) {
       problems.push({
-        line: idx + 1,
-        word: word
+        line:idx + 1,
+        word:s
       });
     }
   });
 
   return {
-    ok: problems.length === 0,
-    canonical: canonical,
-    problems: problems
+    ok:problems.length === 0,
+    canonical:canonical,
+    problems:problems
   };
 }
 
@@ -4885,14 +4902,40 @@ function runMaintenance_() {
           uiStatus(msgBad, { spinner:false, kind:'error', sound:true });
           return;
         }
-        var progress = t('MAINT_PROGRESS', {
-          files: String(res.geprueftDateien || 0),
-          seasons: String(res.geprueftStaffeln || 0),
-          changed: String(res.geaendertDateien || 0)
-        });
-        uiStatus(t('MAINT_DONE'), { spinner:false, kind:'info' });
-        try { uiLogAction_('Wartung abgeschlossen', { ok: true, geprueftDateien: res && res.geprueftDateien || 0, geaendertDateien: res && res.geaendertDateien || 0 }); } catch (_eAction) {}
-        try { loadArchiv(); } catch(_eLoad) {}
+        var isSnapshot = !!(res && res.readOnly && res.phase === 'tmdb_snapshot');
+        var progress = isSnapshot
+          ? ('TMDB-Prüfung: ' + String(res.gepruefteSerien || 0) + ' Serien, ' +
+             String(res.tmdbAnfragen || 0) + ' TMDB-Anfragen, ' +
+             String(res.ausCache || 0) + ' aus Cache. Bewertung: ' +
+             String(res.uebernehmbar || 0) + ' übernehmbar, ' +
+             String(res.rueckfragen || 0) + ' Rückfrage, ' +
+             String(res.beobachten || 0) + ' beobachten, ' +
+             String(res.geschuetzt || 0) + ' geschützt. Archiv und Kalender unverändert.')
+          : t('MAINT_PROGRESS', {
+              files: String(res.geprueftDateien || 0),
+              seasons: String(res.geprueftStaffeln || 0),
+              changed: String(res.geaendertDateien || 0)
+            });
+        uiStatus(progress || t('MAINT_DONE'), { spinner:false, kind:'info' });
+        try {
+          uiLogAction_('Wartung abgeschlossen', {
+            ok: true,
+            geprueftDateien: res && res.geprueftDateien || 0,
+            gepruefteSerien: res && res.gepruefteSerien || 0,
+            tmdbAnfragen: res && res.tmdbAnfragen || 0,
+            ausCache: res && res.ausCache || 0,
+            auffaellig: res && res.auffaellig || 0,
+            uebernehmbar: res && res.uebernehmbar || 0,
+            rueckfragen: res && res.rueckfragen || 0,
+            beobachten: res && res.beobachten || 0,
+            geschuetzt: res && res.geschuetzt || 0,
+            geaendertDateien: res && res.geaendertDateien || 0,
+            readOnly: !!(res && res.readOnly)
+          });
+        } catch (_eAction) {}
+        if (!isSnapshot) {
+          try { loadArchiv(); } catch(_eLoad) {}
+        }
       })
       .withFailureHandler(function(err){
         stopMaintenanceStatusPolling_();
@@ -6398,14 +6441,37 @@ function fillDetailsFromArchiv_(it) {
     if (dirtyPatch && Object.prototype.hasOwnProperty.call(dirtyPatch, 'note')) {
       ta.style.boxShadow = '0 0 0 2px rgba(231,111,81,0.22) inset';
     }
+    var noteHelp = document.createElement('div');
+    noteHelp.id = 'detailsNoteSyntaxHelp';
+    noteHelp.style.display = 'none';
+    noteHelp.style.marginTop = '8px';
+    noteHelp.style.padding = '9px 11px';
+    noteHelp.style.borderRadius = '9px';
+    noteHelp.style.background = 'rgba(99,102,241,0.08)';
+    noteHelp.style.border = '1px solid rgba(99,102,241,0.22)';
+    noteHelp.style.fontSize = '0.92em';
+    noteHelp.style.lineHeight = '1.45';
+    noteHelp.innerHTML =
+      '<b>Auswertbare Notizzeilen:</b><br>' +
+      '<code>Offset 1D</code> – alle deutschen Termine 1 Tag später<br>' +
+      '<code>Offset +2D</code> – alle deutschen Termine 2 Tage später<br>' +
+      '<code>Offset -2D</code> – alle deutschen Termine 2 Tage früher<br>' +
+      '<code>Termine DE: 14.09., 21.09., 28.09.</code> – einzelne Termine festlegen<br>' +
+      '<span style="opacity:.78">Groß-/Kleinschreibung ist egal. Alle anderen Texte bleiben freie Notizen.</span>';
+
+    ta.addEventListener('focus', function() {
+      noteHelp.style.display = 'block';
+    });
     ta.addEventListener('input', function() {
       setDirtyForEntry_(it, { note: String(ta.value || '') });
       ta.style.boxShadow = '0 0 0 2px rgba(231,111,81,0.22) inset';
     });
     ta.addEventListener('blur', function() {
       applyNoteAutofill_(ta, it);
+      noteHelp.style.display = 'none';
     });
     note.appendChild(ta);
+    note.appendChild(noteHelp);
   }
 
   try {
@@ -6795,14 +6861,24 @@ function nextResult() {
             uiSetReadyState_({ clearTitle: true, clearDetails: true });
             if (res && res.calendarMode === 'google') {
               var cal = res.calendar || {};
-              uiStatus('Archiv und Google Kalender gespeichert (' +
-                Number(cal.created || 0) + ' neu, ' + Number(cal.updated || 0) + ' aktualisiert).',
-                {spinner:false, kind:'info'});
-              try { uiLogAction_('Google-Kalender direkt gespeichert', {
-                erstellt:Number(cal.created || 0),
-                aktualisiert:Number(cal.updated || 0),
-                events:Number(cal.events || 0)
-              }); } catch (_eGoogleLog) {}
+              if (cal.skipped === true && cal.reason === 'past_season') {
+                uiStatus('Archiv gespeichert. Kein Kalendereintrag: Die letzte Episode liegt vor dem aktuellen Jahr.',
+                  {spinner:false, kind:'info'});
+                try { uiLogAction_('Kalender nach Originalregel übersprungen', {
+                  grund:'past_season',
+                  letzterTermin:String(cal.lastDate || ''),
+                  aktuellesJahr:Number(cal.currentYear || 0)
+                }); } catch (_eGoogleSkipLog) {}
+              } else {
+                uiStatus('Archiv und Google Kalender gespeichert (' +
+                  Number(cal.created || 0) + ' neu, ' + Number(cal.updated || 0) + ' aktualisiert).',
+                  {spinner:false, kind:'info'});
+                try { uiLogAction_('Google-Kalender direkt gespeichert', {
+                  erstellt:Number(cal.created || 0),
+                  aktualisiert:Number(cal.updated || 0),
+                  events:Number(cal.events || 0)
+                }); } catch (_eGoogleLog) {}
+              }
             } else {
               offerIcsDownloadAfterInsert_(icsPayload);
             }
