@@ -3,11 +3,17 @@ const { FusesPlugin } = require('@electron-forge/plugin-fuses');
 const { FuseV1Options, FuseVersion } = require('@electron/fuses');
 
 const serkalIcon = path.join(__dirname, '4 assets', 'icon', 'serkal.ico');
+const serkalGoogleOauth = process.env.SERKAL_GOOGLE_OAUTH_BUILD_FILE ||
+  path.join(__dirname, '..', 'serkal_private', 'google_oauth_client.json');
 
 module.exports = {
   packagerConfig: {
     asar: true,
     icon: serkalIcon,
+
+    // Hersteller-Ressource: wird ausserhalb von app.asar unter resources/
+    // abgelegt und vom Installer-Einstieg automatisch gefunden.
+    extraResource: [serkalGoogleOauth],
 
     // SERKAL Desktop 0.0.4:
     // Nur Laufzeit-Abhaengigkeiten ins Paket nehmen. Forge/Electron-
