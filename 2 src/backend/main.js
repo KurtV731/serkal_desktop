@@ -86,6 +86,17 @@ const DEFAULT_SETTINGS = {
     calendar: { mode: "", googleCalendarId: "" }
 };
 
+const SERKAL_GOOGLE_HELP_URL = "https://serkal.de/hilfe.html";
+
+function googleCalendarPublicFailure_(extra) {
+    return Object.assign({
+        ok:false,
+        code:"GOOGLE_CALENDAR_UNAVAILABLE",
+        message:"SerKal konnte keine Verbindung zum Google Kalender herstellen. Bitte prüfen Sie die Anmeldung oder öffnen Sie die SerKal-Hilfe.",
+        helpUrl:SERKAL_GOOGLE_HELP_URL
+    }, extra || {});
+}
+
 function settingsPath_() { return path.join(app.getPath("userData"), "settings.json"); }
 function tmdbConfigPath_() { return path.join(app.getPath("userData"), "tmdb.json"); }
 
@@ -589,12 +600,15 @@ async function archiveDeleteSeries_(payload) {
                             continue;
                         }
                         const detail = result.data && (result.data.error && result.data.error.message || result.data.error_description);
-                        return {
-                            ok:false,
-                            message:"Google-Kalendertermin konnte nicht gelöscht werden: " +
-                                (detail || ("Fehler " + result.status)) +
-                                ". Archivdatei wurde nicht gelöscht."
-                        };
+                        logWrite_("ERROR", "GOOGLE", "Google-Kalendertermin konnte beim Löschen nicht entfernt werden", {
+                            fileName,
+                            httpStatus:Number(result.status || 0),
+                            googleMessage:String(detail || "")
+                        });
+                        return googleCalendarPublicFailure_({
+                            action:"delete",
+                            message:"Die Serie wurde nicht gelöscht, weil SerKal den Google Kalender nicht erreichen konnte. Ihre Archivdatei ist unverändert."
+                        });
                     }
                 }
             }
@@ -612,7 +626,18 @@ async function archiveDeleteSeries_(payload) {
             count:loaded.count
         };
     } catch (err) {
-        return { ok:false, message:"Serie konnte nicht gelöscht werden: " + err.message };
+        const technical = String(err && err.message || err);
+        if (/google|oauth|calendar|client.?id|google_oauth_client\.json/i.test(technical)) {
+            logWrite_("ERROR", "GOOGLE", "Google-Fehler beim Löschen einer Serie", {
+                fehler:technical,
+                fileName:String(payload && payload.fileName || "")
+            });
+            return googleCalendarPublicFailure_({
+                action:"delete",
+                message:"Die Serie wurde nicht gelöscht, weil SerKal den Google Kalender nicht erreichen konnte. Ihre Archivdatei ist unverändert."
+            });
+        }
+        return { ok:false, message:"Serie konnte nicht gelöscht werden: " + technical };
     }
 }
 
@@ -1853,7 +1878,7 @@ async function googleCalendarInsertSeason_(payload) {
         logWrite_("ERROR", "KAL", "Google-Kalendereintrag endgültig fehlgeschlagen", {
             fehler:String(err && err.message || err)
         });
-        return { ok:false, message:"Google-Kalendereintrag fehlgeschlagen: " + err.message };
+        return googleCalendarPublicFailure_({ action:"insert" });
     }
 }
 
@@ -2423,6 +2448,10 @@ function installIpc_() {
         }
         return result;
     });
+    ipcMain.handle("serkal:help:google", async () => {
+        await shell.openExternal(SERKAL_GOOGLE_HELP_URL);
+        return { ok:true };
+    });
     ipcMain.handle("serkal:calendar:open", async (_event, settingsFromUi) => {
         const settings = settingsFromUi ? normalizeSettings_(settingsFromUi) : readSettings_();
         let mode = settings.calendar.mode;
@@ -2527,7 +2556,9 @@ function installDesktopTmdbBridge_(hauptfenster) {
               success({
                 ok:false,
                 archiveSaved:true,
-                message:'Archiv wurde gespeichert, aber ' + String(calendarRes && calendarRes.message || 'der Google-Kalendereintrag ist fehlgeschlagen.')
+                code:String(calendarRes && calendarRes.code || 'GOOGLE_CALENDAR_UNAVAILABLE'),
+                helpUrl:String(calendarRes && calendarRes.helpUrl || 'https://serkal.de/hilfe.html'),
+                message:'Archiv wurde gespeichert. ' + String(calendarRes && calendarRes.message || 'SerKal konnte keine Verbindung zum Google Kalender herstellen.')
               });
               return;
             }

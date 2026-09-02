@@ -5074,6 +5074,21 @@ function uiStatus(msg, opts) {
     searchHint.textContent = msg || '';
     searchHint.classList.remove('isError');
     if (kind === 'error') searchHint.classList.add('isError');
+    if (opts.helpUrl) {
+      const helpButton = document.createElement('button');
+      helpButton.type = 'button';
+      helpButton.className = 'btnSmall';
+      helpButton.textContent = 'SerKal-Hilfe öffnen';
+      helpButton.style.marginLeft = '12px';
+      helpButton.addEventListener('click', function(){
+        try {
+          if (window.serkal && window.serkal.help && window.serkal.help.google) {
+            window.serkal.help.google();
+          }
+        } catch (_helpError) {}
+      });
+      searchHint.appendChild(helpButton);
+    }
   } catch (_e) {}
 
   // Sound bei Fehlern (Browser kann Audio ohne User-Interaktion blocken)
@@ -6844,8 +6859,8 @@ function nextResult() {
               updateMainUi_();
               uiSetBusy_(false);
               var msg = String(res.message || res.reason || 'Eintrag fehlgeschlagen.');
-              uiStatus(msg, {spinner:false, kind:'error', sound:true});
-              setHint(searchHint, msg);
+              uiStatus(msg, {spinner:false, kind:'error', sound:true, helpUrl:String(res && res.helpUrl || '')});
+              if (!(res && res.helpUrl)) setHint(searchHint, msg);
               try { uiLogAction_('Eintrag fachlich fehlgeschlagen', { message: msg, response: res }); } catch (_eAction) {}
               return;
             }
