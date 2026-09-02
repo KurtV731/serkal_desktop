@@ -1,0 +1,23 @@
+SERKAL Desktop 0.0.5 – Installer-Übernahme CE 66262f89
+Datum: 02.09.2026
+
+CE-Freigabe:
+66262f899075f789c6173cecb81345fd08d26d28
+Google: verständliche Fehlermeldung mit SerKal-Hilfe anzeigen
+
+Installer-Ausgangsstand:
+16e881895b1f92686ad2faa71a4930cad77a4cf6
+
+Zu übernehmen aus CE seit 777231be:
+- 2 src/backend/main.js
+- 2 src/common/preload.js
+- 2 src/frontend/index.html
+
+Installer-spezifische Dateien und Einstellungen bleiben unverändert, insbesondere:
+- 2 src/backend/installer-main.js
+- forge.config.js
+- Icon-/Squirrel-Konfiguration
+- eingebettete Google-OAuth-Ressource
+
+Endnutzerregel:
+Keine internen Google-OAuth-Dateinamen, Entwicklerpfade, Client-ID oder Google-Cloud-Hinweise in sichtbaren Fehlermeldungen. Technische Ursache ins Log; Benutzer erhält verständliche Meldung und SerKal-Hilfe.
