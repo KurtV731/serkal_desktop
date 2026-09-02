@@ -51,6 +51,9 @@ contextBridge.exposeInMainWorld("serkal", {
         saveText:(day,text)=>ipcRenderer.invoke("serkal:log:saveText",day,text),
         clear:(day)=>ipcRenderer.invoke("serkal:log:clear",day)
     },
+    help:{
+        google:()=>ipcRenderer.invoke("serkal:help:google")
+    },
     calendar:{
         open:(settings)=>ipcRenderer.invoke("serkal:calendar:open",settings),
         insertSeason:(payload)=>ipcRenderer.invoke("serkal:calendar:insertSeason",payload||{}),
