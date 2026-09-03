@@ -5083,7 +5083,7 @@ function uiStatus(msg, opts) {
       helpButton.addEventListener('click', function(){
         try {
           if (window.serkal && window.serkal.help && window.serkal.help.google) {
-            window.serkal.help.google();
+            window.serkal.help.google((typeof LANG !== 'undefined' && LANG) ? LANG : 'de');
           }
         } catch (_helpError) {}
       });
