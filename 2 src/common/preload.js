@@ -52,7 +52,7 @@ contextBridge.exposeInMainWorld("serkal", {
         clear:(day)=>ipcRenderer.invoke("serkal:log:clear",day)
     },
     help:{
-        google:()=>ipcRenderer.invoke("serkal:help:google")
+        google:(lang)=>ipcRenderer.invoke("serkal:help:google",lang||"de")
     },
     calendar:{
         open:(settings)=>ipcRenderer.invoke("serkal:calendar:open",settings),
