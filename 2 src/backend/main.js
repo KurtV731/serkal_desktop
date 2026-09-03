@@ -86,14 +86,20 @@ const DEFAULT_SETTINGS = {
     calendar: { mode: "", googleCalendarId: "" }
 };
 
-const SERKAL_GOOGLE_HELP_URL = "https://serkal.de/hilfe.html";
+const SERKAL_GOOGLE_HELP_URL_DE = "https://serkal.de/google-kalender-hilfe.html";
+const SERKAL_GOOGLE_HELP_URL_EN = "https://serkal.de/google-calendar-help.html";
+
+function googleHelpUrl_(lang) {
+    return String(lang || "de").toLowerCase() === "en" ?
+        SERKAL_GOOGLE_HELP_URL_EN : SERKAL_GOOGLE_HELP_URL_DE;
+}
 
 function googleCalendarPublicFailure_(extra) {
     return Object.assign({
         ok:false,
         code:"GOOGLE_CALENDAR_UNAVAILABLE",
         message:"SerKal konnte keine Verbindung zum Google Kalender herstellen. Bitte prüfen Sie die Anmeldung oder öffnen Sie die SerKal-Hilfe.",
-        helpUrl:SERKAL_GOOGLE_HELP_URL
+        helpUrl:SERKAL_GOOGLE_HELP_URL_DE
     }, extra || {});
 }
 
@@ -2448,9 +2454,10 @@ function installIpc_() {
         }
         return result;
     });
-    ipcMain.handle("serkal:help:google", async () => {
-        await shell.openExternal(SERKAL_GOOGLE_HELP_URL);
-        return { ok:true };
+    ipcMain.handle("serkal:help:google", async (_event, lang) => {
+        const url = googleHelpUrl_(lang);
+        await shell.openExternal(url);
+        return { ok:true, url };
     });
     ipcMain.handle("serkal:calendar:open", async (_event, settingsFromUi) => {
         const settings = settingsFromUi ? normalizeSettings_(settingsFromUi) : readSettings_();
