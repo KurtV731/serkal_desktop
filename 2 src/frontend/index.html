@@ -6859,8 +6859,14 @@ function nextResult() {
               updateMainUi_();
               uiSetBusy_(false);
               var msg = String(res.message || res.reason || 'Eintrag fehlgeschlagen.');
-              uiStatus(msg, {spinner:false, kind:'error', sound:true, helpUrl:String(res && res.helpUrl || '')});
-              if (!(res && res.helpUrl)) setHint(searchHint, msg);
+              var helpUrl = String(res && res.helpUrl || '');
+              if (helpUrl || String(res && res.code || '') === 'GOOGLE_CALENDAR_UNAVAILABLE') {
+                helpUrl = (String((typeof LANG !== 'undefined' && LANG) ? LANG : 'de').toLowerCase() === 'en')
+                  ? 'https://serkal.de/google-calendar-help.html'
+                  : 'https://serkal.de/google-kalender-hilfe.html';
+              }
+              uiStatus(msg, {spinner:false, kind:'error', sound:true, helpUrl:helpUrl});
+              if (!helpUrl) setHint(searchHint, msg);
               try { uiLogAction_('Eintrag fachlich fehlgeschlagen', { message: msg, response: res }); } catch (_eAction) {}
               return;
             }
@@ -6894,8 +6900,14 @@ function nextResult() {
                   events:Number(cal.events || 0)
                 }); } catch (_eGoogleLog) {}
               }
-            } else {
+            } else if (res && (res.calendarMode === 'ics' || res.calendarMode === 'auto')) {
               offerIcsDownloadAfterInsert_(icsPayload);
+            } else {
+              uiStatus('Archiv gespeichert. Kalender wurde auf Wunsch nicht verwendet.',
+                {spinner:false, kind:'info'});
+              try { uiLogAction_('Archiv ohne Kalender gespeichert', {
+                kalenderModus:String(res && res.calendarMode || 'none')
+              }); } catch (_eNoCalendarLog) {}
             }
           })
           .withFailureHandler(function(err) {
