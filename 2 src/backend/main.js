@@ -88,10 +88,17 @@ const DEFAULT_SETTINGS = {
 
 const SERKAL_GOOGLE_HELP_URL_DE = "https://serkal.de/google-kalender-hilfe.html";
 const SERKAL_GOOGLE_HELP_URL_EN = "https://serkal.de/google-calendar-help.html";
+const SERKAL_TMDB_HELP_URL_DE = "https://serkal.de/tmdb-hilfe.html";
+const SERKAL_TMDB_HELP_URL_EN = "https://serkal.de/tmdb-help.html";
 
 function googleHelpUrl_(lang) {
     return String(lang || "de").toLowerCase() === "en" ?
         SERKAL_GOOGLE_HELP_URL_EN : SERKAL_GOOGLE_HELP_URL_DE;
+}
+
+function tmdbHelpUrl_(lang) {
+    return String(lang || "de").toLowerCase() === "en" ?
+        SERKAL_TMDB_HELP_URL_EN : SERKAL_TMDB_HELP_URL_DE;
 }
 
 function googleCalendarPublicFailure_(extra) {
@@ -2459,6 +2466,11 @@ function installIpc_() {
         await shell.openExternal(url);
         return { ok:true, url };
     });
+    ipcMain.handle("serkal:help:tmdb", async (_event, lang) => {
+        const url = tmdbHelpUrl_(lang);
+        await shell.openExternal(url);
+        return { ok:true, url };
+    });
     ipcMain.handle("serkal:calendar:open", async (_event, settingsFromUi) => {
         const settings = settingsFromUi ? normalizeSettings_(settingsFromUi) : readSettings_();
         let mode = settings.calendar.mode;
@@ -2479,6 +2491,36 @@ function installDesktopTmdbBridge_(hauptfenster) {
 (() => {
   function askTmdbKey_() {
     return new Promise((resolve) => {
+      const lang = (() => {
+        try {
+          const saved = String(localStorage.getItem('serkal_lang') || '').toLowerCase();
+          if (saved === 'en') return 'en';
+        } catch (_e) {}
+        return 'de';
+      })();
+      const copy = lang === 'en' ? {
+        title:'Set up TMDB',
+        text:'For this function, SerKal needs your personal free TMDB API key.',
+        placeholder:'Personal TMDB API key (v3 auth)',
+        cancel:'Cancel',
+        help:'Open help',
+        save:'Save',
+        missing:'Please enter your personal TMDB API key.',
+        network:'Unable to connect to TMDB. Please check your internet connection.',
+        invalid:'This TMDB API key did not work. Please check it.',
+        failed:'TMDB setup failed.'
+      } : {
+        title:'TMDB einrichten',
+        text:'Für diese Funktion benötigt SerKal deinen persönlichen kostenlosen TMDB-API-Key.',
+        placeholder:'Persönlicher TMDB-API-Key (v3 auth)',
+        cancel:'Abbrechen',
+        help:'Hilfe öffnen',
+        save:'Speichern',
+        missing:'Bitte deinen persönlichen TMDB-API-Key eingeben.',
+        network:'Keine Verbindung zu TMDB. Bitte die Internetverbindung prüfen.',
+        invalid:'Dieser TMDB-API-Key funktioniert nicht. Bitte prüfe ihn.',
+        failed:'Die TMDB-Einrichtung ist fehlgeschlagen.'
+      };
       const old = document.getElementById('skTmdbKeyOverlay');
       if (old) old.remove();
       const overlay = document.createElement('div');
@@ -2486,30 +2528,37 @@ function installDesktopTmdbBridge_(hauptfenster) {
       overlay.className = 'skDialogOverlay sk-open';
       overlay.setAttribute('aria-hidden', 'false');
       overlay.innerHTML = '<section class="skDialogBox" role="dialog" aria-modal="true" data-kind="info">' +
-        '<div class="skDialogHead"><div class="skDialogIcon">🔑</div><h2 class="skDialogTitle">TMDB einrichten</h2></div>' +
-        '<div class="skDialogText">Für die Seriensuche benötigt SERKAL einmalig Ihren TMDB API-Key.<br><br>' +
-        '<input id="skTmdbKeyInput" type="text" autocomplete="off" spellcheck="false" placeholder="TMDB API-Key" style="width:100%;box-sizing:border-box;padding:10px 12px;border-radius:10px;border:1px solid #cbd5e1;font:inherit">' +
+        '<div class="skDialogHead"><div class="skDialogIcon">🔑</div><h2 class="skDialogTitle">' + copy.title + '</h2></div>' +
+        '<div class="skDialogText">' + copy.text + '<br><br>' +
+        '<input id="skTmdbKeyInput" type="text" autocomplete="off" spellcheck="false" placeholder="' + copy.placeholder + '" style="width:100%;box-sizing:border-box;padding:10px 12px;border-radius:10px;border:1px solid #cbd5e1;font:inherit">' +
         '<div id="skTmdbKeyError" style="display:none;margin-top:10px;color:#b91c1c;font-weight:700"></div></div>' +
-        '<div class="skDialogActions"><button id="skTmdbKeyCancel" type="button">Abbrechen</button><button id="skTmdbKeySave" class="skDialogPrimary" type="button">Speichern und suchen</button></div>' +
+        '<div class="skDialogActions"><button id="skTmdbKeyCancel" type="button">' + copy.cancel + '</button><button id="skTmdbKeyHelp" type="button">' + copy.help + '</button><button id="skTmdbKeySave" class="skDialogPrimary" type="button">' + copy.save + '</button></div>' +
         '</section>';
       document.body.appendChild(overlay);
       const input = document.getElementById('skTmdbKeyInput');
       const error = document.getElementById('skTmdbKeyError');
       const finish = (value) => { overlay.remove(); resolve(value); };
       document.getElementById('skTmdbKeyCancel').onclick = () => finish('');
+      document.getElementById('skTmdbKeyHelp').onclick = async () => {
+        try { await window.serkal.help.tmdb(lang); }
+        catch (_e) {
+          error.textContent=copy.failed;
+          error.style.display='block';
+        }
+      };
       document.getElementById('skTmdbKeySave').onclick = async () => {
         const key = String(input.value || '').trim();
-        if (!key) { error.textContent='Bitte TMDB API-Key eingeben.'; error.style.display='block'; input.focus(); return; }
+        if (!key) { error.textContent=copy.missing; error.style.display='block'; input.focus(); return; }
         try {
           await window.serkal.tmdb.saveKey(key);
           const test = await window.serkal.tmdb.test();
           if (!test.ok) {
-            error.textContent = test.code === 'NETWORK' ? 'Keine Verbindung zu TMDB. Bitte Internetverbindung prüfen.' : 'Der TMDB API-Key funktioniert nicht. Bitte prüfen.';
+            error.textContent = test.code === 'NETWORK' ? copy.network : copy.invalid;
             error.style.display='block'; input.focus(); input.select(); return;
           }
           finish(key);
         } catch (_e) {
-          error.textContent='TMDB-Einrichtung fehlgeschlagen.'; error.style.display='block';
+          error.textContent=copy.failed; error.style.display='block';
         }
       };
       input.addEventListener('keydown', (ev) => { if (ev.key === 'Enter') document.getElementById('skTmdbKeySave').click(); });
