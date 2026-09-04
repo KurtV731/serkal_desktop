@@ -6119,7 +6119,7 @@ function fillDetailsFromPreview_(p) {
   const dateFlag = String(pp && (pp.dateFlag || '') || '').trim();
   let noteText = t('DETAILS_HINT_DASH');
   if (futureLabels.length) {
-    noteText = 'TMDB kennt zusätzlich ' + futureLabels.join(', ') + ' als angekündigte Staffel. Die Entscheidung darüber bleibt beim Nutzer.';
+    noteText = 'TMDB kennt zusätzlich ' + futureLabels.join(', ') + ' als angekündigte Staffel.';
   } else if (dateFlag) {
     noteText = 'TMDB meldet diese Staffel als angekündigt / noch ohne bestätigte Termine.';
   }
