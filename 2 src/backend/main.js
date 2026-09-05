@@ -655,7 +655,7 @@ async function archiveDeleteSeries_(payload) {
 }
 
 function archiveSetField_(line, key, value) {
-    const escaped = String(key || "").replace(/[.*+?^$(){}|[\]\\]/g, "\\const escaped = String(key || "").replace(/[.*+?^$(){}|[\]\\]/g, "\\async function tmdbRequest_(pathname, params) {");");
+    const escaped = String(key || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     const re = new RegExp("((?:^|[;|]\\s*)" + escaped + "=)[^;|]*", "i");
     if (re.test(line)) return String(line).replace(re, "$1" + String(value));
     const delimiter = String(line).includes(";") ? "; " : " | ";
