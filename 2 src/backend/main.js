@@ -655,7 +655,7 @@ async function archiveDeleteSeries_(payload) {
 }
 
 function archiveSetField_(line, key, value) {
-    const escaped = String(key || "").replace(/[.*+?^$(){}|[\]\\]/g, "\\async function tmdbRequest_(pathname, params) {");
+    const escaped = String(key || "").replace(/[.*+?^$(){}|[\]\\]/g, "\\const escaped = String(key || "").replace(/[.*+?^$(){}|[\]\\]/g, "\\async function tmdbRequest_(pathname, params) {");");
     const re = new RegExp("((?:^|[;|]\\s*)" + escaped + "=)[^;|]*", "i");
     if (re.test(line)) return String(line).replace(re, "$1" + String(value));
     const delimiter = String(line).includes(";") ? "; " : " | ";
@@ -759,8 +759,8 @@ function archiveSaveChanges_(dirtyMap) {
     }
 }
 
-async function tmdbRequest_(pathname, params) {
-    const apiKey = readTmdbKey_();
+async function tmdbRequest_(pathname, params, apiKeyOverride) {
+    const apiKey = String(apiKeyOverride || readTmdbKey_()).trim();
     if (!apiKey) return { ok:false, code:"TMDB_KEY_MISSING", message:"TMDB ist noch nicht eingerichtet. Bitte zuerst den TMDB API-Key eintragen." };
 
     const url = new URL("https://api.themoviedb.org/3" + pathname);
@@ -2405,6 +2405,12 @@ function installIpc_() {
     ipcMain.handle("serkal:settings:get", () => readSettings_());
     ipcMain.handle("serkal:settings:save", (_event, settings) => writeSettings_(settings));
     ipcMain.handle("serkal:tmdb:status", () => ({ configured:!!readTmdbKey_() }));
+    ipcMain.handle("serkal:tmdb:testKey", async (_event, apiKey) => {
+        const key = String(apiKey || "").trim();
+        if (!key) return { ok:false, code:"TMDB_KEY_MISSING", message:"TMDB API-Key fehlt." };
+        const res = await tmdbRequest_("/configuration", {}, key);
+        return res.ok ? { ok:true, message:"TMDB-Verbindung funktioniert." } : res;
+    });
     ipcMain.handle("serkal:tmdb:saveKey", (_event, apiKey) => writeTmdbKey_(apiKey));
     ipcMain.handle("serkal:tmdb:test", async () => {
         const res = await tmdbRequest_("/configuration", {});
@@ -2550,12 +2556,12 @@ function installDesktopTmdbBridge_(hauptfenster) {
         const key = String(input.value || '').trim();
         if (!key) { error.textContent=copy.missing; error.style.display='block'; input.focus(); return; }
         try {
-          await window.serkal.tmdb.saveKey(key);
-          const test = await window.serkal.tmdb.test();
+          const test = await window.serkal.tmdb.testKey(key);
           if (!test.ok) {
             error.textContent = test.code === 'NETWORK' ? copy.network : copy.invalid;
             error.style.display='block'; input.focus(); input.select(); return;
           }
+          await window.serkal.tmdb.saveKey(key);
           finish(key);
         } catch (_e) {
           error.textContent=copy.failed; error.style.display='block';
