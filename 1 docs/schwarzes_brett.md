@@ -32,6 +32,17 @@ Absender, Empfänger, Status und dem zugehörigen Commit eingetragen.
   Installer-Chatty.
 - SerKal-Fachlogik und freizugebender Quellstand gehören zum CE.
 
+## Aktuelle Arbeitssperren
+
+### 2026-09-06 – Website-Chatty – Downloadseiten
+
+Status: GESPERRT / IN ARBEIT
+
+`serkal-pages/up/download.html` und `serkal-pages/up/download-en.html` werden aktuell
+vom Website-Chatty bearbeitet. Bis zur Freigabe bitte keine parallelen Änderungen an
+diesen beiden Dateien. Ziel: SerKal Desktop EXE **und** klassische SerKal-ZIP als zwei
+getrennte Downloadangebote; HASA und andere Bereiche bleiben unangetastet.
+
 ## Eine technische Quelle
 
 Bis zur kontrollierten Zusammenführung ist
