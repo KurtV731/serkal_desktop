@@ -2795,7 +2795,10 @@ function erstelleHauptfenster() {
             preload:path.join(__dirname,"..","common","preload.js"),
             contextIsolation:true,
             nodeIntegration:false,
-            additionalArguments:[app.isPackaged ? "--serkal-installed" : "--serkal-development"]
+            additionalArguments:[
+                app.isPackaged ? "--serkal-installed" : "--serkal-development",
+                "--serkal-version=" + app.getVersion()
+            ]
         }
     });
     serkalMainWindow_ = hauptfenster;
