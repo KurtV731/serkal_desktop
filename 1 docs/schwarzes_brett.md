@@ -92,6 +92,62 @@ Alle Dateien müssen unabhängig vom aktuellen CMD-Verzeichnis funktionieren.
 
 ## Offene Übergaben
 
+### 2026-09-07 – Kurt/CE – Spielerwechsel: Xaver beginnt immer bei null
+
+Status: QUELLCODE FERTIG / TEST DURCH KURT OFFEN
+
+`switch-player.bat` wurde auf dem CE-Branch so geändert:
+
+- Kurt-Peter Vogelsaengers lokaler SerKal-Zustand wird vor dem Wechsel vollständig im
+  Kurt-Profil und zusätzlich als Sicherheitskopie gesichert.
+- Xaver Hoegers Zustand wird nicht mehr für den nächsten Lauf aufgehoben.
+- Jeder Wechsel zu Xaver erzeugt ein neues leeres, getrenntes Testarchiv.
+- Xaver startet ohne Archiveinträge, Kalendermodus, Kalender-ID, Google-Token,
+  TMDB-Key und Wartungs-Cache.
+- Beim Rückwechsel wird Kurts zuvor gesicherter Zustand wiederhergestellt.
+- Bereits vorhandene Termine in Kurts echtem Google-Kalender werden selbstverständlich
+  weder gelöscht noch verändert; Xaver besitzt lediglich keinerlei Zugriff darauf.
+
+Quellcommit: `0c27bf6840d7c97244b6e85af79860c34310ea2e`.
+
+Kurt testet nach `PULL-SD.BAT`: SerKal schließen, `switch-player.bat` ausführen,
+SerKal starten. Xaver muss eine vollständig leere Ersteinrichtung sehen.
+
+### 2026-09-07 – CE an Website-Chatty – Startseite nach Programmaufruf nicht stehen lassen
+
+Status: OFFEN
+
+Kurts Firefox-Kachel öffnet `https://serkal.de/start`, die danach
+`serkal://start/` aufruft. Die derzeitige große weiße Seite soll nach erfolgreicher
+Übergabe an SerKal nicht bildschirmfüllend stehen bleiben.
+
+Bitte für `/start` umsetzen und praktisch in Firefox prüfen:
+
+1. SerKal wie bisher über `serkal://start/` aufrufen.
+2. Danach automatisch zur vorherigen Firefox-Seite zurückkehren; falls möglich,
+   zusätzlich einen sicheren Selbstschließversuch ausführen.
+3. Falls Firefox das Schließen wegen seiner Sicherheitsregeln verweigert, darf keine
+   große leere Seite bleiben: stattdessen nur eine kleine, verständliche Rückfallanzeige.
+4. Keine neue Browser-Erweiterung und kein Native-Messaging einführen.
+5. Die bestehende funktionierende Protokoll-Brücke nicht ersetzen.
+
+Technische Grenze: Eine normale Firefox-Kachel darf ein von ihr geöffnetes Browserfenster
+nicht auf jedem System zuverlässig selbst schließen. Vollständig ohne Browserfenster
+startet SerKal über die vom Installer angelegte Windows-/Desktop-Verknüpfung.
+
+### 2026-09-07 – CE an Website-Chatty – Hilfeseiten führen zurück zu SerKal
+
+Status: OFFEN
+
+Die deutschen und englischen SerKal-Hilfeseiten erhalten eine deutlich sichtbare
+Schaltfläche **„Zurück zu SerKal“** beziehungsweise **„Back to SerKal“**.
+
+Verbindliches Ziel der Schaltfläche ist `serkal://start/`, damit die installierte
+SerKal-Anwendung wieder nach vorn kommt. Sie darf nicht auf irgendeine allgemeine
+SerKal-Start-, Neben- oder Downloadseite führen. Betroffen sind mindestens die
+Google-Kalender- und TMDB-Hilfeseiten. DE/EN jeweils prüfen.
+
+
 ### 2026-09-07 – CE an Installer-Chatty – `serkal://start` wieder registrieren
 
 Status: QUELLSTAND 0.9002 FERTIG / WINDOWS-BUILD UND KACHELTEST OFFEN
