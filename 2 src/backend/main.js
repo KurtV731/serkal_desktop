@@ -3,7 +3,7 @@
  SERKAL Desktop
 -------------------------------------------------------------------------------
  Datei      : main.js
- Version    : 0.9001
+ Version    : 0.9002
  Aufgabe    : Startet Electron, verwaltet lokale Grundeinstellungen,
               oeffnet den Kalender, stellt die TMDB-/SERKAL-Suche bereit
               und portiert das SERKAL-2.5-Archiv auf lokale TXT-Dateien.
@@ -15,6 +15,26 @@ const fs = require("node:fs");
 const http = require("node:http");
 const crypto = require("node:crypto");
 const { app, BrowserWindow, ipcMain, shell } = require("electron");
+
+const SERKAL_PROTOCOL = "serkal";
+const serkalSquirrelUninstall_ = process.argv.includes("--squirrel-uninstall");
+
+function maintainSerkalProtocol_() {
+    if (process.platform !== "win32" || !app.isPackaged) return false;
+    try {
+        if (serkalSquirrelUninstall_) {
+            return app.removeAsDefaultProtocolClient(SERKAL_PROTOCOL);
+        }
+        return app.setAsDefaultProtocolClient(SERKAL_PROTOCOL);
+    } catch (err) {
+        console.error("SERKAL URL-Protokoll:", err);
+        return false;
+    }
+}
+
+// Vor der Squirrel-Behandlung registrieren bzw. bei Deinstallation entfernen.
+// Bei jedem normalen Start wird die Zuordnung vorsorglich erneut repariert.
+maintainSerkalProtocol_();
 
 // Squirrel-Ereignisse bei Installation, Update und Deinstallation sofort behandeln.
 // Dadurch werden die dauerhaften Desktop- und Startmenue-Verknuepfungen gepflegt.
@@ -2829,6 +2849,7 @@ if (!serkalHasSingleInstanceLock_) {
     });
 
     app.whenReady().then(()=>{
+        maintainSerkalProtocol_();
         installIpc_();
         erstelleHauptfenster();
         app.on("activate",()=>{
