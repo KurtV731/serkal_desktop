@@ -103,9 +103,11 @@ Bitte `PULL-PD.BAT` gemeinsam mit dem Installer-Chatty vervollständigen. Anford
 
 Ergebnis, öffentliche URL und geprüften Commit hier eintragen.
 
+## Erledigte Übergaben
+
 ### 2026-09-07 – Installer-Chatty – SerKal Desktop 0.9 und Verknüpfungen
 
-Status: QUELLSTAND FERTIG / WINDOWS-BUILD UND XAVER-TEST OFFEN
+Status: ERLEDIGT / WINDOWS-BUILD UND XAVER-KOPFZEILENTEST BESTANDEN
 
 Auf dem verbindlichen Fachbranch `serkal-0.0.5-archiv-start` wurde die
 Veröffentlichungsversion vorbereitet:
@@ -126,12 +128,12 @@ fest eingetragene Versionsanzeige `0.0.5 – INSTALLIERT` enthielt. Gefunden dur
 Volltextsuche. Korrigiert: Die Preload-Brücke erhält die package.json-Version nun von
 der Hauptanwendung, zeigt `0.9.0` als `0.9` und ergänzt bei installierten Fassungen
 keinen Kanaltext. Korrekturcommit: `aa056c78dc8eedbfacbf3cd6a28fdfd58ce2098c`.
-Ein erneuter Windows-Build und Kopfzeilentest sind offen.
-JSON- und Quelltextprüfung erfolgreich. Ein realer Windows-Build und der anschließende
-Neunutzer-/Xaver-Test müssen noch über `PULL-AUTOZIP.BAT` erfolgen. Bis dahin ist kein
-neues Artefakt zur Veröffentlichung freigegeben.
-
-## Erledigte Übergaben
+Erneuter Windows-Build und Kopfzeilentest am 07.09.2026 erfolgreich abgeschlossen.
+Kurt entfernte beide alten 0.0.5-Installationen und installierte das neu gebaute
+Artefakt aus `C:\\serkal-pages\\up\\download\\serkal-desktop.exe`. Windows führt genau
+eine Installation `SerKal Desktop 0.9.0`; die automatisch erzeugte Desktop-Verknüpfung
+trägt das SerKal-Symbol und startet die Fassung mit der sichtbaren Kopfzeile
+`SERKAL Desktop 0.9` ohne Kanalzusatz.
 
 ### 2026-09-06 – Installer-Chatty
 
