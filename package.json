@@ -1,7 +1,7 @@
 {
   "name": "serkal_desktop",
   "productName": "SerKal Desktop",
-  "version": "0.9001.0",
+  "version": "0.9002.0",
   "description": "SERKAL Desktop – lokales Archiv",
   "main": "2 src/backend/main.js",
   "scripts": {
