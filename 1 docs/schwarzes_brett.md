@@ -38,6 +38,22 @@ Absender, Empfänger, Status und dem zugehörigen Commit eingetragen.
   Installer-Chatty.
 - SerKal-Fachlogik und freizugebender Quellstand gehören zum CE.
 
+## Achtung vor jedem Installer-Build: Versionsnummer zwingend erhöhen
+
+**Kein installierbares SerKal-Artefakt darf dieselbe Versionsnummer wie ein früherer
+Build tragen – auch dann nicht, wenn der frühere Build nie öffentlich veröffentlicht
+wurde.** Sobald eine Fassung möglicherweise auf einem Windows-Rechner installiert oder
+als Installer getestet wird, muss vorher die Versionsnummer erhöht werden.
+
+Verbindliche Reihenfolge nach der ersten Fassung `0.9`:
+
+- sichtbar: `0.9001`, `0.9002`, `0.9003` usw.;
+- technisch in package.json/Squirrel: `0.9001.0`, `0.9002.0`, `0.9003.0` usw.
+
+Diese Prüfung gehört vor den Start von `PULL-EX.BAT` und `PULL-AUTOZIP.BAT`.
+Gleiche Versionsnummer bei verändertem Inhalt ist ein Buildfehler und darf nicht zum
+Installationstest oder zur Veröffentlichung weitergegeben werden.
+
 ## Aktuelle Arbeitssperren
 
 ### 2026-09-06 – Website-Chatty – Downloadseiten
