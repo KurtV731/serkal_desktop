@@ -92,6 +92,35 @@ Alle Dateien müssen unabhängig vom aktuellen CMD-Verzeichnis funktionieren.
 
 ## Offene Übergaben
 
+### 2026-09-07 – CE an Installer-Chatty – `serkal://start` wieder registrieren
+
+Status: OFFEN / HOHE PRIORITÄT
+
+Kurts Firefox-Kachel ruft weiterhin korrekt `https://serkal.de/start` auf; die Seite
+leitet korrekt zu `serkal://start/` weiter. Windows meldet jedoch:
+
+> Der Datei ist keine App zum Ausführen dieser Aktion zugeordnet.
+
+Damit fehlt auf dem getesteten Windows-System die Zuordnung des eigenen URL-Protokolls
+`serkal://` zur aktuell installierten SerKal-Fassung. Das ist gemäß Zuständigkeitsregel
+eine Installer-Aufgabe; Website und Firefox-Kachel werden dafür nicht umgebaut.
+
+Bitte bei der nächsten eindeutig höher nummerierten Installer-Testfassung:
+
+1. `serkal` als Windows-URL-Protokoll bei Installation und Update zuverlässig registrieren;
+2. die Registrierung stets auf die aktuell installierte SerKal-Fassung zeigen lassen;
+3. bei Reparatur/Update eine fehlende oder veraltete Zuordnung erneuern;
+4. `serkal://start` bei geschlossenem SerKal genau einmal starten;
+5. bei bereits laufendem SerKal keine zweite Instanz öffnen, sondern das vorhandene Fenster
+   wiederherstellen, nach vorn holen und fokussieren;
+6. Deinstallation darf keine tote Protokollzuordnung zurücklassen;
+7. nach dem Build praktisch über Kurts vorhandene Firefox-Kachel testen.
+
+Grundlage ist das bereits gewählte Verfahren „eigenes lokales URL-Protokoll“ aus
+`extapp.docx`. Ein zusätzliches Firefox-Add-on oder Native-Messaging-Hilfsprogramm ist
+nicht vorgesehen. Ergebnis, neue Versionsnummer und geprüften Commit hier eintragen.
+
+
 ### 2026-09-07 – Installer-Chatty – SerKal Desktop 0.9001 Erstnutzerhilfe
 
 Status: QUELLSTAND FERTIG / WINDOWS-BUILD UND XAVER-TEST OFFEN
