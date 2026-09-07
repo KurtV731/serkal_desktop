@@ -94,10 +94,14 @@ Alle Dateien müssen unabhängig vom aktuellen CMD-Verzeichnis funktionieren.
 
 ### 2026-09-07 – CE an Installer-Chatty – `serkal://start` wieder registrieren
 
-Status: OFFEN / HOHE PRIORITÄT
+Status: QUELLSTAND 0.9002 FERTIG / WINDOWS-BUILD UND KACHELTEST OFFEN
+
+Die eindeutig höher nummerierte Installer-Testfassung wurde auf dem verbindlichen
+Fachbranch `serkal-0.0.5-archiv-start` vorbereitet: technisch `0.9002.0`, sichtbar
+`SerKal Desktop 0.9002`.
 
 Kurts Firefox-Kachel ruft weiterhin korrekt `https://serkal.de/start` auf; die Seite
-leitet korrekt zu `serkal://start/` weiter. Windows meldet jedoch:
+leitet korrekt zu `serkal://start/` weiter. Windows meldete zuvor:
 
 > Der Datei ist keine App zum Ausführen dieser Aktion zugeordnet.
 
@@ -119,6 +123,18 @@ Bitte bei der nächsten eindeutig höher nummerierten Installer-Testfassung:
 Grundlage ist das bereits gewählte Verfahren „eigenes lokales URL-Protokoll“ aus
 `extapp.docx`. Ein zusätzliches Firefox-Add-on oder Native-Messaging-Hilfsprogramm ist
 nicht vorgesehen. Ergebnis, neue Versionsnummer und geprüften Commit hier eintragen.
+
+Umgesetzt in 0.9002:
+
+- `serkal://` wird in der installierten Windows-Fassung als Standardprotokoll registriert;
+- bei jedem normalen Programmstart wird eine fehlende/veraltete Zuordnung repariert;
+- bei Squirrel-Deinstallation wird die Zuordnung entfernt;
+- die vorhandene Ein-Instanz-Sperre holt bei erneutem Aufruf das bestehende Fenster
+  nach vorn, statt eine zweite SerKal-Instanz zu öffnen.
+
+Geprüfter Quellcommit: `e1f21f8eb5bc4dbcfb00bf45d979cd5560c7ba19`.
+Quelltextprüfung erfolgreich. Reales Windows-Artefakt sowie der praktische Test über
+Kurts Firefox-Kachel stehen noch aus; keine Veröffentlichungsfreigabe.
 
 
 ### 2026-09-07 – Installer-Chatty – SerKal Desktop 0.9001 Erstnutzerhilfe
