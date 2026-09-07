@@ -1916,7 +1916,7 @@
       <label class="skCalendarChoice"><input type="radio" name="skCalendarMode" value="ics"><strong>ICS-Datei / anderer Kalender</strong></label>
       <label class="skCalendarChoice"><input type="radio" name="skCalendarMode" value="none"><strong>Keinen Kalender verwenden</strong></label>
       <label class="skCalendarChoice"><input type="radio" name="skCalendarMode" value="auto"><strong>Keine Ahnung, was du von mir willst – mach, was du denkst. 😏</strong></label>
-      <div class="skCalendarSetupActions"><button id="skCalendarSetupLater" type="button">Später</button><button id="skCalendarSetupSave" type="button">Speichern</button></div>
+      <div class="skCalendarSetupActions"><button id="skCalendarSetupLater" type="button">Später</button><button id="skCalendarSetupHelp" type="button">Hilfe öffnen</button><button id="skCalendarSetupSave" type="button">Speichern</button></div>
     </section>
   </div>
   <script>
@@ -1931,6 +1931,11 @@
     window.serkalCalendarSetupShow=async function(){show(await getSettings()||{})};
     document.querySelectorAll('input[name="skCalendarMode"]').forEach(function(e){e.addEventListener('change',refresh)});
     document.getElementById('skCalendarSetupLater').addEventListener('click',hide);
+    document.getElementById('skCalendarSetupHelp').addEventListener('click',async function(){
+      var lang='de';
+      try{lang=String(localStorage.getItem('serkal_lang')||'de').toLowerCase()==='en'?'en':'de'}catch(_e){}
+      try{await window.serkal.help.google(lang)}catch(e){alert('Kalender-Hilfe konnte nicht geöffnet werden: '+String(e||''))}
+    });
     document.getElementById('skCalendarSetupSave').addEventListener('click',async function(){
       var m=mode(),id=googleId?String(googleId.value||'').trim():'';
       if(!m){alert('Bitte eine Kalender-Option auswählen.');return}
@@ -1941,7 +1946,7 @@
   </script>
 
   <!-- ============================================================
-       SERKAL DESKTOP 0.0.5
+       SERKAL DESKTOP 0.9001
        Übergangsbrücke für die reine UI-Übernahme.
        Sie verhindert Fehler durch google.script.run, solange die
        eigentlichen Backend-Funktionen noch nicht nach Electron
@@ -1950,7 +1955,7 @@
   <script>
     (function () {
       const desktopResponses = {
-        apiGetBuildInfo: { ok: true, daten: { version: 'SERKAL Desktop 0.0.5' } },
+        apiGetBuildInfo: { ok: true, daten: { version: 'SERKAL Desktop ' + ((window.serkal && window.serkal.version) || '0.9001') } },
         apiLadeArchivDaten: { ok: true, entries: [] }
       };
 
