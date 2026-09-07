@@ -3,7 +3,7 @@
  SERKAL Desktop
 -------------------------------------------------------------------------------
  Datei      : main.js
- Version    : 0.9
+ Version    : 0.9001
  Aufgabe    : Startet Electron, verwaltet lokale Grundeinstellungen,
               oeffnet den Kalender, stellt die TMDB-/SERKAL-Suche bereit
               und portiert das SERKAL-2.5-Archiv auf lokale TXT-Dateien.
@@ -2599,7 +2599,7 @@ function installDesktopTmdbBridge_(hauptfenster) {
           let res = await window.serkal.tmdb.searchTv(query, lang, options || {});
           if (!res.ok && res.code === 'TMDB_KEY_MISSING') {
             const key = await askTmdbKey_();
-            if (!key) { failure({message:'TMDB ist noch nicht eingerichtet. Bitte zuerst den TMDB API-Key eintragen.'}); return; }
+            if (!key) { failure({message:'Die TMDB-Einrichtung wurde abgebrochen. Du kannst sie jederzeit erneut öffnen, indem du eine neue Suche startest. Über „Hilfe öffnen“ erfährst du, wie du deinen kostenlosen TMDB-API-Key erhältst.'}); return; }
             res = await window.serkal.tmdb.searchTv(query, lang, options || {});
           }
           if (!res.ok) { failure({message:res.message || 'TMDB-Suche fehlgeschlagen.', code:res.code}); return; }
