@@ -3,7 +3,7 @@
  SERKAL Desktop
 -------------------------------------------------------------------------------
  Datei      : main.js
- Version    : 0.0.5
+ Version    : 0.9
  Aufgabe    : Startet Electron, verwaltet lokale Grundeinstellungen,
               oeffnet den Kalender, stellt die TMDB-/SERKAL-Suche bereit
               und portiert das SERKAL-2.5-Archiv auf lokale TXT-Dateien.
@@ -15,6 +15,10 @@ const fs = require("node:fs");
 const http = require("node:http");
 const crypto = require("node:crypto");
 const { app, BrowserWindow, ipcMain, shell } = require("electron");
+
+// Squirrel-Ereignisse bei Installation, Update und Deinstallation sofort behandeln.
+// Dadurch werden die dauerhaften Desktop- und Startmenue-Verknuepfungen gepflegt.
+if (require("electron-squirrel-startup")) return;
 
 function configureSharedUserData_() {
     try {
@@ -67,12 +71,13 @@ function configureSharedUserData_() {
 
 configureSharedUserData_();
 
-function serkalBuildChannel_() {
-    return app.isPackaged ? "INSTALLIERT" : "ENTWICKLUNG";
+function serkalDisplayVersion_() {
+    return app.getVersion().replace(/\.0$/, "");
 }
 
 function serkalWindowTitle_() {
-    return "SERKAL Desktop " + app.getVersion() + " – " + serkalBuildChannel_();
+    const title = "SERKAL Desktop " + serkalDisplayVersion_();
+    return app.isPackaged ? title : title + " – ENTWICKLUNG";
 }
 
 
