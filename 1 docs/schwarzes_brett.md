@@ -103,6 +103,26 @@ Bitte `PULL-PD.BAT` gemeinsam mit dem Installer-Chatty vervollständigen. Anford
 
 Ergebnis, öffentliche URL und geprüften Commit hier eintragen.
 
+### 2026-09-07 – Installer-Chatty – SerKal Desktop 0.9 und Verknüpfungen
+
+Status: QUELLSTAND FERTIG / WINDOWS-BUILD UND XAVER-TEST OFFEN
+
+Auf dem verbindlichen Fachbranch `serkal-0.0.5-archiv-start` wurde die
+Veröffentlichungsversion vorbereitet:
+
+- Paketversion technisch `0.9.0`, sichtbarer Fenstertitel der installierten Fassung
+  verbindlich `SERKAL Desktop 0.9`;
+- kein Zusatz `INSTALLIERT` oder `Installer` im Fenstertitel;
+- Entwicklungsstart bleibt mit `ENTWICKLUNG` unterscheidbar;
+- Squirrel-Installationsereignisse werden nun früh behandelt, damit Desktop- und
+  Startmenü-Verknüpfungen bei Installation, Update und Deinstallation gepflegt werden;
+- interner Setupname auf `SerKal_0.9_Setup.exe` umgestellt.
+
+Geprüfter Quellcommit: `fb4c50059af4091aad2fa26afb19229ed7389ac1`.
+JSON- und Quelltextprüfung erfolgreich. Ein realer Windows-Build und der anschließende
+Neunutzer-/Xaver-Test müssen noch über `PULL-AUTOZIP.BAT` erfolgen. Bis dahin ist kein
+neues Artefakt zur Veröffentlichung freigegeben.
+
 ## Erledigte Übergaben
 
 ### 2026-09-06 – Installer-Chatty
