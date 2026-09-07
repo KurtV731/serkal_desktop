@@ -5,7 +5,7 @@ module.exports = {
   packagerConfig: {
     asar: true,
 
-    // SERKAL Desktop 0.0.5:
+    // SERKAL Desktop 0.9:
     // Nur Laufzeit-Abhaengigkeiten ins Paket nehmen. Forge/Electron-
     // Entwicklungswerkzeuge gehoeren nicht in app.asar.
     prune: true,
@@ -36,7 +36,7 @@ module.exports = {
         name: 'SerKalDesktop',
         authors: 'Kurt Vogelsaenger',
         description: 'SERKAL Desktop – Serienkalender',
-        setupExe: 'SerKal_0.0.5_Setup.exe',
+        setupExe: 'SerKal_0.9_Setup.exe',
         setupIcon: '4 assets/icon/serkal.ico',
 
         // Squirrel versucht sonst zusaetzlich, Update.exe mit demselben Icon
