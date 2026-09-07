@@ -119,6 +119,14 @@ Veröffentlichungsversion vorbereitet:
 - interner Setupname auf `SerKal_0.9_Setup.exe` umgestellt.
 
 Geprüfter Quellcommit: `fb4c50059af4091aad2fa26afb19229ed7389ac1`.
+
+Nachtest 07.09.2026: Der erste 0.9-Build installierte korrekt nach `app-0.9.0`, zeigte
+aber weiterhin die alte Kopfzeile, weil `2 src/common/preload.js` noch eine zweite
+fest eingetragene Versionsanzeige `0.0.5 – INSTALLIERT` enthielt. Gefunden durch Kurts
+Volltextsuche. Korrigiert: Die Preload-Brücke erhält die package.json-Version nun von
+der Hauptanwendung, zeigt `0.9.0` als `0.9` und ergänzt bei installierten Fassungen
+keinen Kanaltext. Korrekturcommit: `aa056c78dc8eedbfacbf3cd6a28fdfd58ce2098c`.
+Ein erneuter Windows-Build und Kopfzeilentest sind offen.
 JSON- und Quelltextprüfung erfolgreich. Ein realer Windows-Build und der anschließende
 Neunutzer-/Xaver-Test müssen noch über `PULL-AUTOZIP.BAT` erfolgen. Bis dahin ist kein
 neues Artefakt zur Veröffentlichung freigegeben.
