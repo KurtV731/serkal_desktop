@@ -2,11 +2,13 @@
    Versionsquelle: package.json (keine manuell gepflegte sichtbare Versionsnummer) */
 const { contextBridge, ipcRenderer } = require("electron");
 
-/* Sandboxed Preloads duerfen keine beliebigen Node-Module wie node:path laden.
-   Die Versionsangabe wird fuer diese Baustellenversion bewusst lokal gehalten. */
-const SERKAL_VERSION = "0.0.5";
-const SERKAL_CHANNEL = process.argv.includes("--serkal-installed") ? "INSTALLIERT" : "ENTWICKLUNG";
-const SERKAL_WINDOW_TITLE = "SERKAL Desktop " + SERKAL_VERSION + " – " + SERKAL_CHANNEL;
+/* Die Hauptanwendung uebergibt ihre package.json-Version als Startargument.
+   Fuer den sichtbaren Titel wird die technische SemVer 0.9.0 als 0.9 dargestellt. */
+const SERKAL_VERSION_ARG = process.argv.find(value => value.startsWith("--serkal-version="));
+const SERKAL_VERSION_RAW = SERKAL_VERSION_ARG ? SERKAL_VERSION_ARG.slice("--serkal-version=".length) : "0.9.0";
+const SERKAL_VERSION = SERKAL_VERSION_RAW.replace(/\.0$/, "");
+const SERKAL_CHANNEL = process.argv.includes("--serkal-installed") ? "" : "ENTWICKLUNG";
+const SERKAL_WINDOW_TITLE = "SERKAL Desktop " + SERKAL_VERSION + (SERKAL_CHANNEL ? " – " + SERKAL_CHANNEL : "");
 
 function applyDesktopIdentity_() {
     try {
