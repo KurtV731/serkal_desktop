@@ -92,6 +92,38 @@ Alle Dateien müssen unabhängig vom aktuellen CMD-Verzeichnis funktionieren.
 
 ## Offene Übergaben
 
+### 2026-09-07 – Kurt/CE an Website-Chatty – alle Webseiten: Logo-Pfade und Kurt-Regeln
+
+Status: DRINGEND / OFFEN
+
+Der Website-Chatty weiß bereits, dass sämtliche SerKal-Seiten angepasst werden müssen.
+Dabei gilt jetzt verbindlich:
+
+1. **Keine sichtbaren Fehler.** Vor Übergabe jede betroffene Seite praktisch öffnen und
+   Bilder, Links und Darstellung prüfen. Ein fehlendes oder veraltetes Logo ist ein
+   sichtbarer Fehler und keine Kleinigkeit.
+2. **Keine redundanten Angaben.** Dieselbe Information darf nicht gleichzeitig in
+   benachbarten oder untereinanderliegenden Feldern wiederholt werden.
+3. **Kein vermeidbarer Klick.** Wenn eine Aktion sicher automatisch erfolgen kann, darf
+   der Nutzer dafür kein zusätzliches Fenster öffnen oder einen weiteren Knopf betätigen
+   müssen.
+
+Die Logos liegen nun gesammelt im Unterordner `icon/logo`. Daher alle echten
+Logo-Einbindungen auf sämtlichen betroffenen HTML-Seiten prüfen und beispielsweise
+so korrigieren:
+
+- `icon/logo/serkallogo.png`
+- `icon/logo/chatgptlogo.png`
+- `icon/logo/tmdblogo.png`
+
+Alte Aufrufe wie `icon/serkallogo.png` sowie das alte SerKal-Logo vollständig aus den
+Seiten entfernen. Relative Pfade bei Seiten in Unterordnern entsprechend korrekt
+auflösen. Nicht blind ersetzen: jede Seite anschließend im Browser prüfen.
+
+Die bereits gesperrten Downloadseiten bleiben ausschließlich im Arbeitsbereich des
+Website-Chattys. Ergebnis und geprüften Website-Commit hier zurückmelden.
+
+
 ### 2026-09-07 – Kurt/CE – Spielerwechsel: Xaver beginnt immer bei null
 
 Status: QUELLCODE FERTIG / TEST DURCH KURT OFFEN
