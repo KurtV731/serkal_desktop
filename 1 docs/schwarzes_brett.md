@@ -14,6 +14,12 @@ Absender, Empfänger, Status und dem zugehörigen Commit eingetragen.
 - **Vor jeder SerKal-Arbeit in GitHub wird zuerst dieses schwarze Brett gelesen.**
 - Die fachliche Quelle bleibt SerKal 2.5: **portieren, nicht neu erfinden**.
 - Die erste öffentliche SerKal-Desktop-Fassung wird **Version 0.9**, nicht 1.0.
+- **Jeder Build, der potentiell installiert oder als Installer getestet wird, erhält eine
+  neue, eindeutig höhere Versionsnummer.** Keine zwei installierbaren Artefakte tragen
+  dieselbe Version. Nach `0.9` wird in Tausenderschritten weitergezählt: sichtbar
+  `0.9001`, `0.9002`, `0.9003` usw.; technisch SemVer-konform `0.9001.0`,
+  `0.9002.0`, `0.9003.0` usw. Reine Quelländerungen ohne Installer-Build benötigen
+  noch keine neue Installationsnummer.
 - Ein veröffentlichter Stand besteht für den Endnutzer aus **einem Installationsangebot**,
   nicht aus mehreren EXE-Varianten.
 - Der Endnutzer installiert SerKal einmal und startet es danach als **lokales, selbständiges
