@@ -92,6 +92,26 @@ Alle Dateien müssen unabhängig vom aktuellen CMD-Verzeichnis funktionieren.
 
 ## Offene Übergaben
 
+### 2026-09-07 – Installer-Chatty – SerKal Desktop 0.9001 Erstnutzerhilfe
+
+Status: QUELLSTAND FERTIG / WINDOWS-BUILD UND XAVER-TEST OFFEN
+
+Auf dem verbindlichen Fachbranch `serkal-0.0.5-archiv-start` wurde die nächste eindeutig
+nummerierte Installer-Testfassung vorbereitet:
+
+- technisch `0.9001.0`, sichtbar `SerKal Desktop 0.9001`;
+- Kalender-Ersteinrichtung besitzt nun neben `Später` und `Speichern` den direkten
+  Knopf `Hilfe öffnen`; er öffnet die vorhandene deutsche/englische Kalenderhilfe;
+- ein Abbruch der TMDB-Einrichtung erklärt nun freundlich, dass eine neue Suche den
+  Einrichtungsdialog jederzeit erneut öffnet und wo die Hilfe zum kostenlosen API-Key
+  erreichbar ist;
+- weitere veraltete sichtbare 0.0.5-Buildtexte in der UI-Brücke wurden auf die dynamische
+  Versionsquelle beziehungsweise 0.9001 umgestellt.
+
+Geprüfter Quellcommit: `7108a76fd3ae82289546bf04245e45811d5cdf8f`.
+JSON- und Quelltextprüfung erfolgreich. Reales Artefakt und Xaver-Test über
+`PULL-AUTOZIP.BAT` stehen noch aus; keine Veröffentlichungsfreigabe.
+
 ### 2026-09-06 – Installer an Website-Chatty
 
 Status: OFFEN
