@@ -2302,7 +2302,7 @@ function maintenanceWriteArchive_(operation) {
     return { ok:true, fileName:operation.fileName, staffelLabel:label };
 }
 
-async function googleCalendarManagedEvents_(calendarId) {
+async function googleCalendarManagedEvents_(calendarId, includeLegacy) {
     const all = [];
     let pageToken = "";
     do {
@@ -2312,7 +2312,14 @@ async function googleCalendarManagedEvents_(calendarId) {
         url.searchParams.set("singleEvents", "true");
         url.searchParams.set("showDeleted", "false");
         url.searchParams.set("maxResults", "2500");
-        url.searchParams.append("privateExtendedProperty", "serkal=1");
+        /*
+         * Normale Wartung arbeitet nur mit eindeutig von SerKal markierten
+         * Terminen. Die Dublettenbereinigung muss zusätzlich den Altbestand
+         * sehen, dessen Termine diese Markierung noch nicht besaßen.
+         */
+        if (!includeLegacy) {
+            url.searchParams.append("privateExtendedProperty", "serkal=1");
+        }
         if (pageToken) url.searchParams.set("pageToken", pageToken);
         const result = await googleCalendarJsonRequest_("GET", url.toString());
         if (!result.ok) {
@@ -2343,7 +2350,8 @@ async function maintenanceCleanupCalendarDuplicates_() {
     }
     const resolved = await googleResolveSerkalCalendar_();
     const calendarId = String(resolved.id || "").trim();
-    const events = await googleCalendarManagedEvents_(calendarId);
+    // Der eigene SerKal-Kalender darf Alttermine ohne serkal=1 enthalten.
+    const events = await googleCalendarManagedEvents_(calendarId, true);
     const groups = new Map();
     for (const event of events) {
         const date = String(event && event.start && (event.start.date || event.start.dateTime) || "").slice(0, 10);
@@ -2359,11 +2367,23 @@ async function maintenanceCleanupCalendarDuplicates_() {
     for (const duplicates of groups.values()) {
         if (duplicates.length < 2) continue;
         duplicates.sort((a, b) => String(a && a.created || "").localeCompare(String(b && b.created || "")));
-        const manual = duplicates.filter(googleCalendarEventWasManuallyChanged_);
+        /*
+         * Eine vorhandene SerKal-Signatur, die nicht mehr zum Termin passt,
+         * beweist eine händische Änderung und hat Vorrang. Fehlende Signaturen
+         * kennzeichnen dagegen auch den SerKal-Altbestand und dürfen bei einer
+         * exakten Dublette nicht pauschal jede Bereinigung blockieren.
+         */
+        const manual = duplicates.filter(event => {
+            const privateData = event && event.extendedProperties && event.extendedProperties.private || {};
+            const stored = String(privateData.serkalSignature || "");
+            return !!stored && googleCalendarEventWasManuallyChanged_(event);
+        });
         const keep = manual[0] || duplicates[0];
         for (const event of duplicates) {
             if (event === keep) continue;
-            if (googleCalendarEventWasManuallyChanged_(event)) {
+            const privateData = event && event.extendedProperties && event.extendedProperties.private || {};
+            const stored = String(privateData.serkalSignature || "");
+            if (stored && googleCalendarEventWasManuallyChanged_(event)) {
                 protectedCount++;
                 continue;
             }
