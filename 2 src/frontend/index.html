@@ -426,6 +426,23 @@
       user-select: none;
     }
 
+    .noteBlockHead {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .noteHelpToggle {
+      width: 24px;
+      min-width: 24px;
+      height: 24px;
+      padding: 0;
+      border-radius: 50%;
+      font-weight: 900;
+      line-height: 1;
+    }
+
     .blockBody {
       padding: 10px;
       box-sizing: border-box;
@@ -1752,7 +1769,12 @@
           </div>
 
           <div class="block">
-            <div class="blockHead" id="hdDetNote">Eigene Notiz</div>
+            <div class="blockHead noteBlockHead">
+              <span id="hdDetNote">Eigene Notiz</span>
+              <button class="btnSmall noteHelpToggle" id="btnNoteSyntaxHelp" type="button"
+                title="Hilfe zu auswertbaren Notizzeilen" aria-label="Hilfe zu auswertbaren Notizzeilen"
+                aria-expanded="false">?</button>
+            </div>
             <div class="blockBody">
               <div class="fixedBox" style="max-height:120px; overflow:auto; padding:10px;" id="detailsNote">
                 <div class="hint">—</div>
@@ -4223,12 +4245,27 @@ function validateNoteText_(text) {
   };
 }
 
+function setNoteSyntaxHelpVisible_(visible) {
+  var noteHelp = document.getElementById('detailsNoteSyntaxHelp');
+  var helpButton = document.getElementById('btnNoteSyntaxHelp');
+  if (!noteHelp || !helpButton) return;
+  var show = !!visible;
+  noteHelp.style.display = show ? 'block' : 'none';
+  helpButton.setAttribute('aria-expanded', show ? 'true' : 'false');
+}
+
+function toggleNoteSyntaxHelp_() {
+  var noteHelp = document.getElementById('detailsNoteSyntaxHelp');
+  if (!noteHelp) return;
+  setNoteSyntaxHelpVisible_(noteHelp.style.display === 'none');
+}
+
 /**
  * @funktion applyNoteAutofill_
  * @bereich Notiz / UI
  * @zweck Übernimmt erkannte Steuerwörter in die kanonische Schreibweise und meldet sie sichtbar.
  * @status aktiv
- * @hinweis Greift bewusst erst bei Blur/Save ein, nicht aggressiv beim Tippen.
+ * @hinweis Greift bei Eingabepause, Blur und Speichern ein.
  * @loeschung nein
  */
 /**
@@ -6481,19 +6518,33 @@ function fillDetailsFromArchiv_(it) {
       '<code>Termine DE: 14.09., 21.09., 28.09.</code> – einzelne Termine festlegen<br>' +
       '<span style="opacity:.78">Groß-/Kleinschreibung ist egal. Alle anderen Texte bleiben freie Notizen.</span>';
 
-    ta.addEventListener('focus', function() {
-      noteHelp.style.display = 'block';
-    });
+    var noteNormalizeTimer = 0;
     ta.addEventListener('input', function() {
       setDirtyForEntry_(it, { note: String(ta.value || '') });
       ta.style.boxShadow = '0 0 0 2px rgba(231,111,81,0.22) inset';
+
+      window.clearTimeout(noteNormalizeTimer);
+      noteNormalizeTimer = window.setTimeout(function() {
+        var canonical = canonicalizeNoteText_(ta.value || '');
+        if (String(ta.value || '') !== String(canonical || '')) {
+          ta.value = String(canonical || '');
+          setDirtyForEntry_(it, { note: String(ta.value || '') });
+          uiStatus('Steuerwort in Notiz vereinheitlicht.', { spinner:false, kind:'info' });
+        }
+      }, 450);
     });
     ta.addEventListener('blur', function() {
+      window.clearTimeout(noteNormalizeTimer);
       applyNoteAutofill_(ta, it);
-      noteHelp.style.display = 'none';
     });
     note.appendChild(ta);
     note.appendChild(noteHelp);
+
+    var helpButton = document.getElementById('btnNoteSyntaxHelp');
+    if (helpButton) {
+      helpButton.setAttribute('aria-expanded', 'false');
+      helpButton.onclick = toggleNoteSyntaxHelp_;
+    }
   }
 
   try {
