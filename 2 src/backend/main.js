@@ -2347,12 +2347,13 @@ function maintenanceCalendarDuplicateKey_(event) {
     const date = String(event && event.start &&
         (event.start.date || event.start.dateTime) || "").slice(0, 10);
     const rawSummary = String(event && event.summary || "");
+    // Für die Dublettenprüfung zählen ausschließlich Buchstaben und Zahlen.
+    // Leerzeichen sowie Satz- und Sonderzeichen dürfen alte und neue
+    // Schreibweisen desselben Kalendertermins nicht voneinander unterscheiden.
     const summary = rawSummary
         .normalize("NFKC")
-        .replace(/[\u2010-\u2015\u2212]/g, "-")
-        .replace(/\s+/g, " ")
-        .trim()
-        .toLocaleLowerCase("de-DE");
+        .toLocaleLowerCase("de-DE")
+        .replace(/[^\p{L}\p{N}]+/gu, "");
     return date && summary ? (summary + "|" + date) : "";
 }
 
