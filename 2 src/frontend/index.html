@@ -1842,9 +1842,10 @@
           </div>
           <input id="logSearchInput" class="logSearchInput" type="text" placeholder="Im Log suchen …" autocomplete="off" />
           <button id="btnLogFindNext" class="btnSmall" type="button" title="Nächsten Treffer suchen">🔎 Weiter</button>
+          <button id="btnLogSelectAll" class="btnSmall" type="button" title="Den gesamten sichtbaren Logtext markieren">☑ Alles markieren</button>
           <button id="btnLogCopy" class="btnSmall" type="button" title="Log oder Auswahl kopieren">📋 Kopieren</button>
           <button id="btnLogDeleteSelection" class="btnSmall" type="button" title="Markierten Text aus der Anzeige löschen">✂ Markiertes</button>
-          <button id="btnLogClearView" class="btnSmall" type="button" title="Heutiges TXT-Log leeren">🧹 Alles</button>
+          <button id="btnLogClearView" class="btnSmall" type="button" title="Das ausgewählte TXT-Log vollständig leeren">🧹 Log leeren</button>
           <button id="btnLogRefresh" class="btnSmall" type="button" title="Log neu laden">↻ Neu laden</button>
           <button id="btnLogClose" class="btnSmall" type="button" title="Logfenster schließen">✖</button>
         </div>
@@ -4468,6 +4469,7 @@ function isActiveSearchToken_(tok) {
     const btnLogClose = document.getElementById('btnLogClose');
     const logSearchInput = document.getElementById('logSearchInput');
     const btnLogFindNext = document.getElementById('btnLogFindNext');
+    const btnLogSelectAll = document.getElementById('btnLogSelectAll');
     const btnLogCopy = document.getElementById('btnLogCopy');
     const btnLogDeleteSelection = document.getElementById('btnLogDeleteSelection');
     const btnLogClearView = document.getElementById('btnLogClearView');
@@ -7524,6 +7526,29 @@ function selectTextInPre_(pre, start, end) {
  * @status aktiv
  * @loeschung nein
  */
+function selectAllLogText_() {
+  try {
+    if (!logPanelPre) return;
+    var txt = String(logPanelPre.textContent || '');
+    if (!txt) {
+      setLogMiniStatus_('Das sichtbare Log ist leer.');
+      return;
+    }
+    selectTextInPre_(logPanelPre, 0, txt.length);
+    setLogMiniStatus_('Gesamter sichtbarer Logtext markiert.');
+  } catch (_e) {
+    setLogMiniStatus_('Logtext konnte nicht vollständig markiert werden.');
+  }
+}
+
+/**
+ * @funktion deleteSelectedLogText_
+ * @modul 7 UI
+ * @gruppe UI / Log / Diagnose
+ * @zweck Löscht den markierten Teil des sichtbaren Logtexts und speichert die Änderung.
+ * @status aktiv
+ * @loeschung nein
+ */
 function deleteSelectedLogText_() {
   try {
     var selected = getLogSelectionText_();
@@ -7930,6 +7955,7 @@ if (btnLogRefresh) btnLogRefresh.addEventListener('click', function(){ try { uiL
 if (btnLogClose) btnLogClose.addEventListener('click', function(){ closeLogPanel_(); });
 if (btnLogFindNext) btnLogFindNext.addEventListener('click', function(){ findNextInLog_(); });
 if (logSearchInput) logSearchInput.addEventListener('keydown', function(ev){ if (ev && ev.key === 'Enter') findNextInLog_(); });
+if (btnLogSelectAll) btnLogSelectAll.addEventListener('click', function(){ selectAllLogText_(); });
 if (btnLogCopy) btnLogCopy.addEventListener('click', function(){ copyLogSelectionOrAll_(); });
 if (btnLogDeleteSelection) btnLogDeleteSelection.addEventListener('click', function(){ deleteSelectedLogText_(); });
 if (btnLogClearView) btnLogClearView.addEventListener('click', function(){ try { uiLogAction_('Log-Anzeige geleert', { day: currentLogDay_ }); } catch (_eAction) {} clearVisibleLog_(); });
