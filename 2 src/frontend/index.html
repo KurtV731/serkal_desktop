@@ -2736,7 +2736,16 @@ function renderPosterImage_(src) {
   if (typeof posterBox === 'undefined' || !posterBox) return;
   var s = String(src || '').trim();
   if (!s) { renderPosterPlaceholder_(); return; }
-  posterBox.innerHTML = '<img src="' + escapeHtml(s) + '" alt="" loading="lazy" />';
+
+  posterBox.textContent = '';
+  var img = document.createElement('img');
+  img.src = s;
+  img.alt = '';
+  img.loading = 'lazy';
+  img.addEventListener('error', function() {
+    renderNoPicPlaceholder_();
+  }, { once:true });
+  posterBox.appendChild(img);
 }
 
 /**
@@ -2783,7 +2792,7 @@ function cancelArchivPosterLoad_() {
  * @loeschung nein
  */
 function getArchivTmdbId_(it) {
-  var raw = it && (it.tmdbId || it.tmdbID || it.seriesId || it.tvId || it.idTmdb || it.tmdb);
+  var raw = it && (it.tmdbId || it.tmdbID || it.seriesId || it.tvId || it.idTmdb || it.tmdb || it.id);
   var n = Number(raw || 0);
   return (isFinite(n) && n > 0) ? n : 0;
 }
@@ -2821,6 +2830,65 @@ function applyArchivPosterResult_(it, res) {
       return;
     }
   } catch (_e) {}
+}
+
+/**
+ * Lädt Poster in der Desktop-App direkt über die Preload/IPC-Schnittstelle.
+ * Die alte Apps-Script-Brücke bleibt nur als Browser-Fallback erhalten.
+ */
+function requestPosterFromDesktop_(tmdbId, lang) {
+  try {
+    if (
+      window.serkal &&
+      window.serkal.tmdb &&
+      typeof window.serkal.tmdb.poster === 'function'
+    ) {
+      return Promise.resolve(window.serkal.tmdb.poster(tmdbId, lang || 'de'));
+    }
+  } catch (err) {
+    return Promise.reject(err);
+  }
+
+  return new Promise(function(resolve, reject) {
+    try {
+      google.script.run
+        .withSuccessHandler(resolve)
+        .withFailureHandler(reject)
+        .apiHoleArchivPoster(tmdbId, lang || 'de');
+    } catch (err) {
+      reject(err);
+    }
+  });
+}
+
+function schedulePreviewPosterLoad_(it) {
+  var tmdbId = getArchivTmdbId_(it);
+  if (!tmdbId) return;
+
+  var key = String(tmdbId);
+  if (state.archivPosterCache[key]) {
+    applyArchivPosterResult_(it, state.archivPosterCache[key]);
+    return;
+  }
+
+  var token = ++state.previewPosterToken;
+  requestPosterFromDesktop_(tmdbId, getLang_ ? getLang_() : LANG)
+    .then(function(res) {
+      if (!state || token !== state.previewPosterToken || !state.currentPreview) return;
+      if (getArchivTmdbId_(state.currentPreview) !== tmdbId) return;
+
+      if (res && res.ok && (res.dataUrl || res.nopic)) {
+        state.archivPosterCache[key] = res;
+        applyArchivPosterResult_(state.currentPreview, res);
+      } else {
+        renderNoPicPlaceholder_();
+        try { uiLogAction_('Poster konnte nicht geladen werden', { tmdbId:tmdbId, bereich:'suche', code:String(res && res.code || '') }); } catch (_e) {}
+      }
+    })
+    .catch(function(err) {
+      renderNoPicPlaceholder_();
+      try { uiLogAction_('Poster konnte nicht geladen werden', { tmdbId:tmdbId, bereich:'suche', fehler:String(err && err.message || err) }); } catch (_e) {}
+    });
 }
 
 /**
@@ -2864,25 +2932,24 @@ function scheduleArchivPosterLoad_(it) {
         if (token !== state.archivPosterToken) return;
         if (getArchivTmdbId_(state.archivSelected) !== tmdbId) return;
 
-        google.script.run
-          .withSuccessHandler(function(res) {
-            try {
-              if (!state || !state.archivSelected) return;
-              if (token !== state.archivPosterToken) return;
-              if (getArchivTmdbId_(state.archivSelected) !== tmdbId) return;
+        requestPosterFromDesktop_(tmdbId, getLang_ ? getLang_() : LANG)
+          .then(function(res) {
+            if (!state || !state.archivSelected) return;
+            if (token !== state.archivPosterToken) return;
+            if (getArchivTmdbId_(state.archivSelected) !== tmdbId) return;
 
-              if (res && res.ok) {
-                state.archivPosterCache[key] = res;
-                applyArchivPosterResult_(state.archivSelected, res);
-              } else {
-                renderNoPicPlaceholder_();
-              }
-            } catch (_e1) {}
+            if (res && res.ok && (res.dataUrl || res.nopic)) {
+              state.archivPosterCache[key] = res;
+              applyArchivPosterResult_(state.archivSelected, res);
+            } else {
+              renderNoPicPlaceholder_();
+              try { uiLogAction_('Poster konnte nicht geladen werden', { tmdbId:tmdbId, bereich:'archiv', code:String(res && res.code || '') }); } catch (_e) {}
+            }
           })
-          .withFailureHandler(function(_err) {
+          .catch(function(err) {
             renderNoPicPlaceholder_();
-          })
-          .apiHoleArchivPoster(tmdbId, getLang_ ? getLang_() : LANG);
+            try { uiLogAction_('Poster konnte nicht geladen werden', { tmdbId:tmdbId, bereich:'archiv', fehler:String(err && err.message || err) }); } catch (_e) {}
+          });
       } catch (_e2) {
         renderNoPicPlaceholder_();
       }
@@ -3923,6 +3990,7 @@ const state = {
   archivPosterCache: Object.create(null),
   archivPosterTimer: null,
   archivPosterToken: 0,
+  previewPosterToken: 0,
   isDirty: false,
   dirtyCount: 0,
   dirtyMap: Object.create(null),
@@ -6755,6 +6823,9 @@ function enrichAndRender(d) {
     } catch (_e) {}
 
     renderPreviewFromResult(state.currentPreview);
+    if (!(state.currentPreview.posterPath || state.currentPreview.poster_path || state.currentPreview.poster || state.currentPreview.posterUrl)) {
+      schedulePreviewPosterLoad_(state.currentPreview);
+    }
     fillDetailsFromPreview_(state.currentPreview);
 
     try {
