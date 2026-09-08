@@ -36,18 +36,20 @@ if errorlevel 1 (
 git status --porcelain
 if errorlevel 1 goto :gitfehler
 
-for /f %%B in ('git branch --show-current') do set "AKTUELLER_BRANCH=%%B"
-if /I not "%AKTUELLER_BRANCH%"=="%SERKAL_BRANCH%" (
-  echo.
-  echo Wechsle auf den aktuellen SerKal-Stand...
-  git switch "%SERKAL_BRANCH%"
-  if errorlevel 1 goto :gitfehler
-)
-
 echo.
-echo Hole den aktuellen SerKal-Stand...
-git pull --ff-only
+echo Hole den freigegebenen Entwicklungsstand von GitHub...
+git fetch origin
 if errorlevel 1 goto :gitfehler
+
+git switch "%SERKAL_BRANCH%"
+if errorlevel 1 goto :gitfehler
+
+git pull --ff-only origin "%SERKAL_BRANCH%"
+if errorlevel 1 goto :gitfehler
+
+for /f %%H in ('git rev-parse --short HEAD') do set "SERKAL_COMMIT=%%H"
+echo.
+echo Geladener SerKal-Stand: %SERKAL_BRANCH% / %SERKAL_COMMIT%
 
 echo.
 echo Pruefe die Programmpakete...
@@ -55,7 +57,13 @@ call npm install
 if errorlevel 1 goto :npmfehler
 
 echo.
-echo Starte SerKal Desktop...
+echo Beende eine noch laufende alte SerKal-Instanz...
+taskkill /F /IM serkal_desktop.exe >nul 2>&1
+powershell -NoProfile -ExecutionPolicy Bypass -Command "Get-CimInstance Win32_Process -Filter \"Name='electron.exe'\" -ErrorAction SilentlyContinue | Where-Object { $_.CommandLine -like '*C:\serkal_dev\serkal_desktop*' } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }"
+timeout /t 1 /nobreak >nul
+
+echo.
+echo Starte SerKal Desktop aus Commit %SERKAL_COMMIT%...
 call npm start
 set "SERKAL_EXIT=%ERRORLEVEL%"
 popd
