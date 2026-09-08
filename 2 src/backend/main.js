@@ -1955,10 +1955,11 @@ function maintenanceGetStatus_() {
  *   2. Einen gemeinsamen TMDB-Pruefbestand im Arbeitsspeicher aufbauen.
  *   3. Gueltige Cache-Daten wiederverwenden; nur faellige Serien abfragen.
  *   4. Archiv/TMDB vergleichen und Abweichungen protokollieren.
+ *   5. Nur vollstaendige, ungeschuetzte Abweichungen kontrolliert uebernehmen.
  *
- * Dieser Hauptlauf schreibt bewusst weder Archiv noch Kalender. Die spaetere
- * Uebernahme bleibt ein eigener, nachgelagerter Schritt mit ManualFlags- und
- * Kalenderschutz. Damit kann ein unvollstaendiger TMDB-Lauf nichts veraendern.
+ * Unvollstaendige TMDB-Daten und manuell geschuetzte Eintraege bleiben
+ * unangetastet. Vor jeder Archiv-Aenderung wird der Originalinhalt gehalten
+ * und bei einem Kalenderfehler wiederhergestellt.
  */
 
 const MAINTENANCE_CACHE_VERSION = 1;
@@ -2198,6 +2199,301 @@ function maintenanceAnalyse_(groups, snapshot) {
     return findings;
 }
 
+function maintenanceOperationKey_(tmdbId, seasonNumber) {
+    return String(Number(tmdbId || 0)) + ":" + String(Number(seasonNumber || 0));
+}
+
+function maintenanceBuildOperations_(groups, snapshot, findings) {
+    const operations = new Map();
+    const groupsByTmdb = new Map(groups.map(group => [String(group.tmdbId), group]));
+
+    for (const finding of Array.isArray(findings) ? findings : []) {
+        if (String(finding && finding.action || "") !== "apply") continue;
+        const tmdbId = Number(finding.tmdbId || 0);
+        const seasonNumber = Number(finding.tmdbSeason || finding.seasonNumber || 0);
+        const group = groupsByTmdb.get(String(tmdbId));
+        const record = snapshot.get(String(tmdbId));
+        const seasonRecord = record && record.seasons && record.seasons[String(seasonNumber)];
+        if (!group || !record || !seasonRecord || !seasonRecord.ok || !seasonRecord.data) continue;
+
+        const analysed = analyseSeason_(seasonRecord.data);
+        if (!maintenanceSeasonIsComplete_(analysed)) continue;
+        const existing = group.entries.find(entry => maintenanceSeasonNumber_(entry) === seasonNumber) || null;
+        const base = existing || group.entries[0];
+        if (!base) continue;
+
+        const key = maintenanceOperationKey_(tmdbId, seasonNumber);
+        if (operations.has(key)) continue;
+        operations.set(key, {
+            key,
+            isNew:!existing,
+            entry:existing,
+            fileName:String(base.fileName || archiveFileName_(base.titel, base.jahr)),
+            payload:{
+                titel:String(base.titel || record.tv && record.tv.name || ""),
+                jahr:String(base.jahr || base.year || ""),
+                staffelNummer:seasonNumber,
+                tmdbId,
+                episoden:Number(analysed.episodeCount || 0),
+                termindaten:analysed.episodeDates.map(String),
+                descDE:!existing ? String(record.tv && record.tv.overview || "") : ""
+            },
+            findingTypes:[]
+        });
+    }
+
+    for (const finding of Array.isArray(findings) ? findings : []) {
+        if (String(finding && finding.action || "") !== "apply") continue;
+        const operation = operations.get(maintenanceOperationKey_(
+            finding.tmdbId,
+            finding.tmdbSeason || finding.seasonNumber
+        ));
+        if (operation) operation.findingTypes.push(String(finding.type || ""));
+    }
+    return Array.from(operations.values());
+}
+
+function maintenanceArchiveSnapshot_(operation) {
+    const folder = archiveFolderPath_();
+    if (!folder || !archiveEnsureFolder_(folder)) throw new Error("Archivordner nicht gefunden: " + folder);
+    const fileName = String(operation && operation.fileName || "");
+    if (!fileName || path.basename(fileName) !== fileName) throw new Error("Ungültiger Archivdateiname.");
+    const fullPath = path.join(folder, fileName);
+    return {
+        fullPath,
+        existed:fs.existsSync(fullPath),
+        content:fs.existsSync(fullPath) ? fs.readFileSync(fullPath, "utf8") : ""
+    };
+}
+
+function maintenanceRestoreArchive_(snapshot) {
+    if (!snapshot) return;
+    if (snapshot.existed) {
+        fs.writeFileSync(snapshot.fullPath, snapshot.content, "utf8");
+    } else if (fs.existsSync(snapshot.fullPath)) {
+        fs.unlinkSync(snapshot.fullPath);
+    }
+}
+
+function maintenanceWriteArchive_(operation) {
+    if (operation.isNew) {
+        const inserted = archiveInsert_(operation.payload);
+        if (!inserted || inserted.ok === false) {
+            throw new Error(String(inserted && inserted.message || "Neue Staffel konnte nicht gespeichert werden."));
+        }
+        return inserted;
+    }
+
+    const snapshot = maintenanceArchiveSnapshot_(operation);
+    const label = "S" + String(operation.payload.staffelNummer).padStart(2, "0");
+    const lines = snapshot.content.split(/\r?\n/);
+    const index = lines.findIndex(line => new RegExp("^" + label + "(?:\\b|;|\\|)", "i")
+        .test(String(line || "").trim()));
+    if (index < 0) throw new Error("Staffel nicht gefunden: " + operation.fileName + " / " + label);
+
+    let line = String(lines[index] || "").trim();
+    line = archiveSetField_(line, "eps", String(operation.payload.episoden));
+    line = archiveSetField_(line, "startOriginal", String(operation.payload.termindaten[0] || ""));
+    line = archiveSetField_(line, "dates", archiveCompactDates_(operation.payload.termindaten).join(","));
+    lines[index] = line;
+    const tempPath = snapshot.fullPath + ".serkal-maint-tmp";
+    fs.writeFileSync(tempPath, lines.join("\n").replace(/\n*$/, "\n"), "utf8");
+    fs.renameSync(tempPath, snapshot.fullPath);
+    return { ok:true, fileName:operation.fileName, staffelLabel:label };
+}
+
+async function googleCalendarManagedEvents_(calendarId) {
+    const all = [];
+    let pageToken = "";
+    do {
+        const base = "https://www.googleapis.com/calendar/v3/calendars/" +
+            encodeURIComponent(calendarId) + "/events";
+        const url = new URL(base);
+        url.searchParams.set("singleEvents", "true");
+        url.searchParams.set("showDeleted", "false");
+        url.searchParams.set("maxResults", "2500");
+        url.searchParams.append("privateExtendedProperty", "serkal=1");
+        if (pageToken) url.searchParams.set("pageToken", pageToken);
+        const result = await googleCalendarJsonRequest_("GET", url.toString());
+        if (!result.ok) {
+            const detail = result.data && result.data.error && result.data.error.message;
+            throw new Error(detail || ("Google-Termine konnten nicht geprüft werden (" + result.status + ")."));
+        }
+        all.push(...(Array.isArray(result.data && result.data.items) ? result.data.items : []));
+        pageToken = String(result.data && result.data.nextPageToken || "");
+    } while (pageToken);
+
+    return all;
+}
+
+async function googleCalendarManagedSeasonEvents_(calendarId, tmdbId, seasonNumber) {
+    const seasonLabel = "S" + calendarPad2_(seasonNumber);
+    const all = await googleCalendarManagedEvents_(calendarId);
+    return all.filter(event => {
+        const privateData = event && event.extendedProperties && event.extendedProperties.private || {};
+        return String(privateData.tmdbId || "") === String(tmdbId) &&
+            String(privateData.season || "").toUpperCase() === seasonLabel;
+    });
+}
+
+async function maintenanceCleanupCalendarDuplicates_() {
+    const settings = readSettings_();
+    if (String(settings && settings.calendar && settings.calendar.mode || "").toLowerCase() !== "google") {
+        return { ok:true, removed:0, protected:0, skipped:true };
+    }
+    const resolved = await googleResolveSerkalCalendar_();
+    const calendarId = String(resolved.id || "").trim();
+    const events = await googleCalendarManagedEvents_(calendarId);
+    const groups = new Map();
+    for (const event of events) {
+        const date = String(event && event.start && (event.start.date || event.start.dateTime) || "").slice(0, 10);
+        const summary = String(event && event.summary || "").trim();
+        if (!date || !summary) continue;
+        const key = summary + "|" + date;
+        if (!groups.has(key)) groups.set(key, []);
+        groups.get(key).push(event);
+    }
+
+    let removed = 0;
+    let protectedCount = 0;
+    for (const duplicates of groups.values()) {
+        if (duplicates.length < 2) continue;
+        duplicates.sort((a, b) => String(a && a.created || "").localeCompare(String(b && b.created || "")));
+        const manual = duplicates.filter(googleCalendarEventWasManuallyChanged_);
+        const keep = manual[0] || duplicates[0];
+        for (const event of duplicates) {
+            if (event === keep) continue;
+            if (googleCalendarEventWasManuallyChanged_(event)) {
+                protectedCount++;
+                continue;
+            }
+            const eventId = String(event && event.id || "");
+            if (!eventId) continue;
+            const deleted = await googleCalendarApi_("DELETE", calendarId, eventId, null);
+            if (!deleted.ok && deleted.status !== 404 && deleted.status !== 410) {
+                const detail = deleted.data && deleted.data.error && deleted.data.error.message;
+                throw new Error(detail || "Kalender-Doppeltermin konnte nicht entfernt werden.");
+            }
+            removed++;
+            logWrite_("INFO", "WARTUNG", "Exakter Kalender-Doppeltermin bereinigt", {
+                titel:String(event.summary || ""),
+                datum:String(event.start && (event.start.date || event.start.dateTime) || "").slice(0, 10),
+                entfernt:eventId.slice(0, 18) + "…"
+            });
+        }
+    }
+    return { ok:true, removed, protected:protectedCount, skipped:false };
+}
+
+async function maintenanceSyncCalendar_(operation) {
+    const settings = readSettings_();
+    const mode = String(settings && settings.calendar && settings.calendar.mode || "none").toLowerCase();
+    if (mode !== "google") {
+        return { ok:true, skipped:true, reason:mode === "ics" ? "ics_requires_export" : "calendar_disabled", created:0, updated:0, removed:0 };
+    }
+
+    const dates = operation.payload.termindaten;
+    const lastDate = dates.length ? dates[dates.length - 1] : "";
+    if (Number(lastDate.slice(0, 4)) < new Date().getFullYear()) {
+        return { ok:true, skipped:true, reason:"past_season", created:0, updated:0, removed:0 };
+    }
+
+    const resolved = await googleResolveSerkalCalendar_();
+    const calendarId = String(resolved.id || "").trim();
+    const existing = await googleCalendarManagedSeasonEvents_(
+        calendarId,
+        operation.payload.tmdbId,
+        operation.payload.staffelNummer
+    );
+
+    // Eine händische Änderung im Google-Kalender ist die Ultima Ratio:
+    // Dann bleibt die komplette Staffel in Archiv und Kalender unberührt.
+    const manuallyChanged = existing.filter(googleCalendarEventWasManuallyChanged_);
+    if (manuallyChanged.length) {
+        return { ok:true, skipped:true, protected:true, reason:"manual_calendar_change", created:0, updated:0, removed:0 };
+    }
+
+    const wanted = new Set(calendarBlocks_(dates).map(block => [
+        String(block.eFrom), String(block.eTo), String(block.date)
+    ].join("|")));
+    let removed = 0;
+    for (const event of existing) {
+        const privateData = event.extendedProperties && event.extendedProperties.private || {};
+        const eventDate = String(event.start && (event.start.date || event.start.dateTime) || "").slice(0, 10);
+        const key = [String(privateData.episodeFrom || ""), String(privateData.episodeTo || ""), eventDate].join("|");
+        if (wanted.has(key)) continue;
+        const eventId = String(event.id || "");
+        if (!eventId) continue;
+        const deleted = await googleCalendarApi_("DELETE", calendarId, eventId, null);
+        if (!deleted.ok && deleted.status !== 404 && deleted.status !== 410) {
+            const detail = deleted.data && deleted.data.error && deleted.data.error.message;
+            throw new Error(detail || "Veralteter SerKal-Termin konnte nicht entfernt werden.");
+        }
+        removed++;
+    }
+
+    const inserted = await googleCalendarInsertSeason_(operation.payload);
+    if (!inserted || inserted.ok === false) {
+        throw new Error(String(inserted && inserted.message || "Google-Kalender konnte nicht aktualisiert werden."));
+    }
+    return Object.assign({ removed }, inserted);
+}
+
+async function maintenanceApplyOperations_(operations) {
+    const result = { changedFiles:new Set(), created:0, updated:0, removed:0, protected:0, skipped:0, errors:[] };
+    for (const operation of Array.isArray(operations) ? operations : []) {
+        const snapshot = maintenanceArchiveSnapshot_(operation);
+        try {
+            maintenanceWriteArchive_(operation);
+            const calendar = await maintenanceSyncCalendar_(operation);
+            if (calendar && calendar.protected) {
+                maintenanceRestoreArchive_(snapshot);
+                result.protected++;
+                result.skipped++;
+                logWrite_("INFO", "WARTUNG", "Wartungsänderung wegen händischer Kalenderänderung geschützt", {
+                    fileName:operation.fileName,
+                    staffel:operation.payload.staffelNummer
+                });
+                continue;
+            }
+            result.changedFiles.add(operation.fileName);
+            result.created += Number(calendar && calendar.created || 0);
+            result.updated += Number(calendar && calendar.updated || 0);
+            result.removed += Number(calendar && calendar.removed || 0);
+            if (calendar && calendar.skipped) result.skipped++;
+            logWrite_("INFO", "WARTUNG", "Wartungsänderung übernommen", {
+                fileName:operation.fileName,
+                staffel:operation.payload.staffelNummer,
+                neu:operation.isNew,
+                kalenderModus:String(readSettings_().calendar.mode || "none"),
+                kalenderEntfernt:Number(calendar && calendar.removed || 0)
+            });
+        } catch (err) {
+            maintenanceRestoreArchive_(snapshot);
+            const error = {
+                fileName:operation.fileName,
+                seasonNumber:operation.payload.staffelNummer,
+                message:String(err && err.message || err)
+            };
+            result.errors.push(error);
+            logWrite_("ERROR", "WARTUNG", "Wartungsänderung zurückgerollt", error);
+        }
+    }
+    try {
+        const cleanup = await maintenanceCleanupCalendarDuplicates_();
+        result.removed += Number(cleanup && cleanup.removed || 0);
+        result.protected += Number(cleanup && cleanup.protected || 0);
+    } catch (err) {
+        result.errors.push({
+            fileName:"",
+            seasonNumber:0,
+            message:"Kalender-Doppelprüfung: " + String(err && err.message || err)
+        });
+    }
+    result.changedFileCount = result.changedFiles.size;
+    return result;
+}
+
 async function maintenanceFetchGroup_(group, cache, snapshot, counters) {
     const key = String(group.tmdbId);
     const cached = cache.series[key];
@@ -2363,14 +2659,34 @@ async function maintenanceRun_() {
             });
         }
 
-        const ok = counters.errors.length === 0;
+        let applied = {
+            changedFileCount:0,
+            created:0,
+            updated:0,
+            removed:0,
+            protected:0,
+            skipped:0,
+            errors:[]
+        };
+        if (counters.errors.length === 0) {
+            const operations = maintenanceBuildOperations_(groups, snapshot, findings);
+            maintenanceSetStatus_("uebernahme", "Freigegebene Wartungsänderungen werden sicher übernommen.", null, 0, operations.length);
+            applied = await maintenanceApplyOperations_(operations);
+        } else {
+            logWrite_("WARN", "WARTUNG", "Übernahme wegen unvollständigem TMDB-Prüflauf ausgesetzt", {
+                fehler:counters.errors.length
+            });
+        }
+
+        const allErrors = counters.errors.concat(applied.errors || []);
+        const ok = allErrors.length === 0;
         const result = {
             ok,
-            readOnly:true,
-            phase:"tmdb_snapshot",
+            readOnly:false,
+            phase:"applied",
             message:ok
-                ? "TMDB-Prüfung abgeschlossen. Archiv und Kalender wurden nicht verändert."
-                : ("TMDB-Prüfung mit " + counters.errors.length + " Fehler(n) abgeschlossen. Archiv und Kalender wurden nicht verändert."),
+                ? ("Wartung abgeschlossen. " + Number(applied.changedFileCount || 0) + " Archivdatei(en) geändert.")
+                : ("Wartung mit " + allErrors.length + " Fehler(n) sicher beendet."),
             geprueftDateien:entries.length,
             geprueftStaffeln:entries.length,
             gepruefteSerien:groups.length,
@@ -2384,12 +2700,14 @@ async function maintenanceRun_() {
             rueckfragen:decisionCounts.review,
             beobachten:decisionCounts.observe,
             geschuetzt:decisionCounts.protected,
-            geaendertDateien:0,
-            created:0,
-            updated:0,
-            skipped:grouped.withoutTmdbId.length,
+            geaendertDateien:Number(applied.changedFileCount || 0),
+            created:Number(applied.created || 0),
+            updated:Number(applied.updated || 0),
+            removed:Number(applied.removed || 0),
+            kalenderGeschuetzt:Number(applied.protected || 0),
+            skipped:grouped.withoutTmdbId.length + Number(applied.skipped || 0),
             findings,
-            errors:counters.errors
+            errors:allErrors
         };
 
         maintenanceSetStatus_(ok ? "ende" : "fehler", result.message, null, groups.length, groups.length);
