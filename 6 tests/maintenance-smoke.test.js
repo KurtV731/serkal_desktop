@@ -3,6 +3,7 @@ const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
 const vm = require("node:vm");
+const mainPath = process.env.SERKAL_MAIN_TEST_PATH || path.resolve("2 src/backend/main.js");
 
 const testRoot = fs.mkdtempSync(path.join(os.tmpdir(), "serkal-maintenance-"));
 const appData = path.join(testRoot, "appData");
@@ -43,13 +44,13 @@ const context = {
         if (id === "electron-squirrel-startup") return false;
         return require(id);
     },
-    __dirname:path.resolve("work"),
+    __dirname:path.dirname(mainPath),
     process,
     setTimeout,
     clearTimeout
 };
 vm.createContext(context);
-const mainSource = `(function(){\n` + fs.readFileSync(path.resolve("work/main.js"), "utf8") + `
+const mainSource = `(function(){\n` + fs.readFileSync(mainPath, "utf8") + `
 globalThis.__maintenanceTest={
   archiveLoad_, maintenanceAnalyse_, maintenanceBuildOperations_,
   maintenanceArchiveSnapshot_, maintenanceWriteArchive_, maintenanceRestoreArchive_,
