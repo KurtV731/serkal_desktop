@@ -90,6 +90,49 @@ eine einzige gemeinsame Hauptlinie überführt. Keine ungeprüfte Schnellzusamme
 
 Alle Dateien müssen unabhängig vom aktuellen CMD-Verzeichnis funktionieren.
 
+## Gemeinsamer Störungsfall – Poster im Archiv
+
+### 2026-09-08 – Kurt/Installer an CE und Installer – Archivposter verschwunden
+
+Status: DRINGEND / REPRODUZIERT / KEIN WEITERER INSTALLER-BUILD
+
+Kurts praktischer Test auf dem aktuellen Fachbranch
+`serkal-0.0.5-archiv-start` zeigt: Die Archivdaten werden geladen, die Poster im
+linken Vorschaufeld jedoch nicht mehr angezeigt. SerKal Desktop 0.9002 hatte die Bilder
+zuvor nachweislich noch angezeigt. Der aktuelle Branch endet beim geprüften Stand auf
+`0857e2ea9fa8ba9bd49cff852ad38fbcfcdd3942`
+(`fix: restore posters via desktop TMDB bridge`); auch mit diesem Reparaturversuch
+bleiben die Bilder bei Kurt aus.
+
+Bis zur Klärung gilt:
+
+- kein `PULL-AUTOZIP.BAT`, kein weiterer Installer-Test und keine Veröffentlichung;
+- nicht erneut blind am Posterfeld ändern;
+- zuerst den vollständigen Weg Archiv-TMDB-ID → Frontend-Aufruf → Preload/IPC →
+  `tmdbPoster_` → Data-URL → Bildanzeige mit einem bekannten Archivdatensatz prüfen;
+- den letzten funktionierenden 0.9002-Stand gezielt mit dem ersten fehlerhaften Commit
+  vergleichen.
+
+Konkreter technischer Hinweis aus der Installer-Prüfung: Der neue Frontend-Helfer
+`requestPosterFromDesktop_` ruft bevorzugt unmittelbar
+`window.serkal.tmdb.poster(...)` auf. Bei `TMDB_KEY_MISSING` wird dadurch die bereits
+vorhandene Desktop-Brücke `apiHoleArchivPoster(...)` umgangen, die den TMDB-Key-Dialog
+öffnet und die Posteranfrage danach wiederholt. CE soll prüfen, ob dies die beobachtete
+Leerstelle verursacht oder ob der IPC-Aufruf einen anderen Fehlercode liefert. Fehlercode
+und TMDB-ID müssen sichtbar ins Log; Fehler nicht mehr nur als „No Pic“ verdecken.
+
+Aufgaben:
+
+1. **CE:** Ursache im aktuellen Quellstand feststellen und gegen den funktionierenden
+   0.9002-Stand vergleichen; Posterlogik fachlich reparieren.
+2. **Installer-Chatty:** Nach CE-Freigabe sicherstellen, dass Preload/IPC und TMDB-Konfiguration
+   auch in der gepackten App enthalten sind; erst dann die nächste eindeutige
+   Installationsnummer vergeben.
+3. **Website-Chatty:** Keine Codeänderung erforderlich; Website ist an diesem lokalen
+   Archiv-/TMDB-Fehler nicht beteiligt.
+4. **Kurt:** Bis zum nächsten ausdrücklich freigegebenen Test nichts deinstallieren und
+   keinen weiteren AUTOZIP-Build erzeugen.
+
 ## Offene Übergaben
 
 ### 2026-09-07 – Kurt/CE an Website-Chatty – alle Webseiten: Logo-Pfade und Kurt-Regeln
