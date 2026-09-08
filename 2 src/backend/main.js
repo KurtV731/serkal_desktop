@@ -2343,6 +2343,19 @@ async function googleCalendarManagedSeasonEvents_(calendarId, tmdbId, seasonNumb
     });
 }
 
+function maintenanceCalendarDuplicateKey_(event) {
+    const date = String(event && event.start &&
+        (event.start.date || event.start.dateTime) || "").slice(0, 10);
+    const rawSummary = String(event && event.summary || "");
+    const summary = rawSummary
+        .normalize("NFKC")
+        .replace(/[\u2010-\u2015\u2212]/g, "-")
+        .replace(/\s+/g, " ")
+        .trim()
+        .toLocaleLowerCase("de-DE");
+    return date && summary ? (summary + "|" + date) : "";
+}
+
 async function maintenanceCleanupCalendarDuplicates_() {
     const settings = readSettings_();
     if (String(settings && settings.calendar && settings.calendar.mode || "").toLowerCase() !== "google") {
@@ -2354,13 +2367,20 @@ async function maintenanceCleanupCalendarDuplicates_() {
     const events = await googleCalendarManagedEvents_(calendarId, true);
     const groups = new Map();
     for (const event of events) {
-        const date = String(event && event.start && (event.start.date || event.start.dateTime) || "").slice(0, 10);
-        const summary = String(event && event.summary || "").trim();
-        if (!date || !summary) continue;
-        const key = summary + "|" + date;
+        const key = maintenanceCalendarDuplicateKey_(event);
+        if (!key) continue;
         if (!groups.has(key)) groups.set(key, []);
         groups.get(key).push(event);
     }
+
+    const duplicateGroups = Array.from(groups.values())
+        .filter(items => items.length > 1);
+    logWrite_("INFO", "WARTUNG", "Kalender-Dublettenprüfung", {
+        kalenderTermine:events.length,
+        vergleichbareTermine:Array.from(groups.values()).reduce((sum, items) => sum + items.length, 0),
+        doppelgruppen:duplicateGroups.length,
+        doppeltermine:duplicateGroups.reduce((sum, items) => sum + items.length - 1, 0)
+    });
 
     let removed = 0;
     let protectedCount = 0;
