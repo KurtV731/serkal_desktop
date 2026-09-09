@@ -2837,24 +2837,32 @@ function applyArchivPosterResult_(it, res) {
  * Die alte Apps-Script-Brücke bleibt nur als Browser-Fallback erhalten.
  */
 function requestPosterFromDesktop_(tmdbId, lang) {
-  try {
-    if (
-      window.serkal &&
-      window.serkal.tmdb &&
-      typeof window.serkal.tmdb.poster === 'function'
-    ) {
-      return Promise.resolve(window.serkal.tmdb.poster(tmdbId, lang || 'de'));
-    }
-  } catch (err) {
-    return Promise.reject(err);
-  }
-
   return new Promise(function(resolve, reject) {
     try {
-      google.script.run
-        .withSuccessHandler(resolve)
-        .withFailureHandler(reject)
-        .apiHoleArchivPoster(tmdbId, lang || 'de');
+      if (
+        window.google &&
+        window.google.script &&
+        window.google.script.run &&
+        typeof window.google.script.run.apiHoleArchivPoster === 'function'
+      ) {
+        window.google.script.run
+          .withSuccessHandler(resolve)
+          .withFailureHandler(reject)
+          .apiHoleArchivPoster(tmdbId, lang || 'de');
+        return;
+      }
+
+      if (
+        window.serkal &&
+        window.serkal.tmdb &&
+        typeof window.serkal.tmdb.poster === 'function'
+      ) {
+        Promise.resolve(window.serkal.tmdb.poster(tmdbId, lang || 'de'))
+          .then(resolve, reject);
+        return;
+      }
+
+      reject(new Error('Keine TMDB-Posterbrücke verfügbar.'));
     } catch (err) {
       reject(err);
     }
