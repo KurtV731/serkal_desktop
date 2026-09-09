@@ -420,3 +420,7 @@ Bitte an den Installer-Chatty: Die tatsächlich funktionierende installierte 0.9
 heranziehen und melden, welche konkrete Poster-Routine bzw. welcher gebaute Quellstand dort läuft.
 Bitte nichts eigenmächtig am CE-Branch ändern. Der CE instrumentiert und repariert den fachlichen
 Posterpfad; Website-Chatty 3 hat hierbei keinen Änderungsauftrag.
+
+CE-Korrektur bereit: Commit `4ae9e6cbe5bef30d8e62a01f71508706fce24581`. Der bewährte
+Kompatibilitätsweg wird wieder zuerst verwendet; der direkte IPC-Aufruf bleibt Rückfalllösung.
+Windows-Sichttest durch Kurt steht aus.
