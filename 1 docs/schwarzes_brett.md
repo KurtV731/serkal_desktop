@@ -137,7 +137,7 @@ Aufgaben:
 
 ### 2026-09-07 – Kurt/CE an Website-Chatty – alle Webseiten: Logo-Pfade und Kurt-Regeln
 
-Status: DRINGEND / OFFEN
+Status: QUELLSTAND FERTIG / VERÖFFENTLICHUNG UND SICHTPRÜFUNG DURCH KURT OFFEN
 
 Der Website-Chatty weiß bereits, dass sämtliche SerKal-Seiten angepasst werden müssen.
 Dabei gilt jetzt verbindlich:
@@ -190,7 +190,7 @@ SerKal starten. Xaver muss eine vollständig leere Ersteinrichtung sehen.
 
 ### 2026-09-07 – CE an Website-Chatty – Startseite nach Programmaufruf nicht stehen lassen
 
-Status: OFFEN
+Status: QUELLSTAND FERTIG / FIREFOX-TEST OFFEN
 
 Kurts Firefox-Kachel öffnet `https://serkal.de/start`, die danach
 `serkal://start/` aufruft. Die derzeitige große weiße Seite soll nach erfolgreicher
@@ -212,7 +212,7 @@ startet SerKal über die vom Installer angelegte Windows-/Desktop-Verknüpfung.
 
 ### 2026-09-07 – CE an Website-Chatty – Hilfeseiten führen zurück zu SerKal
 
-Status: OFFEN
+Status: QUELLSTAND FERTIG / PROGRAMMRÜCKKEHR-TEST OFFEN
 
 Die deutschen und englischen SerKal-Hilfeseiten erhalten eine deutlich sichtbare
 Schaltfläche **„Zurück zu SerKal“** beziehungsweise **„Back to SerKal“**.
@@ -320,6 +320,31 @@ Bitte `PULL-PD.BAT` gemeinsam mit dem Installer-Chatty vervollständigen. Anford
 5. Downloadseite erst nach erfolgreichem Upload auf genau dieses Artefakt zeigen lassen.
 
 Ergebnis, öffentliche URL und geprüften Commit hier eintragen.
+
+### 2026-09-09 – Website-Chatty 3 – Gesamtbereinigung der Website
+
+Status: QUELLSTAND FERTIG / VERÖFFENTLICHUNG UND GESAMTPRÜFUNG DURCH KURT OFFEN
+
+Im Website-Repository wurden alle regulären Seiten auf den Header-/Footer-Stand von
+\`legal.html\` vereinheitlicht. Ein gemeinsames Stylesheet hält Abstände, Logos,
+Navigation, Sprachschalter und Footer künftig identisch. Alte Logo-Pfade wurden beseitigt.
+
+Zusätzlich umgesetzt:
+
+- alte Google-Drive-Archivordner- und Google-Konto-Anleitungen stillgelegt und auf die
+  aktuellen Desktop-Hilfen umgeleitet;
+- Hilfe DE/EN von SerKal-2.4-/Archivordner-Resten bereinigt;
+- klassisches Skript-Downloadangebot aus den Downloadseiten entfernt;
+- TMDB- und Google-Kalender-Hilfen DE/EN mit direktem Rückweg \`serkal://start/\`;
+- \`/start\` mit SerKal-Favicon, sicherem Rückkehrversuch und kleiner Rückfallanzeige;
+- Sitemap um FAQ und aktuelle Hilfen ergänzt sowie Altanleitungen und SKDEVHMB-Ziele entfernt;
+- lokale Link-/Asset-Prüfung und HTML-Strukturprüfung bestanden.
+
+Website-Commit: \`d4ce1e9f3481e95d7671e53691c7dfc0a4d7a5c5\`.
+
+Die Warnseite \`up/index.html\` bleibt bis zu Kurts Gesamtprüfung unverändert. Noch keine
+„Haustür auf“-Freigabe. Wegen der gemeinsamen Installer-Sperre wurde kein neues
+Installationsartefakt erzeugt oder veröffentlicht.
 
 ## Erledigte Übergaben
 
