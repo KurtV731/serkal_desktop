@@ -430,3 +430,6 @@ Installer-Quellstand zurückübernommen (Commit `464835bf7bf6203a768741398b676d1
 Zusätzlich protokolliert der Backend-Posterhandler Start und Ergebnis, damit ein weiterer
 Fehler nicht unsichtbar bleibt (Commit `ce07c7870729dada70bdd352c96f8b3433e05cb6`).
 JavaScript-Syntaxprüfung für Backend und alle drei Inline-Skripte bestanden. Neuer Sichttest steht aus.
+
+
+CE-Nachtrag 10.09.2026: Poster-Timerpfad durch unmittelbaren, vollständig geloggten Abruf ersetzt. Commit `d864e021efae352d64f74f945e5587b32347c131`; Nachtest offen.
