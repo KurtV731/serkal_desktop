@@ -471,3 +471,42 @@ CE-Nachtrag 10.09.2026: Kurts Sichttest für Commit `8aa23b3` bestanden. Gemisch
 
 
 CE-Nachtrag 10.09.2026: Auf Kurts Hinweis wurde der verlorene `?`-Hilfeknopf in der Werkzeugreihe des Logfensters wiederhergestellt. Das SerKal-eigene Hinweisfenster erklärt Wochentage, Suche, Weiter, Alles markieren, Kopieren, Markiertes, Log leeren, Neu laden und Schließen. Dauerhafte Löschwirkungen auf die ausgewählte TXT-Datei sind ausdrücklich gekennzeichnet; der zuvor irreführende Fußtext wurde berichtigt. Commit `fb1e0935e16c7390d149b3031036efc226727cf4`; Syntaxprüfung bestanden, Windows-Sichttest offen.
+
+
+### 2026-09-10 – Kurt/CE an Installer-Chatty – laufendes SerKal im öffentlichen EXE-Installer sicher behandeln
+
+Status: NEUER VERBINDLICHER INSTALLER-AUFTRAG / UMSETZUNG UND WINDOWS-TEST OFFEN
+
+Kurts Klarstellung: Diese Bedienung gehört nicht nur in `switch-player.bat`. Ein neuer oder
+aktualisierender Nutzer lädt ausschließlich die öffentliche `serkal-desktop.exe` herunter und
+besitzt keine Hilfs-Batchdatei. Deshalb muss die heruntergeladene EXE selbst den vollständigen
+Ablauf beherrschen.
+
+Verbindliches Verhalten:
+
+1. Bei einer echten Erstinstallation ohne laufendes SerKal beginnt die Installation ohne
+   überflüssigen Countdown.
+2. Läuft bereits ein Fenster `SERKAL Desktop*`, zeigt die heruntergeladene EXE vor jeglicher
+   Installationsänderung sichtbar den Countdown
+   „SerKal Desktop wird automatisch geschlossen in 7 … 6 … 5 … 4 … 3 … 2 … 1 Sekunden“.
+3. Während jeder Sekunde, ausdrücklich auch in der letzten, kann Kurt/Nutzer den gesamten
+   Vorgang abbrechen. Beim Abbruch darf die vorhandene Installation nicht verändert werden.
+4. Nach Ablauf soll SerKal zunächst regulär über sein Hauptfenster geschlossen werden. Kein
+   blindes gewaltsames Beenden; bleibt der Prozess aktiv, Installation sicher abbrechen.
+5. Erst wenn nachweislich kein SerKal-Prozess mehr läuft, darf die eigentliche Installation
+   beziehungsweise Aktualisierung beginnen.
+6. Am Ende muss die EXE eindeutig melden:
+   „SerKal Desktop wurde erfolgreich installiert/aktualisiert“ oder
+   „Installation/Aktualisierung fehlgeschlagen“ mit verständlichem Grund.
+7. Der öffentliche Download bleibt genau eine Datei `serkal-desktop.exe`; kein separates BAT,
+   PowerShell-Skript oder zweiter manueller Klick für den Nutzer.
+
+Technischer Hinweis des CE: Das aktuelle Forge-`maker-squirrel`-Setup bietet für einen echten
+Abbruch vor Installationsbeginn keinen passenden SerKal-UI-Einstieg; die Squirrel-Ereignisse im
+Programm laufen dafür zu spät. Daher eine vorgeschaltete Installer-Hülle verwenden oder auf eine
+Installertechnik mit entsprechendem Vorinstallationsdialog wechseln. Keine Scheinlösung im
+normalen SerKal-`main.js`, die erst nach begonnener Installation reagiert.
+
+`switch-player.bat` bleibt aufgrund dieser Klarstellung unverändert. Ergebnis, gewählte Technik,
+Versionsnummer, Commit und praktischen Windows-Test hier zurückmelden. Kein öffentlicher Upload
+vor Kurts Sichtprüfung und Freigabe.
