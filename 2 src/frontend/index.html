@@ -1866,16 +1866,17 @@
           <button id="btnLogFindNext" class="btnSmall" type="button" title="Nächsten Treffer suchen">🔎 Weiter</button>
           <button id="btnLogSelectAll" class="btnSmall" type="button" title="Den gesamten sichtbaren Logtext markieren">☑ Alles markieren</button>
           <button id="btnLogCopy" class="btnSmall" type="button" title="Log oder Auswahl kopieren">📋 Kopieren</button>
-          <button id="btnLogDeleteSelection" class="btnSmall" type="button" title="Markierten Text aus der Anzeige löschen">✂ Markiertes</button>
+          <button id="btnLogDeleteSelection" class="btnSmall" type="button" title="Markierten Text dauerhaft aus der ausgewählten TXT-Logdatei löschen">✂ Markiertes</button>
           <button id="btnLogClearView" class="btnSmall" type="button" title="Das ausgewählte TXT-Log vollständig leeren">🧹 Log leeren</button>
           <button id="btnLogRefresh" class="btnSmall" type="button" title="Log neu laden">↻ Neu laden</button>
+          <button id="btnLogHelp" class="btnSmall" type="button" title="Funktionen des Logfensters erklären" aria-label="Hilfe zu den Logfunktionen">?</button>
           <button id="btnLogClose" class="btnSmall" type="button" title="Logfenster schließen">✖</button>
         </div>
       </div>
       <div class="logPanelBody">
         <pre id="logPanelPre" class="logPre">Log wird geladen …</pre>
       </div>
-      <div id="logPanelMiniStatus" class="logPanelMiniStatus">Markieren und Strg+C funktionieren direkt. Buttons wirken nur auf die sichtbare Anzeige.</div>
+      <div id="logPanelMiniStatus" class="logPanelMiniStatus">Markieren und Strg+C funktionieren direkt. Löschfunktionen ändern die ausgewählte TXT-Logdatei.</div>
     </div>
 
     <div id="posterOverlay" class="posterOverlay" aria-label="Poster groß anzeigen" title="Zum Schließen klicken">
@@ -4618,6 +4619,7 @@ function isActiveSearchToken_(tok) {
     const logPanel = document.getElementById('logPanel');
     const logPanelPre = document.getElementById('logPanelPre');
     const btnLogRefresh = document.getElementById('btnLogRefresh');
+    const btnLogHelp = document.getElementById('btnLogHelp');
     const btnLogClose = document.getElementById('btnLogClose');
     const logSearchInput = document.getElementById('logSearchInput');
     const btnLogFindNext = document.getElementById('btnLogFindNext');
@@ -7499,6 +7501,48 @@ function setActiveLogDay_(day) {
  * @status aktiv
  * @loeschung nein
  */
+/**
+ * @funktion showLogHelp_
+ * @bereich UI / Log
+ * @zweck Erklärt die Bedienelemente des geöffneten Logfensters.
+ * @status aktiv
+ * @hinweis Löschfunktionen werden ausdrücklich als dauerhaft gekennzeichnet.
+ * @loeschung nein
+ */
+function showLogHelp_() {
+  var lines = (String(LANG || 'de').toLowerCase() === 'en')
+    ? [
+        'Mo–So: Load the log file for the selected weekday.',
+        'Search field: Enter text to find in the displayed log.',
+        'Weiter: Select the next match; after the last match, search starts again at the top.',
+        'Alles markieren: Select all currently displayed log text.',
+        'Kopieren: Copy the selection; without a selection, copy the entire displayed log.',
+        'Markiertes: Permanently delete the selected text from the selected TXT log file.',
+        'Log leeren: Permanently clear the entire selected TXT log file.',
+        'Neu laden: Reload the selected log file from storage.',
+        'X: Close the log window.'
+      ]
+    : [
+        'Mo–So: Lädt die Logdatei des gewählten Wochentags.',
+        'Suchfeld: Hier den Text eingeben, der im angezeigten Log gesucht werden soll.',
+        'Weiter: Markiert den nächsten Treffer; nach dem letzten beginnt die Suche wieder oben.',
+        'Alles markieren: Markiert den gesamten momentan angezeigten Logtext.',
+        'Kopieren: Kopiert die Markierung; ohne Markierung wird der gesamte angezeigte Logtext kopiert.',
+        'Markiertes: Löscht den markierten Text dauerhaft aus der ausgewählten TXT-Logdatei.',
+        'Log leeren: Leert die gesamte ausgewählte TXT-Logdatei dauerhaft.',
+        'Neu laden: Lädt die ausgewählte Logdatei erneut vom Speicher.',
+        'X: Schließt das Logfenster.'
+      ];
+  showSerKalDialog_({
+    kind: 'info',
+    icon: '?',
+    title: (String(LANG || 'de').toLowerCase() === 'en') ? 'Log controls' : 'Funktionen im Logfenster',
+    message: lines.join('\n\n'),
+    confirmText: 'OK',
+    showCancel: false
+  });
+}
+
 function loadLogDay_(day) {
   try {
     var d = String(day || currentLogDay_ || '').toLowerCase();
@@ -8143,6 +8187,7 @@ var skFanalCloseBtn_ = document.getElementById('skFanalCloseBtn');
 if (skFanalCloseBtn_) skFanalCloseBtn_.addEventListener('click', function(){ closeFanalAnalyseOverlay_(); });
 if (btnLogDock) btnLogDock.addEventListener('click', function(){ try { uiLogAction_('Log geöffnet', {}); } catch (_eAction) {} openLogFromDock_(); });
 if (btnLogRefresh) btnLogRefresh.addEventListener('click', function(){ try { uiLogAction_('Log neu geladen', {}); } catch (_eAction) {} loadLogPanel_(false); });
+if (btnLogHelp) btnLogHelp.addEventListener('click', function(){ try { uiLogAction_('Log-Hilfe geöffnet', {}); } catch (_eAction) {} showLogHelp_(); });
 if (btnLogClose) btnLogClose.addEventListener('click', function(){ closeLogPanel_(); });
 if (btnLogFindNext) btnLogFindNext.addEventListener('click', function(){ findNextInLog_(); });
 if (logSearchInput) logSearchInput.addEventListener('keydown', function(ev){ if (ev && ev.key === 'Enter') findNextInLog_(); });
