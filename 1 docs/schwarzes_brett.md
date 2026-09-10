@@ -423,4 +423,10 @@ Posterpfad; Website-Chatty 3 hat hierbei keinen Änderungsauftrag.
 
 CE-Korrektur bereit: Commit `4ae9e6cbe5bef30d8e62a01f71508706fce24581`. Der bewährte
 Kompatibilitätsweg wird wieder zuerst verwendet; der direkte IPC-Aufruf bleibt Rückfalllösung.
-Windows-Sichttest durch Kurt steht aus.
+Windows-Sichttest durch Kurt vom 10.09.2026: weiterhin nur `Pic`; derselbe Eintrag `Silo`
+zeigt in der installierten 0.9002 korrekt das Poster. Daraufhin wurden
+`renderPosterImage_` und `scheduleArchivPosterLoad_` wortgleich aus dem funktionierenden
+Installer-Quellstand zurückübernommen (Commit `464835bf7bf6203a768741398b676d19cc0bf51e`).
+Zusätzlich protokolliert der Backend-Posterhandler Start und Ergebnis, damit ein weiterer
+Fehler nicht unsichtbar bleibt (Commit `ce07c7870729dada70bdd352c96f8b3433e05cb6`).
+JavaScript-Syntaxprüfung für Backend und alle drei Inline-Skripte bestanden. Neuer Sichttest steht aus.
