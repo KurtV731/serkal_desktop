@@ -465,3 +465,6 @@ Sichttest: Bloodhounds öffnen, `offSeT +1d` eingeben, kurz warten oder Feld ver
 speichern und erneut auswählen. Erwartet: `OffsetDE: 1D`, `Start: 03.04.2026`
 und `DE: 04.04.2026`.
 
+
+
+CE-Nachtrag 10.09.2026: Kurts Sichttest für Commit `8aa23b3` bestanden. Gemischte Eingabe `offSeT +1d` wurde korrekt zu `OffsetDE: 1D` vereinheitlicht, ausgewertet und die Start-/DE-Daten deutsch angezeigt. Auf Kurts Hinweis wird jede tatsächliche automatische Änderung nun lesbar mit Eingabe und Ergebnis protokolliert; freie Notiztexte bleiben aus diesem Logeintrag heraus. Die Eingabepause wurde von 450 auf 1500 ms verlängert. Commit `f9bba0471561ab23fba2ee9bd941c40894b86894`; Syntax- und Funktionsprobe bestanden, Windows-Sichttest offen.
