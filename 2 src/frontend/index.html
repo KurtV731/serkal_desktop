@@ -4317,6 +4317,35 @@ function toggleNoteSyntaxHelp_() {
 }
 
 /**
+ * @funktion logNoteCanonicalization_
+ * @bereich Notiz / Log
+ * @zweck Protokolliert ausschließlich tatsächlich automatisch vereinheitlichte Steuerzeilen.
+ * @status aktiv
+ * @hinweis Freie Notiztexte werden nicht geloggt.
+ * @loeschung nein
+ */
+function logNoteCanonicalization_(before, after, it) {
+  try {
+    var oldLines = String(before || '').split(/\r?\n/);
+    var newLines = String(after || '').split(/\r?\n/);
+    var count = Math.max(oldLines.length, newLines.length);
+    for (var i = 0; i < count; i++) {
+      var oldLine = String(oldLines[i] || '');
+      var newLine = String(newLines[i] || '');
+      if (oldLine === newLine || !parseNoteControlLine_(oldLine).recognized) continue;
+      var info = Object.assign({}, uiActionEntryInfo_(it) || {}, {
+        eingabe: oldLine,
+        geaendertZu: newLine
+      });
+      uiLogAction_(
+        'Notiz-Steuerwort vereinheitlicht: "' + oldLine + '" → "' + newLine + '"',
+        info
+      );
+    }
+  } catch (_e) {}
+}
+
+/**
  * @funktion applyNoteAutofill_
  * @bereich Notiz / UI
  * @zweck Übernimmt erkannte Steuerwörter in die kanonische Schreibweise und meldet sie sichtbar.
@@ -4344,7 +4373,9 @@ function applyNoteAutofill_(ta, it) {
       return checked;
     }
     if (String(ta.value || '') !== String(checked.canonical || '')) {
+      var noteBefore = String(ta.value || '');
       ta.value = String(checked.canonical || '');
+      logNoteCanonicalization_(noteBefore, ta.value, it);
       uiStatus('Steuerwort in Notiz vereinheitlicht.', { spinner:false, kind:'info' });
     }
     setDirtyForEntry_(it, { note: String(ta.value || '') });
@@ -6609,13 +6640,15 @@ function fillDetailsFromArchiv_(it) {
 
       window.clearTimeout(noteNormalizeTimer);
       noteNormalizeTimer = window.setTimeout(function() {
-        var canonical = canonicalizeNoteText_(ta.value || '');
-        if (String(ta.value || '') !== String(canonical || '')) {
+        var noteBefore = String(ta.value || '');
+        var canonical = canonicalizeNoteText_(noteBefore);
+        if (noteBefore !== String(canonical || '')) {
           ta.value = String(canonical || '');
+          logNoteCanonicalization_(noteBefore, ta.value, it);
           setDirtyForEntry_(it, { note: String(ta.value || '') });
           uiStatus('Steuerwort in Notiz vereinheitlicht.', { spinner:false, kind:'info' });
         }
-      }, 450);
+      }, 1500);
     });
     ta.addEventListener('blur', function() {
       window.clearTimeout(noteNormalizeTimer);
