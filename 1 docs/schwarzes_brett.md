@@ -468,3 +468,6 @@ und `DE: 04.04.2026`.
 
 
 CE-Nachtrag 10.09.2026: Kurts Sichttest für Commit `8aa23b3` bestanden. Gemischte Eingabe `offSeT +1d` wurde korrekt zu `OffsetDE: 1D` vereinheitlicht, ausgewertet und die Start-/DE-Daten deutsch angezeigt. Auf Kurts Hinweis wird jede tatsächliche automatische Änderung nun lesbar mit Eingabe und Ergebnis protokolliert; freie Notiztexte bleiben aus diesem Logeintrag heraus. Die Eingabepause wurde von 450 auf 1500 ms verlängert. Commit `f9bba0471561ab23fba2ee9bd941c40894b86894`; Syntax- und Funktionsprobe bestanden, Windows-Sichttest offen.
+
+
+CE-Nachtrag 10.09.2026: Auf Kurts Hinweis wurde der verlorene `?`-Hilfeknopf in der Werkzeugreihe des Logfensters wiederhergestellt. Das SerKal-eigene Hinweisfenster erklärt Wochentage, Suche, Weiter, Alles markieren, Kopieren, Markiertes, Log leeren, Neu laden und Schließen. Dauerhafte Löschwirkungen auf die ausgewählte TXT-Datei sind ausdrücklich gekennzeichnet; der zuvor irreführende Fußtext wurde berichtigt. Commit `fb1e0935e16c7390d149b3031036efc226727cf4`; Syntaxprüfung bestanden, Windows-Sichttest offen.
