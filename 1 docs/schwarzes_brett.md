@@ -436,3 +436,32 @@ CE-Nachtrag 10.09.2026: Poster-Timerpfad durch unmittelbaren, vollständig gelog
 
 
 CE-Nachtrag 10.09.2026: Richtiger Commit `d864e02` war bei Kurt aktiv, dennoch kein Posterstart im Log. Ursache im Ablauf lokalisiert: `fillDetailsFromArchiv_()` konnte nach sichtbarem Detailaufbau abbrechen, bevor der nachgelagerte Posteraufruf erreicht wurde. Commit `39959c6cad0b736f265a47fe64e767589eb48ff6` startet den Posterabruf nun zuerst und protokolliert Fehler der folgenden UI-Schritte. Syntaxprüfung bestanden. Nachtest durch Kurt am 10.09.2026 bestanden: Die Entwicklungsfassung zeigt die Archivposter wieder korrekt (sichtgeprüft unter anderem mit „Percy Jackson Die Serie“). Ursache war die Reihenfolge: Der Posterabruf lag hinter der fehleranfälligen Detailverarbeitung und wurde deshalb nicht erreicht.
+
+## 2026-09-10 – CE – Smarte Notizsteuerung und deutsches Startdatum repariert
+
+Status: CODE FERTIG / WINDOWS-SICHTTEST OFFEN
+
+Kurts Befund:
+
+- `offSeT +1d` blieb unverändert und erzeugte bei „Bloodhounds“ keinen deutschen Termin;
+- `Start` wurde in den Staffeldetails weiterhin als ISO-Datum `2026-04-03` angezeigt.
+
+Ursache:
+
+- Der vollständige Notiz-Helferblock (`canonicalizeNoteText_`, `validateNoteText_`,
+  `applyNoteAutofill_` sowie zugehörige Funktionen) war versehentlich innerhalb
+  `saveDirtyChanges_()` deklariert und dadurch für das Notizfeld zur Laufzeit nicht erreichbar.
+
+Korrektur auf `serkal-0.0.5-archiv-start`:
+
+- Commit `8aa23b3004b52d1772bf8c7fc2e8b4667b8e5ecb`;
+- Notiz-Helferblock in den globalen Skriptbereich verschoben;
+- beide Start-Anzeigen benutzen nun die vorhandene Funktion `formatDateShort_()`;
+- interne Funktionsprobe: `offSeT +1d` → `OffsetDE: 1D`;
+- Datumsproben: `2026-04-03` → `03.04.2026`, `2026-05-28` → `28.05.2026`;
+- Syntaxprüfung aller drei Inline-Skripte bestanden.
+
+Sichttest: Bloodhounds öffnen, `offSeT +1d` eingeben, kurz warten oder Feld verlassen,
+speichern und erneut auswählen. Erwartet: `OffsetDE: 1D`, `Start: 03.04.2026`
+und `DE: 04.04.2026`.
+
