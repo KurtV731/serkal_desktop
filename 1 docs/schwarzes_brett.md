@@ -547,3 +547,12 @@ Bildpfad: `up/icon/help/google-kalender-auswahl.png`.
 Bild und HTML wurden atomar gemeinsam eingecheckt. Repository-Nachprüfung: Bilddatei
 vollständig vorhanden, HTML verweist auf den festen Bildpfad und das Bild steht vor `h1`.
 Öffentliche Veröffentlichung beziehungsweise Sichtprüfung auf serkal.de steht noch aus.
+
+Website-Chatty-3-Nachtrag 10.09.2026: Kurts Originaldatei
+`up/icon/cal 01 - anmeldung.png` ist nun selbst eingebunden; die deutsche Hilfe verweist
+URL-sicher auf `/icon/cal%2001%20-%20anmeldung.png`. Die vier Auswahlmöglichkeiten werden
+unmittelbar unter dem Bild erklärt. Nach dem CE-Stand `d6b2966` wurden DE und EN außerdem
+fachlich berichtigt: ICS und automatische Auswahl erzeugen derzeit noch keine
+Kalendereinträge; für direkte Termine ist die erste Google-Auswahl zu verwenden.
+Website-Abschlusscommit: `c26609ab3363be2ef947bf7a8a8c9d1cf409c3d4`.
+
