@@ -2801,7 +2801,27 @@ function installIpc_() {
         return res.ok ? { ok:true, message:"TMDB-Verbindung funktioniert." } : res;
     });
     ipcMain.handle("serkal:tmdb:searchTv", async (_event, query, lang, options) => serkalSearchComplete_(query, lang, options));
-    ipcMain.handle("serkal:tmdb:poster", async (_event, id, lang) => tmdbPoster_(id, lang));
+    ipcMain.handle("serkal:tmdb:poster", async (_event, id, lang) => {
+        const tmdbId = Number(id || 0);
+        logWrite_("TRACE", "TMDB", "Posterabruf gestartet", { tmdbId, lang:String(lang || "de") });
+        try {
+            const result = await tmdbPoster_(tmdbId, lang);
+            logWrite_(result && result.ok ? "TRACE" : "ERROR", "TMDB", "Posterabruf abgeschlossen", {
+                tmdbId,
+                ok:Boolean(result && result.ok),
+                nopic:Boolean(result && result.nopic),
+                code:String(result && result.code || ""),
+                hasDataUrl:Boolean(result && result.dataUrl)
+            });
+            return result;
+        } catch (err) {
+            logWrite_("ERROR", "TMDB", "Posterabruf fehlgeschlagen", {
+                tmdbId,
+                fehler:String(err && err.message || err)
+            });
+            throw err;
+        }
+    });
     ipcMain.handle("serkal:archive:load", () => archiveLoad_());
     ipcMain.handle("serkal:archive:insert", (_event, payload) => {
         logWrite_("TRACE", "PIPELINE", "IPC Archiv-Eintrag empfangen", {
