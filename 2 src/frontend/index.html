@@ -4167,33 +4167,6 @@ function getDirtyPatchForEntry_(it) {
   return key && state.dirtyMap ? (state.dirtyMap[key] || null) : null;
 }
 /**
- * @funktion saveDirtyChanges_
- * @bereich Dirty-State
- * @zweck Speichert alle offenen Änderungen gesammelt ins Archiv.
- * @status aktiv
- * @hinweis Interner Helfer; Aufrufer möglichst sauber begrenzt halten.
- * @loeschung nein
- */
-/**
- * @id 7.01.011
- * @funktion saveDirtyChanges_
- * @modul 7 UI
- * @gruppe UI / Zustand / Eingabe
- * @zweck Funktions-ID automatisch vergeben; Zweck anhand Funktionsname/Modul später bei Bedarf verfeinern.
- * @status aktiv
- * @loeschung nein
- */
-function saveDirtyChanges_() {
-  try {
-    try { uiLogAction_('Speichern angefordert', { dirtyCount: state && state.dirtyCount || 0 }); } catch (_eAction) {}
-    if (state.saveBusy) return;
-    if (!state.isDirty || !Object.keys(state.dirtyMap || {}).length) {
-      uiStatus(t('SAVE_NOTHING'), { spinner:false, kind:'info' });
-      updateSaveUi_();
-      return;
-    }
-
-/**
  * @funktion normalizeNoteControlWord_
  * @bereich Notiz / Validierung
  * @zweck Vereinheitlicht bekannte Steuerwörter für DE-Termine/Offsets.
@@ -4381,6 +4354,34 @@ function applyNoteAutofill_(ta, it) {
     return { ok:true, canonical:String(ta && ta.value || ''), problems:[] };
   }
 }
+
+/**
+ * @funktion saveDirtyChanges_
+ * @bereich Dirty-State
+ * @zweck Speichert alle offenen Änderungen gesammelt ins Archiv.
+ * @status aktiv
+ * @hinweis Interner Helfer; Aufrufer möglichst sauber begrenzt halten.
+ * @loeschung nein
+ */
+/**
+ * @id 7.01.011
+ * @funktion saveDirtyChanges_
+ * @modul 7 UI
+ * @gruppe UI / Zustand / Eingabe
+ * @zweck Funktions-ID automatisch vergeben; Zweck anhand Funktionsname/Modul später bei Bedarf verfeinern.
+ * @status aktiv
+ * @loeschung nein
+ */
+function saveDirtyChanges_() {
+  try {
+    try { uiLogAction_('Speichern angefordert', { dirtyCount: state && state.dirtyCount || 0 }); } catch (_eAction) {}
+    if (state.saveBusy) return;
+    if (!state.isDirty || !Object.keys(state.dirtyMap || {}).length) {
+      uiStatus(t('SAVE_NOTHING'), { spinner:false, kind:'info' });
+      updateSaveUi_();
+      return;
+    }
+
     var dirtyKeys = Object.keys(state.dirtyMap || {});
     for (var i = 0; i < dirtyKeys.length; i++) {
       var dk = dirtyKeys[i];
@@ -6228,7 +6229,7 @@ function fillDetailsFromPreview_(p) {
     let html = '';
     html += '<div class="summaryTitleRow"><span class="summaryStatusIcon" title="' + escapeHtml(statusToLabel_(st)) + '">' + escapeHtml(statusToIcon_(st)) + '</span><span class="summaryTitleText">' + escapeHtml(String(title)) + '</span></div>';
     html += '<div class="summaryGrid">';
-    if (start) html += '<div class="summaryCell"><span class="summaryLabel">' + escapeHtml(t('PV_START')) + ':</span>' + escapeHtml(String(start)) + '</div>';
+    if (start) html += '<div class="summaryCell"><span class="summaryLabel">' + escapeHtml(t('PV_START')) + ':</span>' + escapeHtml(formatDateShort_(start) || String(start)) + '</div>';
     if (eps !== '' && eps != null) html += '<div class="summaryCell"><span class="summaryLabel">' + escapeHtml(t('PV_EPISODES')) + ':</span>' + escapeHtml(String(eps)) + '</div>';
     if (deStart) html += '<div class="summaryCell"><span class="summaryLabel">DE:</span>' + escapeHtml(formatDateShort_(deStart)) + '</div>';
     if (tc) html += '<div class="summaryCell"><span class="summaryLabel">' + escapeHtml(t('PV_DATES')) + ':</span>' + escapeHtml(String(tc)) + '</div>';
@@ -6548,7 +6549,7 @@ function fillDetailsFromArchiv_(it) {
     let html = '';
     html += '<div class="summaryTitleRow"><span class="summaryStatusIcon" title="' + escapeHtml(String(statusTxt)) + '">' + escapeHtml(statusToIcon_(statusNum)) + '</span><span class="summaryTitleText">' + escapeHtml(String(title)) + '</span></div>';
     html += '<div class="summaryGrid">';
-    if (start) html += '<div class="summaryCell"><span class="summaryLabel">' + escapeHtml(t('PV_START')) + ':</span>' + escapeHtml(String(start)) + '</div>';
+    if (start) html += '<div class="summaryCell"><span class="summaryLabel">' + escapeHtml(t('PV_START')) + ':</span>' + escapeHtml(formatDateShort_(start) || String(start)) + '</div>';
     if (eps !== '') html += '<div class="summaryCell"><span class="summaryLabel">' + escapeHtml(t('PV_EPISODES')) + ':</span>' + escapeHtml(String(eps)) + '</div>';
     if (deStart) html += '<div class="summaryCell"><span class="summaryLabel">DE:</span>' + escapeHtml(formatDateShort_(deStart)) + '</div>';
     if (tc !== '') html += '<div class="summaryCell"><span class="summaryLabel">' + escapeHtml(t('PV_DATES')) + ':</span>' + escapeHtml(String(tc)) + '</div>';
