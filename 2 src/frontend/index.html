@@ -1956,9 +1956,37 @@
     document.querySelectorAll('input[name="skCalendarMode"]').forEach(function(e){e.addEventListener('change',refresh)});
     document.getElementById('skCalendarSetupLater').addEventListener('click',hide);
     document.getElementById('skCalendarSetupHelp').addEventListener('click',async function(){
-      var lang='de';
+      var lang='de',m=mode();
       try{lang=String(localStorage.getItem('serkal_lang')||'de').toLowerCase()==='en'?'en':'de'}catch(_e){}
-      try{await window.serkal.help.google(lang)}catch(e){alert('Kalender-Hilfe konnte nicht geöffnet werden: '+String(e||''))}
+      if(m==='google'){
+        try{await window.serkal.help.google(lang)}catch(e){alert('Kalender-Hilfe konnte nicht geöffnet werden: '+String(e||''))}
+        return;
+      }
+      var de={
+        '':'Bitte zuerst eine Kalender-Option auswählen. Danach erklärt diese Hilfe genau die gewählte Möglichkeit.',
+        ics:'ICS ist für andere Kalenderprogramme gedacht. Der eigentliche ICS-Export ist in dieser SerKal-Version noch nicht aktiv. Für sofortige automatische Kalendereinträge bitte „Google Kalender“ wählen.',
+        none:'SerKal verwaltet dann nur das Serienarchiv. Es werden keine Termine in einen Kalender geschrieben.',
+        auto:'Diese automatische Auswahl ist für eine spätere vollständig selbständige Kalenderentscheidung vorgesehen. Derzeit führt sie zum noch nicht aktiven ICS-Export und erzeugt deshalb keine Kalendereinträge. Für funktionierende automatische Einträge bitte „Google Kalender“ wählen.'
+      };
+      var en={
+        '':'Please select a calendar option first. This help will then explain the selected option.',
+        ics:'ICS is intended for other calendar applications. ICS export is not active in this SerKal version yet. For working automatic calendar entries, please select “Google Calendar”.',
+        none:'SerKal will manage the series archive only. No calendar events will be created.',
+        auto:'This automatic choice is intended for a later fully automatic calendar decision. It currently selects the unfinished ICS export and therefore creates no calendar events. For working automatic entries, please select “Google Calendar”.'
+      };
+      var message=(lang==='en'?en:de)[m]||(lang==='en'?en['']:de['']);
+      if(typeof showSerKalDialog_==='function'){
+        showSerKalDialog_({
+          kind:'info',
+          icon:'?',
+          title:lang==='en'?'Help for this selection':'Hilfe zu dieser Auswahl',
+          message:message,
+          confirmText:'OK',
+          showCancel:false
+        });
+      }else{
+        alert(message);
+      }
     });
     document.getElementById('skCalendarSetupSave').addEventListener('click',async function(){
       var m=mode(),id=googleId?String(googleId.value||'').trim():'';
@@ -7926,6 +7954,11 @@ async function openCalendarFromDock_() {
     }
     var settings = await window.serkal.settings.get();
     if (!settings || settings.setupDone !== true || !settings.calendar || !settings.calendar.mode) {
+      if (typeof window.serkalCalendarSetupShow === 'function') await window.serkalCalendarSetupShow();
+      return;
+    }
+    var selectedMode = String(settings.calendar.mode || '').toLowerCase();
+    if (selectedMode !== 'google') {
       if (typeof window.serkalCalendarSetupShow === 'function') await window.serkalCalendarSetupShow();
       return;
     }
