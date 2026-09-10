@@ -6669,9 +6669,23 @@ function selectArchivItem(it) {
       keys: it ? Object.keys(it) : []
     });
   } catch (_e) {}
-  fillDetailsFromArchiv_(it);
-  try { renderLeftPreviewFromAny_(it); } catch (e) {}
-  try { scheduleArchivPosterLoad_(it); } catch (e) {}
+  try {
+    scheduleArchivPosterLoad_(it);
+  } catch (e) {
+    try { uiLogAction_('Posterfunktion konnte nicht gestartet werden', { fehler:String(e && e.message || e) }); } catch (_ePoster) {}
+  }
+
+  try {
+    fillDetailsFromArchiv_(it);
+  } catch (e) {
+    try { uiLogAction_('Archivdetails konnten nicht vollständig aufgebaut werden', { fehler:String(e && e.message || e) }); } catch (_eDetails) {}
+  }
+
+  try {
+    renderLeftPreviewFromAny_(it);
+  } catch (e) {
+    try { uiLogAction_('Archivvorschau konnte nicht vollständig aufgebaut werden', { fehler:String(e && e.message || e) }); } catch (_ePreview) {}
+  }
 }
 
 // --------- SUCHE: TMDB Vorschläge ----------
