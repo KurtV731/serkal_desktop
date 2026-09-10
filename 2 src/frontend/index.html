@@ -2908,53 +2908,68 @@ function schedulePreviewPosterLoad_(it) {
  * @loeschung nein
  */
 function scheduleArchivPosterLoad_(it) {
+  cancelArchivPosterLoad_();
+
+  var tmdbId = getArchivTmdbId_(it);
+  if (!tmdbId) {
+    renderNoPicPlaceholder_();
+    try { uiLogAction_('Posteranforderung ohne TMDB-ID verworfen', { bereich:'archiv' }); } catch (_e0) {}
+    return;
+  }
+
+  var key = String(tmdbId);
+  if (state && state.archivPosterCache && state.archivPosterCache[key]) {
+    applyArchivPosterResult_(it, state.archivPosterCache[key]);
+    try { uiLogAction_('Poster aus Sitzungscache übernommen', { tmdbId:tmdbId, bereich:'archiv' }); } catch (_e1) {}
+    return;
+  }
+
+  var token = ++state.archivPosterToken;
+  try { uiLogAction_('Posteranforderung gestartet', { tmdbId:tmdbId, bereich:'archiv' }); } catch (_e2) {}
+
   try {
-    cancelArchivPosterLoad_();
+    google.script.run
+      .withSuccessHandler(function(res) {
+        try {
+          if (!state || !state.archivSelected) return;
+          if (token !== state.archivPosterToken) return;
+          if (getArchivTmdbId_(state.archivSelected) !== tmdbId) return;
 
-    var tmdbId = getArchivTmdbId_(it);
-    if (!tmdbId) {
-      renderNoPicPlaceholder_();
-      return;
-    }
-
-    var key = String(tmdbId);
-    if (state && state.archivPosterCache && state.archivPosterCache[key]) {
-      applyArchivPosterResult_(it, state.archivPosterCache[key]);
-      return;
-    }
-
-    var token = ++state.archivPosterToken;
-
-    state.archivPosterTimer = setTimeout(function() {
-      try {
-        if (!state || !state.archivSelected) return;
-        if (token !== state.archivPosterToken) return;
-        if (getArchivTmdbId_(state.archivSelected) !== tmdbId) return;
-
-        google.script.run
-          .withSuccessHandler(function(res) {
+          if (res && res.ok) {
+            state.archivPosterCache[key] = res;
+            applyArchivPosterResult_(state.archivSelected, res);
             try {
-              if (!state || !state.archivSelected) return;
-              if (token !== state.archivPosterToken) return;
-              if (getArchivTmdbId_(state.archivSelected) !== tmdbId) return;
-
-              if (res && res.ok) {
-                state.archivPosterCache[key] = res;
-                applyArchivPosterResult_(state.archivSelected, res);
-              } else {
-                renderNoPicPlaceholder_();
-              }
-            } catch (_e1) {}
-          })
-          .withFailureHandler(function(_err) {
+              uiLogAction_('Posterantwort übernommen', {
+                tmdbId:tmdbId,
+                bereich:'archiv',
+                nopic:Boolean(res.nopic),
+                hasDataUrl:Boolean(res.dataUrl)
+              });
+            } catch (_e3) {}
+          } else {
             renderNoPicPlaceholder_();
-          })
-          .apiHoleArchivPoster(tmdbId, getLang_ ? getLang_() : LANG);
-      } catch (_e2) {
+            try {
+              uiLogAction_('Poster konnte nicht geladen werden', {
+                tmdbId:tmdbId,
+                bereich:'archiv',
+                code:String(res && res.code || '')
+              });
+            } catch (_e4) {}
+          }
+        } catch (err) {
+          renderNoPicPlaceholder_();
+          try { uiLogAction_('Posterantwort konnte nicht verarbeitet werden', { tmdbId:tmdbId, fehler:String(err && err.message || err) }); } catch (_e5) {}
+        }
+      })
+      .withFailureHandler(function(err) {
         renderNoPicPlaceholder_();
-      }
-    }, 500);
-  } catch (_e) {}
+        try { uiLogAction_('Posterbrücke meldet Fehler', { tmdbId:tmdbId, fehler:String(err && err.message || err) }); } catch (_e6) {}
+      })
+      .apiHoleArchivPoster(tmdbId, (typeof getLang_ === 'function') ? getLang_() : LANG);
+  } catch (err) {
+    renderNoPicPlaceholder_();
+    try { uiLogAction_('Posterbrücke konnte nicht gestartet werden', { tmdbId:tmdbId, fehler:String(err && err.message || err) }); } catch (_e7) {}
+  }
 }
 
 
