@@ -531,3 +531,19 @@ Korrekturcommit: `d6b29660b3b7440eaea7b3d912b51eff3aec825f`.
 - Der normale Kalenderknopf öffnet bei allen Nicht-Google-Modi erneut die Einrichtungsauswahl;
   nur ein eingerichteter Google-Modus öffnet unmittelbar Google.
 - Syntaxprüfung aller drei Inline-Skripte bestanden.
+
+
+### 2026-09-10 – Kurt/CE – Google-Kalender-Hilfe beginnt mit Einrichtungsbild
+
+Status: WEBSITE-CODE FERTIG / VERÖFFENTLICHUNG UND SICHTTEST OFFEN
+
+Auf Kurts verbindliche Vorgabe wurde sein aktueller Screenshot des SerKal-Dialogs
+`Kalender einrichten` als erste Darstellung im Seiteninhalt der deutschen
+`google-kalender-hilfe.html` eingebunden – noch vor der bisherigen Überschrift.
+
+Website-Commit: `5bc93ccd52d9d7d85edcf97727a28ff6f3a9b1de`.
+Bildpfad: `up/icon/help/google-kalender-auswahl.png`.
+
+Bild und HTML wurden atomar gemeinsam eingecheckt. Repository-Nachprüfung: Bilddatei
+vollständig vorhanden, HTML verweist auf den festen Bildpfad und das Bild steht vor `h1`.
+Öffentliche Veröffentlichung beziehungsweise Sichtprüfung auf serkal.de steht noch aus.
