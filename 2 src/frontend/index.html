@@ -2736,16 +2736,7 @@ function renderPosterImage_(src) {
   if (typeof posterBox === 'undefined' || !posterBox) return;
   var s = String(src || '').trim();
   if (!s) { renderPosterPlaceholder_(); return; }
-
-  posterBox.textContent = '';
-  var img = document.createElement('img');
-  img.src = s;
-  img.alt = '';
-  img.loading = 'lazy';
-  img.addEventListener('error', function() {
-    renderNoPicPlaceholder_();
-  }, { once:true });
-  posterBox.appendChild(img);
+  posterBox.innerHTML = '<img src="' + escapeHtml(s) + '" alt="" loading="lazy" />';
 }
 
 /**
@@ -2940,24 +2931,25 @@ function scheduleArchivPosterLoad_(it) {
         if (token !== state.archivPosterToken) return;
         if (getArchivTmdbId_(state.archivSelected) !== tmdbId) return;
 
-        requestPosterFromDesktop_(tmdbId, getLang_ ? getLang_() : LANG)
-          .then(function(res) {
-            if (!state || !state.archivSelected) return;
-            if (token !== state.archivPosterToken) return;
-            if (getArchivTmdbId_(state.archivSelected) !== tmdbId) return;
+        google.script.run
+          .withSuccessHandler(function(res) {
+            try {
+              if (!state || !state.archivSelected) return;
+              if (token !== state.archivPosterToken) return;
+              if (getArchivTmdbId_(state.archivSelected) !== tmdbId) return;
 
-            if (res && res.ok && (res.dataUrl || res.nopic)) {
-              state.archivPosterCache[key] = res;
-              applyArchivPosterResult_(state.archivSelected, res);
-            } else {
-              renderNoPicPlaceholder_();
-              try { uiLogAction_('Poster konnte nicht geladen werden', { tmdbId:tmdbId, bereich:'archiv', code:String(res && res.code || '') }); } catch (_e) {}
-            }
+              if (res && res.ok) {
+                state.archivPosterCache[key] = res;
+                applyArchivPosterResult_(state.archivSelected, res);
+              } else {
+                renderNoPicPlaceholder_();
+              }
+            } catch (_e1) {}
           })
-          .catch(function(err) {
+          .withFailureHandler(function(_err) {
             renderNoPicPlaceholder_();
-            try { uiLogAction_('Poster konnte nicht geladen werden', { tmdbId:tmdbId, bereich:'archiv', fehler:String(err && err.message || err) }); } catch (_e) {}
-          });
+          })
+          .apiHoleArchivPoster(tmdbId, getLang_ ? getLang_() : LANG);
       } catch (_e2) {
         renderNoPicPlaceholder_();
       }
