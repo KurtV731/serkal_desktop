@@ -6626,7 +6626,13 @@ function fillDetailsFromArchiv_(it) {
     var helpButton = document.getElementById('btnNoteSyntaxHelp');
     if (helpButton) {
       helpButton.setAttribute('aria-expanded', 'false');
-      helpButton.onclick = toggleNoteSyntaxHelp_;
+      helpButton.onclick = function() {
+        var helpPanel = document.getElementById('detailsNoteSyntaxHelp');
+        if (!helpPanel) return;
+        var show = helpPanel.style.display === 'none';
+        helpPanel.style.display = show ? 'block' : 'none';
+        helpButton.setAttribute('aria-expanded', show ? 'true' : 'false');
+      };
     }
   }
 
