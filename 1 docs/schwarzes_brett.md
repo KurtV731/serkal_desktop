@@ -433,3 +433,6 @@ JavaScript-Syntaxprüfung für Backend und alle drei Inline-Skripte bestanden. N
 
 
 CE-Nachtrag 10.09.2026: Poster-Timerpfad durch unmittelbaren, vollständig geloggten Abruf ersetzt. Commit `d864e021efae352d64f74f945e5587b32347c131`; Nachtest offen.
+
+
+CE-Nachtrag 10.09.2026: Richtiger Commit `d864e02` war bei Kurt aktiv, dennoch kein Posterstart im Log. Ursache im Ablauf lokalisiert: `fillDetailsFromArchiv_()` konnte nach sichtbarem Detailaufbau abbrechen, bevor der nachgelagerte Posteraufruf erreicht wurde. Commit `39959c6cad0b736f265a47fe64e767589eb48ff6` startet den Posterabruf nun zuerst und protokolliert Fehler der folgenden UI-Schritte. Syntaxprüfung bestanden; Nachtest offen.
