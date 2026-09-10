@@ -510,3 +510,24 @@ normalen SerKal-`main.js`, die erst nach begonnener Installation reagiert.
 `switch-player.bat` bleibt aufgrund dieser Klarstellung unverändert. Ergebnis, gewählte Technik,
 Versionsnummer, Commit und praktischen Windows-Test hier zurückmelden. Kein öffentlicher Upload
 vor Kurts Sichtprüfung und Freigabe.
+
+
+### 2026-09-10 – CE – Kalender-Erststarthilfe aus Xaver-Test korrigiert
+
+Status: CODE FERTIG / XAVER-SICHTTEST OFFEN
+
+Xaver-Testbefund von Kurt: Der Knopf `Hilfe öffnen` führte unabhängig von der gewählten
+Kalenderoption immer zur Google-Kalender-Hilfe. Besonders für „Keine Ahnung … mach, was
+du denkst“ war diese Hilfe unpassend; die einmal gespeicherte Auswahl ließ sich zudem nicht
+einfach erneut öffnen.
+
+Korrekturcommit: `d6b29660b3b7440eaea7b3d912b51eff3aec825f`.
+
+- Google-Auswahl öffnet weiterhin die Google-Hilfe.
+- ICS, kein Kalender, keine Auswahl und automatische Auswahl erhalten jeweils eine passende
+  Erklärung im SerKal-Dialog.
+- Die automatische Auswahl erklärt ausdrücklich den Iststand: Sie führt derzeit zum noch nicht
+  aktiven ICS-Export und erzeugt daher keine Kalendereinträge.
+- Der normale Kalenderknopf öffnet bei allen Nicht-Google-Modi erneut die Einrichtungsauswahl;
+  nur ein eingerichteter Google-Modus öffnet unmittelbar Google.
+- Syntaxprüfung aller drei Inline-Skripte bestanden.
