@@ -667,3 +667,41 @@ Xaver-Nachtest 11.09.2026:
 Korrekturcommits: `b5ae31242ac2627bdcb492a6e05419eff9d54243` und
 `89709ceb3f4943ac597975bc1a18d3aa708ec18d`.
 Backend, injizierte Brücke und alle drei Inline-Skripte syntaktisch geprüft.
+
+
+### 2026-09-11 – Kurt/CE – Logfenster auf Laptop skalierbar und Höhe dauerhaft
+
+Status: CODE FERTIG / LAPTOP-SICHTTEST OFFEN
+
+Kurts Laptopbefund: Das geöffnete Logfenster nahm nahezu die gesamte nutzbare Bildschirmhöhe
+ein und verdeckte die SerKal-Oberfläche. Gewünscht ist ein verschiebbarer oberer Rand; die
+eingestellte Höhe soll beim nächsten Öffnen erhalten bleiben.
+
+Ursache: Neben der älteren 420-Pixel-Regel setzte eine spätere Log-CSS-Regel die Höhe erneut auf
+bis zu 520 Pixel. Auf der Laptopanzeige wirkte das Log dadurch unverhältnismäßig groß.
+
+Korrekturcommit: `5981c2a0e51cd343f04de70b1edc2fecc0c69231`.
+
+- Responsive Anfangshöhe: 38 Prozent der verfügbaren Fensterhöhe, höchstens 360 Pixel.
+- Der neue sichtbare Ziehbalken liegt unmittelbar am oberen Rand des Logfensters.
+- Nach oben ziehen vergrößert, nach unten ziehen verkleinert das Log.
+- Die gewählte Höhe wird lokal gespeichert und beim nächsten Öffnen sowie nach Programmneustart
+  wiederhergestellt.
+- Bei einer kleineren Bildschirmhöhe wird ein zu großer gespeicherter Wert automatisch auf die
+  noch verfügbare Fläche begrenzt.
+- Mindesthöhe 170 Pixel; oberhalb des Logs bleiben mindestens 130 Pixel der Hauptoberfläche frei.
+- Tastaturbedienung am Ziehbalken ist mit Pfeil hoch/runter möglich.
+- Die Log-Hilfe erklärt den Ziehbalken und das Speichern der Höhe.
+- Logsuche, Markierung, Kopieren und dauerhafte Löschfunktionen wurden nicht verändert.
+- Der von GitHub zurückgelesene Stand enthält genau einen Ziehbalken und eine Initialisierung;
+  alle drei Inline-Skripte sind syntaktisch gültig.
+
+Laptop-Sichttest:
+
+1. `PULL-SD.BAT` ausführen, SerKal starten und das Log öffnen.
+2. Prüfen: Das Log startet deutlich niedriger als im Screenshot vom 11.09.2026.
+3. Den blauen/violetten Ziehbalken am oberen Logrand nach unten ziehen und loslassen.
+4. Log schließen und erneut öffnen: Die niedrigere Höhe muss erhalten bleiben.
+5. SerKal neu starten und Log erneut öffnen: Die Höhe muss weiterhin erhalten bleiben.
+6. Ziehbalken nach oben ziehen: Das Log darf wachsen, aber nicht die gesamte Hauptoberfläche
+   verdecken.
