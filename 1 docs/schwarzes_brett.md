@@ -556,3 +556,37 @@ fachlich berichtigt: ICS und automatische Auswahl erzeugen derzeit noch keine
 Kalendereinträge; für direkte Termine ist die erste Google-Auswahl zu verwenden.
 Website-Abschlusscommit: `c26609ab3363be2ef947bf7a8a8c9d1cf409c3d4`.
 
+
+
+### 2026-09-11 – CE – ICS-Auswahl erklärt und als später änderbar gekennzeichnet
+
+Status: CODE FERTIG / XAVER-SICHTTEST OFFEN
+
+Kurts Vorgabe: Beim bewussten Auswählen von „ICS-Datei / anderer Kalender“ soll ein kurzes
+SerKal-Pop-up nach dem gezeigten Kalender-Hinzufügen-Vorbild erscheinen. Außerdem muss bereits
+im Einrichtungsdialog eindeutig stehen, dass sämtliche anfänglichen Auswahlen später geändert
+werden können.
+
+Korrekturcommit: `79bc9b1ee411a8d58710fda64220665077aad5d8`.
+
+- Die Einleitung erklärt nun: Alle Einstellungen können später jederzeit über „Kalender“
+  geändert werden.
+- Nur beim aktiven Anklicken der ICS-Auswahl erscheint „Zum Kalender hinzufügen“.
+- Das Pop-up nennt Apple Kalender/iCal, Microsoft Outlook und andere ICS-fähige
+  Kalenderprogramme.
+- Es verschweigt den Iststand nicht: Der ICS-Export ist in dieser SerKal-Version noch nicht aktiv.
+- Beim bloßen erneuten Öffnen einer bereits gespeicherten ICS-Einstellung erscheint das Pop-up
+  nicht ungefragt erneut.
+- Deutsch und Englisch sind berücksichtigt.
+- Der von GitHub zurückgelesene Stand wurde geprüft; alle drei Inline-Skripte sind syntaktisch
+  gültig.
+
+Xaver-Sichttest:
+1. `PULL-SD.BAT` ausführen und SerKal starten.
+2. Unten „Kalender“ öffnen.
+3. Prüfen, ob die Einleitung die spätere Änderbarkeit über „Kalender“ nennt.
+4. „ICS-Datei / anderer Kalender“ anklicken.
+5. Prüfen, ob das Pop-up sofort erscheint und Apple/iCal, Outlook, andere ICS-Kalender sowie
+   den noch nicht aktiven Export nennt.
+6. Pop-up mit „OK“ schließen; anschließend eine andere Auswahl anklicken und wieder ICS wählen.
+   Das Pop-up muss erneut erscheinen.
