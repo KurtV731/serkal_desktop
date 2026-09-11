@@ -637,13 +637,15 @@ Xaver-Test:
 1. SerKal vollständig schließen und `PULL-SD.BAT` ausführen.
 2. Mit `switch-player.bat` zunächst zu Kurt und anschließend wieder zu Xaver wechseln,
    damit Xaver garantiert neu auf null erzeugt wird.
-3. SerKal starten: Der Assistent muss mit „Schritt 1 von 3“ beginnen; kein Kalender ist
-   vorausgewählt.
-4. Einen TMDB-Key eintippen und „Weiter“ drücken. Im Kalenderschritt „Zurück“ wählen:
-   Der eingegebene Key muss noch sichtbar sein, aber noch nicht dauerhaft gespeichert sein.
-5. Wieder weitergehen, eine Kalenderoption wählen und zur Kontrollseite gehen. Mit „Zurück“
+3. SerKal starten: Der Assistent muss mit „Schritt 1 von 3 – TMDB einrichten“ beginnen.
+   In diesem ersten Schritt ist noch keine Kalenderauswahl sichtbar.
+4. Einen TMDB-Key eintippen und „Weiter“ drücken. Erst im danach sichtbaren
+   „Schritt 2 von 3 – Kalender einrichten“ prüfen: Keine Kalenderoption darf vorausgewählt sein.
+5. Im Kalenderschritt „Zurück“ wählen: Der eingegebene TMDB-Key muss noch sichtbar sein,
+   aber noch nicht dauerhaft gespeichert sein.
+6. Wieder weitergehen, eine Kalenderoption wählen und zur Kontrollseite gehen. Mit „Zurück“
    muss die Kalenderauswahl noch korrigierbar sein.
-6. Erst „Alles speichern“ beendet den Assistenten dauerhaft.
-7. Bei Google: Beim ersten tatsächlichen Kalendereintrag muss die Google-Kontoauswahl
+7. Erst „Alles speichern“ beendet den Assistenten dauerhaft.
+8. Bei Google: Beim ersten tatsächlichen Kalendereintrag muss die Google-Kontoauswahl
    erscheinen. Danach muss das Log die automatische Suche/Fundstelle des Kalenders „SerKal“
    zeigen.
