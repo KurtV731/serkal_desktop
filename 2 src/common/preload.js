@@ -34,6 +34,9 @@ contextBridge.exposeInMainWorld("serkal", {
         get:()=>ipcRenderer.invoke("serkal:settings:get"),
         save:(settings)=>ipcRenderer.invoke("serkal:settings:save",settings)
     },
+    setup:{
+        commit:(payload)=>ipcRenderer.invoke("serkal:setup:commit",payload)
+    },
     tmdb:{
         status:()=>ipcRenderer.invoke("serkal:tmdb:status"),
         testKey:(apiKey)=>ipcRenderer.invoke("serkal:tmdb:testKey",apiKey),
