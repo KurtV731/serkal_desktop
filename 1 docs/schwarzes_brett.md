@@ -649,3 +649,21 @@ Xaver-Test:
 8. Bei Google: Beim ersten tatsächlichen Kalendereintrag muss die Google-Kontoauswahl
    erscheinen. Danach muss das Log die automatische Suche/Fundstelle des Kalenders „SerKal“
    zeigen.
+
+
+Xaver-Nachtest 11.09.2026:
+
+- Der dreistufige Assistent erschien korrekt mit „Schritt 1 von 3 – TMDB einrichten“.
+- Zurück-Navigation, Entwurfszustand und abschließendes Speichern wurden von Kurt als bestanden
+  gemeldet.
+- Dabei wurde ein verbliebener Seitenweg gefunden: Nach Verlassen der unvollständigen
+  Ersteinrichtung öffnete eine Suche noch den älteren einzelnen TMDB-Dialog mit nur
+  „Speichern“, statt den vollständigen Assistenten fortzusetzen.
+- Korrigiert: Solange `setupDone` noch nicht wahr ist, öffnet eine Suche wieder den gesamten
+  Drei-Schritt-Assistenten. Der einzelne TMDB-Dialog bleibt nur für den zulässigen Fall erhalten,
+  dass die Ersteinrichtung bereits abgeschlossen, TMDB aber bewusst zunächst ausgelassen wurde.
+- Der Knopf „Später“ heißt zur besseren Verständlichkeit nun „Später fortsetzen“.
+
+Korrekturcommits: `b5ae31242ac2627bdcb492a6e05419eff9d54243` und
+`89709ceb3f4943ac597975bc1a18d3aa708ec18d`.
+Backend, injizierte Brücke und alle drei Inline-Skripte syntaktisch geprüft.
