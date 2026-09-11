@@ -1919,40 +1919,112 @@
 
 
 
-  <!-- SERKAL Desktop 0.0.5 – Kalender-Grundeinrichtung -->
+  <!-- SERKAL Desktop – zusammenhängende Ersteinrichtung -->
   <style>
     .skCalendarSetupOverlay{position:fixed;inset:0;z-index:20000;display:none;align-items:center;justify-content:center;padding:24px;background:rgba(15,23,42,.62)}
     .skCalendarSetupOverlay.sk-open{display:flex}
-    .skCalendarSetupBox{width:min(720px,96vw);max-height:90vh;overflow:auto;background:#fff;color:#1f2937;border:1px solid rgba(120,120,140,.32);border-radius:18px;box-shadow:0 24px 70px rgba(0,0,0,.35);padding:24px}
+    .skCalendarSetupBox{width:min(760px,96vw);max-height:90vh;overflow:auto;background:#fff;color:#1f2937;border:1px solid rgba(120,120,140,.32);border-radius:18px;box-shadow:0 24px 70px rgba(0,0,0,.35);padding:24px}
     body[data-theme="dark"] .skCalendarSetupBox{background:#20232d;color:#f4f4f5}
     .skCalendarSetupBox h2{margin:0 0 8px}.skCalendarSetupIntro{margin:0 0 18px;opacity:.82}
+    .skSetupProgress{font-size:.88rem;font-weight:800;color:#64748b;margin-bottom:7px}
+    body[data-theme="dark"] .skSetupProgress{color:#a5b4fc}
+    .skSetupStep[hidden]{display:none}
+    .skSetupFieldLabel{display:block;font-weight:800;margin:12px 0 7px}
+    .skSetupKeyInput{width:100%;box-sizing:border-box;padding:11px 12px;border-radius:10px;border:1px solid rgba(120,120,140,.45);font:inherit}
+    .skSetupError{display:none;margin-top:9px;color:#b91c1c;font-weight:750;white-space:pre-line}
     .skCalendarChoice{display:block;padding:11px 12px;margin:8px 0;border:1px solid rgba(120,120,140,.28);border-radius:12px;cursor:pointer}.skCalendarChoice input{margin-right:9px}
-    .skCalendarGoogleData{margin:12px 0 4px 29px;display:none}.skCalendarGoogleData.sk-open{display:block}.skCalendarGoogleData label{display:block;font-weight:700;margin-bottom:6px}
-    .skCalendarGoogleData input{width:100%;padding:10px 11px;border-radius:9px;border:1px solid rgba(120,120,140,.4)}.skCalendarHint{font-size:.9rem;opacity:.75;margin-top:6px}
-    .skCalendarSetupActions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px}.skCalendarSetupActions button{padding:9px 15px;border-radius:10px;cursor:pointer}
+    .skCalendarGoogleData{margin:12px 0 4px 29px;display:none}.skCalendarGoogleData.sk-open{display:block}
+    .skCalendarHint{font-size:.9rem;opacity:.75;margin-top:6px}
+    .skSetupReview{border:1px solid rgba(120,120,140,.28);border-radius:12px;padding:14px 16px;line-height:1.6;white-space:pre-line}
+    .skCalendarSetupActions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px;flex-wrap:wrap}.skCalendarSetupActions button{padding:9px 15px;border-radius:10px;cursor:pointer}
   </style>
   <div id="skCalendarSetupOverlay" class="skCalendarSetupOverlay" aria-hidden="true">
     <section class="skCalendarSetupBox" role="dialog" aria-modal="true" aria-labelledby="skCalendarSetupTitle">
-      <h2 id="skCalendarSetupTitle">Kalender einrichten</h2>
-      <p class="skCalendarSetupIntro">Wie soll SERKAL mit deinem Kalender umgehen? Alle Einstellungen können später jederzeit über „Kalender“ geändert werden.</p>
-      <label class="skCalendarChoice"><input type="radio" name="skCalendarMode" value="google"><strong>Google Kalender</strong> – Kalender „SerKal“ automatisch verwenden</label>
-      <div id="skCalendarGoogleData" class="skCalendarGoogleData"><div class="skCalendarHint">SerKal sucht den passenden Google-Kalender automatisch und legt ihn bei Bedarf an. Eine Kalender-ID muss nicht eingegeben werden.</div></div>
-      <label class="skCalendarChoice"><input type="radio" name="skCalendarMode" value="ics"><strong>ICS-Datei / anderer Kalender</strong></label>
-      <label class="skCalendarChoice"><input type="radio" name="skCalendarMode" value="none"><strong>Keinen Kalender verwenden</strong></label>
-      <label class="skCalendarChoice"><input type="radio" name="skCalendarMode" value="auto"><strong>Keine Ahnung, was du von mir willst – mach, was du denkst. 😏</strong></label>
-      <div class="skCalendarSetupActions"><button id="skCalendarSetupLater" type="button">Später</button><button id="skCalendarSetupHelp" type="button">Hilfe öffnen</button><button id="skCalendarSetupSave" type="button">Speichern</button></div>
+      <div id="skSetupProgress" class="skSetupProgress"></div>
+      <h2 id="skCalendarSetupTitle">SerKal einrichten</h2>
+
+      <div id="skSetupTmdbStep" class="skSetupStep" data-sk-setup-step="tmdb">
+        <p class="skCalendarSetupIntro">Zuerst dein persönlicher kostenloser TMDB-API-Key. Deine Eingabe bleibt bis zum letzten Schritt nur ein Entwurf und wird noch nicht gespeichert.</p>
+        <label class="skSetupFieldLabel" for="skSetupTmdbKey">TMDB-API-Key</label>
+        <input id="skSetupTmdbKey" class="skSetupKeyInput" type="text" autocomplete="off" spellcheck="false" placeholder="Persönlicher TMDB-API-Key (v3 auth)">
+        <div id="skSetupTmdbError" class="skSetupError"></div>
+        <div class="skCalendarSetupActions"><button id="skSetupLater" type="button">Später</button><button id="skSetupTmdbHelp" type="button">Hilfe öffnen</button><button id="skSetupTmdbNext" type="button">Weiter</button></div>
+      </div>
+
+      <div id="skSetupCalendarStep" class="skSetupStep" data-sk-setup-step="calendar" hidden>
+        <p class="skCalendarSetupIntro">Wie soll SERKAL mit deinem Kalender umgehen? Diese Auswahl bleibt zunächst ein Entwurf. Alle Einstellungen können später jederzeit über „Kalender“ geändert werden.</p>
+        <label class="skCalendarChoice"><input type="radio" name="skCalendarMode" value="google"><strong>Google Kalender</strong> – Kalender „SerKal“ automatisch verwenden</label>
+        <div id="skCalendarGoogleData" class="skCalendarGoogleData"><div class="skCalendarHint">Eine Google-Kalender-ID musst du nicht eingeben: Beim ersten echten Kalendereintrag öffnet SerKal die Google-Kontoauswahl, sucht den Kalender „SerKal“ und speichert dessen technische ID automatisch.</div></div>
+        <label class="skCalendarChoice"><input type="radio" name="skCalendarMode" value="ics"><strong>ICS-Datei / anderer Kalender</strong></label>
+        <label class="skCalendarChoice"><input type="radio" name="skCalendarMode" value="none"><strong>Keinen Kalender verwenden</strong></label>
+        <label class="skCalendarChoice"><input type="radio" name="skCalendarMode" value="auto"><strong>Keine Ahnung, was du von mir willst – mach, was du denkst. 😏</strong></label>
+        <div id="skSetupCalendarError" class="skSetupError"></div>
+        <div class="skCalendarSetupActions"><button id="skSetupCalendarCancel" type="button">Abbrechen</button><button id="skSetupCalendarBack" type="button">Zurück</button><button id="skCalendarSetupHelp" type="button">Hilfe öffnen</button><button id="skSetupCalendarNext" type="button">Weiter</button><button id="skCalendarSetupSave" type="button">Speichern</button></div>
+      </div>
+
+      <div id="skSetupReviewStep" class="skSetupStep" data-sk-setup-step="review" hidden>
+        <p class="skCalendarSetupIntro">Bitte prüfe alles in Ruhe. Erst „Alles speichern“ macht die Angaben dauerhaft.</p>
+        <div id="skSetupReview" class="skSetupReview"></div>
+        <div id="skSetupCommitError" class="skSetupError"></div>
+        <div class="skCalendarSetupActions"><button id="skSetupReviewBack" type="button">Zurück</button><button id="skSetupCommit" type="button">Alles speichern</button></div>
+      </div>
     </section>
   </div>
   <script>
   (function(){
-    var overlay=document.getElementById('skCalendarSetupOverlay'), googleData=document.getElementById('skCalendarGoogleData'), googleId=document.getElementById('skCalendarGoogleId');
+    var overlay=document.getElementById('skCalendarSetupOverlay');
+    var title=document.getElementById('skCalendarSetupTitle');
+    var progress=document.getElementById('skSetupProgress');
+    var tmdbStep=document.getElementById('skSetupTmdbStep');
+    var calendarStep=document.getElementById('skSetupCalendarStep');
+    var reviewStep=document.getElementById('skSetupReviewStep');
+    var tmdbInput=document.getElementById('skSetupTmdbKey');
+    var tmdbError=document.getElementById('skSetupTmdbError');
+    var calendarError=document.getElementById('skSetupCalendarError');
+    var commitError=document.getElementById('skSetupCommitError');
+    var googleData=document.getElementById('skCalendarGoogleData');
+    var firstRun=false;
+    var testedTmdbKey='';
+
     function mode(){var e=document.querySelector('input[name="skCalendarMode"]:checked');return e?String(e.value||''):''}
     function refresh(){if(googleData)googleData.classList.toggle('sk-open',mode()==='google')}
-    function setMode(m){var e=document.querySelector('input[name="skCalendarMode"][value="'+String(m||'')+'"]');if(e)e.checked=true;refresh()}
+    function setMode(m){
+      document.querySelectorAll('input[name="skCalendarMode"]').forEach(function(e){e.checked=false});
+      var e=document.querySelector('input[name="skCalendarMode"][value="'+String(m||'')+'"]');
+      if(e)e.checked=true;
+      refresh();
+    }
+    function setStep(name){
+      tmdbStep.hidden=name!=='tmdb';
+      calendarStep.hidden=name!=='calendar';
+      reviewStep.hidden=name!=='review';
+      if(firstRun){
+        progress.textContent=name==='tmdb'?'Schritt 1 von 3':(name==='calendar'?'Schritt 2 von 3':'Schritt 3 von 3');
+        title.textContent=name==='tmdb'?'TMDB einrichten':(name==='calendar'?'Kalender einrichten':'Einstellungen prüfen');
+      }else{
+        progress.textContent='';
+        title.textContent='Kalender einrichten';
+      }
+    }
     async function getSettings(){try{return window.serkal&&window.serkal.settings?await window.serkal.settings.get():null}catch(_e){return null}}
-    function show(s){s=s||{};var c=s.calendar||{};setMode(c.mode||'google');if(googleId)googleId.value=String(c.googleCalendarId||'');overlay.classList.add('sk-open');overlay.setAttribute('aria-hidden','false')}
+    function show(s,asFirstRun){
+      s=s||{};var c=s.calendar||{};
+      firstRun=asFirstRun===true;
+      testedTmdbKey='';
+      if(tmdbInput)tmdbInput.value='';
+      setMode(c.mode||'');
+      tmdbError.style.display='none';calendarError.style.display='none';commitError.style.display='none';
+      document.getElementById('skSetupCalendarBack').style.display=firstRun?'':'none';
+      document.getElementById('skSetupCalendarNext').style.display=firstRun?'':'none';
+      document.getElementById('skCalendarSetupSave').style.display=firstRun?'none':'';
+      document.getElementById('skSetupCalendarCancel').style.display=firstRun?'none':'';
+      setStep(firstRun?'tmdb':'calendar');
+      overlay.classList.add('sk-open');overlay.setAttribute('aria-hidden','false');
+      window.setTimeout(function(){try{(firstRun?tmdbInput:document.querySelector('input[name="skCalendarMode"]')).focus()}catch(_e){}},0);
+    }
     function hide(){overlay.classList.remove('sk-open');overlay.setAttribute('aria-hidden','true')}
-    window.serkalCalendarSetupShow=async function(){show(await getSettings()||{})};
+    window.serkalCalendarSetupShow=async function(){show(await getSettings()||{},false)};
+
     function showIcsSelectionInfo_(){
       var lang='de';
       try{lang=String(localStorage.getItem('serkal_lang')||'de').toLowerCase()==='en'?'en':'de'}catch(_e){}
@@ -1960,58 +2032,86 @@
       var message=isEn
         ? 'An ICS file can be opened with:\n\n• Apple Calendar / iCal\n• Microsoft Outlook\n• other ICS-compatible calendar applications\n\nICS export is not active in this SerKal version yet. You can change this setting later at any time via “Calendar”.'
         : 'Eine ICS-Datei kann geöffnet werden mit:\n\n• Apple Kalender / iCal\n• Microsoft Outlook\n• anderen ICS-fähigen Kalenderprogrammen\n\nDer ICS-Export ist in dieser SerKal-Version noch nicht aktiv. Du kannst diese Einstellung später jederzeit über „Kalender“ ändern.';
-      if(typeof showSerKalDialog_==='function'){
-        showSerKalDialog_({kind:'info',icon:'📅',title:isEn?'Add to calendar':'Zum Kalender hinzufügen',message:message,confirmText:'OK',showCancel:false});
-      }else{
-        alert(message);
-      }
+      if(typeof showSerKalDialog_==='function')showSerKalDialog_({kind:'info',icon:'📅',title:isEn?'Add to calendar':'Zum Kalender hinzufügen',message:message,confirmText:'OK',showCancel:false});
+      else alert(message);
     }
+
     document.querySelectorAll('input[name="skCalendarMode"]').forEach(function(e){
       e.addEventListener('change',function(){
-        refresh();
+        refresh();calendarError.style.display='none';
         if(e.checked&&String(e.value||'')==='ics')showIcsSelectionInfo_();
       });
     });
-    document.getElementById('skCalendarSetupLater').addEventListener('click',hide);
+    tmdbInput.addEventListener('input',function(){testedTmdbKey='';tmdbError.style.display='none'});
+
+    document.getElementById('skSetupLater').addEventListener('click',hide);
+    document.getElementById('skSetupTmdbHelp').addEventListener('click',async function(){
+      var lang='de';try{lang=String(localStorage.getItem('serkal_lang')||'de').toLowerCase()==='en'?'en':'de'}catch(_e){}
+      try{await window.serkal.help.tmdb(lang)}catch(_e){tmdbError.textContent='Die TMDB-Hilfe konnte nicht geöffnet werden.';tmdbError.style.display='block'}
+    });
+    document.getElementById('skSetupTmdbNext').addEventListener('click',async function(){
+      var key=String(tmdbInput.value||'').trim();
+      tmdbError.style.display='none';
+      if(key){
+        this.disabled=true;this.textContent='Prüfe …';
+        try{
+          var result=await window.serkal.tmdb.testKey(key);
+          if(!result||result.ok!==true){tmdbError.textContent=(result&&result.message)||'Dieser TMDB-API-Key funktioniert nicht.';tmdbError.style.display='block';return}
+          testedTmdbKey=key;
+        }catch(e){tmdbError.textContent='Der TMDB-API-Key konnte nicht geprüft werden: '+String(e&&e.message||e);tmdbError.style.display='block';return}
+        finally{this.disabled=false;this.textContent='Weiter'}
+      }else testedTmdbKey='';
+      setStep('calendar');
+    });
+    document.getElementById('skSetupCalendarBack').addEventListener('click',function(){setStep('tmdb');tmdbInput.focus()});
+    document.getElementById('skSetupReviewBack').addEventListener('click',function(){setStep('calendar')});
+    document.getElementById('skSetupCalendarCancel').addEventListener('click',hide);
+
     document.getElementById('skCalendarSetupHelp').addEventListener('click',async function(){
       var lang='de',m=mode();
       try{lang=String(localStorage.getItem('serkal_lang')||'de').toLowerCase()==='en'?'en':'de'}catch(_e){}
-      if(m==='google'){
-        try{await window.serkal.help.google(lang)}catch(e){alert('Kalender-Hilfe konnte nicht geöffnet werden: '+String(e||''))}
-        return;
-      }
-      var de={
-        '':'Bitte zuerst eine Kalender-Option auswählen. Danach erklärt diese Hilfe genau die gewählte Möglichkeit.',
-        ics:'ICS ist für andere Kalenderprogramme gedacht. Der eigentliche ICS-Export ist in dieser SerKal-Version noch nicht aktiv. Für sofortige automatische Kalendereinträge bitte „Google Kalender“ wählen.',
-        none:'SerKal verwaltet dann nur das Serienarchiv. Es werden keine Termine in einen Kalender geschrieben.',
-        auto:'Diese automatische Auswahl ist für eine spätere vollständig selbständige Kalenderentscheidung vorgesehen. Derzeit führt sie zum noch nicht aktiven ICS-Export und erzeugt deshalb keine Kalendereinträge. Für funktionierende automatische Einträge bitte „Google Kalender“ wählen.'
-      };
-      var en={
-        '':'Please select a calendar option first. This help will then explain the selected option.',
-        ics:'ICS is intended for other calendar applications. ICS export is not active in this SerKal version yet. For working automatic calendar entries, please select “Google Calendar”.',
-        none:'SerKal will manage the series archive only. No calendar events will be created.',
-        auto:'This automatic choice is intended for a later fully automatic calendar decision. It currently selects the unfinished ICS export and therefore creates no calendar events. For working automatic entries, please select “Google Calendar”.'
-      };
+      if(m==='google'){try{await window.serkal.help.google(lang)}catch(e){alert('Kalender-Hilfe konnte nicht geöffnet werden: '+String(e||''))}return}
+      var de={'':'Bitte zuerst eine Kalender-Option auswählen. Danach erklärt diese Hilfe genau die gewählte Möglichkeit.',ics:'ICS ist für andere Kalenderprogramme gedacht. Der eigentliche ICS-Export ist in dieser SerKal-Version noch nicht aktiv. Für sofortige automatische Kalendereinträge bitte „Google Kalender“ wählen.',none:'SerKal verwaltet dann nur das Serienarchiv. Es werden keine Termine in einen Kalender geschrieben.',auto:'Diese automatische Auswahl ist für eine spätere vollständig selbständige Kalenderentscheidung vorgesehen. Derzeit führt sie zum noch nicht aktiven ICS-Export und erzeugt deshalb keine Kalendereinträge. Für funktionierende automatische Einträge bitte „Google Kalender“ wählen.'};
+      var en={'':'Please select a calendar option first. This help will then explain the selected option.',ics:'ICS is intended for other calendar applications. ICS export is not active in this SerKal version yet. For working automatic calendar entries, please select “Google Calendar”.',none:'SerKal will manage the series archive only. No calendar events will be created.',auto:'This automatic choice is intended for a later fully automatic calendar decision. It currently selects the unfinished ICS export and therefore creates no calendar events. For working automatic entries, please select “Google Calendar”.'};
       var message=(lang==='en'?en:de)[m]||(lang==='en'?en['']:de['']);
-      if(typeof showSerKalDialog_==='function'){
-        showSerKalDialog_({
-          kind:'info',
-          icon:'?',
-          title:lang==='en'?'Help for this selection':'Hilfe zu dieser Auswahl',
-          message:message,
-          confirmText:'OK',
-          showCancel:false
-        });
-      }else{
-        alert(message);
-      }
+      if(typeof showSerKalDialog_==='function')showSerKalDialog_({kind:'info',icon:'?',title:lang==='en'?'Help for this selection':'Hilfe zu dieser Auswahl',message:message,confirmText:'OK',showCancel:false});
+      else alert(message);
     });
+
+    document.getElementById('skSetupCalendarNext').addEventListener('click',function(){
+      var m=mode();
+      if(!m){calendarError.textContent='Bitte eine Kalender-Option auswählen.';calendarError.style.display='block';return}
+      var names={google:'Google Kalender – Kalender „SerKal“ automatisch verwenden',ics:'ICS-Datei / anderer Kalender',none:'Keinen Kalender verwenden',auto:'Automatische Entscheidung (derzeit noch ohne Kalenderexport)'};
+      var key=String(tmdbInput.value||'').trim();
+      document.getElementById('skSetupReview').textContent=
+        'TMDB: '+(key?'API-Key geprüft; wird erst jetzt gespeichert':'noch nicht eingerichtet')+'\n'+
+        'Kalender: '+(names[m]||m)+'\n'+
+        (m==='google'?'Google: Kontoauswahl und technische Kalender-ID folgen sichtbar beim ersten Kalendereintrag.\n':'')+
+        '\nMit „Zurück“ kannst du beide Entscheidungen noch ändern.';
+      setStep('review');
+    });
+
+    document.getElementById('skSetupCommit').addEventListener('click',async function(){
+      var m=mode(),key=String(tmdbInput.value||'').trim();
+      commitError.style.display='none';
+      if(key&&testedTmdbKey!==key){commitError.textContent='Der TMDB-Key wurde nach der Prüfung verändert. Bitte gehe zurück und prüfe ihn erneut.';commitError.style.display='block';return}
+      this.disabled=true;this.textContent='Speichere …';
+      try{
+        var result=await window.serkal.setup.commit({tmdbKey:key,clearTmdb:!key,settings:{setupDone:true,calendar:{mode:m,googleCalendarId:''}}});
+        if(!result||result.ok!==true){commitError.textContent=(result&&result.message)||'Die Ersteinrichtung konnte nicht gespeichert werden.';commitError.style.display='block';return}
+        hide();
+        if(typeof loadArchiv==='function')loadArchiv();
+      }catch(e){commitError.textContent='Die Ersteinrichtung konnte nicht gespeichert werden: '+String(e&&e.message||e);commitError.style.display='block'}
+      finally{this.disabled=false;this.textContent='Alles speichern'}
+    });
+
     document.getElementById('skCalendarSetupSave').addEventListener('click',async function(){
-      var m=mode(),id=googleId?String(googleId.value||'').trim():'';
-      if(!m){alert('Bitte eine Kalender-Option auswählen.');return}
-      try{await window.serkal.settings.save({setupDone:true,calendar:{mode:m,googleCalendarId:id}});hide()}catch(e){alert('Einstellungen konnten nicht gespeichert werden: '+String(e||''))}
+      var m=mode();
+      if(!m){calendarError.textContent='Bitte eine Kalender-Option auswählen.';calendarError.style.display='block';return}
+      try{await window.serkal.settings.save({setupDone:true,calendar:{mode:m}});hide()}catch(e){calendarError.textContent='Einstellungen konnten nicht gespeichert werden: '+String(e||'');calendarError.style.display='block'}
     });
-    document.addEventListener('DOMContentLoaded',async function(){var s=await getSettings();if(s&&s.setupDone!==true)show(s)});
+
+    document.addEventListener('DOMContentLoaded',async function(){var s=await getSettings();if(s&&s.setupDone!==true)show(s,true)});
   })();
   </script>
 
