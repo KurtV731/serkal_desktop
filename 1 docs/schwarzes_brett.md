@@ -13,7 +13,8 @@ Absender, Empfänger, Status und dem zugehörigen Commit eingetragen.
   Zwischenstände zwischen den Chattys.
 - **Vor jeder SerKal-Arbeit in GitHub wird zuerst dieses schwarze Brett gelesen.**
 - Die fachliche Quelle bleibt SerKal 2.5: **portieren, nicht neu erfinden**.
-- Die erste öffentliche SerKal-Desktop-Fassung wird **Version 0.9**, nicht 1.0.
+- Die endgültige erste öffentliche SerKal-Desktop-Fassung wird **Version 1.0**. Zuvor wird exakt
+  dasselbe Artefakt als nicht veröffentlichter Release Candidate praktisch geprüft.
 - **Jeder Build, der potentiell installiert oder als Installer getestet wird, erhält eine
   neue, eindeutig höhere Versionsnummer.** Keine zwei installierbaren Artefakte tragen
   dieselbe Version. Nach `0.9` wird in Tausenderschritten weitergezählt: sichtbar
@@ -47,8 +48,12 @@ als Installer getestet wird, muss vorher die Versionsnummer erhöht werden.
 
 Verbindliche Reihenfolge nach der ersten Fassung `0.9`:
 
-- sichtbar: `0.9001`, `0.9002`, `0.9003` usw.;
-- technisch in package.json/Squirrel: `0.9001.0`, `0.9002.0`, `0.9003.0` usw.
+- bisherige Testfolge sichtbar: `0.9001`, `0.9002` usw.;
+- der endgültige Release Candidate trägt sichtbar `1.0`, technisch `1.0.0`;
+- besteht exakt dieses Artefakt alle Abschlussprüfungen, wird dieselbe Datei als Version 1.0
+  freigegeben und nicht neu gebaut;
+- muss der RC inhaltlich geändert werden, erhält der nächste installierbare Versuch zwingend
+  wieder eine neue höhere Versionsnummer.
 
 Diese Prüfung gehört vor den Start von `PULL-EX.BAT` und `PULL-AUTOZIP.BAT`.
 Gleiche Versionsnummer bei verändertem Inhalt ist ein Buildfehler und darf nicht zum
@@ -475,7 +480,7 @@ CE-Nachtrag 10.09.2026: Auf Kurts Hinweis wurde der verlorene `?`-Hilfeknopf in 
 
 ### 2026-09-10 – Kurt/CE an Installer-Chatty – laufendes SerKal im öffentlichen EXE-Installer sicher behandeln
 
-Status: NEUER VERBINDLICHER INSTALLER-AUFTRAG / UMSETZUNG UND WINDOWS-TEST OFFEN
+Status: QUELLSTAND 1.0 RC FERTIG / WINDOWS-BUILD UND XAVER-TEST OFFEN
 
 Kurts Klarstellung: Diese Bedienung gehört nicht nur in `switch-player.bat`. Ein neuer oder
 aktualisierender Nutzer lädt ausschließlich die öffentliche `serkal-desktop.exe` herunter und
@@ -510,6 +515,31 @@ normalen SerKal-`main.js`, die erst nach begonnener Installation reagiert.
 `switch-player.bat` bleibt aufgrund dieser Klarstellung unverändert. Ergebnis, gewählte Technik,
 Versionsnummer, Commit und praktischen Windows-Test hier zurückmelden. Kein öffentlicher Upload
 vor Kurts Sichtprüfung und Freigabe.
+
+Umsetzung als Release Candidate am 11.09.2026:
+
+- fachliche Grundlage ist unverändert der von CE freigegebene Branchstand einschließlich
+  `5981c2a0e51cd343f04de70b1edc2fecc0c69231`;
+- Programmversion technisch `1.0.0`, sichtbar `SERKAL Desktop 1.0`;
+- Squirrel bleibt der bewährte innere Installations- und Updateweg;
+- eine native Windows-Hülle enthält dieses Setup vollständig und bildet weiterhin genau eine
+  öffentliche Datei `serkal-desktop.exe`;
+- nur bei einem sichtbaren laufenden SerKal-Hauptfenster erscheint der abbrechbare Countdown
+  von 7 bis 1; bei Erstinstallation ohne laufendes SerKal gibt es keinen Countdown;
+- nach dem Countdown wird ausschließlich `CloseMainWindow` verwendet; kein gewaltsames
+  Prozess-Kill. Bleibt SerKal aktiv, bricht die Hülle verständlich ab;
+- das innere Setup wird erst nach nachweislich beendetem SerKal gestartet;
+- Erfolg, Benutzerabbruch und Fehler werden jeweils ausdrücklich gemeldet;
+- der AUTOZIP-Ersatz prüft den CE-Basiscommit, die Version, den Build und die vollständige
+  Einbettung. Die vorhandene Publish-Datei wird erst nach erfolgreichem Hüllenbau ersetzt.
+
+Installer-Quellkopf nach Umsetzung:
+`23444473f1b80bcab9c2c49c004a3b0b6b022f4a`.
+
+Quellprüfungen bestanden: package.json und package-lock.json einheitlich `1.0.0`;
+Backend, Preload und Forge syntaktisch gültig; Hüllenquelle enthält Countdown, Abbruch,
+reguläres Schließen, Setup-Einbettung und keinen Kill-Aufruf. Der reale Windows-Build und
+Kurts Abschlussprüfung stehen aus. **Noch keine öffentliche Veröffentlichung.**
 
 
 ### 2026-09-10 – CE – Kalender-Erststarthilfe aus Xaver-Test korrigiert
