@@ -1948,7 +1948,7 @@
         <label class="skSetupFieldLabel" for="skSetupTmdbKey">TMDB-API-Key</label>
         <input id="skSetupTmdbKey" class="skSetupKeyInput" type="text" autocomplete="off" spellcheck="false" placeholder="Persönlicher TMDB-API-Key (v3 auth)">
         <div id="skSetupTmdbError" class="skSetupError"></div>
-        <div class="skCalendarSetupActions"><button id="skSetupLater" type="button">Später</button><button id="skSetupTmdbHelp" type="button">Hilfe öffnen</button><button id="skSetupTmdbNext" type="button">Weiter</button></div>
+        <div class="skCalendarSetupActions"><button id="skSetupLater" type="button">Später fortsetzen</button><button id="skSetupTmdbHelp" type="button">Hilfe öffnen</button><button id="skSetupTmdbNext" type="button">Weiter</button></div>
       </div>
 
       <div id="skSetupCalendarStep" class="skSetupStep" data-sk-setup-step="calendar" hidden>
@@ -2024,6 +2024,7 @@
     }
     function hide(){overlay.classList.remove('sk-open');overlay.setAttribute('aria-hidden','true')}
     window.serkalCalendarSetupShow=async function(){show(await getSettings()||{},false)};
+    window.serkalFirstSetupShow=async function(){show(await getSettings()||{},true)};
 
     function showIcsSelectionInfo_(){
       var lang='de';
