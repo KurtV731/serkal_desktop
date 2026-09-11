@@ -1220,9 +1220,47 @@
       left: 18px;
       right: 18px;
       bottom: 58px;
-      height: min(520px, calc(100vh - 92px));
+      height: min(360px, 38vh);
+      min-height: 170px;
+      max-height: calc(100vh - 130px);
       display: none;
       flex-direction: column;
+    }
+
+    .logPanelResizeHandle {
+      flex: 0 0 12px;
+      height: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: ns-resize;
+      touch-action: none;
+      user-select: none;
+      background: rgba(94, 114, 255, 0.08);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .logPanelResizeHandle::after {
+      content: "";
+      width: 84px;
+      height: 4px;
+      border-radius: 999px;
+      background: rgba(94, 114, 255, 0.55);
+    }
+
+    .logPanelResizeHandle:hover,
+    .logPanelResizeHandle:focus-visible {
+      background: rgba(94, 114, 255, 0.18);
+      outline: none;
+    }
+
+    body[data-theme="dark"] .logPanelResizeHandle {
+      border-bottom-color: rgba(255, 255, 255, 0.10);
+      background: rgba(143, 157, 255, 0.10);
+    }
+
+    body[data-theme="dark"] .logPanelResizeHandle::after {
+      background: rgba(173, 183, 255, 0.72);
     }
 
     .logPanelHead {
@@ -1850,6 +1888,8 @@
 
 
     <div id="logPanel" class="logPanel" aria-label="Loganzeige">
+      <div id="logPanelResizeHandle" class="logPanelResizeHandle" role="separator" aria-orientation="horizontal"
+        aria-label="Logfensterhöhe ändern" title="Ziehen: Höhe des Logfensters ändern" tabindex="0"></div>
       <div class="logPanelHead">
         <span id="logPanelTitle">📜 Log</span>
         <div class="logPanelBtns">
@@ -4764,6 +4804,7 @@ function isActiveSearchToken_(tok) {
     const btnLogDock = document.getElementById('btnLogDock');
     const btnSaveDock  = document.getElementById('btnSaveDock');
     const logPanel = document.getElementById('logPanel');
+    const logPanelResizeHandle = document.getElementById('logPanelResizeHandle');
     const logPanelPre = document.getElementById('logPanelPre');
     const btnLogRefresh = document.getElementById('btnLogRefresh');
     const btnLogHelp = document.getElementById('btnLogHelp');
@@ -7613,6 +7654,97 @@ function startFromDock_() {
  * @status aktiv
  * @loeschung nein
  */
+var LOG_PANEL_HEIGHT_KEY_ = 'serkal_log_panel_height_px';
+
+function logPanelHeightLimits_() {
+  var viewportHeight = Math.max(320, Number(window.innerHeight || 0));
+  return {
+    min:170,
+    max:Math.max(170, Math.floor(viewportHeight - 130))
+  };
+}
+
+function defaultLogPanelHeight_() {
+  var limits = logPanelHeightLimits_();
+  var responsive = Math.round(Math.max(230, Math.min(360, Number(window.innerHeight || 0) * 0.38)));
+  return Math.max(limits.min, Math.min(limits.max, responsive));
+}
+
+function applyLogPanelHeight_(height, persist) {
+  if (!logPanel) return 0;
+  var limits = logPanelHeightLimits_();
+  var value = Number(height);
+  if (!isFinite(value) || value <= 0) value = defaultLogPanelHeight_();
+  value = Math.round(Math.max(limits.min, Math.min(limits.max, value)));
+  logPanel.style.height = value + 'px';
+  if (logPanelResizeHandle) {
+    logPanelResizeHandle.setAttribute('aria-valuemin', String(limits.min));
+    logPanelResizeHandle.setAttribute('aria-valuemax', String(limits.max));
+    logPanelResizeHandle.setAttribute('aria-valuenow', String(value));
+  }
+  if (persist) {
+    try { localStorage.setItem(LOG_PANEL_HEIGHT_KEY_, String(value)); } catch (_eStore) {}
+  }
+  return value;
+}
+
+function restoreLogPanelHeight_() {
+  var saved = '';
+  try { saved = localStorage.getItem(LOG_PANEL_HEIGHT_KEY_) || ''; } catch (_eRead) {}
+  return applyLogPanelHeight_(saved ? Number(saved) : defaultLogPanelHeight_(), false);
+}
+
+function initLogPanelResize_() {
+  if (!logPanel || !logPanelResizeHandle) return;
+  restoreLogPanelHeight_();
+
+  logPanelResizeHandle.addEventListener('pointerdown', function(ev) {
+    if (!ev || (ev.button !== undefined && ev.button !== 0)) return;
+    ev.preventDefault();
+    var startY = Number(ev.clientY || 0);
+    var startHeight = logPanel.getBoundingClientRect().height;
+    document.body.style.cursor = 'ns-resize';
+    document.body.style.userSelect = 'none';
+
+    function move(moveEv) {
+      var nextHeight = startHeight + startY - Number(moveEv.clientY || 0);
+      applyLogPanelHeight_(nextHeight, false);
+    }
+    function stop() {
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', stop);
+      window.removeEventListener('pointercancel', stop);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+      applyLogPanelHeight_(logPanel.getBoundingClientRect().height, true);
+      setLogMiniStatus_('Logfensterhöhe gespeichert.');
+    }
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', stop);
+    window.addEventListener('pointercancel', stop);
+  });
+
+  logPanelResizeHandle.addEventListener('keydown', function(ev) {
+    if (!ev || (ev.key !== 'ArrowUp' && ev.key !== 'ArrowDown')) return;
+    ev.preventDefault();
+    var current = logPanel.getBoundingClientRect().height || defaultLogPanelHeight_();
+    applyLogPanelHeight_(current + (ev.key === 'ArrowUp' ? 24 : -24), true);
+    setLogMiniStatus_('Logfensterhöhe gespeichert.');
+  });
+
+  window.addEventListener('resize', function() {
+    if (logPanel.style.display !== 'none') applyLogPanelHeight_(logPanel.getBoundingClientRect().height, false);
+  });
+}
+
+/**
+ * @funktion closeLogPanel_
+ * @bereich Bottom-Bar / Log
+ * @zweck Schließt die Loganzeige in der UI.
+ * @status aktiv
+ * @hinweis Die individuell eingestellte Höhe bleibt gespeichert.
+ * @loeschung nein
+ */
 function closeLogPanel_() {
   try { if (logPanel) logPanel.style.display = 'none'; } catch (_e) {}
 }
@@ -7667,6 +7799,7 @@ function showLogHelp_() {
         'Markiertes: Permanently delete the selected text from the selected TXT log file.',
         'Log leeren: Permanently clear the entire selected TXT log file.',
         'Neu laden: Reload the selected log file from storage.',
+        'Upper handle: Drag up or down to resize the log window. The selected height is saved.',
         'X: Close the log window.'
       ]
     : [
@@ -7678,6 +7811,7 @@ function showLogHelp_() {
         'Markiertes: Löscht den markierten Text dauerhaft aus der ausgewählten TXT-Logdatei.',
         'Log leeren: Leert die gesamte ausgewählte TXT-Logdatei dauerhaft.',
         'Neu laden: Lädt die ausgewählte Logdatei erneut vom Speicher.',
+        'Oberer Ziehbalken: Verändert die Höhe des Logfensters. Die gewählte Höhe wird gespeichert.',
         'X: Schließt das Logfenster.'
       ];
   showSerKalDialog_({
@@ -7694,6 +7828,7 @@ function loadLogDay_(day) {
   try {
     var d = String(day || currentLogDay_ || '').toLowerCase();
     if (!d) d = 'today';
+    restoreLogPanelHeight_();
     if (logPanel) logPanel.style.display = 'flex';
     if (logPanelPre) {
       logPanelPre.textContent = t('LOG_LOADING');
@@ -8338,6 +8473,7 @@ if (btnAnalyseDock) btnAnalyseDock.addEventListener('click', function(){ try { u
 var skFanalCloseBtn_ = document.getElementById('skFanalCloseBtn');
 if (skFanalCloseBtn_) skFanalCloseBtn_.addEventListener('click', function(){ closeFanalAnalyseOverlay_(); });
 if (btnLogDock) btnLogDock.addEventListener('click', function(){ try { uiLogAction_('Log geöffnet', {}); } catch (_eAction) {} openLogFromDock_(); });
+initLogPanelResize_();
 if (btnLogRefresh) btnLogRefresh.addEventListener('click', function(){ try { uiLogAction_('Log neu geladen', {}); } catch (_eAction) {} loadLogPanel_(false); });
 if (btnLogHelp) btnLogHelp.addEventListener('click', function(){ try { uiLogAction_('Log-Hilfe geöffnet', {}); } catch (_eAction) {} showLogHelp_(); });
 if (btnLogClose) btnLogClose.addEventListener('click', function(){ closeLogPanel_(); });
