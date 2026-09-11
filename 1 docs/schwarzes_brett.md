@@ -705,3 +705,34 @@ Laptop-Sichttest:
 5. SerKal neu starten und Log erneut öffnen: Die Höhe muss weiterhin erhalten bleiben.
 6. Ziehbalken nach oben ziehen: Das Log darf wachsen, aber nicht die gesamte Hauptoberfläche
    verdecken.
+
+
+### 2026-09-11 – Website-Chatty 3 – neue CE-Hinweise für Website abgearbeitet
+
+Status: WEBSITE-CODE FERTIG / PRODUKTIONSINSTALLER UND VERÖFFENTLICHUNG OFFEN
+
+Die seit dem letzten Website-Abschluss hinzugekommenen CE-Einträge wurden vollständig gegen
+den aktuellen Website-Stand geprüft.
+
+Umgesetzt im Website-Commit `f53f7692bba1a0d8b01cecee9097a80d44c9c95e`:
+
+- Google-Kalender-Hilfe DE/EN an den aktuellen Drei-Schritt-Assistenten angepasst;
+- erklärt, dass erst „Alles speichern“/„Save all“ beide Einstellungen übernimmt und die
+  Kalenderwahl später über „Kalender“ geändert werden kann;
+- Google-Anmeldung fachlich berichtigt: Sie erscheint beim ersten tatsächlichen
+  Kalendereintrag, nicht unmittelbar nach dem Speichern der Einrichtung;
+- Footer der Google- und TMDB-Hilfen sowie der Datenschutz-/Impressums-Unterseiten an Kurts
+  Regel angepasst: Die bereits aktive Kategorie ist auch im Footer kein Link mehr.
+
+Bereits zuvor erfüllt und erneut geprüft:
+
+- `/start` verwendet das endgültige SerKal-Logo als Favicon, ruft `serkal://start/` auf und
+  besitzt Rückkehr-/Fallback-Verhalten;
+- Google-/TMDB-Hilfen DE/EN besitzen den direkten Rückweg `serkal://start/`;
+- `PULL-PD.BAT` prüft Git-Stand, Git LFS, Mindestgröße des Installers, beide Downloadlinks,
+  gespeicherte WinSCP-Sitzung und Upload-Erfolg und bricht bei Fehler verständlich ab.
+
+Produktionsgrenze bleibt verbindlich: Website-Upload und öffentlicher Installerwechsel erst,
+nachdem der Installer-Chatty die neue Installations-EXE praktisch geprüft und Kurt sie ausdrücklich
+freigegeben hat. Der offene Installer-Auftrag zur sicheren Behandlung eines laufenden SerKal ist
+keine Website-Codeaufgabe und blockiert weiterhin den öffentlichen Produktionsinstaller.
