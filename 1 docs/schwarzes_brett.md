@@ -590,3 +590,60 @@ Xaver-Sichttest:
    den noch nicht aktiven Export nennt.
 6. Pop-up mit „OK“ schließen; anschließend eine andere Auswahl anklicken und wieder ICS wählen.
    Das Pop-up muss erneut erscheinen.
+
+
+### 2026-09-11 – Kurt/CE – Xaver-Nullstart und Ersteinrichtung als Einheit
+
+Status: CODE FERTIG / XAVER-WINDOWS-TEST OFFEN
+
+Kurts Testbefund: Nach „alles auf null“ erschien Google weiterhin vorausgewählt. Die
+Ersteinrichtung speicherte Teilentscheidungen zu früh; nach der TMDB-Frage fehlte eine
+Zurück-Möglichkeit. Die automatische Google-Kalender-ID war im Ablauf nicht nachvollziehbar.
+
+Ursachen und Korrekturen:
+
+- Ein leerer Kalenderwert wurde im Frontend mit `c.mode || 'google'` wieder als Google
+  dargestellt. Frische Ersteinrichtung zeigt jetzt keine vorausgewählte Kalenderoption.
+- Beim Programmstart konnten fehlende Xaver-Dateien erneut aus alten Electron-Datenordnern
+  importiert werden. Sobald die absichtlich erzeugte `settings.json` existiert, findet keine
+  solche Wiederbelebung von TMDB-Key oder Google-Token mehr statt.
+- Teilweises Speichern der Kalenderkonfiguration konnte Xavers besonderen Archivordner
+  überschreiben. Einstellungen werden nun mit dem vorhandenen Zustand zusammengeführt.
+- Die Ersteinrichtung bildet eine Einheit mit drei Schritten:
+  1. TMDB-Key eingeben und lediglich prüfen,
+  2. Kalender auswählen,
+  3. Gesamtübersicht prüfen.
+  Beide Folgeschritte besitzen „Zurück“. Erst „Alles speichern“ schreibt die Daten.
+- TMDB- und Kalendereinstellungen werden gemeinsam geschrieben; bei einem Schreibfehler wird
+  der vorherige Zustand zurückgesichert.
+- Bei Google erklärt die Oberfläche, dass keine ID eingegeben wird. Beim ersten echten
+  Kalendereintrag erscheint nach einem Nullstart ausdrücklich die Google-Kontoauswahl; danach
+  sucht SerKal den Kalender „SerKal“ und speichert dessen technische ID automatisch.
+- Die vorhandene `switch-player.bat` löscht bereits Kalendermodus, Google-ID, lokalen
+  Google-Token, TMDB-Key, Wartungs-Cache und Xaver-Archiv. Die eigentliche Lücke lag im
+  anschließenden Programmstart und ist dort geschlossen.
+
+Geprüfte Commitfolge auf `serkal-0.0.5-archiv-start`:
+
+- `e0e53f774ed60ef467803961b7563b9b3392c40a` – Nullstart, Zusammenführen und gemeinsamer Commit;
+- `2d3bf7ec1bfb25f08f3ff8364b8434bed1b8d985` – sichere Preload-Brücke;
+- `2898f15f8db7323c5d2691e6435f727a12bb5233` – dreistufiger Assistent.
+
+Der von GitHub zurückgelesene Endstand wurde geprüft: Backend, Preload, injizierte
+TMDB-Brücke und alle drei Inline-Skripte sind syntaktisch gültig.
+
+Xaver-Test:
+
+1. SerKal vollständig schließen und `PULL-SD.BAT` ausführen.
+2. Mit `switch-player.bat` zunächst zu Kurt und anschließend wieder zu Xaver wechseln,
+   damit Xaver garantiert neu auf null erzeugt wird.
+3. SerKal starten: Der Assistent muss mit „Schritt 1 von 3“ beginnen; kein Kalender ist
+   vorausgewählt.
+4. Einen TMDB-Key eintippen und „Weiter“ drücken. Im Kalenderschritt „Zurück“ wählen:
+   Der eingegebene Key muss noch sichtbar sein, aber noch nicht dauerhaft gespeichert sein.
+5. Wieder weitergehen, eine Kalenderoption wählen und zur Kontrollseite gehen. Mit „Zurück“
+   muss die Kalenderauswahl noch korrigierbar sein.
+6. Erst „Alles speichern“ beendet den Assistenten dauerhaft.
+7. Bei Google: Beim ersten tatsächlichen Kalendereintrag muss die Google-Kontoauswahl
+   erscheinen. Danach muss das Log die automatische Suche/Fundstelle des Kalenders „SerKal“
+   zeigen.
