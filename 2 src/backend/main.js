@@ -54,7 +54,14 @@ function configureSharedUserData_() {
         fs.mkdirSync(target, { recursive:true });
 
         const files = ["settings.json", "tmdb.json", "google_calendar_token.json"];
-        for (const fileName of files) {
+        /*
+         * Alte Ordner werden nur bei einer echten einmaligen Übernahme berücksichtigt.
+         * Sobald im gemeinsamen Ziel eine settings.json liegt, ist dieser Zustand absichtlich:
+         * insbesondere darf ein Switch-Player-Nullstart fehlende TMDB-/Google-Dateien nicht
+         * aus alten Electron-Ordnern wieder auferstehen lassen.
+         */
+        const canonicalStateExists = fs.existsSync(path.join(target, "settings.json"));
+        for (const fileName of (canonicalStateExists ? [] : files)) {
             const targetFile = path.join(target, fileName);
             if (fs.existsSync(targetFile)) continue;
 
@@ -174,6 +181,19 @@ function writeSettings_(settings) {
     return normalized;
 }
 
+function mergeSettingsPatch_(patch) {
+    const current = readSettings_();
+    const incoming = patch && typeof patch === "object" ? patch : {};
+    return normalizeSettings_(Object.assign({}, current, incoming, {
+        archive:Object.assign({}, current.archive || {}, incoming.archive || {}),
+        calendar:Object.assign({}, current.calendar || {}, incoming.calendar || {})
+    }));
+}
+
+function saveSettingsPatch_(patch) {
+    return writeSettings_(mergeSettingsPatch_(patch));
+}
+
 function readTmdbKey_() {
     try {
         const file = tmdbConfigPath_();
@@ -193,6 +213,58 @@ function writeTmdbKey_(apiKey) {
     fs.mkdirSync(path.dirname(file), { recursive: true });
     fs.writeFileSync(file, JSON.stringify({ apiKey:key }, null, 2) + "\n", "utf8");
     return { ok:true, configured:true };
+}
+
+function snapshotLocalFile_(file) {
+    return fs.existsSync(file) ? { exists:true, data:fs.readFileSync(file) } : { exists:false, data:null };
+}
+
+function restoreLocalFile_(file, snapshot) {
+    if (snapshot && snapshot.exists) {
+        fs.mkdirSync(path.dirname(file), { recursive:true });
+        fs.writeFileSync(file, snapshot.data);
+    } else if (fs.existsSync(file)) {
+        fs.rmSync(file, { force:true });
+    }
+}
+
+async function commitFirstSetup_(payload) {
+    const input = payload && typeof payload === "object" ? payload : {};
+    const tmdbKey = String(input.tmdbKey || "").trim();
+    const settings = mergeSettingsPatch_(Object.assign({}, input.settings || {}, { setupDone:true }));
+
+    if (tmdbKey) {
+        const tested = await tmdbRequest_("/configuration", {}, tmdbKey);
+        if (!tested.ok) return tested;
+    }
+
+    const settingsFile = settingsPath_();
+    const tmdbFile = tmdbConfigPath_();
+    const beforeSettings = snapshotLocalFile_(settingsFile);
+    const beforeTmdb = snapshotLocalFile_(tmdbFile);
+
+    try {
+        writeSettings_(settings);
+        if (tmdbKey) writeTmdbKey_(tmdbKey);
+        else if (input.clearTmdb === true && fs.existsSync(tmdbFile)) fs.rmSync(tmdbFile, { force:true });
+        logWrite_("ACTION", "SETUP", "Ersteinrichtung vollständig gespeichert", {
+            tmdbKonfiguriert:Boolean(tmdbKey),
+            kalenderModus:String(settings.calendar && settings.calendar.mode || ""),
+            googleKalenderIdVorhanden:Boolean(settings.calendar && settings.calendar.googleCalendarId)
+        });
+        return { ok:true, settings, tmdbConfigured:Boolean(tmdbKey) };
+    } catch (err) {
+        try {
+            restoreLocalFile_(settingsFile, beforeSettings);
+            restoreLocalFile_(tmdbFile, beforeTmdb);
+        } catch (rollbackErr) {
+            logWrite_("ERROR", "SETUP", "Ersteinrichtung und Rücksicherung fehlgeschlagen", {
+                fehler:String(err && err.message || err),
+                ruecksicherung:String(rollbackErr && rollbackErr.message || rollbackErr)
+            });
+        }
+        return { ok:false, code:"SETUP_SAVE_FAILED", message:"Die Ersteinrichtung konnte nicht vollständig gespeichert werden: " + String(err && err.message || err) };
+    }
 }
 
 
@@ -1394,7 +1466,8 @@ function googleOauthBrowserLogin_(cfg) {
             authUrl.searchParams.set("response_type", "code");
             authUrl.searchParams.set("scope", GOOGLE_CALENDAR_SCOPE);
             authUrl.searchParams.set("access_type", "offline");
-            authUrl.searchParams.set("prompt", "consent");
+            // Nach einem echten Nullstart muss Google die Kontoauswahl wieder sichtbar zeigen.
+            authUrl.searchParams.set("prompt", "select_account consent");
             authUrl.searchParams.set("state", state);
             authUrl.searchParams.set("code_challenge", challenge);
             authUrl.searchParams.set("code_challenge_method", "S256");
@@ -2787,7 +2860,8 @@ function googleCalendarUrl_(_calendarId) {
 
 function installIpc_() {
     ipcMain.handle("serkal:settings:get", () => readSettings_());
-    ipcMain.handle("serkal:settings:save", (_event, settings) => writeSettings_(settings));
+    ipcMain.handle("serkal:settings:save", (_event, settings) => saveSettingsPatch_(settings));
+    ipcMain.handle("serkal:setup:commit", (_event, payload) => commitFirstSetup_(payload));
     ipcMain.handle("serkal:tmdb:status", () => ({ configured:!!readTmdbKey_() }));
     ipcMain.handle("serkal:tmdb:testKey", async (_event, apiKey) => {
         const key = String(apiKey || "").trim();
