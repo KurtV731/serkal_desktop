@@ -873,3 +873,30 @@ Xaver-Nachtest:
    werden, bis der geänderte Key erneut geprüft wurde.
 7. Erst nach gültigem Key und Kalenderwahl darf `Alles speichern` ins Programm führen.
 
+### 2026-09-13 – Installer-Chatty – nächster Release Candidate 1.0001 vorbereitet
+
+Status: QUELLSTAND UND AUTOZIP FERTIG / WINDOWS-BUILD UND XAVER-NACHTEST OFFEN
+
+Auf Grundlage des vollständigen CE-Korrekturstands einschließlich
+`bd1b2245e69669476338b43aeeb69ca740353062` wurde der nächste eindeutig höhere
+installierbare Kandidat vorbereitet:
+
+- technisch SemVer-konform `1.0.1`;
+- sichtbar `SERKAL Desktop 1.0001`;
+- interner Squirrel-Setupname `SerKal_1.0001_Setup.exe`;
+- Paket- und Lockdatei sind einheitlich `1.0.1`;
+- Hauptprozess und Preload bilden technische Patchstände nach Kurts RC-Schema sichtbar
+  als vierstellige Folge hinter dem Punkt ab;
+- der öffentliche Dateiname bleibt unverändert `serkal-desktop.exe`;
+- AUTOZIP erwartet ausdrücklich den CE-Endstand `bd1b2245…`, Paketversion `1.0.1`
+  und den exakten x64-Setup-Pfad. Die frühere fehleranfällige Dateisuche mit zusätzlichen
+  Anführungszeichen wird nicht mehr verwendet.
+
+Installer-Quellkopf: `28e663a7c9ae5c495df40a95008014324ae02a5e`.
+
+JSON-Prüfung von package.json und package-lock.json sowie Syntaxprüfung von Forge,
+Backend und Preload bestanden. Noch kein öffentliches Artefakt und keine Freigabe.
+Kurt baut den neuen Kandidaten mit der vollständigen Ersatzdatei
+`PULL-AUTOZIP-RC-1-0001.BAT` und führt anschließend den am Schwarzen Brett
+beschriebenen Xaver-Nachtest durch.
+
