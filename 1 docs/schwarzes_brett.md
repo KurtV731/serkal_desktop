@@ -1079,3 +1079,40 @@ Nächste Schritte:
 4. Diese Quelländerung allein benötigt noch keine Installationsnummer. Der nächste daraus
    gebaute installierbare Kandidat muss wegen der bereits vorbereiteten 1.0002 mindestens
    technisch `1.0.3` und sichtbar `1.0003` tragen.
+
+
+### 2026-09-13 – Kurt/CE – Kalenderhilfe lag hinter dem Einrichtungsassistenten
+
+Status: CODE FERTIG / NEUER WINDOWS-SICHTTEST OFFEN
+
+Kurts Video `20260913_190300(1).mp4` aus dem praktischen Test von
+`SERKAL Desktop 1.0004` zeigt einen eindeutigen Ablauffehler: Nach dem Klick auf
+`Hilfe öffnen` blieb der Kalender-Assistent sichtbar. Das tatsächlich bereits geöffnete
+Hilfefenster lag wegen seiner niedrigeren Anzeigeebene unsichtbar dahinter und erschien erst
+verspätet, nachdem `Alles speichern` den Einrichtungsassistenten geschlossen hatte.
+
+Ursache:
+
+- allgemeiner SerKal-Hilfedialog: `z-index: 12000`;
+- Einrichtungsassistent: `z-index: 20000`.
+
+Korrekturcommit: `62e7d9ede3444f3c2d6cecb9e58c8a6c66ed6ea7`.
+
+Der allgemeine SerKal-Hilfedialog liegt nun mit `z-index: 22000` zuverlässig vor
+dem Assistenten. Dadurch muss die Kalenderhilfe unmittelbar beim Klick sichtbar werden und
+kann geschlossen oder über `Ausführliche Hilfe öffnen` zur Webseite weitergeführt
+werden, bevor der Einrichtungsablauf fortgesetzt wird. Inhalt und Funktion der Hilfe wurden
+nicht verändert. Alle drei Inline-Skripte sind syntaktisch gültig.
+
+Versionskorrektur: `1.0004` ist durch den von Kurt gezeigten installierten Kandidaten
+bereits belegt. Jeder neue Installer mit dieser Korrektur muss deshalb technisch mindestens
+`1.0.5` und sichtbar `1.0005` tragen.
+
+Sichttest:
+
+1. Xaver leer starten und bis Schritt 2 `Kalender einrichten` gehen.
+2. Google markieren und `Hilfe öffnen` anklicken.
+3. `Hilfe zu dieser Auswahl` muss sofort vor dem Assistenten sichtbar sein.
+4. `Schließen` muss zurück zu Schritt 2 führen, ohne die Einrichtung abzuschließen.
+5. Erneut öffnen und `Ausführliche Hilfe öffnen` wählen; erst dann darf die
+   Kalender-Hilfeseite im Browser erscheinen.
