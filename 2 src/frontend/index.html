@@ -1656,7 +1656,8 @@
     .skDialogOverlay {
       position: fixed;
       inset: 0;
-      z-index: 12000;
+      /* Muss auch vor dem Einrichtungsassistenten (z-index 20000) liegen. */
+      z-index: 22000;
       display: none;
       align-items: center;
       justify-content: center;
