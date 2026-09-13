@@ -1001,3 +1001,35 @@ Xaver-Sichttest:
 5. Danach auf Deutsch wechseln und wiederholen: Kalender-Schritt und Hilfe müssen vollständig
    deutsch erscheinen.
 
+### 2026-09-13 – Kurt/CE – ICS ist Exportformat, keine Kalenderwahl
+
+Status: CODE FERTIG / SPÄTERE ICS-EXPORTFRAGE VORGEMERKT / WINDOWS-SICHTTEST OFFEN
+
+Kurts fachliche Klarstellung zum Video-Test: ICS ist kein eigener Kalenderdienst und gehört
+deshalb nicht als gleichwertige Auswahl neben Google in die Ersteinrichtung. Die Auswahl
+des Kalenders und der spätere zusätzliche Export der erzeugten Termine sind zwei getrennte
+Entscheidungen.
+
+Korrekturcommit: `ac7ed6dba9a9b340cd2bf72eaf25ce6e04215d5f`.
+
+Aktuelles Verhalten:
+
+- Die Ersteinrichtung fragt nur noch ehrlich:
+  1. `Google Kalender (empfohlen)`, oder
+  2. `Keinen Kalender verwenden`.
+- Die bisherige ICS-Radioauswahl wurde aus diesem Dialog herausgenommen.
+- Auch `SerKal entscheiden lassen` wurde aus dem Erstentscheid entfernt, weil diese Auswahl
+  derzeit lediglich verdeckt auf den noch nicht aktiven ICS-Weg führte.
+- Ein Hinweis erklärt: ICS ist ein zusätzliches Exportformat. Sobald der Export funktionsfähig
+  ist, fragt SerKal nach einem Eintrag gesondert danach.
+- Bestehende ICS-Texte, Dialogfunktion und Exportbrücke wurden ausdrücklich nicht gelöscht.
+  Sie bleiben stillgelegt im Code erhalten und bilden die Grundlage für die spätere Frage:
+  `Möchtest du diese Termine zusätzlich als ICS-Datei erhalten?`
+- Der aus GitHub zurückgelesene Dialog enthält nur die Modi `google` und `none`;
+  die vorhandene ICS-Routine ist weiterhin vorhanden. Alle drei Inline-Skripte sind
+  syntaktisch gültig.
+
+Versionsfolge: Diese fachliche Änderung liegt nach dem vorbereiteten Kandidaten `1.0002`.
+Der nächste daraus gebaute installierbare Kandidat muss technisch mindestens `1.0.3`
+und sichtbar `1.0003` tragen.
+
