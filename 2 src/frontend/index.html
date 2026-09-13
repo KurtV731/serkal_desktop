@@ -1988,7 +1988,7 @@
         <label class="skSetupFieldLabel" for="skSetupTmdbKey">TMDB-API-Key</label>
         <input id="skSetupTmdbKey" class="skSetupKeyInput" type="text" autocomplete="off" spellcheck="false" placeholder="Persönlicher TMDB-API-Key (v3 auth)">
         <div id="skSetupTmdbError" class="skSetupError"></div>
-        <div class="skCalendarSetupActions"><button id="skSetupLater" type="button">Später fortsetzen</button><button id="skSetupTmdbHelp" type="button">Hilfe öffnen</button><button id="skSetupTmdbNext" type="button">Weiter</button></div>
+        <div class="skCalendarSetupActions"><button id="skSetupTmdbCreate" type="button">TMDB-Key jetzt erstellen</button><button id="skSetupTmdbHelp" type="button">Hilfe öffnen</button><button id="skSetupTmdbNext" type="button" disabled>Weiter</button></div>
       </div>
 
       <div id="skSetupCalendarStep" class="skSetupStep" data-sk-setup-step="calendar" hidden>
@@ -2052,6 +2052,7 @@
       firstRun=asFirstRun===true;
       testedTmdbKey='';
       if(tmdbInput)tmdbInput.value='';
+      document.getElementById('skSetupTmdbNext').disabled=true;
       setMode(c.mode||'');
       tmdbError.style.display='none';calendarError.style.display='none';commitError.style.display='none';
       document.getElementById('skSetupCalendarBack').style.display=firstRun?'':'none';
@@ -2083,9 +2084,12 @@
         if(e.checked&&String(e.value||'')==='ics')showIcsSelectionInfo_();
       });
     });
-    tmdbInput.addEventListener('input',function(){testedTmdbKey='';tmdbError.style.display='none'});
+    tmdbInput.addEventListener('input',function(){testedTmdbKey='';tmdbError.style.display='none';document.getElementById('skSetupTmdbNext').disabled=!String(tmdbInput.value||'').trim()});
 
-    document.getElementById('skSetupLater').addEventListener('click',hide);
+    document.getElementById('skSetupTmdbCreate').addEventListener('click',async function(){
+      tmdbError.style.display='none';
+      try{await window.serkal.help.tmdbCreate()}catch(_e){tmdbError.textContent='Die TMDB-Seite zum Erstellen des API-Keys konnte nicht geöffnet werden.';tmdbError.style.display='block'}
+    });
     document.getElementById('skSetupTmdbHelp').addEventListener('click',async function(){
       var lang='de';try{lang=String(localStorage.getItem('serkal_lang')||'de').toLowerCase()==='en'?'en':'de'}catch(_e){}
       try{await window.serkal.help.tmdb(lang)}catch(_e){tmdbError.textContent='Die TMDB-Hilfe konnte nicht geöffnet werden.';tmdbError.style.display='block'}
@@ -2093,16 +2097,15 @@
     document.getElementById('skSetupTmdbNext').addEventListener('click',async function(){
       var key=String(tmdbInput.value||'').trim();
       tmdbError.style.display='none';
-      if(key){
-        this.disabled=true;this.textContent='Prüfe …';
-        try{
-          var result=await window.serkal.tmdb.testKey(key);
-          if(!result||result.ok!==true){tmdbError.textContent=(result&&result.message)||'Dieser TMDB-API-Key funktioniert nicht.';tmdbError.style.display='block';return}
-          testedTmdbKey=key;
-        }catch(e){tmdbError.textContent='Der TMDB-API-Key konnte nicht geprüft werden: '+String(e&&e.message||e);tmdbError.style.display='block';return}
-        finally{this.disabled=false;this.textContent='Weiter'}
-      }else testedTmdbKey='';
-      setStep('calendar');
+      if(!key){tmdbError.textContent='SerKal benötigt einen gültigen persönlichen TMDB-API-Key. Ohne diesen Key kann die Einrichtung nicht fortgesetzt werden.';tmdbError.style.display='block';tmdbInput.focus();this.disabled=true;return}
+      this.disabled=true;this.textContent='Prüfe …';
+      try{
+        var result=await window.serkal.tmdb.testKey(key);
+        if(!result||result.ok!==true){testedTmdbKey='';tmdbError.textContent=(result&&result.message)||'Dieser TMDB-API-Key funktioniert nicht. Bitte prüfe ihn.';tmdbError.style.display='block';tmdbInput.focus();tmdbInput.select();return}
+        testedTmdbKey=key;
+        setStep('calendar');
+      }catch(e){testedTmdbKey='';tmdbError.textContent='Der TMDB-API-Key konnte nicht geprüft werden: '+String(e&&e.message||e);tmdbError.style.display='block'}
+      finally{this.disabled=!String(tmdbInput.value||'').trim();this.textContent='Weiter'}
     });
     document.getElementById('skSetupCalendarBack').addEventListener('click',function(){setStep('tmdb');tmdbInput.focus()});
     document.getElementById('skSetupReviewBack').addEventListener('click',function(){setStep('calendar')});
@@ -2111,7 +2114,12 @@
     document.getElementById('skCalendarSetupHelp').addEventListener('click',async function(){
       var lang='de',m=mode();
       try{lang=String(localStorage.getItem('serkal_lang')||'de').toLowerCase()==='en'?'en':'de'}catch(_e){}
-      if(m==='google'){try{await window.serkal.help.google(lang)}catch(e){alert('Kalender-Hilfe konnte nicht geöffnet werden: '+String(e||''))}return}
+      if(m==='google'){
+        var googleMessage=lang==='en'?'SerKal will use your Google account. The account selection opens with the first actual calendar entry. SerKal then finds or creates the calendar “SerKal” and stores its technical ID automatically.':'SerKal verwendet dein Google-Konto. Die Kontoauswahl öffnet sich beim ersten tatsächlichen Kalendereintrag. Danach findet oder erstellt SerKal den Kalender „SerKal“ und speichert dessen technische ID automatisch.';
+        if(typeof showSerKalDialog_==='function')showSerKalDialog_({kind:'info',icon:'📅',title:lang==='en'?'Google Calendar help':'Google-Kalender-Hilfe',message:googleMessage,confirmText:lang==='en'?'Open detailed help':'Ausführliche Hilfe öffnen',showCancel:true,cancelText:lang==='en'?'Close':'Schließen',onConfirm:async function(){try{await window.serkal.help.google(lang)}catch(e){alert('Kalender-Hilfe konnte nicht geöffnet werden: '+String(e||''))}}});
+        else alert(googleMessage);
+        return;
+      }
       var de={'':'Bitte zuerst eine Kalender-Option auswählen. Danach erklärt diese Hilfe genau die gewählte Möglichkeit.',ics:'ICS ist für andere Kalenderprogramme gedacht. Der eigentliche ICS-Export ist in dieser SerKal-Version noch nicht aktiv. Für sofortige automatische Kalendereinträge bitte „Google Kalender“ wählen.',none:'SerKal verwaltet dann nur das Serienarchiv. Es werden keine Termine in einen Kalender geschrieben.',auto:'Diese automatische Auswahl ist für eine spätere vollständig selbständige Kalenderentscheidung vorgesehen. Derzeit führt sie zum noch nicht aktiven ICS-Export und erzeugt deshalb keine Kalendereinträge. Für funktionierende automatische Einträge bitte „Google Kalender“ wählen.'};
       var en={'':'Please select a calendar option first. This help will then explain the selected option.',ics:'ICS is intended for other calendar applications. ICS export is not active in this SerKal version yet. For working automatic calendar entries, please select “Google Calendar”.',none:'SerKal will manage the series archive only. No calendar events will be created.',auto:'This automatic choice is intended for a later fully automatic calendar decision. It currently selects the unfinished ICS export and therefore creates no calendar events. For working automatic entries, please select “Google Calendar”.'};
       var message=(lang==='en'?en:de)[m]||(lang==='en'?en['']:de['']);
@@ -2135,10 +2143,10 @@
     document.getElementById('skSetupCommit').addEventListener('click',async function(){
       var m=mode(),key=String(tmdbInput.value||'').trim();
       commitError.style.display='none';
-      if(key&&testedTmdbKey!==key){commitError.textContent='Der TMDB-Key wurde nach der Prüfung verändert. Bitte gehe zurück und prüfe ihn erneut.';commitError.style.display='block';return}
+      if(!key||testedTmdbKey!==key){commitError.textContent=!key?'Ohne gültigen TMDB-API-Key kann SerKal nicht eingerichtet werden. Bitte gehe zurück und gib deinen persönlichen Key ein.':'Der TMDB-Key wurde nach der Prüfung verändert. Bitte gehe zurück und prüfe ihn erneut.';commitError.style.display='block';return}
       this.disabled=true;this.textContent='Speichere …';
       try{
-        var result=await window.serkal.setup.commit({tmdbKey:key,clearTmdb:!key,settings:{setupDone:true,calendar:{mode:m,googleCalendarId:''}}});
+        var result=await window.serkal.setup.commit({tmdbKey:key,settings:{setupDone:true,calendar:{mode:m,googleCalendarId:''}}});
         if(!result||result.ok!==true){commitError.textContent=(result&&result.message)||'Die Ersteinrichtung konnte nicht gespeichert werden.';commitError.style.display='block';return}
         hide();
         if(typeof loadArchiv==='function')loadArchiv();
