@@ -945,3 +945,59 @@ Windows-Nachtest: RC 1.0002 installieren, Bonanza erneut löschen und prüfen, d
 Browser/Google-Login erscheint, die Archivdatei gelöscht wird und im Log
 `Kalender beim Löschen übersprungen` steht.
 
+### 2026-09-13 – Kurt/CE – Kalenderwahl nach Video-Test vereinheitlicht
+
+Status: CODE FERTIG / NÄCHSTER WINDOWS-KANDIDAT UND XAVER-SICHTTEST OFFEN
+
+Kurt zeigte den vollständigen Kalender-Einrichtungsweg in
+`20260913_164348(1).mp4`. Der Ablauf war funktional, wirkte aber nicht wie eine
+zusammenhängende Entscheidung:
+
+- Bei englischer Hauptoberfläche blieb der Kalender-Assistent deutsch, während einzelne
+  Folge-Pop-ups wieder englisch erschienen.
+- Nur die ICS-Auswahl öffnete bereits beim bloßen Anklicken ungefragt ein zusätzliches
+  Fenster.
+- Die vier Optionen erklärten nicht unmittelbar und gleichartig, was sie praktisch bewirken.
+- Die scherzhafte automatische Auswahl verschwieg in ihrer Bezeichnung, dass sie derzeit
+  noch keinen Kalenderexport erzeugt.
+
+Korrekturcommit: `a04e482a92c7736a51a067ac45c125067d7270c3`.
+
+Umgesetzt:
+
+1. Der Kalender-Schritt richtet Überschrift, Fortschrittsanzeige, Optionen, Erläuterungen,
+   Knöpfe, Fehlermeldung und Kontrollseite einheitlich nach der gewählten Sprache DE/EN aus.
+2. Jede Kalenderoption besitzt direkt unter ihrem Namen eine kurze verständliche
+   Wirkungsbeschreibung.
+3. Google ist sichtbar als empfohlene und derzeit funktionierende automatische
+   Kalenderanbindung gekennzeichnet.
+4. ICS nennt offen direkt in der Auswahl: für Apple Kalender, Outlook und andere
+   Kalenderprogramme, Export in dieser Version noch nicht aktiv.
+5. „Keinen Kalender verwenden“ erklärt unmittelbar: nur Serienarchiv, keine Termine.
+6. Die vierte Auswahl heißt sachlich „SerKal entscheiden lassen“ und erklärt unmittelbar,
+   dass dies derzeit nur Archiv und noch keinen Kalenderexport bedeutet.
+7. Das ungefragte ICS-Pop-up beim bloßen Auswählen ist entfernt.
+8. `Hilfe öffnen` bleibt bewusst benutzergesteuert und erklärt die jeweils markierte
+   Möglichkeit nach demselben Muster. Bei Google kann von dort zusätzlich die ausführliche
+   Website-Hilfe geöffnet werden.
+9. Der aus GitHub zurückgelesene Stand enthält DE und EN sowie keine automatische
+   ICS-Pop-up-Auslösung; alle drei Inline-Skripte sind syntaktisch gültig.
+
+Versionsfolge:
+
+Der bereits vorbereitete/installierbare Kandidat `1.0002` enthält diese spätere
+Oberflächenkorrektur noch nicht. Sobald daraus ein neuer Installer gebaut wird, muss er
+gemäß Versionsregel technisch mindestens `1.0.3` und sichtbar `1.0003` tragen.
+Keinen vorhandenen Kandidaten mit verändertem Inhalt unter gleicher Nummer neu bauen.
+
+Xaver-Sichttest:
+
+1. SerKal auf Englisch stellen und den Kalender-Schritt öffnen: Der gesamte Kalender-Schritt
+   einschließlich Kontrollseite muss Englisch sein.
+2. Nacheinander alle vier Optionen anklicken: Beim bloßen Anklicken darf kein Pop-up
+   erscheinen.
+3. Jede Option muss ihre Wirkung direkt unter der Bezeichnung erklären.
+4. `Open help` muss zur markierten Option eine sichtbare englische Erklärung liefern.
+5. Danach auf Deutsch wechseln und wiederholen: Kalender-Schritt und Hilfe müssen vollständig
+   deutsch erscheinen.
+
