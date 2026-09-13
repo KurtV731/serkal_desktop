@@ -3,7 +3,7 @@
  SERKAL Desktop
 -------------------------------------------------------------------------------
  Datei      : main.js
- Version    : 1.0001
+ Version    : 1.0002
  Aufgabe    : Startet Electron, verwaltet lokale Grundeinstellungen,
               oeffnet den Kalender, stellt die TMDB-/SERKAL-Suche bereit
               und portiert das SERKAL-2.5-Archiv auf lokale TXT-Dateien.
@@ -680,18 +680,45 @@ async function archiveDeleteSeries_(payload) {
         const calendarMode = String(settings.calendar.mode || "").toLowerCase();
         let calendarDeleted = 0;
 
-        if (calendarMode === "ics") {
+        /*
+         * Dieselbe Jahresgrenze wie beim Eintragen:
+         * Nur Staffeln mit mindestens einem echten Termin und einem letzten Termin
+         * im aktuellen Jahr oder spaeter konnten von SerKal in einen Kalender
+         * geschrieben worden sein. Alte Serien duerfen beim Loeschen weder Google
+         * noch einen ICS-Hinweis ausloesen.
+         */
+        const currentYear = new Date().getFullYear();
+        const calendarEntries = entries.filter(entry => {
+            const dates = Array.isArray(entry.activeDates) ? entry.activeDates : [];
+            let lastDate = null;
+            for (const iso of dates) {
+                const parsed = new Date(String(iso || "") + "T00:00:00");
+                if (Number.isNaN(parsed.getTime())) continue;
+                if (!lastDate || parsed.getTime() > lastDate.getTime()) lastDate = parsed;
+            }
+            return Boolean(lastDate && lastDate.getFullYear() >= currentYear);
+        });
+
+        if (calendarEntries.length === 0 && (calendarMode === "google" || calendarMode === "ics")) {
+            logWrite_("INFO", "DELETE", "Kalender beim Loeschen uebersprungen: Serie besitzt keine aktuellen oder zukuenftigen Termine", {
+                fileName,
+                calendarMode,
+                entryCount:entries.length
+            });
+        }
+
+        if (calendarEntries.length > 0 && calendarMode === "ics") {
             return {
                 ok:false,
                 message:"ICS-Kalendertermine können nicht automatisch gelöscht werden. Archivdatei wurde nicht gelöscht."
             };
         }
 
-        if (calendarMode === "google") {
+        if (calendarEntries.length > 0 && calendarMode === "google") {
             const resolvedCalendar = await googleResolveSerkalCalendar_();
             const calendarId = String(resolvedCalendar.id || "").trim();
 
-            for (const entry of entries) {
+            for (const entry of calendarEntries) {
                 const seasonNumber = Number(String(entry.staffelLabel || "").replace(/\D/g, ""));
                 const dates = Array.isArray(entry.activeDates) ? entry.activeDates : [];
                 const blocks = calendarBlocks_(dates);
