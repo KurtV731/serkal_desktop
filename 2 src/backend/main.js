@@ -1345,11 +1345,18 @@ function calendarCreateIcs_(payload) {
 
 /* Originalverhalten aus modul5-kalender.gs benötigt:
    Kalender "SerKal" suchen, bei Bedarf anlegen und danach Events verwalten. */
-const GOOGLE_CALENDAR_SCOPE = "https://www.googleapis.com/auth/calendar";
+const GOOGLE_CALENDAR_SCOPES = [
+    // Nur die vorhandene Kalenderliste lesen, damit SerKal seinen Kalender wiederfindet.
+    "https://www.googleapis.com/auth/calendar.calendarlist.readonly",
+    // Den eigenen SerKal-Kalender bei Bedarf anlegen.
+    "https://www.googleapis.com/auth/calendar.calendars",
+    // Ausschließlich Termine in Kalendern verwalten, deren Eigentümer der Nutzer ist.
+    "https://www.googleapis.com/auth/calendar.events.owned"
+];
 
 function googleOauthTokenHasRequiredScope_(token) {
-    const scopes = String(token && token.scope || "").split(/\s+/).filter(Boolean);
-    return scopes.includes(GOOGLE_CALENDAR_SCOPE);
+    const scopes = new Set(String(token && token.scope || "").split(/\s+/).filter(Boolean));
+    return GOOGLE_CALENDAR_SCOPES.every(scope => scopes.has(scope));
 }
 
 function googleOauthTokenPath_() {
@@ -1494,7 +1501,7 @@ function googleOauthBrowserLogin_(cfg) {
             authUrl.searchParams.set("client_id", cfg.clientId);
             authUrl.searchParams.set("redirect_uri", redirectUri);
             authUrl.searchParams.set("response_type", "code");
-            authUrl.searchParams.set("scope", GOOGLE_CALENDAR_SCOPE);
+            authUrl.searchParams.set("scope", GOOGLE_CALENDAR_SCOPES.join(" "));
             authUrl.searchParams.set("access_type", "offline");
             // Nach einem echten Nullstart muss Google die Kontoauswahl wieder sichtbar zeigen.
             authUrl.searchParams.set("prompt", "select_account consent");
