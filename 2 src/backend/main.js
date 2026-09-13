@@ -3,7 +3,7 @@
  SERKAL Desktop
 -------------------------------------------------------------------------------
  Datei      : main.js
- Version    : 1.0
+ Version    : 1.0001
  Aufgabe    : Startet Electron, verwaltet lokale Grundeinstellungen,
               oeffnet den Kalender, stellt die TMDB-/SERKAL-Suche bereit
               und portiert das SERKAL-2.5-Archiv auf lokale TXT-Dateien.
