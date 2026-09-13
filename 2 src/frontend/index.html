@@ -1995,9 +1995,8 @@
         <p id="skSetupCalendarIntro" class="skCalendarSetupIntro">Wähle, was SerKal mit deinen Terminen tun soll. Du kannst diese Einstellung später jederzeit über „Kalender“ ändern.</p>
         <label class="skCalendarChoice"><input type="radio" name="skCalendarMode" value="google"><span class="skCalendarChoiceText"><strong id="skChoiceGoogleTitle">Google Kalender (empfohlen)</strong><span id="skChoiceGoogleHint" class="skCalendarChoiceHint">SerKal trägt Termine automatisch in den Kalender „SerKal“ ein. Die Google-Anmeldung folgt beim ersten tatsächlichen Eintrag.</span></span></label>
         <div id="skCalendarGoogleData" class="skCalendarGoogleData"><div id="skCalendarGoogleHint" class="skCalendarHint">Eine Kalender-ID musst du nicht eingeben. SerKal findet oder erstellt den Kalender „SerKal“ automatisch.</div></div>
-        <label class="skCalendarChoice"><input type="radio" name="skCalendarMode" value="ics"><span class="skCalendarChoiceText"><strong id="skChoiceIcsTitle">ICS-Datei / anderer Kalender</strong><span id="skChoiceIcsHint" class="skCalendarChoiceHint">Für Apple Kalender, Outlook und andere Kalenderprogramme. Der Export ist in dieser Version noch nicht aktiv.</span></span></label>
         <label class="skCalendarChoice"><input type="radio" name="skCalendarMode" value="none"><span class="skCalendarChoiceText"><strong id="skChoiceNoneTitle">Keinen Kalender verwenden</strong><span id="skChoiceNoneHint" class="skCalendarChoiceHint">SerKal führt nur dein Serienarchiv und legt keine Kalendertermine an.</span></span></label>
-        <label class="skCalendarChoice"><input type="radio" name="skCalendarMode" value="auto"><span class="skCalendarChoiceText"><strong id="skChoiceAutoTitle">SerKal entscheiden lassen</strong><span id="skChoiceAutoHint" class="skCalendarChoiceHint">Derzeit bedeutet dies: nur Archiv, noch kein Kalenderexport. Später kann SerKal hier automatisch entscheiden.</span></span></label>
+        <p id="skCalendarExportHint" class="skCalendarHint">ICS ist keine Kalenderwahl, sondern ein zusätzliches Exportformat. Sobald der Export verfügbar ist, fragt SerKal nach einem Eintrag gesondert danach.</p>
         <div id="skSetupCalendarError" class="skSetupError"></div>
         <div class="skCalendarSetupActions"><button id="skSetupCalendarCancel" type="button">Abbrechen</button><button id="skSetupCalendarBack" type="button">Zurück</button><button id="skCalendarSetupHelp" type="button">Hilfe öffnen</button><button id="skSetupCalendarNext" type="button">Weiter</button><button id="skCalendarSetupSave" type="button">Speichern</button></div>
       </div>
@@ -2040,6 +2039,7 @@
       setText_('skChoiceNoneHint',en?'SerKal manages your series archive only and creates no calendar events.':'SerKal führt nur dein Serienarchiv und legt keine Kalendertermine an.');
       setText_('skChoiceAutoTitle',en?'Let SerKal decide':'SerKal entscheiden lassen');
       setText_('skChoiceAutoHint',en?'Currently this means: archive only, no calendar export yet. SerKal can decide automatically here in a later version.':'Derzeit bedeutet dies: nur Archiv, noch kein Kalenderexport. Später kann SerKal hier automatisch entscheiden.');
+      setText_('skCalendarExportHint',en?'ICS is not a calendar choice but an additional export format. Once export is available, SerKal will ask about it separately after an entry.':'ICS ist keine Kalenderwahl, sondern ein zusätzliches Exportformat. Sobald der Export verfügbar ist, fragt SerKal nach einem Eintrag gesondert danach.');
       setText_('skSetupCalendarBack',en?'Back':'Zurück');
       setText_('skSetupReviewBack',en?'Back':'Zurück');
       setText_('skCalendarSetupHelp',en?'Open help':'Hilfe öffnen');
