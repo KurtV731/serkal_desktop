@@ -233,10 +233,11 @@ async function commitFirstSetup_(payload) {
     const tmdbKey = String(input.tmdbKey || "").trim();
     const settings = mergeSettingsPatch_(Object.assign({}, input.settings || {}, { setupDone:true }));
 
-    if (tmdbKey) {
-        const tested = await tmdbRequest_("/configuration", {}, tmdbKey);
-        if (!tested.ok) return tested;
+    if (!tmdbKey) {
+        return { ok:false, code:"TMDB_KEY_REQUIRED", message:"SerKal benötigt einen gültigen persönlichen TMDB-API-Key. Ohne diesen Key kann die Ersteinrichtung nicht abgeschlossen werden." };
     }
+    const tested = await tmdbRequest_("/configuration", {}, tmdbKey);
+    if (!tested.ok) return tested;
 
     const settingsFile = settingsPath_();
     const tmdbFile = tmdbConfigPath_();
@@ -245,8 +246,7 @@ async function commitFirstSetup_(payload) {
 
     try {
         writeSettings_(settings);
-        if (tmdbKey) writeTmdbKey_(tmdbKey);
-        else if (input.clearTmdb === true && fs.existsSync(tmdbFile)) fs.rmSync(tmdbFile, { force:true });
+        writeTmdbKey_(tmdbKey);
         logWrite_("ACTION", "SETUP", "Ersteinrichtung vollständig gespeichert", {
             tmdbKonfiguriert:Boolean(tmdbKey),
             kalenderModus:String(settings.calendar && settings.calendar.mode || ""),
@@ -2952,6 +2952,11 @@ function installIpc_() {
     });
     ipcMain.handle("serkal:help:tmdb", async (_event, lang) => {
         const url = tmdbHelpUrl_(lang);
+        await shell.openExternal(url);
+        return { ok:true, url };
+    });
+    ipcMain.handle("serkal:help:tmdbCreate", async () => {
+        const url = "https://www.themoviedb.org/settings/api";
         await shell.openExternal(url);
         return { ok:true, url };
     });
