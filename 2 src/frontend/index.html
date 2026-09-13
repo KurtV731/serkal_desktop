@@ -1972,7 +1972,7 @@
     .skSetupFieldLabel{display:block;font-weight:800;margin:12px 0 7px}
     .skSetupKeyInput{width:100%;box-sizing:border-box;padding:11px 12px;border-radius:10px;border:1px solid rgba(120,120,140,.45);font:inherit}
     .skSetupError{display:none;margin-top:9px;color:#b91c1c;font-weight:750;white-space:pre-line}
-    .skCalendarChoice{display:block;padding:11px 12px;margin:8px 0;border:1px solid rgba(120,120,140,.28);border-radius:12px;cursor:pointer}.skCalendarChoice input{margin-right:9px}
+    .skCalendarChoice{display:flex;align-items:flex-start;gap:9px;padding:11px 12px;margin:8px 0;border:1px solid rgba(120,120,140,.28);border-radius:12px;cursor:pointer}.skCalendarChoice input{margin:3px 0 0}.skCalendarChoiceText{display:block}.skCalendarChoiceHint{display:block;margin-top:4px;font-size:.88rem;font-weight:500;line-height:1.35;opacity:.72}
     .skCalendarGoogleData{margin:12px 0 4px 29px;display:none}.skCalendarGoogleData.sk-open{display:block}
     .skCalendarHint{font-size:.9rem;opacity:.75;margin-top:6px}
     .skSetupReview{border:1px solid rgba(120,120,140,.28);border-radius:12px;padding:14px 16px;line-height:1.6;white-space:pre-line}
@@ -1992,12 +1992,12 @@
       </div>
 
       <div id="skSetupCalendarStep" class="skSetupStep" data-sk-setup-step="calendar" hidden>
-        <p class="skCalendarSetupIntro">Wie soll SERKAL mit deinem Kalender umgehen? Diese Auswahl bleibt zunächst ein Entwurf. Alle Einstellungen können später jederzeit über „Kalender“ geändert werden.</p>
-        <label class="skCalendarChoice"><input type="radio" name="skCalendarMode" value="google"><strong>Google Kalender</strong> – Kalender „SerKal“ automatisch verwenden</label>
-        <div id="skCalendarGoogleData" class="skCalendarGoogleData"><div class="skCalendarHint">Eine Google-Kalender-ID musst du nicht eingeben: Beim ersten echten Kalendereintrag öffnet SerKal die Google-Kontoauswahl, sucht den Kalender „SerKal“ und speichert dessen technische ID automatisch.</div></div>
-        <label class="skCalendarChoice"><input type="radio" name="skCalendarMode" value="ics"><strong>ICS-Datei / anderer Kalender</strong></label>
-        <label class="skCalendarChoice"><input type="radio" name="skCalendarMode" value="none"><strong>Keinen Kalender verwenden</strong></label>
-        <label class="skCalendarChoice"><input type="radio" name="skCalendarMode" value="auto"><strong>Keine Ahnung, was du von mir willst – mach, was du denkst. 😏</strong></label>
+        <p id="skSetupCalendarIntro" class="skCalendarSetupIntro">Wähle, was SerKal mit deinen Terminen tun soll. Du kannst diese Einstellung später jederzeit über „Kalender“ ändern.</p>
+        <label class="skCalendarChoice"><input type="radio" name="skCalendarMode" value="google"><span class="skCalendarChoiceText"><strong id="skChoiceGoogleTitle">Google Kalender (empfohlen)</strong><span id="skChoiceGoogleHint" class="skCalendarChoiceHint">SerKal trägt Termine automatisch in den Kalender „SerKal“ ein. Die Google-Anmeldung folgt beim ersten tatsächlichen Eintrag.</span></span></label>
+        <div id="skCalendarGoogleData" class="skCalendarGoogleData"><div id="skCalendarGoogleHint" class="skCalendarHint">Eine Kalender-ID musst du nicht eingeben. SerKal findet oder erstellt den Kalender „SerKal“ automatisch.</div></div>
+        <label class="skCalendarChoice"><input type="radio" name="skCalendarMode" value="ics"><span class="skCalendarChoiceText"><strong id="skChoiceIcsTitle">ICS-Datei / anderer Kalender</strong><span id="skChoiceIcsHint" class="skCalendarChoiceHint">Für Apple Kalender, Outlook und andere Kalenderprogramme. Der Export ist in dieser Version noch nicht aktiv.</span></span></label>
+        <label class="skCalendarChoice"><input type="radio" name="skCalendarMode" value="none"><span class="skCalendarChoiceText"><strong id="skChoiceNoneTitle">Keinen Kalender verwenden</strong><span id="skChoiceNoneHint" class="skCalendarChoiceHint">SerKal führt nur dein Serienarchiv und legt keine Kalendertermine an.</span></span></label>
+        <label class="skCalendarChoice"><input type="radio" name="skCalendarMode" value="auto"><span class="skCalendarChoiceText"><strong id="skChoiceAutoTitle">SerKal entscheiden lassen</strong><span id="skChoiceAutoHint" class="skCalendarChoiceHint">Derzeit bedeutet dies: nur Archiv, noch kein Kalenderexport. Später kann SerKal hier automatisch entscheiden.</span></span></label>
         <div id="skSetupCalendarError" class="skSetupError"></div>
         <div class="skCalendarSetupActions"><button id="skSetupCalendarCancel" type="button">Abbrechen</button><button id="skSetupCalendarBack" type="button">Zurück</button><button id="skCalendarSetupHelp" type="button">Hilfe öffnen</button><button id="skSetupCalendarNext" type="button">Weiter</button><button id="skCalendarSetupSave" type="button">Speichern</button></div>
       </div>
@@ -2026,6 +2026,28 @@
     var firstRun=false;
     var testedTmdbKey='';
 
+    function setupLang_(){try{return String(localStorage.getItem('serkal_lang')||'de').toLowerCase()==='en'?'en':'de'}catch(_e){return 'de'}}
+    function setText_(id,value){var e=document.getElementById(id);if(e)e.textContent=value}
+    function applyCalendarLanguage_(){
+      var en=setupLang_()==='en';
+      setText_('skSetupCalendarIntro',en?'Choose what SerKal should do with your dates. You can change this setting later at any time via “Calendar”.':'Wähle, was SerKal mit deinen Terminen tun soll. Du kannst diese Einstellung später jederzeit über „Kalender“ ändern.');
+      setText_('skChoiceGoogleTitle',en?'Google Calendar (recommended)':'Google Kalender (empfohlen)');
+      setText_('skChoiceGoogleHint',en?'SerKal automatically adds dates to the “SerKal” calendar. Google sign-in follows with the first actual entry.':'SerKal trägt Termine automatisch in den Kalender „SerKal“ ein. Die Google-Anmeldung folgt beim ersten tatsächlichen Eintrag.');
+      setText_('skCalendarGoogleHint',en?'You do not need to enter a calendar ID. SerKal automatically finds or creates the “SerKal” calendar.':'Eine Kalender-ID musst du nicht eingeben. SerKal findet oder erstellt den Kalender „SerKal“ automatisch.');
+      setText_('skChoiceIcsTitle',en?'ICS file / another calendar':'ICS-Datei / anderer Kalender');
+      setText_('skChoiceIcsHint',en?'For Apple Calendar, Outlook, and other calendar applications. Export is not active in this version yet.':'Für Apple Kalender, Outlook und andere Kalenderprogramme. Der Export ist in dieser Version noch nicht aktiv.');
+      setText_('skChoiceNoneTitle',en?'Do not use a calendar':'Keinen Kalender verwenden');
+      setText_('skChoiceNoneHint',en?'SerKal manages your series archive only and creates no calendar events.':'SerKal führt nur dein Serienarchiv und legt keine Kalendertermine an.');
+      setText_('skChoiceAutoTitle',en?'Let SerKal decide':'SerKal entscheiden lassen');
+      setText_('skChoiceAutoHint',en?'Currently this means: archive only, no calendar export yet. SerKal can decide automatically here in a later version.':'Derzeit bedeutet dies: nur Archiv, noch kein Kalenderexport. Später kann SerKal hier automatisch entscheiden.');
+      setText_('skSetupCalendarBack',en?'Back':'Zurück');
+      setText_('skSetupReviewBack',en?'Back':'Zurück');
+      setText_('skCalendarSetupHelp',en?'Open help':'Hilfe öffnen');
+      setText_('skSetupCalendarNext',en?'Next':'Weiter');
+      setText_('skCalendarSetupSave',en?'Save':'Speichern');
+      setText_('skSetupCommit',en?'Save all':'Alles speichern');
+    }
+
     function mode(){var e=document.querySelector('input[name="skCalendarMode"]:checked');return e?String(e.value||''):''}
     function refresh(){if(googleData)googleData.classList.toggle('sk-open',mode()==='google')}
     function setMode(m){
@@ -2038,12 +2060,13 @@
       tmdbStep.hidden=name!=='tmdb';
       calendarStep.hidden=name!=='calendar';
       reviewStep.hidden=name!=='review';
+      var en=setupLang_()==='en';
       if(firstRun){
-        progress.textContent=name==='tmdb'?'Schritt 1 von 3':(name==='calendar'?'Schritt 2 von 3':'Schritt 3 von 3');
-        title.textContent=name==='tmdb'?'TMDB einrichten':(name==='calendar'?'Kalender einrichten':'Einstellungen prüfen');
+        progress.textContent=name==='tmdb'?(en?'Step 1 of 3':'Schritt 1 von 3'):(name==='calendar'?(en?'Step 2 of 3':'Schritt 2 von 3'):(en?'Step 3 of 3':'Schritt 3 von 3'));
+        title.textContent=name==='tmdb'?(en?'Set up TMDB':'TMDB einrichten'):(name==='calendar'?(en?'Set up calendar':'Kalender einrichten'):(en?'Review settings':'Einstellungen prüfen'));
       }else{
         progress.textContent='';
-        title.textContent='Kalender einrichten';
+        title.textContent=en?'Set up calendar':'Kalender einrichten';
       }
     }
     async function getSettings(){try{return window.serkal&&window.serkal.settings?await window.serkal.settings.get():null}catch(_e){return null}}
@@ -2059,6 +2082,7 @@
       document.getElementById('skSetupCalendarNext').style.display=firstRun?'':'none';
       document.getElementById('skCalendarSetupSave').style.display=firstRun?'none':'';
       document.getElementById('skSetupCalendarCancel').style.display=firstRun?'none':'';
+      applyCalendarLanguage_();
       setStep(firstRun?'tmdb':'calendar');
       overlay.classList.add('sk-open');overlay.setAttribute('aria-hidden','false');
       window.setTimeout(function(){try{(firstRun?tmdbInput:document.querySelector('input[name="skCalendarMode"]')).focus()}catch(_e){}},0);
@@ -2081,7 +2105,6 @@
     document.querySelectorAll('input[name="skCalendarMode"]').forEach(function(e){
       e.addEventListener('change',function(){
         refresh();calendarError.style.display='none';
-        if(e.checked&&String(e.value||'')==='ics')showIcsSelectionInfo_();
       });
     });
     tmdbInput.addEventListener('input',function(){testedTmdbKey='';tmdbError.style.display='none';document.getElementById('skSetupTmdbNext').disabled=!String(tmdbInput.value||'').trim()});
@@ -2115,8 +2138,8 @@
       var lang='de',m=mode();
       try{lang=String(localStorage.getItem('serkal_lang')||'de').toLowerCase()==='en'?'en':'de'}catch(_e){}
       if(m==='google'){
-        var googleMessage=lang==='en'?'SerKal will use your Google account. The account selection opens with the first actual calendar entry. SerKal then finds or creates the calendar “SerKal” and stores its technical ID automatically.':'SerKal verwendet dein Google-Konto. Die Kontoauswahl öffnet sich beim ersten tatsächlichen Kalendereintrag. Danach findet oder erstellt SerKal den Kalender „SerKal“ und speichert dessen technische ID automatisch.';
-        if(typeof showSerKalDialog_==='function')showSerKalDialog_({kind:'info',icon:'📅',title:lang==='en'?'Google Calendar help':'Google-Kalender-Hilfe',message:googleMessage,confirmText:lang==='en'?'Open detailed help':'Ausführliche Hilfe öffnen',showCancel:true,cancelText:lang==='en'?'Close':'Schließen',onConfirm:async function(){try{await window.serkal.help.google(lang)}catch(e){alert('Kalender-Hilfe konnte nicht geöffnet werden: '+String(e||''))}}});
+        var googleMessage=lang==='en'?'Google Calendar creates working automatic entries. Google account selection appears only with the first actual entry; SerKal then finds or creates its calendar automatically.':'Google Kalender erzeugt funktionierende automatische Einträge. Die Google-Kontoauswahl erscheint erst beim ersten tatsächlichen Eintrag; anschließend findet oder erstellt SerKal seinen Kalender automatisch.';
+        if(typeof showSerKalDialog_==='function')showSerKalDialog_({kind:'info',icon:'📅',title:lang==='en'?'Help for this selection':'Hilfe zu dieser Auswahl',message:googleMessage,confirmText:lang==='en'?'Open detailed help':'Ausführliche Hilfe öffnen',showCancel:true,cancelText:lang==='en'?'Close':'Schließen',onConfirm:async function(){try{await window.serkal.help.google(lang)}catch(e){alert('Kalender-Hilfe konnte nicht geöffnet werden: '+String(e||''))}}});
         else alert(googleMessage);
         return;
       }
@@ -2129,14 +2152,13 @@
 
     document.getElementById('skSetupCalendarNext').addEventListener('click',function(){
       var m=mode();
-      if(!m){calendarError.textContent='Bitte eine Kalender-Option auswählen.';calendarError.style.display='block';return}
-      var names={google:'Google Kalender – Kalender „SerKal“ automatisch verwenden',ics:'ICS-Datei / anderer Kalender',none:'Keinen Kalender verwenden',auto:'Automatische Entscheidung (derzeit noch ohne Kalenderexport)'};
+      var en=setupLang_()==='en';
+      if(!m){calendarError.textContent=en?'Please select one calendar option.':'Bitte eine Kalender-Option auswählen.';calendarError.style.display='block';return}
+      var names=en?{google:'Google Calendar — automatic entries',ics:'ICS file / another calendar (export not active yet)',none:'No calendar',auto:'Let SerKal decide (currently archive only)'}:{google:'Google Kalender – automatische Einträge',ics:'ICS-Datei / anderer Kalender (Export noch nicht aktiv)',none:'Kein Kalender',auto:'SerKal entscheiden lassen (derzeit nur Archiv)'};
       var key=String(tmdbInput.value||'').trim();
-      document.getElementById('skSetupReview').textContent=
-        'TMDB: '+(key?'API-Key geprüft; wird erst jetzt gespeichert':'noch nicht eingerichtet')+'\n'+
-        'Kalender: '+(names[m]||m)+'\n'+
-        (m==='google'?'Google: Kontoauswahl und technische Kalender-ID folgen sichtbar beim ersten Kalendereintrag.\n':'')+
-        '\nMit „Zurück“ kannst du beide Entscheidungen noch ändern.';
+      document.getElementById('skSetupReview').textContent=en
+        ? 'TMDB: API key verified; it will now be saved\nCalendar: '+(names[m]||m)+'\n'+(m==='google'?'Google: Account selection and automatic calendar setup follow with the first calendar entry.\n':'')+'\nUse “Back” to change either decision.'
+        : 'TMDB: API-Key geprüft; wird erst jetzt gespeichert\nKalender: '+(names[m]||m)+'\n'+(m==='google'?'Google: Kontoauswahl und automatische Kalendereinrichtung folgen beim ersten Kalendereintrag.\n':'')+'\nMit „Zurück“ kannst du beide Entscheidungen noch ändern.';
       setStep('review');
     });
 
