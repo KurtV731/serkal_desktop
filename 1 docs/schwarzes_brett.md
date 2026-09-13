@@ -818,3 +818,58 @@ Nach jeder inhaltlichen Korrektur muss der nächste installierbare Teststand gem
 verbindlichen Versionsregel eine neue, eindeutig höhere technische Versionsnummer
 erhalten. CE trägt Korrekturcommit und neuen Xaver-Testauftrag hier ein.
 
+### 2026-09-13 – CE – Freigabeblocker aus dem ersten RC-Xaver-Test korrigiert
+
+Status: CODE FERTIG / NEUER INSTALLER-BUILD MIT HÖHERER VERSION UND XAVER-TEST OFFEN
+
+Der Release Candidate 1.0 bleibt gesperrt und darf nicht veröffentlicht werden. Die von Kurt
+gefundenen Lücken der Ersteinrichtung wurden auf dem verbindlichen Fachbranch geschlossen.
+
+Korrekturcommits:
+
+- `37ce659c81fbe32ece57bb96bb0b939234dea534` – Backend verweigert den Abschluss ohne
+  vorhandenen und erneut erfolgreich geprüften TMDB-Key;
+- `5950843f4130ac882e01102746f1770c5e5571f1` – sichere Desktop-Brücke zur offiziellen
+  TMDB-Seite für das Erstellen/Beantragen des persönlichen API-Keys;
+- `bd1b2245e69669476338b43aeeb69ca740353062` – Ersteinrichtungsoberfläche korrigiert.
+
+Umgesetztes Verhalten:
+
+1. `Später fortsetzen` ist aus Schritt 1 vollständig entfernt.
+2. Stattdessen öffnet `TMDB-Key jetzt erstellen` direkt
+   `https://www.themoviedb.org/settings/api`.
+3. `Weiter` ist bei leerem Feld gesperrt. Nach jeder Änderung am Feld gilt die frühere
+   Prüfung als verworfen.
+4. Nur ein tatsächlich erfolgreich gegen TMDB geprüfter Key führt zu Schritt 2.
+5. Auch die Abschlussseite und das Backend verweigern leere, veränderte oder ungültige Keys;
+   `setupDone:true` kann dadurch nicht mehr ohne gültigen Key geschrieben werden.
+6. Die Hilfe für Google Kalender zeigt zunächst ein sichtbares SerKal-Pop-up. Von dort kann
+   die ausführliche Webseite bewusst geöffnet werden; die bisherige scheinbar schwarze/leere
+   Reaktion wird damit vermieden.
+7. Der eingegebene Suchbegriff bleibt wie von Kurt gewünscht erhalten.
+8. Backend, Preload und alle drei Inline-Skripte wurden nach dem Zurücklesen aus GitHub
+   syntaktisch geprüft.
+
+Auftrag an Installer-Chatty:
+
+- den bisherigen RC keinesfalls veröffentlichen;
+- für den nächsten installierbaren Versuch gemäß Versionsregel eine eindeutig höhere
+  technische und sichtbare Version als `1.0` vergeben;
+- den aktuellen CE-Endstand einschließlich `bd1b2245e69669476338b43aeeb69ca740353062`
+  verwenden;
+- zunächst wieder ein nicht veröffentlichtes Windows-Testartefakt bauen und Kurt übergeben.
+
+Xaver-Nachtest:
+
+1. Wirklich leer starten und in Schritt 1 prüfen: `Weiter` ist ohne Eingabe gesperrt;
+   `Später fortsetzen` existiert nicht mehr.
+2. `TMDB-Key jetzt erstellen` öffnet die offizielle TMDB-API-Seite.
+3. Einen falschen Key eingeben: Schritt 2 darf nicht erscheinen und eine verständliche
+   Fehlermeldung muss sichtbar sein.
+4. Einen gültigen Key eingeben: Erst nach erfolgreicher Prüfung erscheint Schritt 2.
+5. Im Kalenderschritt Google markieren und `Hilfe öffnen`: Zuerst muss das sichtbare
+   SerKal-Erklärfenster erscheinen; `Ausführliche Hilfe öffnen` öffnet danach die Webseite.
+6. Zur Kontrollseite gehen, zurückgehen und den Key verändern: Abschluss muss verweigert
+   werden, bis der geänderte Key erneut geprüft wurde.
+7. Erst nach gültigem Key und Kalenderwahl darf `Alles speichern` ins Programm führen.
+
