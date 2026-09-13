@@ -99,7 +99,10 @@ function configureSharedUserData_() {
 configureSharedUserData_();
 
 function serkalDisplayVersion_() {
-    return app.getVersion().replace(/\.0$/, "");
+    const raw = app.getVersion();
+    const rc = /^(\d+)\.0\.(\d+)$/.exec(raw);
+    if (rc && Number(rc[2]) > 0) return rc[1] + "." + rc[2].padStart(4, "0");
+    return raw.replace(/\.0$/, "");
 }
 
 function serkalWindowTitle_() {
