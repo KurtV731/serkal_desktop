@@ -900,3 +900,48 @@ Kurt baut den neuen Kandidaten mit der vollständigen Ersatzdatei
 `PULL-AUTOZIP-RC-1-0001.BAT` und führt anschließend den am Schwarzen Brett
 beschriebenen Xaver-Nachtest durch.
 
+### 2026-09-13 – Kurt/Installer – Löschen alter Serien ohne unnötigen Google-Zugriff
+
+Status: CODE UND RC 1.0002 VORBEREITET / WINDOWS-NACHTEST OFFEN
+
+Kurts praktischer Test mit `Bonanza (1959) [S14]` zeigte einen weiteren
+Freigabeblocker: Obwohl diese alte Staffel niemals einen aktuellen SerKal-Kalendertermin
+besitzen konnte, begann der Löschvorgang sofort mit der automatischen Suche nach dem
+Google-Kalender. Firefox zeigte dabei statt der normalen Kontoauswahl eine rohe
+Google-OAuth-Adresse. Nach fünf Minuten brach die Anmeldung ab; SerKal ließ die
+Archivdatei vorsichtshalber unverändert.
+
+Der Lognachweis lautete:
+
+- `Löschen angefordert` für `Bonanza (1959).txt`;
+- danach unnötig `Automatische Suche nach Kalender SerKal gestartet`;
+- nach fünf Minuten `Google-Anmeldung wurde ... abgebrochen`;
+- Archivdatei blieb unverändert.
+
+Korrektur auf dem Fachbranch:
+
+- Commit `f866cbebf6d3aa049076e23302a9029a578baa2b`;
+- vor jedem Kalenderzugriff ermittelt SerKal nun aus den Archivdaten, ob die Staffel
+  überhaupt einen echten letzten Termin im aktuellen Jahr oder in der Zukunft besitzt;
+- gibt es ausschließlich alte oder gar keine Termine, werden Google und ICS vollständig
+  übersprungen und die Archivdatei kann unmittelbar gelöscht werden;
+- nur bei aktuellen oder zukünftigen Kalenderdaten bleibt die bisherige sichere
+  Kalenderbereinigung aktiv;
+- der übersprungene Kalenderweg wird als INFO im Log dokumentiert.
+
+Da der zuvor vorbereitete Stand 1.0001 bereits praktisch installiert und getestet wurde,
+trägt der neue installierbare Kandidat zwingend:
+
+- technisch `1.0.2`;
+- sichtbar `SERKAL Desktop 1.0002`;
+- Setupname `SerKal_1.0002_Setup.exe`;
+- Installer-Quellkopf `8b631b692aa087810e1a384e8c983683264932cf`.
+
+JSON- und Syntaxprüfung bestanden. Funktionsprobe bestanden: alte Termine lösen keinen
+Kalenderweg aus; Termine des aktuellen Jahres und der Zukunft bleiben kalenderrelevant.
+Noch keine Veröffentlichung.
+
+Windows-Nachtest: RC 1.0002 installieren, Bonanza erneut löschen und prüfen, dass kein
+Browser/Google-Login erscheint, die Archivdatei gelöscht wird und im Log
+`Kalender beim Löschen übersprungen` steht.
+
