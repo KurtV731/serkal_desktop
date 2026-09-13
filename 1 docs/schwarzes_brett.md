@@ -766,3 +766,55 @@ Produktionsgrenze bleibt verbindlich: Website-Upload und öffentlicher Installer
 nachdem der Installer-Chatty die neue Installations-EXE praktisch geprüft und Kurt sie ausdrücklich
 freigegeben hat. Der offene Installer-Auftrag zur sicheren Behandlung eines laufenden SerKal ist
 keine Website-Codeaufgabe und blockiert weiterhin den öffentlichen Produktionsinstaller.
+
+### 2026-09-13 – Kurt/Installer an CE – Xaver-Test des Release Candidate 1.0
+
+Status: RC NICHT FREIGEGEBEN / CE-KORREKTUR ERFORDERLICH
+
+Der reale Windows-Release-Candidate wurde aus Installer-Quellkopf
+`23444473f1b80bcab9c2c49c004a3b0b6b022f4a` gebaut und von Kurt als vollständig
+neuer Xaver praktisch geprüft.
+
+Installer-Ergebnis:
+
+- die vorgeschaltete Ein-Datei-Hülle wurde erfolgreich als
+  `C:\serkal-pages\up\download\serkal-desktop.exe` gebaut;
+- ein laufendes SerKal wurde erkannt, der abbrechbare Countdown angezeigt und SerKal
+  anschließend regulär geschlossen;
+- danach startete die eigentliche Installation;
+- Desktop-Start und sichtbare Kopfzeile `SERKAL Desktop 1.0` waren korrekt;
+- das Artefakt bleibt ein nicht veröffentlichter Teststand.
+
+Der Xaver-Test fand jedoch folgende Freigabeblocker in der Ersteinrichtung:
+
+1. Schritt 1 akzeptiert ein leeres TMDB-Key-Feld. Mit `Weiter` gelangt Xaver ohne
+   TMDB-Key zur Kalenderauswahl und kann die Einrichtung anschließend sogar vollständig
+   speichern.
+2. `Später fortsetzen` verlässt den Assistenten. Eine Suche öffnet ihn erneut; so kann
+   Xaver denselben Kreislauf beliebig oft wiederholen.
+3. Kurts verbindliche Entscheidung: Ohne gültigen TMDB-Key darf die Ersteinrichtung
+   nicht fortgesetzt oder abgeschlossen werden. SerKal soll klar mitteilen, dass es ohne
+   diesen Key nicht nutzbar ist.
+4. Der Knopf `Später fortsetzen` entfällt. An seine Stelle gehört ein klarer direkter
+   Weg zur passenden TMDB-Seite für das Erstellen/Beantragen des persönlichen API-Keys,
+   beispielsweise `TMDB-Key jetzt erstellen`.
+5. `Weiter` bleibt gesperrt, bis ein eingegebener TMDB-Key tatsächlich erfolgreich
+   geprüft wurde. Bei einem fehlenden oder ungültigen Key erscheint eine verständliche
+   Meldung.
+6. `Hilfe öffnen` für TMDB funktioniert und öffnete die richtige SerKal-Hilfeseite.
+7. Im Kalenderschritt blieb `Hilfe öffnen` beim Xaver-Sichttest ohne brauchbare
+   sichtbare Erklärung (tiefschwarz/leere Reaktion). Diesen Aufruf und gegebenenfalls
+   den zugehörigen Website-Weg bitte gemeinsam mit dem Website-Chatty prüfen.
+8. Die Auswahl `Keine Ahnung, was du von mir willst – mach, was du denkst` wurde wie
+   vorgesehen als automatische Entscheidung/ICS-Export übernommen. Die Abschlussseite
+   zeigte korrekt `derzeit noch ohne Kalenderexport`; `Alles speichern` führte ins
+   Programm.
+9. Der vor Beginn der Einrichtung eingegebene Suchbegriff `Reacher` blieb erhalten.
+   Das ist sinnvoll, damit die Suche nach erfolgreicher Einrichtung nicht neu eingegeben
+   werden muss.
+
+Konsequenz: Dieser RC darf nicht Version 1.0 werden und nicht veröffentlicht werden.
+Nach jeder inhaltlichen Korrektur muss der nächste installierbare Teststand gemäß der
+verbindlichen Versionsregel eine neue, eindeutig höhere technische Versionsnummer
+erhalten. CE trägt Korrekturcommit und neuen Xaver-Testauftrag hier ein.
+
