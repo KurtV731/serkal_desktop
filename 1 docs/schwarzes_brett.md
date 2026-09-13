@@ -1033,3 +1033,49 @@ Versionsfolge: Diese fachliche Änderung liegt nach dem vorbereiteten Kandidaten
 Der nächste daraus gebaute installierbare Kandidat muss technisch mindestens `1.0.3`
 und sichtbar `1.0003` tragen.
 
+
+
+### 2026-09-13 – Kurt/CE – Google-Kalenderzugriff auf notwendige Berechtigungen begrenzt
+
+Status: CODE FERTIG / GOOGLE-KONSOLE UND XAVER-WINDOWS-TEST OFFEN
+
+Kurts Google-Auth-Konsole zeigte bisher nur `calendar.events.owned`, während der
+Desktop-Code pauschal den Vollzugriff `https://www.googleapis.com/auth/calendar`
+anforderte. Dieser Widerspruch erschwerte die Veröffentlichung und verlangte mehr Zugriff
+als die tatsächlich vorhandene SerKal-Logik benötigt.
+
+Korrekturcommit auf `serkal-0.0.5-archiv-start`:
+`ba23a19b4ec006a2668f6643abbf6c3c9fe7bd48`.
+
+Der Desktop fordert nun genau diese drei getrennten Berechtigungen an:
+
+1. `calendar.calendarlist.readonly` – vorhandene Kalender ausschließlich auflisten, damit
+   der Kalender „SerKal“ automatisch wiedergefunden wird;
+2. `calendar.calendars` – den eigenen Kalender „SerKal“ anlegen, falls er noch fehlt;
+3. `calendar.events.owned` – Termine ausschließlich in Kalendern verwalten, deren
+   Eigentümer der angemeldete Nutzer ist.
+
+Der pauschale Scope `calendar` ist aus dem OAuth-Aufruf entfernt. Bereits gespeicherte
+Tokens werden nur weiterverwendet, wenn alle drei neuen Berechtigungen tatsächlich enthalten
+sind; andernfalls fordert SerKal einmalig eine neue Google-Zustimmung an.
+
+Prüfung:
+
+- Backend syntaktisch gültig;
+- Kalenderliste, Kalenderneuanlage und Ereignisverwaltung weiterhin vorhanden;
+- OAuth-Anforderung und Tokenprüfung verwenden übereinstimmend dieselben drei Scopes;
+- kein pauschaler `calendar`-Scope mehr im Desktop-Code.
+
+Nächste Schritte:
+
+1. In der Google Auth Platform unter „Datenzugriff“ dieselben drei Scopes eintragen;
+   `calendar.events.owned` ist laut Kurts Screenshot bereits vorhanden, ergänzen sind
+   `calendar.calendarlist.readonly` und `calendar.calendars`.
+2. Erst danach Xaver leer starten und den ersten echten Google-Kalendereintrag ausführen.
+   Google muss die neue Zustimmung zeigen; SerKal muss den Kalender automatisch finden oder
+   anlegen und den Termin speichern.
+3. Log prüfen: automatische Kalendersuche, gefundener beziehungsweise neu angelegter
+   SerKal-Kalender und erfolgreicher Termineintrag.
+4. Diese Quelländerung allein benötigt noch keine Installationsnummer. Der nächste daraus
+   gebaute installierbare Kandidat muss wegen der bereits vorbereiteten 1.0002 mindestens
+   technisch `1.0.3` und sichtbar `1.0003` tragen.
