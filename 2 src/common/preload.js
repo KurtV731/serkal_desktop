@@ -3,10 +3,13 @@
 const { contextBridge, ipcRenderer } = require("electron");
 
 /* Die Hauptanwendung uebergibt ihre package.json-Version als Startargument.
-   Fuer den sichtbaren Titel wird die technische technische SemVer fuer den sichtbaren Titel aufbereitet. */
+   Fuer den sichtbaren Titel wird die technische SemVer nach Kurts RC-Schema aufbereitet. */
 const SERKAL_VERSION_ARG = process.argv.find(value => value.startsWith("--serkal-version="));
 const SERKAL_VERSION_RAW = SERKAL_VERSION_ARG ? SERKAL_VERSION_ARG.slice("--serkal-version=".length) : "1.0.1";
-const SERKAL_VERSION = SERKAL_VERSION_RAW.replace(/\.0$/, "");
+const SERKAL_RC_VERSION = /^(\d+)\.0\.(\d+)$/.exec(SERKAL_VERSION_RAW);
+const SERKAL_VERSION = SERKAL_RC_VERSION && Number(SERKAL_RC_VERSION[2]) > 0
+    ? SERKAL_RC_VERSION[1] + "." + SERKAL_RC_VERSION[2].padStart(4, "0")
+    : SERKAL_VERSION_RAW.replace(/\.0$/, "");
 const SERKAL_CHANNEL = process.argv.includes("--serkal-installed") ? "" : "ENTWICKLUNG";
 const SERKAL_WINDOW_TITLE = "SERKAL Desktop " + SERKAL_VERSION + (SERKAL_CHANNEL ? " – " + SERKAL_CHANNEL : "");
 
