@@ -1116,3 +1116,35 @@ Sichttest:
 4. `Schließen` muss zurück zu Schritt 2 führen, ohne die Einrichtung abzuschließen.
 5. Erneut öffnen und `Ausführliche Hilfe öffnen` wählen; erst dann darf die
    Kalender-Hilfeseite im Browser erscheinen.
+
+
+### 2026-09-14 – Kurt/Installer – SerKal Desktop 1.0005 praktisch freigegeben
+
+Status: PRAKTISCH FREIGEGEBEN / FESTSCHREIBUNG DER GEPRÜFTEN EXE DURCH KURT OFFEN
+
+Kurt hat den Windows-Kandidaten sichtbar `1.0005`, technisch `1.0.5`, praktisch
+geprüft und zur Veröffentlichung als **SerKal Desktop Version 1** freigegeben.
+Die geprüfte Datei darf nicht erneut gebaut, verändert oder umnummeriert werden.
+
+Verbindliche Veröffentlichungsdaten:
+
+- öffentlicher Dateiname: `serkal-desktop.exe`;
+- Git-Tag nach erfolgreichem Upload: `v1.0.5`;
+- Release-Titel: **SerKal Desktop 1.0 – Build 1.0005**;
+- Quellstand des Builds: `150d9ce464176f616cf958e83618a1173568521a`;
+- enthaltene CE-Korrektur: `62e7d9ede3444f3c2d6cecb9e58c8a6c66ed6ea7`.
+
+Im Website-Repository wurden zwei Sicherungen vorbereitet:
+
+1. `RELEASE-1-0005-FESTSCHREIBEN.BAT` berechnet SHA-256, schreibt
+   `up/download/serkal-desktop.sha256`, übernimmt exakt die vorhandene geprüfte EXE
+   über Git LFS und pusht beides nach `main`.
+2. `PULL-PD.BAT` lädt nur hoch, wenn EXE und festgeschriebene SHA-256 exakt
+   übereinstimmen; bei fehlender oder abweichender Prüfsumme erfolgt kein Upload.
+
+Website-Commits: `6d5fc4b3b8c46f93335a0a1bbd9ad291579df887` und
+`9c8c9eb8c0e456a4397f9089e383f862bc01c633`.
+
+Noch offen: Kurt führt zuerst die Festschreibungsroutine und danach `PULL-PD.BAT`
+auf seinem Windows-Rechner aus. Erst nach bestätigtem Upload werden Tag und öffentlicher
+GitHub-Release gesetzt. Bis dahin ist noch nichts veröffentlicht.
