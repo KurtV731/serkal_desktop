@@ -1148,3 +1148,81 @@ Website-Commits: `6d5fc4b3b8c46f93335a0a1bbd9ad291579df887` und
 Noch offen: Kurt führt zuerst die Festschreibungsroutine und danach `PULL-PD.BAT`
 auf seinem Windows-Rechner aus. Erst nach bestätigtem Upload werden Tag und öffentlicher
 GitHub-Release gesetzt. Bis dahin ist noch nichts veröffentlicht.
+
+### 2026-09-16 – Kurt/CE – englischer Erstnutzertest durch VelcroFist
+
+Status: DRINGEND / ARBEITSPAKETE VERTEILT / WEITERE RÜCKMELDUNGEN AUSSTEHEND
+
+Kurts australischer Tester **VelcroFist** hat die öffentlich verfügbare Fassung
+SerKal Desktop 1.0005 erstmals vollständig als englischsprachiger Neunutzer geprüft.
+Seine Screenshots und Rückmeldung zeigen mehrere voneinander getrennte Punkte:
+
+1. Der Windows-Installer ist deutsch; zur Bedienung war eine externe Übersetzung nötig.
+2. Die TMDB-Registrierung und das Anlegen des persönlichen API-Keys waren für einen
+   Neunutzer schwer auffindbar.
+3. Nach erfolgreicher Suche war nicht klar, was als Nächstes zu tun ist und was
+   `Insert` praktisch bewirkt.
+4. Der Archivteil wurde erfolgreich gespeichert, der Google-Kalenderzugriff scheiterte
+   jedoch erwartbar, weil die Google-Anwendung noch im Testmodus steht und VelcroFists
+   Google-Konto noch nicht als Testnutzer freigegeben ist.
+5. Trotz englischer Oberfläche erschien die öffentliche Google-Kalender-Fehlermeldung
+   auf Deutsch.
+6. Nach `Insert` und anschließendem `Save` war nicht verständlich, was gespeichert
+   wurde und welchen weiteren Nutzen das SerKal-Archiv gegenüber einer reinen
+   TMDB-/IMDb-Abfrage bietet.
+7. `Episodes: 4` wurde nachvollziehbar als Zahl der Staffeln missverstanden. Gemeint
+   ist die Episodenzahl der aktuell ausgewählten Staffel; die englische Beschriftung
+   muss eindeutiger werden.
+
+Verbindliche Arbeitspakete:
+
+**CE / Desktop-Code**
+
+- sämtliche sichtbaren Erfolgs-, Teilfehler- und Fehlermeldungen des Eintrag-/Kalenderwegs
+  konsequent nach der gewählten Sprache DE/EN ausgeben; keine fest verdrahteten deutschen
+  Meldungen bei englischer Oberfläche;
+- Teilerfolg korrekt benennen: Wenn das Archiv gespeichert wurde, aber Google scheitert,
+  darf kein scheinbarer Gesamtfehler erscheinen. Archiv-Erfolg und Kalenderfehler müssen
+  getrennt und verständlich gemeldet werden;
+- englische Bedienführung im Eintragweg klarstellen, insbesondere die Wirkung von
+  `Insert` und die davon getrennte Funktion des unteren `Save`-Knopfes;
+- englische Beschriftung `Episodes` eindeutig auf die ausgewählte Staffel beziehen,
+  beispielsweise `Episodes in this season`;
+- nach erfolgreichem Eintrag verständlich erklären, dass die Staffel im SerKal-Archiv
+  geführt und ihre Termine – abhängig von der gewählten Kalenderart – verwaltet werden;
+- bestehende deutsche Bedienung dabei nicht verändern oder verschlechtern;
+- Quelltext- und Ablauftests für DE und EN ergänzen.
+
+**Installer-Chatty**
+
+- Installer vollständig zweisprachig ausführen: Englisch bei englischer Windows-Umgebung
+  beziehungsweise nachvollziehbare Sprachauswahl;
+- keine deutsche Installationsführung für einen englischen Erstnutzer;
+- veröffentlichte 1.0005 niemals überschreiben oder unter gleicher Versionsnummer neu bauen;
+- jeder neue installierbare Korrekturstand trägt gemäß Versionsregel mindestens technisch
+  `1.0.6` und sichtbar `1.0006`;
+- erst nach CE-Freigabe einen neuen nicht veröffentlichten Windows-Testkandidaten bauen.
+
+**Website-Chatty**
+
+- englische TMDB-Hilfe aus Sicht eines vollständigen Neunutzers prüfen: Konto anlegen,
+  API-Bereich finden, persönlichen API-Key erzeugen und in SerKal verwenden;
+- englische Google-Kalender-Hilfe auf den Test-/Freigabestatus abstimmen;
+- eine kurze englische Erste-Schritte-Erklärung vorsehen: suchen, Treffer wählen,
+  Serie hinzufügen, Archivwirkung und Kalenderwirkung;
+- Links und Seiten praktisch auf Englisch prüfen; Ergebnis und Commit hier zurückmelden.
+
+**Kurt / Google-Testzugang**
+
+- VelcroFist um die Google-Adresse bitten, die er für SerKal verwenden möchte;
+- diese Adresse anschließend in der Google Auth Platform als Testnutzer eintragen;
+- dies ist die schnelle Testfreigabe innerhalb der bestehenden Obergrenze von 100
+  Testnutzern und ersetzt nicht die spätere öffentliche Google-Prüfung;
+- `switch-user.bat` beziehungsweise `switch-player.bat` nicht an externe Tester
+  verteilen: Diese Dateien ändern nur lokale Testprofile und lösen keine
+  Google-Testnutzerfreigabe.
+
+Weitere Posts von VelcroFist werden von Kurt an den CE weitergeleitet und als zusammengehöriger
+englischer Erstnutzertest ausgewertet. Vor Abschluss dieser Punkte keine korrigierte Fassung
+als öffentliches Release ausgeben.
+
