@@ -1226,3 +1226,41 @@ Weitere Posts von VelcroFist werden von Kurt an den CE weitergeleitet und als zu
 englischer Erstnutzertest ausgewertet. Vor Abschluss dieser Punkte keine korrigierte Fassung
 als öffentliches Release ausgeben.
 
+### 2026-09-16 – Website-Chatty – englische Erstnutzerhilfe nach VelcroFist-Test korrigiert
+
+Status: WEBSITE-ARBEITSPAKET ERLEDIGT / DREI COMMITS AUF `serkal-pages/main`
+
+Die Rückmeldung des englischsprachigen Erstnutzers wurde gegen die tatsächlich
+veröffentlichten Hilfeseiten geprüft. Dabei zeigte sich neben fehlender Bedienführung
+ein konkreter Altstand: `google-calendar-help.html` erklärte noch vier frühere
+Kalenderoptionen, obwohl die Ersteinrichtung inzwischen nur noch Google Kalender oder
+den lokalen Betrieb ohne Kalender anbietet.
+
+Umgesetzt:
+
+1. `help-en.html` erklärt nun den vollständigen ersten Arbeitsweg: Serie suchen,
+   Treffer und Staffel wählen, mit `Insert` in das lokale SerKal-Archiv übernehmen,
+   Archivwirkung prüfen und die getrennte Bedeutung des unteren `Save`-Knopfes
+   verstehen. Auch ein Kalender-Teilfehler wird ausdrücklich vom erfolgreichen lokalen
+   Archiveintrag getrennt erklärt.
+2. `tmdb-help.html` setzt kein bereits vorhandenes TMDB-Konto mehr voraus. Die Seite
+   führt nun direkt zur Kontoerstellung, nennt E-Mail-/Mensch-Verifizierung,
+   führt anschließend direkt zu den API-Einstellungen und von dort zum persönlichen
+   API-Key für SerKal.
+3. `google-calendar-help.html` beschreibt nur noch die beiden tatsächlich vorhandenen
+   Auswahlmöglichkeiten. Die Seite nennt offen den derzeitigen Google-Test- und
+   Verifizierungsstatus, erklärt den Betrieb ohne Kalender und trennt lokales Archiv
+   und Google-Kalendereintrag verständlich.
+4. Alle internen Ziele der drei geänderten Seiten wurden im Repository praktisch
+   auf Vorhandensein geprüft; kein fehlendes internes Ziel.
+
+Website-Commits:
+
+- `4c95a1780f6e55baba51827772e8ef14e3a1bad5` – englische Erste Schritte und Archivwirkung;
+- `ede32512b1fe57401b368f86c50ea163127f6ab8` – TMDB-Konto bis API-Key;
+- `0f208bc0d21d8d892399d06d65d5693e5ca82635` – aktuelle Kalenderwahl und Google-Teststatus.
+
+Abgrenzung: Die deutschsprachige Installerführung, deutschsprachige Desktop-Fehlermeldung,
+Teilerfolgsmeldung und Beschriftung `Episodes in this season` bleiben gemäß verteiltem
+Arbeitspaket bei Installer-Chatty beziehungsweise CE.
+
