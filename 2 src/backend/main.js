@@ -2891,8 +2891,38 @@ async function maintenanceRun_() {
     }
 }
 
-function googleCalendarUrl_(_calendarId) {
-    return "https://calendar.google.com/calendar/u/0/r";
+function serkalLanguage_(lang) {
+    return String(lang || "de").toLowerCase().startsWith("en") ? "en" : "de";
+}
+
+function googleCalendarUrl_(_calendarId, lang) {
+    const url = new URL("https://calendar.google.com/calendar/u/0/r");
+    // Google Calendar understands `hl`; keep the external page aligned with SerKal.
+    url.searchParams.set("hl", serkalLanguage_(lang));
+    return url.toString();
+}
+
+function tmdbCreateUrl_(lang) {
+    const locale = serkalLanguage_(lang) === "en" ? "en-US" : "de-DE";
+    return "https://www.themoviedb.org/settings/api?language=" + encodeURIComponent(locale);
+}
+
+function tmdbTestResult_(result, lang) {
+    const en = serkalLanguage_(lang) === "en";
+    if (result && result.ok) return { ok:true, message:en ? "TMDB connection works." : "TMDB-Verbindung funktioniert." };
+    const code = String(result && result.code || "TMDB_HTTP");
+    const messages = en ? {
+        TMDB_KEY_MISSING:"TMDB API key is missing.",
+        TMDB_KEY_INVALID:"This TMDB API key does not work. Please check it.",
+        NETWORK:"Unable to connect to TMDB. Please check your internet connection.",
+        TMDB_HTTP:"The TMDB request failed. Please try again."
+    } : {
+        TMDB_KEY_MISSING:"TMDB-API-Key fehlt.",
+        TMDB_KEY_INVALID:"Dieser TMDB-API-Key funktioniert nicht. Bitte prüfe ihn.",
+        NETWORK:"Keine Verbindung zu TMDB. Bitte Internetverbindung prüfen.",
+        TMDB_HTTP:"Die TMDB-Anfrage ist fehlgeschlagen. Bitte erneut versuchen."
+    };
+    return Object.assign({}, result || {}, { ok:false, code, message:messages[code] || messages.TMDB_HTTP });
 }
 
 function installIpc_() {
@@ -2900,11 +2930,11 @@ function installIpc_() {
     ipcMain.handle("serkal:settings:save", (_event, settings) => saveSettingsPatch_(settings));
     ipcMain.handle("serkal:setup:commit", (_event, payload) => commitFirstSetup_(payload));
     ipcMain.handle("serkal:tmdb:status", () => ({ configured:!!readTmdbKey_() }));
-    ipcMain.handle("serkal:tmdb:testKey", async (_event, apiKey) => {
+    ipcMain.handle("serkal:tmdb:testKey", async (_event, apiKey, lang) => {
         const key = String(apiKey || "").trim();
-        if (!key) return { ok:false, code:"TMDB_KEY_MISSING", message:"TMDB API-Key fehlt." };
+        if (!key) return tmdbTestResult_({ ok:false, code:"TMDB_KEY_MISSING" }, lang);
         const res = await tmdbRequest_("/configuration", {}, key);
-        return res.ok ? { ok:true, message:"TMDB-Verbindung funktioniert." } : res;
+        return tmdbTestResult_(res, lang);
     });
     ipcMain.handle("serkal:tmdb:saveKey", (_event, apiKey) => writeTmdbKey_(apiKey));
     ipcMain.handle("serkal:tmdb:test", async () => {
@@ -2992,19 +3022,19 @@ function installIpc_() {
         await shell.openExternal(url);
         return { ok:true, url };
     });
-    ipcMain.handle("serkal:help:tmdbCreate", async () => {
-        const url = "https://www.themoviedb.org/settings/api";
+    ipcMain.handle("serkal:help:tmdbCreate", async (_event, lang) => {
+        const url = tmdbCreateUrl_(lang);
         await shell.openExternal(url);
         return { ok:true, url };
     });
-    ipcMain.handle("serkal:calendar:open", async (_event, settingsFromUi) => {
+    ipcMain.handle("serkal:calendar:open", async (_event, settingsFromUi, lang) => {
         const settings = settingsFromUi ? normalizeSettings_(settingsFromUi) : readSettings_();
         let mode = settings.calendar.mode;
         if (mode === "auto") mode = "ics";
         if (mode === "none") return { ok:false, action:"none", message:"Kalender ist in SERKAL deaktiviert." };
         if (mode === "ics") return { ok:false, action:"ics", message:"ICS ist ausgewaehlt. Der eigentliche ICS-Export folgt in einer spaeteren SERKAL-Version." };
         if (mode === "google") {
-            const url = googleCalendarUrl_(settings.calendar.googleCalendarId);
+            const url = googleCalendarUrl_(settings.calendar.googleCalendarId, lang);
             await shell.openExternal(url);
             return { ok:true, action:"google", url };
         }

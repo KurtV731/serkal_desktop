@@ -42,7 +42,7 @@ contextBridge.exposeInMainWorld("serkal", {
     },
     tmdb:{
         status:()=>ipcRenderer.invoke("serkal:tmdb:status"),
-        testKey:(apiKey)=>ipcRenderer.invoke("serkal:tmdb:testKey",apiKey),
+        testKey:(apiKey,lang)=>ipcRenderer.invoke("serkal:tmdb:testKey",apiKey,lang||"de"),
         saveKey:(apiKey)=>ipcRenderer.invoke("serkal:tmdb:saveKey",apiKey),
         test:()=>ipcRenderer.invoke("serkal:tmdb:test"),
         searchTv:(query,lang,options)=>ipcRenderer.invoke("serkal:tmdb:searchTv",query,lang,options||{}),
@@ -63,10 +63,10 @@ contextBridge.exposeInMainWorld("serkal", {
     help:{
         google:(lang)=>ipcRenderer.invoke("serkal:help:google",lang||"de"),
         tmdb:(lang)=>ipcRenderer.invoke("serkal:help:tmdb",lang||"de"),
-        tmdbCreate:()=>ipcRenderer.invoke("serkal:help:tmdbCreate")
+        tmdbCreate:(lang)=>ipcRenderer.invoke("serkal:help:tmdbCreate",lang||"de")
     },
     calendar:{
-        open:(settings)=>ipcRenderer.invoke("serkal:calendar:open",settings),
+        open:(settings,lang)=>ipcRenderer.invoke("serkal:calendar:open",settings,lang||"de"),
         insertSeason:(payload)=>ipcRenderer.invoke("serkal:calendar:insertSeason",payload||{}),
         createIcs:(payload)=>ipcRenderer.invoke("serkal:calendar:createIcs",payload||{})
     },
