@@ -1,0 +1,33 @@
+plugins {
+    id "com.android.application"
+}
+
+android {
+    namespace "de.serkal.android.training"
+    compileSdk 35
+
+    defaultConfig {
+        applicationId "de.serkal.android.training"
+        minSdk 26
+        targetSdk 35
+        versionCode 1
+        versionName "0.0.1"
+    }
+
+    signingConfigs {
+        training {
+            storeFile file("../keystore/serkal-training.keystore")
+            storePassword "serkal-training-only"
+            keyAlias "serkal-training"
+            keyPassword "serkal-training-only"
+        }
+    }
+
+    buildTypes {
+        debug {
+            signingConfig signingConfigs.training
+            applicationIdSuffix ""
+            versionNameSuffix ""
+        }
+    }
+}
