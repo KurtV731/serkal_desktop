@@ -5,7 +5,9 @@ const path = require("node:path");
 const vm = require("node:vm");
 
 const testRoot = fs.mkdtempSync(path.join(os.tmpdir(),"serkal-archive-"));
-const userData = path.join(testRoot,"userData");
+const appData = path.join(testRoot,"appData");
+const userData = path.join(appData,"SerKal");
+const documents = path.join(testRoot,"Documents");
 const archivePath = path.join(testRoot,"archive");
 fs.mkdirSync(userData,{recursive:true});
 fs.mkdirSync(archivePath,{recursive:true});
@@ -17,14 +19,27 @@ fs.writeFileSync(path.join(userData,"settings.json"),JSON.stringify({
 
 const ipcMain = { handle(){} };
 const app = {
-    getPath(name) { assert.equal(name,"userData"); return userData; },
+    isPackaged:false,
+    getVersion(){ return "1.0.5"; },
+    getAppPath(){ return testRoot; },
+    getPath(name) {
+        if (name === "appData") return appData;
+        if (name === "userData") return userData;
+        if (name === "documents") return documents;
+        throw new Error("unexpected app path: " + name);
+    },
+    setPath(){},
     whenReady() { return { then(){} }; },
-    on(){}, quit(){}
+    on(){}, quit(){},
+    requestSingleInstanceLock(){ return true; },
+    setAsDefaultProtocolClient(){ return true; },
+    removeAsDefaultProtocolClient(){ return true; }
 };
 const context = {
     console, URL, fetch:async()=>{ throw new Error("fetch not used"); },
     require(id) {
         if (id === "electron") return {app,BrowserWindow:function(){},ipcMain,shell:{openExternal:async()=>{}}};
+        if (id === "electron-squirrel-startup") return false;
         return require(id);
     },
     __dirname:path.resolve("2 src/backend"),
@@ -33,8 +48,9 @@ const context = {
     clearTimeout
 };
 vm.createContext(context);
-const mainSource = fs.readFileSync(path.resolve("2 src/backend/main.js"),"utf8") +
-    "\nglobalThis.__archiveTest={archiveInsert_,archiveLoad_};";
+const mainSource = "(function(){\n" +
+    fs.readFileSync(path.resolve("2 src/backend/main.js"),"utf8") +
+    "\nglobalThis.__archiveTest={archiveInsert_,archiveLoad_};\n})();";
 vm.runInContext(mainSource,context,{filename:"main.js"});
 
 const api = context.__archiveTest;

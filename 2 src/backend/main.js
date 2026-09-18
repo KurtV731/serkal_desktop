@@ -3142,11 +3142,13 @@ function installDesktopTmdbBridge_(hauptfenster) {
             const calendarRes = await window.serkal.calendar.insertSeason(payload || {});
             if (!calendarRes || calendarRes.ok === false) {
               success({
-                ok:false,
+                ok:true,
+                partial:true,
                 archiveSaved:true,
+                calendarMode:'google',
+                calendar:calendarRes || {ok:false},
                 code:String(calendarRes && calendarRes.code || 'GOOGLE_CALENDAR_UNAVAILABLE'),
-                helpUrl:String(calendarRes && calendarRes.helpUrl || 'https://serkal.de/hilfe.html'),
-                message:'Archiv wurde gespeichert. ' + String(calendarRes && calendarRes.message || 'SerKal konnte keine Verbindung zum Google Kalender herstellen.')
+                helpUrl:String(calendarRes && calendarRes.helpUrl || '')
               });
               return;
             }

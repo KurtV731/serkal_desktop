@@ -2010,6 +2010,7 @@
       </div>
     </section>
   </div>
+  <script src="../common/entry-flow.js"></script>
   <script>
   (function(){
     var overlay=document.getElementById('skCalendarSetupOverlay');
@@ -3718,7 +3719,7 @@ const I18N = {
     STATUS_NO_RESULTS: 'Keine Treffer.',
     NO_HIT_TITLE: 'KEIN TREFFER GEFUNDEN',
     NO_HIT_TIP: 'Tippfehler?',
-    STATUS_RESULTS_LOADED: 'Treffer geladen.',
+    STATUS_RESULTS_LOADED: 'Treffer geladen. Mit „Eintrag“ wird die gewählte Staffel ins SerKal-Archiv übernommen.',
     STATUS_INSERTING: 'Eintrag…',
     STATUS_INSERT_DONE: 'Eintrag fertig.',
     ERR_TITLE_MISSING: 'Titel fehlt.',
@@ -3747,7 +3748,7 @@ const I18N = {
     TT_YEAR_OPT: 'Optional: Jahr (YYYY) – schränkt Treffer ein',
     TT_SEASON_OPT: 'Optional: Staffelnummer – erzwingt Sxx',
     TT_APPLY: 'Übernehmen',
-    TT_INSERT: 'Eintragen',
+    TT_INSERT: 'Gewählte Staffel ins SerKal-Archiv eintragen und – falls aktiviert – Kalendertermine verwalten',
     BTN_BUSY: '⏳',
     BTN_APPLY: '✓ Übernehmen',
     BTN_INSERT: '📅 Eintrag',
@@ -3762,6 +3763,7 @@ const I18N = {
     BTN_ANALYSE_DOCK: '🧠 Analyse',
     BTN_LOG_DOCK: '📜 Log',
     BTN_SAVE_DOCK: '💾 Speichern',
+    TT_SAVE_DOCK: 'Nachträgliche Änderungen an Archivnotizen und Status speichern',
     DIRTY_PENDING: 'Ungespeicherte Änderungen ({n})',
     DIRTY_CLEAN: 'Alles gespeichert',
     DIRTY_SAVING: 'Speichere Änderungen …',
@@ -3819,7 +3821,7 @@ const I18N = {
     STATUS_NO_RESULTS: 'No results.',
     NO_HIT_TITLE: 'NO MATCH FOUND',
     NO_HIT_TIP: 'Typos?',
-    STATUS_RESULTS_LOADED: 'Results loaded.',
+    STATUS_RESULTS_LOADED: 'Results loaded. Choose Insert to add this season to your SerKal archive.',
     STATUS_INSERTING: 'Inserting …',
     STATUS_INSERT_DONE: 'Insert finished.',
     ERR_TITLE_MISSING: 'Missing title.',
@@ -3827,7 +3829,7 @@ const I18N = {
     PV_YEAR: "Year",
     PV_SEASON: "Season",
     PV_START: "Start",
-    PV_EPISODES: "Episodes",
+    PV_EPISODES: "Episodes in this season",
     PV_DATES: "Dates",
     STATUS_SEARCHING: 'Searching …',
     STATUS_LOADING_DETAILS: 'Loading details …',
@@ -3850,10 +3852,10 @@ const I18N = {
     TT_YEAR_OPT: 'Optional: year (YYYY) – narrows results',
     TT_SEASON_OPT: 'Optional: season number – forces Sxx',
     TT_APPLY: 'Apply',
-    TT_INSERT: 'Insert',
+    TT_INSERT: 'Add the selected season to the SerKal archive and manage calendar dates when enabled',
     BTN_BUSY:'⏳',
     BTN_APPLY: '✓ Apply',
-    BTN_INSERT: '📅 Insert',
+    BTN_INSERT: '📅 Insert into archive',
     DETAILS_HINT_DASH: '—',
     BTN_SORT_DATE: 'Date',
     BTN_SORT_STATUS: 'Status',
@@ -3864,7 +3866,8 @@ const I18N = {
     BTN_CALENDAR_DOCK: '📅 Calendar',
     BTN_ANALYSE_DOCK: '🧠 Analysis',
     BTN_LOG_DOCK: '📜 Log',
-    BTN_SAVE_DOCK: '💾 Save',
+    BTN_SAVE_DOCK: '💾 Save edits',
+    TT_SAVE_DOCK: 'Save later edits to archive notes and status; Insert adds a new season',
     DIRTY_PENDING: 'Unsaved changes ({n})',
     DIRTY_CLEAN: 'Everything saved',
     DIRTY_SAVING: 'Saving changes …',
@@ -4998,7 +5001,7 @@ function refreshTexts_() {
           }
           if (btnSaveDock) {
             btnSaveDock.textContent = t('BTN_SAVE_DOCK');
-            btnSaveDock.title = t('BTN_SAVE_DOCK');
+            btnSaveDock.title = t('TT_SAVE_DOCK');
           }
           if (document.getElementById('logPanelTitle')) document.getElementById('logPanelTitle').textContent = t('LOG_PANEL_TITLE');
           if (btnLogRefresh) btnLogRefresh.textContent = t('LOG_REFRESH');
@@ -7223,7 +7226,7 @@ function nextResult() {
           uiSetBusy_(false);
           state.phase='searched';
           updateMainUi_();
-          uiStatus('Eintrag blockiert (Preview unvollständig – bitte Treffer neu wählen).', {spinner:false, kind:'warn', sound:true});
+          uiStatus(window.SerKalEntryFlow.text(LANG, 'previewIncomplete'), {spinner:false, kind:'warn', sound:true});
           try { uiLogSheet('G2 block insert', { seasonNumber: cur.seasonNumber || cur.staffelNummer || null, seasonLabel: cur.seasonLabel || cur.staffelLabel || null, tmdbId: cur.tmdbId || cur.id || null }); } catch (_eBlock) {}
           return;
         }
@@ -7240,8 +7243,9 @@ function nextResult() {
           uiSetBusy_(false);
           state.phase='searched';
           updateMainUi_();
-          setInfoBox_(true, 'Info', 'Achtung: Platzhalter / unklare Datierung (' + (df || 'ANNOUNCED') + '). Diese Staffel wird NICHT in den Kalender eingetragen.');
-          uiStatus('Eintrag blockiert (unklare Staffel).', {spinner:false, kind:'warn', sound:true});
+          setInfoBox_(true, window.SerKalEntryFlow.text(LANG, 'unclearSeasonTitle'),
+            window.SerKalEntryFlow.text(LANG, 'unclearSeasonBody') + ' (' + (df || 'ANNOUNCED') + ')');
+          uiStatus(window.SerKalEntryFlow.text(LANG, 'unclearSeasonStatus'), {spinner:false, kind:'warn', sound:true});
           return;
         }
       } catch(_eDf) {}
@@ -7256,6 +7260,7 @@ function nextResult() {
         try {
           cur.jahrOverride = getYearOverride_();
           cur.staffelOverride = getSeasonOverride_();
+          cur.uiLang = String(LANG || 'de').toLowerCase();
         } catch(_e) {}
 
         // Unveränderliche Kopie für den späteren ICS-Export. Der UI-Reset darf
@@ -7272,12 +7277,12 @@ function nextResult() {
 
             // Apps Script kann fachliche Fehler als normales Rückgabeobjekt liefern.
             // Diese dürfen nicht fälschlich als erfolgreicher Kalendereintrag erscheinen.
-            if (res && res.ok === false) {
+            if (res && res.ok === false && !res.archiveSaved) {
               state.insertLock = false;
               state.phase = 'searched';
               updateMainUi_();
               uiSetBusy_(false);
-              var msg = String(res.message || res.reason || 'Eintrag fehlgeschlagen.');
+              var msg = window.SerKalEntryFlow.outcomeText(LANG, res) || window.SerKalEntryFlow.text(LANG, 'insertFailed');
               var helpUrl = String(res && res.helpUrl || '');
               if (helpUrl || String(res && res.code || '') === 'GOOGLE_CALENDAR_UNAVAILABLE') {
                 helpUrl = (String((typeof LANG !== 'undefined' && LANG) ? LANG : 'de').toLowerCase() === 'en')
@@ -7299,10 +7304,21 @@ function nextResult() {
             uiStatus(t('STATUS_INSERT_DONE'), {spinner:false, kind:'info'});
             try { uiLogAction_('Eintrag abgeschlossen', uiActionEntryInfo_(cur)); } catch (_eAction) {}
             uiSetReadyState_({ clearTitle: true, clearDetails: true });
-            if (res && res.calendarMode === 'google') {
+            var entryOutcome = window.SerKalEntryFlow.outcome(res);
+            if (entryOutcome === 'archiveCalendarPartial') {
+              var partialHelpUrl = (String(LANG || 'de').toLowerCase() === 'en')
+                ? 'https://serkal.de/google-calendar-help.html'
+                : 'https://serkal.de/google-kalender-hilfe.html';
+              uiStatus(window.SerKalEntryFlow.outcomeText(LANG, res),
+                {spinner:false, kind:'warn', sound:true, helpUrl:partialHelpUrl});
+              try { uiLogAction_('Archiv gespeichert, Kalender fehlgeschlagen', {
+                code:String(res && res.code || ''),
+                calendarMessage:String(res && res.calendar && res.calendar.message || '')
+              }); } catch (_ePartialLog) {}
+            } else if (res && res.calendarMode === 'google') {
               var cal = res.calendar || {};
               if (cal.skipped === true && cal.reason === 'past_season') {
-                uiStatus('Archiv gespeichert. Kein Kalendereintrag: Die letzte Episode liegt vor dem aktuellen Jahr.',
+                uiStatus(window.SerKalEntryFlow.outcomeText(LANG, res),
                   {spinner:false, kind:'info'});
                 try { uiLogAction_('Kalender nach Originalregel übersprungen', {
                   grund:'past_season',
@@ -7310,8 +7326,7 @@ function nextResult() {
                   aktuellesJahr:Number(cal.currentYear || 0)
                 }); } catch (_eGoogleSkipLog) {}
               } else {
-                uiStatus('Archiv und Google Kalender gespeichert (' +
-                  Number(cal.created || 0) + ' neu, ' + Number(cal.updated || 0) + ' aktualisiert).',
+                uiStatus(window.SerKalEntryFlow.outcomeText(LANG, res),
                   {spinner:false, kind:'info'});
                 try { uiLogAction_('Google-Kalender direkt gespeichert', {
                   erstellt:Number(cal.created || 0),
@@ -7322,7 +7337,7 @@ function nextResult() {
             } else if (res && (res.calendarMode === 'ics' || res.calendarMode === 'auto')) {
               offerIcsDownloadAfterInsert_(icsPayload);
             } else {
-              uiStatus('Archiv gespeichert. Kalender wurde auf Wunsch nicht verwendet.',
+              uiStatus(window.SerKalEntryFlow.outcomeText(LANG, res),
                 {spinner:false, kind:'info'});
               try { uiLogAction_('Archiv ohne Kalender gespeichert', {
                 kalenderModus:String(res && res.calendarMode || 'none')
@@ -7336,7 +7351,7 @@ function nextResult() {
             updateMainUi_();
             uiSetBusy_(false);
             uiStatus(t('ERR_INSERT_FAILED'), {spinner:false, kind:'error', sound:true});
-            setHint(searchHint, 'Eintrag fehlgeschlagen.');
+            setHint(searchHint, window.SerKalEntryFlow.text(LANG, 'insertFailed'));
             try { uiLogAction_('Eintrag fehlgeschlagen', { message: String((err && (err.message || err)) || '') }); } catch (_eAction) {}
           })
           .verarbeiteTmdbAuswahl(cur);
@@ -7344,7 +7359,7 @@ function nextResult() {
         state.insertLock = false;
         state.phase='searched'; updateMainUi_(); uiSetBusy_(false);
             uiStatus(t('ERR_INSERT_FAILED'), {spinner:false, kind:'error', sound:true});
-            setHint(searchHint, 'Eintrag fehlgeschlagen.');
+            setHint(searchHint, window.SerKalEntryFlow.text(LANG, 'insertFailed'));
       }
     }
 
@@ -7359,16 +7374,16 @@ function nextResult() {
       showSerKalDialog_({
         kind: 'question',
         icon: '📅',
-        title: 'Verarbeitung abgeschlossen',
-        message: 'Möchten Sie zusätzlich eine ICS-Datei für Outlook, Apple Kalender oder andere Kalender speichern?',
-        confirmText: 'ICS herunterladen',
-        cancelText: 'Nein, danke',
+        title: window.SerKalEntryFlow.text(LANG, 'icsTitle'),
+        message: window.SerKalEntryFlow.text(LANG, 'icsQuestion'),
+        confirmText: window.SerKalEntryFlow.text(LANG, 'icsConfirm'),
+        cancelText: window.SerKalEntryFlow.text(LANG, 'icsCancel'),
         onConfirm: function() {
-          uiStatus('ICS-Datei wird erstellt …', {spinner:true, kind:'info'});
+          uiStatus(window.SerKalEntryFlow.text(LANG, 'icsCreating'), {spinner:true, kind:'info'});
           google.script.run
         .withSuccessHandler(function(res) {
           if (!res || res.ok === false || !res.base64) {
-            var msg = String(res && (res.message || res.reason) || 'ICS-Datei konnte nicht erstellt werden.');
+            var msg = String(res && (res.message || res.reason) || window.SerKalEntryFlow.text(LANG, 'icsCreateFailed'));
             uiStatus(msg, {spinner:false, kind:'error', sound:true});
             try { uiLogAction_('ICS-Erzeugung fehlgeschlagen', { message: msg }); } catch (_eAction) {}
             return;
@@ -7376,15 +7391,15 @@ function nextResult() {
 
           try {
             downloadIcsBase64_(res.fileName || 'SerKal.ics', res.base64, res.mimeType || 'text/calendar;charset=utf-8');
-            uiStatus('ICS-Datei wurde zum Speichern bereitgestellt.', {spinner:false, kind:'info'});
+            uiStatus(window.SerKalEntryFlow.text(LANG, 'icsReady'), {spinner:false, kind:'info'});
             try { uiLogAction_('ICS-Download gestartet', { fileName: res.fileName || '', events: res.events || 0 }); } catch (_eAction) {}
           } catch (e) {
-            uiStatus('ICS-Download fehlgeschlagen.', {spinner:false, kind:'error', sound:true});
+            uiStatus(window.SerKalEntryFlow.text(LANG, 'icsDownloadFailed'), {spinner:false, kind:'error', sound:true});
             try { uiLogAction_('ICS-Download fehlgeschlagen', { message: String(e && (e.message || e) || '') }); } catch (_eAction) {}
           }
         })
         .withFailureHandler(function(err) {
-          var msg = String((err && (err.message || err)) || 'ICS-Erzeugung fehlgeschlagen.');
+          var msg = String((err && (err.message || err)) || window.SerKalEntryFlow.text(LANG, 'icsCreateFailed'));
           uiStatus(msg, {spinner:false, kind:'error', sound:true});
           try { uiLogAction_('ICS-Aufruf fehlgeschlagen', { message: msg }); } catch (_eAction) {}
         })

@@ -7,7 +7,8 @@
   "scripts": {
     "start": "electron-forge start",
     "package": "electron-forge package",
-    "make": "electron-forge make"
+    "make": "electron-forge make",
+    "test": "node \"6 tests/archive-smoke.test.js\" && node \"6 tests/maintenance-smoke.test.js\" && node \"6 tests/entry-flow-i18n.test.js\""
   },
   "author": "Kurt Vogelsaenger",
   "private": true,
