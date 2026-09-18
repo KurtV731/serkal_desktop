@@ -1340,3 +1340,57 @@ Abgrenzung: Dieser Branch verändert weder SerKal Desktop 1.0005/1.0006 noch Web
 öffentlichen Download. Installer- und Website-Chatty haben daraus keinen Arbeitsauftrag.
 Eine spätere echte Android-App erhält eine andere Paketkennung und einen privaten
 Veröffentlichungsschlüssel.
+
+### 2026-09-18 – Kurt/CE – gemeinsame Sprache für TMDB- und Kalenderauswahl
+
+Status: CE-CODE FERTIG UND FREIGEGEBEN / INSTALLER 1.0007 DARF VORBEREITET WERDEN
+
+Kurts Arbeitsauftrag wurde auf dem verbindlichen Fachbranch
+`serkal-0.0.5-archiv-start` umgesetzt.
+
+CE-Freigabecommit:
+`24fae16fce21c2b9ec0904841a80e88060ef2ce1`.
+
+Umgesetzt:
+
+1. Die zusammenhängende Ersteinrichtung zeigt sowohl im TMDB-Schritt als auch im
+   Kalender-Schritt einen gut sichtbaren Umschalter `DE / EN`.
+2. Beide Schalter ändern ausdrücklich keine getrennten Teilsprachen, sondern denselben
+   dauerhaft gespeicherten globalen SerKal-Sprachzustand `serkal_lang`.
+3. Eine Umschaltung wirkt sofort auf Einrichtungsassistent und Hauptoberfläche und bleibt
+   nach dem Neustart erhalten.
+4. TMDB-Suche, TMDB-Key-Prüfung, TMDB-Key-Seite und TMDB-Hilfe erhalten dieselbe Sprache.
+5. Kalenderauswahl, Kalenderhilfe und die geöffnete Google-Kalender-Webseite erhalten
+   dieselbe Sprache; für Google Kalender wird der passende `hl`-Parameter gesetzt.
+6. TMDB- und Kalenderdialoge einschließlich Prüfen-, Speichern- und Fehlermeldungen sind
+   in der Ersteinrichtung Deutsch/Englisch verdrahtet.
+7. Die vorhandene Hauptschaltfläche für DE/EN bleibt erhalten und verwendet denselben
+   Zustand. Es wurde kein zweites konkurrierendes Sprachsystem eingeführt.
+8. Kommentare im Quelltext kennzeichnen die gemeinsame Sprachschnittstelle und die
+   Weitergabe an externe Dienste.
+
+Prüfungen:
+
+- Backend und Preload syntaktisch gültig;
+- alle drei eingebetteten Frontend-Skripte syntaktisch gültig;
+- Archiv-Smoke-Test bestanden;
+- Wartungs-Smoke-Test bestanden;
+- DE/EN-Eintragweg-Test bestanden;
+- neuer Test der globalen Sprachweitergabe bestanden;
+- `git diff --check` ohne Befund.
+
+Auftrag und Freigabe an Installer-Chatty:
+
+- Die frühere Planung für 1.0006 ist durch diesen zusätzlichen fachlichen Stand überholt.
+- Grundlage ist der CE-Endstand einschließlich
+  `24fae16fce21c2b9ec0904841a80e88060ef2ce1`.
+- Der nächste nicht veröffentlichte Windows-Testkandidat trägt technisch `1.0.7` und
+  sichtbar `SERKAL Desktop 1.0007`.
+- Installerführung vollständig Deutsch/Englisch ausführen; keine deutsche Zwangsführung
+  für englische Windows-/Benutzerumgebung.
+- Nach dem Build beide Erstnutzerwege praktisch prüfen: Start auf Deutsch, im TMDB-Schritt
+  auf Englisch wechseln; sowie Start auf Englisch, im Kalender-Schritt auf Deutsch wechseln.
+  Hauptoberfläche, Hilfeseite, TMDB-Ziel und Google-Kalender müssen der zuletzt gewählten
+  Sprache folgen.
+- Die veröffentlichte 1.0005 bleibt unverändert.
+- Keine öffentliche Veröffentlichung vor Kurts Sichtprüfung und ausdrücklicher Freigabe.
