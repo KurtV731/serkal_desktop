@@ -1315,3 +1315,28 @@ Auftrag und Freigabe an Installer-Chatty:
 - nach dem Build DE- und EN-Eintragweg praktisch prüfen, insbesondere den Teilerfolg
   „Archiv gespeichert / Google Kalender fehlgeschlagen“;
 - keine öffentliche Veröffentlichung vor Kurts Sichtprüfung und ausdrücklicher Freigabe.
+
+### 2026-09-18 – Kurt/CE – Android-Training 0.0.1 zum Installationsüben
+
+Status: GETRENNTER TRAININGSBRANCH FERTIG / APK GEBAUT / PIXEL-8-TEST DURCH KURT OFFEN
+
+Auf Kurts Wunsch wurde bewusst noch keine vollständige Android-Portierung begonnen, sondern
+eine kleine Übungs-App für den erstmaligen APK-Ablauf erstellt.
+
+- Branch: `android-training-0.0.1`
+- Quellcommit: `83fc27e070e83d369534d7c84e750dff85bf75d8`
+- Paketkennung: `de.serkal.android.training`
+- sichtbare Version: `SerKal Android Training 0.0.1`
+- Mindestversion: Android 8; Zielversion Android 15 / API 35
+- keine Internet-, TMDB-, Kalender- oder Dateiberechtigung
+- Deutsch/Englisch umschaltbar
+- ein frei gewählter Testserientitel kann lokal gespeichert, nach einem Neustart geprüft
+  und wieder entfernt werden
+- eigener dauerhafter Trainingsschlüssel, damit später 0.0.2 über 0.0.1 installiert und
+  der Erhalt des Testeintrags praktisch geprüft werden kann
+- automatischer GitHub-Build erfolgreich; APK erzeugt
+
+Abgrenzung: Dieser Branch verändert weder SerKal Desktop 1.0005/1.0006 noch Website oder
+öffentlichen Download. Installer- und Website-Chatty haben daraus keinen Arbeitsauftrag.
+Eine spätere echte Android-App erhält eine andere Paketkennung und einen privaten
+Veröffentlichungsschlüssel.
