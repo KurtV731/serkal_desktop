@@ -1394,3 +1394,34 @@ Auftrag und Freigabe an Installer-Chatty:
   Sprache folgen.
 - Die veröffentlichte 1.0005 bleibt unverändert.
 - Keine öffentliche Veröffentlichung vor Kurts Sichtprüfung und ausdrücklicher Freigabe.
+
+### 2026-09-18 – Kurt – SerKal Desktop 1.0007 praktisch freigegeben
+
+Status: PRAKTISCH FREIGEGEBEN / KLEINE FOLGEKORREKTUR VORGEMERKT
+
+Kurt hat den installierten Windows-Kandidaten sichtbar `1.0007`, technisch `1.0.7`,
+intensiv in unterschiedlichen Sprach- und Ablaufkombinationen geprüft und freigegeben.
+Die nachfolgend dokumentierte Kleinigkeit blockiert diese Freigabe ausdrücklich nicht und
+ist kein Grund für einen neuen Build 1.0008.
+
+Beobachtung aus Kurts Sichttest:
+
+- Im Einrichtungsassistenten, Schritt 3 von 3 `Einstellungen prüfen`, werden bei einem
+  nachträglichen Wechsel zwischen DE und EN Überschrift, Erklärung und Schaltflächen sofort
+  umgestellt.
+- Der bereits erzeugte Text im inneren Prüfkasten bleibt dagegen in der Sprache stehen,
+  in der Schritt 3 aufgebaut wurde.
+- Ursache und gewünschtes Verhalten sind klar: Der Prüfkasten ist derzeit ein fertiger
+  Text-Snapshot. Bei einer Sprachumschaltung muss diese Zusammenfassung aus den vorhandenen
+  Entscheidungen erneut in der nun aktiven Sprache erzeugt werden.
+- Für die nächste reguläre Desktop-Version ist deshalb vorgemerkt: Sprachwechsel im
+  Prüfschritt ruft denselben Zusammenfassungsaufbau erneut auf; ergänzender DE/EN-Test für
+  den Wechsel direkt in Schritt 3.
+
+Verbindliche Abgrenzung:
+
+- Die geprüfte 1.0007 wird wegen dieses rein sichtbaren Aktualisierungspunktes nicht verändert
+  und nicht unter gleicher Versionsnummer neu gebaut.
+- Die Korrektur wird erst gemeinsam mit einer späteren regulären Version umgesetzt.
+- Installer- und Website-Chatty erhalten aus diesem kleinen Punkt allein keinen Auftrag für
+  einen neuen Build oder eine neue Veröffentlichung.
