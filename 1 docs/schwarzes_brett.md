@@ -1264,3 +1264,54 @@ Abgrenzung: Die deutschsprachige Installerführung, deutschsprachige Desktop-Feh
 Teilerfolgsmeldung und Beschriftung `Episodes in this season` bleiben gemäß verteiltem
 Arbeitspaket bei Installer-Chatty beziehungsweise CE.
 
+### 2026-09-17 – CE – Desktop-Arbeitspaket aus englischem Erstnutzertest abgeschlossen
+
+Status: CE-CODE FERTIG UND FREIGEGEBEN / INSTALLER 1.0006 DARF VORBEREITET WERDEN
+
+Das CE-Arbeitspaket aus VelcroFists englischem Erstnutzertest wurde auf dem verbindlichen
+Fachbranch `serkal-0.0.5-archiv-start` abgeschlossen.
+
+CE-Freigabecommit:
+`c2ef57c5fa1c7a29ad8e456fee0613376c6ef3f0`.
+
+Umgesetzt:
+
+1. Ein erfolgreicher Archiveintrag mit anschließend fehlgeschlagenem Google-Zugriff ist nun
+   ein ausdrücklich gekennzeichneter **Teilerfolg**. Die Staffel bleibt sicher im lokalen
+   SerKal-Archiv gespeichert; der Kalenderfehler macht daraus keinen scheinbaren Gesamtfehler.
+2. Sämtliche sichtbaren Ergebnis- und Fehlermeldungen dieses Eintragwegs werden passend zur
+   gewählten Sprache Deutsch oder Englisch ausgegeben. Die englische Oberfläche zeigt bei
+   einem Google-Fehler keinen deutschen öffentlichen Fehlertext mehr.
+3. Der englische Eintragweg erklärt nach der Suche, dass `Insert` die gewählte Staffel ins
+   SerKal-Archiv übernimmt. Der Knopf heißt nun `Insert into archive`.
+4. Der untere englische Knopf heißt `Save edits`; sein Hinweis erklärt, dass er spätere
+   Änderungen an Archivnotizen und Status speichert und nicht den erstmaligen Serieneintrag.
+5. Die englische Episodenbeschriftung lautet eindeutig `Episodes in this season`.
+6. Erfolgsanzeigen erklären, dass die Staffel im SerKal-Archiv geführt wird und ob ihre
+   Termine zusätzlich in Google Kalender verwaltet, wegen ihres Alters übersprungen oder
+   auf Wunsch nicht in einem Kalender geführt werden.
+7. Die ICS-Ergebnisdialoge des Eintragwegs wurden ebenfalls DE/EN-abhängig verdrahtet.
+8. Ein eigener, gemeinsam von UI und Tests verwendeter Nachrichten-/Ablaufbaustein verhindert,
+   dass die beiden Sprachfassungen fachlich auseinanderlaufen.
+
+Prüfungen:
+
+- Backend und gemeinsamer DE/EN-Ablaufbaustein syntaktisch gültig;
+- alle drei eingebetteten Frontend-Skripte syntaktisch gültig;
+- Archiv-Smoke-Test bestanden;
+- Wartungs-Smoke-Test bestanden;
+- neuer Eintragweg-Test für DE und EN bestanden, einschließlich Archiv-Teilerfolg,
+  Google-Erfolg, Betrieb ohne Kalender sowie eindeutiger englischer Beschriftungen;
+- `git diff --check` ohne Befund.
+
+Auftrag und Freigabe an Installer-Chatty:
+
+- Grundlage ist der CE-Endstand einschließlich `c2ef57c5fa1c7a29ad8e456fee0613376c6ef3f0`;
+- die veröffentlichte 1.0005 bleibt unverändert;
+- der nächste nicht veröffentlichte Windows-Testkandidat trägt technisch `1.0.6` und
+  sichtbar `SERKAL Desktop 1.0006`;
+- die Installerführung muss gemäß dem bereits verteilten Installer-Auftrag vollständig
+  Deutsch/Englisch sein;
+- nach dem Build DE- und EN-Eintragweg praktisch prüfen, insbesondere den Teilerfolg
+  „Archiv gespeichert / Google Kalender fehlgeschlagen“;
+- keine öffentliche Veröffentlichung vor Kurts Sichtprüfung und ausdrücklicher Freigabe.
