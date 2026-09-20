@@ -1472,3 +1472,48 @@ Abgrenzung:
   Neueinträge oder Löschungen durchführen; Lesen auf mehreren Geräten bleibt möglich.
 - Aus dieser Architekturregel entsteht erst nach Konzept, Migrationstest und CE-Freigabe
   ein neuer installierbarer Kandidat.
+
+### 2026-09-20 – Kurt an CE – vollständige Sprachinventur für SerKal 1.1.2
+
+Status: VERBINDLICHER CE-ARBEITSAUFTRAG / UMSETZUNG FÜR 1.1.2 VORGEMERKT
+
+Kurt beauftragt den CE ausdrücklich mit einer vollständigen Sprachbereinigung. Die bisherige
+Mischung aus zentralen Sprachtexten und einzelnen fest im HTML-, Frontend- oder Backend-Code
+eingebauten sichtbaren Sätzen wird nicht weiter punktuell repariert, sondern systematisch
+vollständig erfasst.
+
+Verbindlicher Auftrag:
+
+1. Die maßgebliche `index.html` wird vollständig von der ersten bis zur letzten Zeile
+   geprüft; keine Beschränkung auf Suchtreffer nach einzelnen deutschen Wörtern.
+2. Am Anfang der Datei entsteht eine einzige klar erkennbare Sprachzentrale mit zwei
+   vollständigen Sprachpaketen `en` und `de`.
+3. Beide Sprachpakete verwenden für jeden Text exakt denselben stabilen Schlüssel.
+4. Sämtliche für Benutzer sichtbaren Texte werden über diese Schlüssel ausgegeben:
+   HTML-Beschriftungen, Platzhalter, Tooltips, Assistent, Prüfkasten, Suche, Archiv,
+   Kalender, Löschen, Speichern, Wartung, Hilfe, Status-, Erfolgs-, Warn- und
+   Fehlermeldungen sowie seltene Sonder- und Abbruchwege.
+5. Sichtbare Texte werden aus dem übrigen Programmcode entfernt. Das Backend liefert für
+   öffentliche Ergebnisse nach Möglichkeit stabile Codes und strukturierte Daten; die
+   Oberfläche erzeugt daraus den Text in der aktuell gewählten Sprache.
+6. Bei Sprache Englisch darf kein deutscher öffentlicher Text erscheinen; bei Sprache
+   Deutsch kein englischer Bedienungstext.
+7. Es gibt keinen stillen Sprach-Fallback. Ein fehlender Sprachschlüssel ist ein prüfbarer
+   Entwicklungsfehler und darf nicht unbemerkt einen Text der anderen Sprache anzeigen.
+8. Automatische Tests vergleichen die Schlüsselmengen von DE und EN, prüfen bekannte
+   dynamische Abläufe in beiden Sprachen und suchen nach verbliebenen fest eingebauten
+   sichtbaren Texten außerhalb der Sprachzentrale.
+9. Die bereits vorgemerkte Neuberechnung des inneren Prüfkastens bei Sprachwechsel in
+   Schritt 3 wird innerhalb dieses Arbeitspakets umgesetzt und getestet.
+10. Interne technische Logs dürfen ihre feste technische Sprache behalten, sofern sie nicht
+    unmittelbar als Benutzertext angezeigt werden.
+
+Vorgehen und Freigabegrenze:
+
+- Zuerst vollständige Inventur und Zuordnung, danach kontrollierte Umstellung in
+  überprüfbaren Abschnitten.
+- Keine oberflächliche Massenersetzung und keine Löschung bestehender Funktionen.
+- Deutsche und englische Abläufe werden jeweils praktisch und automatisiert geprüft.
+- SerKal Desktop 1.0007 bleibt unverändert freigegeben.
+- Erst der vollständig geprüfte und von Kurt praktisch bestätigte Gesamtstand darf als
+  Bestandteil von SerKal 1.1.2 an den Installer-Chatty übergeben werden.
