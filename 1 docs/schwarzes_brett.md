@@ -1425,3 +1425,50 @@ Verbindliche Abgrenzung:
 - Die Korrektur wird erst gemeinsam mit einer späteren regulären Version umgesetzt.
 - Installer- und Website-Chatty erhalten aus diesem kleinen Punkt allein keinen Auftrag für
   einen neuen Build oder eine neue Veröffentlichung.
+
+### 2026-09-20 – Kurt/CE – ein persönliches Archiv auf allen Geräten
+
+Status: VERBINDLICHE ARCHITEKTURREGEL / KONZEPT UND UMSETZUNG OFFEN
+
+Kurt legt als verbindliche Produktregel fest:
+
+> Pro Person darf es nur ein SerKal-Archiv geben – unabhängig davon, wie viele
+> Computer oder später mobile Geräte diese Person verwendet.
+
+Hintergrund:
+
+- SerKal Desktop verwendet derzeit standardmäßig ein lokales Archiv je Windows-Rechner.
+- PC und Laptop können dadurch unterschiedliche Archivstände besitzen, obwohl beide mit
+  demselben Google-Kalender arbeiten.
+- Einträge, Änderungen oder Löschungen auf nur einem Rechner können lokales Archiv und
+  Google-Termine auseinanderlaufen lassen.
+- Die Spielerumschaltung Kurt/Xaver ist davon zu trennen: Spieler beziehungsweise Personen
+  benötigen getrennte Archive; mehrere Geräte derselben Person müssen dagegen dasselbe
+  persönliche Archiv verwenden.
+
+Verbindliches Zielbild:
+
+1. Jedes persönliche Archiv erhält eine dauerhafte eindeutige Archivkennung und einen
+   Besitzerbezug, nicht nur einen zufällig gleichen Ordnernamen.
+2. PC, Laptop und spätere Android-Geräte derselben Person greifen auf denselben
+   synchronisierten Archivbestand zu.
+3. Der Archivpfad wird je Gerät eingerichtet, darf aber auf dasselbe persönliche
+   Google-Drive-Ziel zeigen; unterschiedliche Laufwerksbuchstaben sind zu berücksichtigen.
+4. Vor Schreiben oder Löschen wird der aktuelle gemeinsame Stand erneut gelesen.
+5. Atomare Schreibvorgänge, Konflikterkennung und Sicherungskopien verhindern, dass zwei
+   Geräte Änderungen unbemerkt überschreiben.
+6. Gleichzeitige oder zeitlich versetzte Änderungen müssen verständlich gemeldet und
+   kontrolliert zusammengeführt werden; niemals stillschweigend eine Fassung verlieren.
+7. Kalenderoperationen dürfen sich nicht allein auf den lokalen Stand eines einzelnen
+   Rechners verlassen. Tatsächliche Google-Termine sind zusätzlich fachlich zuzuordnen.
+8. Vor einer Umstellung werden Kurts bestehende PC- und Laptop-Archive verglichen und
+   kontrolliert zu einem persönlichen Hauptarchiv zusammengeführt; kein blindes Kopieren
+   gleichnamiger Dateien.
+
+Abgrenzung:
+
+- SerKal Desktop 1.0007 bleibt unverändert freigegeben.
+- Bis zur kontrollierten Zusammenführung möglichst nur auf einem Gerät Archivänderungen,
+  Neueinträge oder Löschungen durchführen; Lesen auf mehreren Geräten bleibt möglich.
+- Aus dieser Architekturregel entsteht erst nach Konzept, Migrationstest und CE-Freigabe
+  ein neuer installierbarer Kandidat.
