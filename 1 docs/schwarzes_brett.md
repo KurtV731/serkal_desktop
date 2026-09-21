@@ -6,6 +6,34 @@ Dieses Dokument ist die gemeinsame Übergabestelle für CE-, Installer- und Webs
 Vor Beginn einer SerKal-Arbeit wird es gelesen. Neue Übergaben werden hier mit Datum,
 Absender, Empfänger, Status und dem zugehörigen Commit eingetragen.
 
+## 🚨🚨🚨 KNALLROTE VERBINDLICHE GITHUB-REGEL 🚨🚨🚨
+
+> **ACHTUNG – GILT AB SOFORT FÜR CE-, INSTALLER- UND WEBSITE-CHATTY**
+>
+> Ein fehlgeschlagener Terminal-`git push` ist **kein Arbeitsabschluss** und kein Grund,
+> Kurt die Arbeit zuzuschieben. Zuerst werden alle verfügbaren Wege über die verbundene
+> GitHub-App vollständig geprüft.
+
+Für jede GitHub-Arbeit gilt verbindlich:
+
+1. Zuerst die verbundene GitHub-App verwenden und direkt im genannten Repository arbeiten.
+2. Über die GitHub-App den aktuellen Stand des Repositorys prüfen.
+3. Die gewünschte Änderung vollständig ausführen.
+4. Die fertige Änderung über die GitHub-App committen und übertragen.
+5. Anschließend den Commit direkt auf GitHub kontrollieren.
+6. Scheitert ein Terminal-`git push`, wird als Nächstes der GitHub-App-Weg geprüft; der
+   Terminalfehler allein beendet die Aufgabe nicht.
+7. Ist GitHub danach tatsächlich nicht verfügbar, muss der zuständige Chatty konkret nennen:
+   - ob die GitHub-App fehlt,
+   - ob das Repository nicht für die App freigegeben ist,
+   - ob Lesen oder Schreiben scheitert,
+   - welche genaue Freigabe Kurt vornehmen muss.
+8. Die Antwort **„geht nicht, mach du“** ist ohne diese vollständige Prüfung unzulässig.
+
+Diese Regel gilt ebenso für das Lesen und Aktualisieren dieses Schwarzen Bretts.
+
+---
+
 ## Verbindliche Entscheidungen von Kurt
 
 - Es gibt für Kurt nur **eine aktuelle SerKal-Version**.
