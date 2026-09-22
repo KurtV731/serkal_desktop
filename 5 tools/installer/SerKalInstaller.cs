@@ -2,22 +2,30 @@ using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Windows.Forms;
 
 [assembly: AssemblyTitle("SerKal Desktop Installer")]
-[assembly: AssemblyDescription("SerKal Desktop Installation und Aktualisierung")]
+[assembly: AssemblyDescription("SerKal Desktop installation and update")]
 [assembly: AssemblyCompany("Kurt Vogelsaenger")]
 [assembly: AssemblyProduct("SerKal Desktop")]
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: AssemblyVersion("1.0.7.1")]
+[assembly: AssemblyFileVersion("1.0.7.1")]
 
 internal static class SerKalInstaller
 {
     private const string ResourceName = "SerKal.Setup.exe";
-    private const string SetupFileName = "SerKal_1.0_Setup.exe";
+    private const string SetupFileName = "SerKal_1.007f1_Setup.exe";
+    private static readonly bool German =
+        string.Equals(CultureInfo.CurrentUICulture.TwoLetterISOLanguageName, "de", StringComparison.OrdinalIgnoreCase);
+
+    private static string T(string german, string english)
+    {
+        return German ? german : english;
+    }
 
     [STAThread]
     private static int Main()
@@ -35,7 +43,9 @@ internal static class SerKalInstaller
                     if (countdown.ShowDialog() != DialogResult.OK)
                     {
                         MessageBox.Show(
-                            "Die Installation/Aktualisierung wurde abgebrochen.\r\nDie vorhandene SerKal-Installation wurde nicht verändert.",
+                            T(
+                                "Die Installation/Aktualisierung wurde abgebrochen.\r\nDie vorhandene SerKal-Installation wurde nicht verändert.",
+                                "Installation/update was cancelled.\r\nThe existing SerKal installation was not changed."),
                             "SerKal Desktop",
                             MessageBoxButtons.OK,
                             MessageBoxIcon.Information);
@@ -59,7 +69,9 @@ internal static class SerKalInstaller
                 if (FindRunningSerKal().Length > 0)
                 {
                     MessageBox.Show(
-                        "Installation/Aktualisierung fehlgeschlagen.\r\n\r\nSerKal Desktop konnte nicht regulär geschlossen werden. Bitte schließen Sie SerKal selbst und starten Sie diese Datei erneut.",
+                        T(
+                            "Installation/Aktualisierung fehlgeschlagen.\r\n\r\nSerKal Desktop konnte nicht regulär geschlossen werden. Bitte schließen Sie SerKal selbst und starten Sie diese Datei erneut.",
+                            "Installation/update failed.\r\n\r\nSerKal Desktop could not be closed normally. Please close SerKal yourself and run this file again."),
                         "SerKal Desktop",
                         MessageBoxButtons.OK,
                         MessageBoxIcon.Error);
@@ -82,16 +94,22 @@ internal static class SerKalInstaller
                 };
                 using (Process setup = Process.Start(startInfo))
                 {
-                    if (setup == null) throw new InvalidOperationException("Das eingebettete Installationsprogramm konnte nicht gestartet werden.");
+                    if (setup == null) throw new InvalidOperationException(T(
+                        "Das eingebettete Installationsprogramm konnte nicht gestartet werden.",
+                        "The embedded installer could not be started."));
                     setup.WaitForExit();
                     if (setup.ExitCode != 0)
                     {
-                        throw new InvalidOperationException("Das Installationsprogramm meldete Fehlercode " + setup.ExitCode + ".");
+                        throw new InvalidOperationException(T(
+                            "Das Installationsprogramm meldete Fehlercode ",
+                            "The installer returned error code ") + setup.ExitCode + ".");
                     }
                 }
 
                 MessageBox.Show(
-                    "SerKal Desktop wurde erfolgreich installiert/aktualisiert.",
+                    T(
+                        "SerKal Desktop wurde erfolgreich installiert/aktualisiert.",
+                        "SerKal Desktop was installed/updated successfully."),
                     "SerKal Desktop",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Information);
@@ -106,7 +124,7 @@ internal static class SerKalInstaller
         catch (Exception ex)
         {
             MessageBox.Show(
-                "Installation/Aktualisierung fehlgeschlagen.\r\n\r\n" + ex.Message,
+                T("Installation/Aktualisierung fehlgeschlagen.", "Installation/update failed.") + "\r\n\r\n" + ex.Message,
                 "SerKal Desktop",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Error);
@@ -135,7 +153,9 @@ internal static class SerKalInstaller
         Assembly assembly = Assembly.GetExecutingAssembly();
         using (Stream source = assembly.GetManifestResourceStream(ResourceName))
         {
-            if (source == null) throw new InvalidOperationException("Das eingebettete SerKal-Setup fehlt.");
+            if (source == null) throw new InvalidOperationException(T(
+                "Das eingebettete SerKal-Setup fehlt.",
+                "The embedded SerKal setup is missing."));
             using (FileStream destination = File.Create(target))
             {
                 source.CopyTo(destination);
@@ -152,7 +172,7 @@ internal static class SerKalInstaller
 
         internal CountdownForm()
         {
-            Text = "SerKal Desktop aktualisieren";
+            Text = T("SerKal Desktop aktualisieren", "Update SerKal Desktop");
             Width = 570;
             Height = 190;
             StartPosition = FormStartPosition.CenterScreen;
@@ -177,7 +197,7 @@ internal static class SerKalInstaller
 
             cancel = new Button
             {
-                Text = "Abbrechen",
+                Text = T("Abbrechen", "Cancel"),
                 Width = 125,
                 Height = 34,
                 Left = (ClientSize.Width - 125) / 2,
@@ -211,7 +231,9 @@ internal static class SerKalInstaller
 
         private void UpdateText()
         {
-            message.Text = "SerKal Desktop wird automatisch geschlossen in " + seconds + " Sekunden.";
+            message.Text = T(
+                "SerKal Desktop wird automatisch geschlossen in " + seconds + " Sekunden.",
+                "SerKal Desktop will close automatically in " + seconds + " seconds.");
         }
 
         protected override void Dispose(bool disposing)

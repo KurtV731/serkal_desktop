@@ -28,6 +28,6 @@ const context = {
 vm.createContext(context);
 vm.runInContext(preloadSource, context, { filename:"preload.js" });
 assert.ok(exposed);
-assert.equal(exposed.version, "1.0007f1");
+assert.equal(exposed.version, "1.007f1");
 
 console.log("SERKAL calendar repair 1.007f1 test: OK");
