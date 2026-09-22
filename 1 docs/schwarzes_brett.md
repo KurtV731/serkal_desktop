@@ -1548,7 +1548,7 @@ Vorgehen und Freigabegrenze:
 
 ### 2026-09-22 – Kurt/CE – kurze Reparaturreihe 1.007f1
 
-Status: CE-CODE FERTIG / PRAKTISCHER WINDOWS-TEST DURCH KURT OFFEN
+Status: CE-CODE FERTIG UND FREIGEGEBEN / INSTALLER DARF TESTKANDIDAT BAUEN
 
 Kurt führt für dringende Korrekturen auf Basis der freigegebenen 1.0007 eine kurze
 Reparaturreihe ein. Der erste Stand trägt technisch `1.0.7-f1` und sichtbar
@@ -1591,7 +1591,8 @@ die echte-ID-Löschstrategie, die Wiederanlage und die sichtbare Versionskennung
 Rollenabgrenzung:
 
 - CE stellt ausschließlich den geprüften Quellstand bereit.
-- Installer-Chatty baut erst nach Kurts praktischem Quelltest beziehungsweise ausdrücklicher
-  Freigabe einen installierbaren Kandidaten 1.007f1.
-- Website-Chatty erhält vor einer ausdrücklichen Veröffentlichungsfreigabe keinen Auftrag.
+- Installer-Chatty darf auf Grundlage des CE-Commits jetzt einen nicht öffentlichen
+  installierbaren Testkandidaten 1.007f1 bauen und übergibt ihn Kurt zum Praxistest.
+- Keine Veröffentlichung vor Kurts praktischem Test und ausdrücklicher Freigabe.
+- Website-Chatty erhält vor dieser Veröffentlichungsfreigabe keinen Auftrag.
 
