@@ -1545,3 +1545,53 @@ Vorgehen und Freigabegrenze:
 - SerKal Desktop 1.0007 bleibt unverändert freigegeben.
 - Erst der vollständig geprüfte und von Kurt praktisch bestätigte Gesamtstand darf als
   Bestandteil von SerKal 1.1.2 an den Installer-Chatty übergeben werden.
+
+### 2026-09-22 – Kurt/CE – kurze Reparaturreihe 1.007f1
+
+Status: CE-CODE FERTIG / PRAKTISCHER WINDOWS-TEST DURCH KURT OFFEN
+
+Kurt führt für dringende Korrekturen auf Basis der freigegebenen 1.0007 eine kurze
+Reparaturreihe ein. Der erste Stand trägt technisch `1.0.7-f1` und sichtbar
+`SERKAL Desktop 1.007f1`. Werden vor einer regulären Folgeversion weitere kleine
+Reparaturen erforderlich, folgen `f2`, `f3` usw. Eine ausreichend angewachsene und
+praktisch geprüfte Reparaturreihe kann später kontrolliert in eine reguläre Version
+übernommen werden.
+
+Anlass für `f1` ist Kurts reproduzierter Google-Kalenderfehler beim Löschen und erneuten
+Eintragen, insbesondere bei `Lucky (2026)`:
+
+- Die bisherige Löschroutine fragte je Termin bis zu zehn nur berechnete Event-IDs ab.
+  Alte oder bereits gelöschte IDs lieferten viele `404`/`410` und schließlich
+  `403 Rate Limit Exceeded`; die Archivdatei blieb dabei richtigerweise erhalten.
+- Beim unmittelbaren erneuten Eintragen kann Google eine früher verwendete eigene Event-ID
+  trotz Löschung weiterhin als belegt melden (`409`). Ein direkt gelesener gelöschter
+  Termin wurde danach irrtümlich als geschützter vorhandener Termin behandelt, sodass
+  die Oberfläche Erfolg meldete, obwohl `0` Termine erstellt und `0` aktualisiert wurden.
+
+Umgesetzt in `1.007f1`:
+
+1. Vor dem Löschen sucht SerKal die tatsächlich vorhandenen Kalendertermine anhand der
+   SerKal-Metadaten sowie bei Altbeständen anhand von Titel/Staffel/Episodenblock.
+2. Nur gefundene echte Google-Event-IDs werden jeweils genau einmal gelöscht; die
+   Zehnerfolge geratener IDs entfällt.
+3. `404` und `410` nach einer vorherigen Suche gelten als bereits erreichter Löschzustand;
+   echte Zugriffs- und Ratenfehler brechen weiterhin sicher ab, bevor das Archiv gelöscht wird.
+4. Ein von Google als `cancelled` gelieferter ID-Grabstein gilt nicht mehr als vorhandener
+   oder manuell geschützter Termin.
+5. Sind die früheren eigenen IDs nach einer Löschung blockiert, lässt SerKal Google eine
+   neue Event-ID vergeben. Die vorherige fachliche Suche verhindert dabei Doppeltermine.
+6. Die sichtbare Versionsdarstellung unterstützt die Reparaturkennung `1.007f1`.
+
+CE-Quellcommit: `5185529b19251cc607733cab9bd8fba0cd33ea54`.
+
+Automatisch geprüft: Backend und Preload syntaktisch gültig; Archiv-, Wartungs-,
+DE/EN-Eintrags- und globale Sprachtests bestanden; zusätzlicher Regressionstest bestätigt
+die echte-ID-Löschstrategie, die Wiederanlage und die sichtbare Versionskennung.
+
+Rollenabgrenzung:
+
+- CE stellt ausschließlich den geprüften Quellstand bereit.
+- Installer-Chatty baut erst nach Kurts praktischem Quelltest beziehungsweise ausdrücklicher
+  Freigabe einen installierbaren Kandidaten 1.007f1.
+- Website-Chatty erhält vor einer ausdrücklichen Veröffentlichungsfreigabe keinen Auftrag.
+
