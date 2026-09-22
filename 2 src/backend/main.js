@@ -722,35 +722,63 @@ async function archiveDeleteSeries_(payload) {
                 const seasonNumber = Number(String(entry.staffelLabel || "").replace(/\D/g, ""));
                 const dates = Array.isArray(entry.activeDates) ? entry.activeDates : [];
                 const blocks = calendarBlocks_(dates);
+                const actualEvents = new Map();
+
+                /*
+                 * 1.007f1: Nicht mehr bis zu zehn nur berechnete Event-IDs pro
+                 * Termin ausprobieren. Google behaelt geloeschte IDs als
+                 * Grabsteine; die alte Schleife erzeugte dadurch 404/410-Bursts
+                 * und schliesslich ein 403 Rate Limit. Stattdessen werden zuerst
+                 * die wirklich vorhandenen SerKal-Termine ermittelt.
+                 */
+                const managedEvents = await googleCalendarManagedSeasonEvents_(
+                    calendarId,
+                    entry.tmdbId,
+                    seasonNumber
+                );
+                for (const event of managedEvents) {
+                    const eventId = String(event && event.id || "");
+                    if (eventId) actualEvents.set(eventId, event);
+                }
+
                 for (const block of blocks) {
-                    let deletedCandidate = false;
-                    const idPayload = {
-                        tmdbId:entry.tmdbId,
-                        staffelNummer:seasonNumber
-                    };
-                    for (const eventId of googleCalendarEventIdCandidates_(idPayload, block)) {
-                        const result = await googleCalendarApi_("DELETE", calendarId, eventId, null);
-                        if (result.ok) {
-                            calendarDeleted++;
-                            deletedCandidate = true;
-                            continue;
-                        }
-                        if (result.status === 404 || result.status === 410) {
-                            if (deletedCandidate) break;
-                            continue;
-                        }
-                        const detail = result.data && (result.data.error && result.data.error.message || result.data.error_description);
-                        logWrite_("ERROR", "GOOGLE", "Google-Kalendertermin konnte beim Löschen nicht entfernt werden", {
-                            fileName,
-                            httpStatus:Number(result.status || 0),
-                            googleMessage:String(detail || "")
-                        });
-                        return googleCalendarPublicFailure_({
-                            action:"delete",
-                            message:"Die Serie wurde nicht gelöscht, weil SerKal den Google Kalender nicht erreichen konnte. Ihre Archivdatei ist unverändert."
-                        });
+                    const seasonLabel = "S" + calendarPad2_(seasonNumber);
+                    const summary = String(entry.title || entry.titel || "") + " (" +
+                        String(entry.year || entry.jahr || "") + ") " + seasonLabel + "E" +
+                        calendarPad2_(block.eFrom) +
+                        (block.eTo !== block.eFrom ? ("–E" + calendarPad2_(block.eTo)) : "");
+                    const legacyEvents = await googleCalendarFindSummaryAnywhere_(calendarId, summary);
+                    for (const event of legacyEvents) {
+                        const eventId = String(event && event.id || "");
+                        if (eventId) actualEvents.set(eventId, event);
                     }
                 }
+
+                for (const eventId of actualEvents.keys()) {
+                    const result = await googleCalendarApi_("DELETE", calendarId, eventId, null);
+                    if (result.ok) {
+                        calendarDeleted++;
+                        continue;
+                    }
+                    // Zwischen Suche und DELETE bereits entfernt = Zielzustand erreicht.
+                    if (result.status === 404 || result.status === 410) continue;
+                    const detail = result.data && (result.data.error && result.data.error.message || result.data.error_description);
+                    logWrite_("ERROR", "GOOGLE", "Google-Kalendertermin konnte beim Löschen nicht entfernt werden", {
+                        fileName,
+                        httpStatus:Number(result.status || 0),
+                        googleMessage:String(detail || "")
+                    });
+                    return googleCalendarPublicFailure_({
+                        action:"delete",
+                        message:"Die Serie wurde nicht gelöscht, weil SerKal den Google Kalender nicht erreichen konnte. Ihre Archivdatei ist unverändert."
+                    });
+                }
+
+                logWrite_("INFO", "DELETE", "Vorhandene Google-Termine anhand echter IDs verarbeitet", {
+                    fileName,
+                    staffel:String(entry.staffelLabel || ""),
+                    gefunden:actualEvents.size
+                });
             }
         }
 
@@ -1991,6 +2019,11 @@ async function googleCalendarInsertSeason_(payload) {
 
                 const existingResult = await googleCalendarApi_("GET", calendarId, eventId, null);
                 if (existingResult.ok && existingResult.data) {
+                    /* Eine direkt gelesene geloeschte Ressource ist kein
+                       vorhandener, schuetzenswerter Termin. Naechste ID testen. */
+                    if (String(existingResult.data.status || "").toLowerCase() === "cancelled") {
+                        continue;
+                    }
                     if (googleCalendarEventWasManuallyChanged_(existingResult.data)) {
                         protectedEvents++;
                         stored = true;
@@ -2017,7 +2050,24 @@ async function googleCalendarInsertSeason_(payload) {
                 throw new Error(detail || ("Google Kalender antwortete mit Fehler " + (result.status || existingResult.status) + "."));
             }
             if (!stored) {
-                throw new Error("Der frühere Google-Termin ist gelöscht und konnte nicht neu angelegt werden.");
+                /*
+                 * Google gibt einmal verwendete benutzerdefinierte Event-IDs
+                 * nach dem Loeschen nicht verlaesslich frei. Nach ausgeschoepften
+                 * SerKal-Kandidaten deshalb Google eine neue ID vergeben lassen.
+                 * Die fachliche Suche oben verhindert trotzdem Doppeltermine.
+                 */
+                const freshResult = await googleCalendarApi_("POST", calendarId, "", eventBase);
+                if (freshResult.ok) {
+                    created++;
+                    stored = true;
+                    logWrite_("INFO", "KAL", "Kalendertermin mit neuer Google-ID wiederangelegt", {
+                        titel:summary,
+                        datum:block.date
+                    });
+                } else {
+                    const detail = freshResult.data && (freshResult.data.error && freshResult.data.error.message || freshResult.data.error_description);
+                    throw new Error(detail || "Der frühere Google-Termin ist gelöscht und konnte nicht neu angelegt werden.");
+                }
             }
         }
 
