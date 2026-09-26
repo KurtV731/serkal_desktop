@@ -1596,3 +1596,45 @@ Rollenabgrenzung:
 - Keine Veröffentlichung vor Kurts praktischem Test und ausdrücklicher Freigabe.
 - Website-Chatty erhält vor dieser Veröffentlichungsfreigabe keinen Auftrag.
 
+
+
+### 2026-09-26 – Website-Chatty – Website-Dokumentation der Android-Entwicklung nachgeholt
+
+Status: ERLEDIGT / COMMITS AUF `serkal-pages/main`
+
+Kurts Auftrag, die seit dem Android-Training begonnene Entwicklung im Handbuch und in der
+Werkstatt fortlaufend zu dokumentieren, war trotz vorheriger Ankündigung noch nicht
+ausgeführt worden. Diese Dokumentationslücke wurde geschlossen.
+
+Umgesetzt:
+
+1. Neue ausführliche Chronik
+   `docs/werkstatt/serkal-android-entwicklung.md` mit:
+   - Android Training 0.0.1 und APK-Installationsweg;
+   - praktischen Tests auf Pixel 8 und Samsung-Tablet;
+   - Android-Präversionen 0.0.2 und 0.0.3;
+   - Erkenntnissen zu Querformat, Vollbild/Systemleisten, Skalierung und Arbeitsreihenfolge;
+   - technischer Trennung von Training, Vorschau und späterer Produktiv-App;
+   - Verbindung zur verbindlichen Regel „eine Person, ein gemeinsames Archiv“;
+   - nächsten fachlichen Schritten und dauerhafter Dokumentationsregel.
+2. `docs/website_entwicklerhandbuch.md` auf Stand 26.09.2026 fortgeführt und um
+   Android-Zuständigkeit, aktuellen Stand und Dokumentationspflicht ergänzt.
+3. `up/werkstatt.html` um drei verständliche öffentliche Entwicklungsetappen ergänzt:
+   Training 0.0.1, Oberflächenstudie 0.0.2 und kompaktere Präversion 0.0.3.
+4. `docs/README.md` aktualisiert und die Android-Chronik dauerhaft im
+   Dokumentationsverzeichnis verankert.
+
+Website-Commits:
+
+- `def8ca21e3cabaf00cfe2ad3f3c18c9b7f398143` – ausführliche Android-Chronik;
+- `dac1601d377d6aa7ea2854828bd0b417382cc496` – Entwicklerhandbuch fortgeführt;
+- `84b4d832319b557cd0299d959e19d4170aa10d61` – öffentliche Werkstatt ergänzt;
+- `65defc1d66d446861b6a4ed0e68c69e12633167c` – Dokumentationsverzeichnis aktualisiert.
+
+Abgrenzung:
+
+- Es wurde keine APK veröffentlicht und kein Android- oder Desktop-Quellcode verändert.
+- Die Werkstatt beschreibt die Präversionen ausdrücklich als Darstellungstests ohne echten
+  Archiv- oder Kalenderzugriff.
+- Ein späterer öffentlicher Android-Download benötigt weiterhin eigene CE-/Installer- und
+  Kurts Freigabe.
