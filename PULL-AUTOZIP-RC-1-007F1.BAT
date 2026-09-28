@@ -1,7 +1,7 @@
 @echo off
 setlocal EnableExtensions
 set "PROJECT=C:\serkal_dev\serkal_desktop"
-set "TEST_ROOT=C:\SerKal-Testinstallationen"
+set "TEST_ROOT=C:\PPD\SerKal\Testinstallationen"
 set "PUBLISH=%TEST_ROOT%\1.007f1"
 set "PUBLIC_NAME=1.007f1-SerKal-Desktop-Testinstallation.exe"
 set "BRANCH=installer-1.007f1"
