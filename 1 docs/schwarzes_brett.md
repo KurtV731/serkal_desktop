@@ -1728,12 +1728,12 @@ Die gemeinsame Prüfung bestätigt Kurts Vorschlag. Nicht öffentliche Installat
 werden künftig in einem eigenen lokalen Ordner außerhalb sämtlicher Git-Repositories und
 außerhalb des Website-Uploadbaums aufbewahrt:
 
-- Stammordner: `C:\PPD\SerKal\Testinstallationen\`;
-- versionsbezogener Ordner: `C:\PPD\SerKal\Testinstallationen\<Version>\`;
+- Stammordner: `C:\ppd\serkal\testinstallationen\`;
+- versionsbezogener Ordner: `C:\ppd\serkal\testinstallationen\<Version>\`;
 - versionsführender Dateiname:
   `<Version>-SerKal-Desktop-Testinstallation.exe`;
 - für den vorhandenen Kandidaten konkret:
-  `C:\PPD\SerKal\Testinstallationen\1.007f1\1.007f1-SerKal-Desktop-Testinstallation.exe`.
+  `C:\ppd\serkal\testinstallationen\1.007f1\1.007f1-SerKal-Desktop-Testinstallation.exe`.
 
 Begründung und Sicherheitsentscheidung:
 
@@ -1757,9 +1757,9 @@ Begründung und Sicherheitsentscheidung:
    Testkandidaten jetzt direkt in den getrennten Versionsordner, überschreiben keine
    vorhandene Testdatei und erzeugen zusätzlich eine SHA-256-Datei:
    - `PULL-AUTOZIP-RC-1-007F1.BAT`, Commit
-     `aba4f8a6806c03e3d4e7c55403937c4868f0f49e`;
+     `116b9cce71ff22bc7da1ceed6c0d4156dc70bb51`;
    - `SERKAL-1-007F1-UEBERNEHMEN-UND-BAUEN.BAT`, Commit
-     `1b40447739662b12d87a4e3e522d749275be2a5e`.
+     `727ede7a15cb893367a47a00f6282f39f68a7811`.
 7. `PULL-SD.BAT` und `PULL-PD.BAT` benötigen dafür keine Änderung.
 
 Getrennt offener Website-Punkt:
@@ -1779,10 +1779,16 @@ Prüfung von `robots.txt` und gibt den normalen Website-Upload wieder frei.
 
 Ergänzende Ordnungsregel von Kurt:
 
-`C:\PPD` wird als gemeinsamer Stamm für private Programmentwicklung vorgesehen, damit
+`C:\ppd` wird als gemeinsamer Stamm für private Programmentwicklung vorgesehen, damit
 nicht für jedes Projekt weitere Hauptordner direkt unter `C:\` entstehen. Die spätere
 Zusammenführung bereits vorhandener SerKal- und HASA-Ordner ist ein eigenes zeitnahes
 Migrationsprojekt. Vor jedem Verschieben werden Ordnerinhalt und sämtliche fest
 eingetragenen Pfade in Installationsskripten, Batchdateien, JSON-Dateien, Verknüpfungen und
 Konfigurationen vollständig erfasst und angepasst. Bestehende Arbeitsordner werden nicht
 pauschal oder vorzeitig verschoben.
+
+
+Klarstellung von Kurt: Der gesamte neue PPD-Pfad wird einschließlich aller
+Projekt- und Unterordner konsequent in Kleinbuchstaben geschrieben. Verbindlich ist daher
+`C:\ppd\serkal\testinstallationen\<Version>\`; entsprechend werden spätere
+Projektordner beispielsweise unter `C:\ppd\serkal` und `C:\ppd\hasa` angelegt.
