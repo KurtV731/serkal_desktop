@@ -1728,12 +1728,12 @@ Die gemeinsame Prüfung bestätigt Kurts Vorschlag. Nicht öffentliche Installat
 werden künftig in einem eigenen lokalen Ordner außerhalb sämtlicher Git-Repositories und
 außerhalb des Website-Uploadbaums aufbewahrt:
 
-- Stammordner: `C:\SerKal-Testinstallationen\`;
-- versionsbezogener Ordner: `C:\SerKal-Testinstallationen\<Version>\`;
+- Stammordner: `C:\PPD\SerKal\Testinstallationen\`;
+- versionsbezogener Ordner: `C:\PPD\SerKal\Testinstallationen\<Version>\`;
 - versionsführender Dateiname:
   `<Version>-SerKal-Desktop-Testinstallation.exe`;
 - für den vorhandenen Kandidaten konkret:
-  `C:\SerKal-Testinstallationen\1.007f1\1.007f1-SerKal-Desktop-Testinstallation.exe`.
+  `C:\PPD\SerKal\Testinstallationen\1.007f1\1.007f1-SerKal-Desktop-Testinstallation.exe`.
 
 Begründung und Sicherheitsentscheidung:
 
@@ -1757,9 +1757,9 @@ Begründung und Sicherheitsentscheidung:
    Testkandidaten jetzt direkt in den getrennten Versionsordner, überschreiben keine
    vorhandene Testdatei und erzeugen zusätzlich eine SHA-256-Datei:
    - `PULL-AUTOZIP-RC-1-007F1.BAT`, Commit
-     `f870152b507fac93697a8122d470ad16037bb1cd`;
+     `aba4f8a6806c03e3d4e7c55403937c4868f0f49e`;
    - `SERKAL-1-007F1-UEBERNEHMEN-UND-BAUEN.BAT`, Commit
-     `48bc3f4a8a0d735e2080e6eceb2b02b62821e397`.
+     `1b40447739662b12d87a4e3e522d749275be2a5e`.
 7. `PULL-SD.BAT` und `PULL-PD.BAT` benötigen dafür keine Änderung.
 
 Getrennt offener Website-Punkt:
@@ -1775,3 +1775,14 @@ bleibt der Website-Upload gesperrt.
 Kurts nächster praktischer Schritt ist ausschließlich das sichere Verschieben der vorhandenen
 1.007f1-Datei in den oben festgelegten Ordner. Danach übernimmt Website-Chatty die getrennte
 Prüfung von `robots.txt` und gibt den normalen Website-Upload wieder frei.
+
+
+Ergänzende Ordnungsregel von Kurt:
+
+`C:\PPD` wird als gemeinsamer Stamm für private Programmentwicklung vorgesehen, damit
+nicht für jedes Projekt weitere Hauptordner direkt unter `C:\` entstehen. Die spätere
+Zusammenführung bereits vorhandener SerKal- und HASA-Ordner ist ein eigenes zeitnahes
+Migrationsprojekt. Vor jedem Verschieben werden Ordnerinhalt und sämtliche fest
+eingetragenen Pfade in Installationsskripten, Batchdateien, JSON-Dateien, Verknüpfungen und
+Konfigurationen vollständig erfasst und angepasst. Bestehende Arbeitsordner werden nicht
+pauschal oder vorzeitig verschoben.
