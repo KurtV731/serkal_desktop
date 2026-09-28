@@ -1718,3 +1718,60 @@ Nächster Schritt: Installer-Chatty prüft gemeinsam mit dem Website-Chatty den 
 vor; CE bestätigt anschließend, dass dadurch die Test- und Übergabekette nicht beschädigt
 wird.
 
+
+
+### 2026-09-28 – CE mit Installer- und Website-Chatty – Testinstaller dauerhaft vom Website-Upload getrennt
+
+Status: ENTSCHEIDUNG UND INSTALLER-SKRIPTE FERTIG / EINMALIGES LOKALES VERSCHIEBEN UND ROBOTS-DIFF OFFEN
+
+Die gemeinsame Prüfung bestätigt Kurts Vorschlag. Nicht öffentliche Installationsfassungen
+werden künftig in einem eigenen lokalen Ordner außerhalb sämtlicher Git-Repositories und
+außerhalb des Website-Uploadbaums aufbewahrt:
+
+- Stammordner: `C:\SerKal-Testinstallationen\`;
+- versionsbezogener Ordner: `C:\SerKal-Testinstallationen\<Version>\`;
+- versionsführender Dateiname:
+  `<Version>-SerKal-Desktop-Testinstallation.exe`;
+- für den vorhandenen Kandidaten konkret:
+  `C:\SerKal-Testinstallationen\1.007f1\1.007f1-SerKal-Desktop-Testinstallation.exe`.
+
+Begründung und Sicherheitsentscheidung:
+
+1. `PULL-PD.BAT` überträgt über WinSCP mit `synchronize remote` den gesamten lokalen
+   Ordner `C:\serkal-pages\up` nach serkal.de. Die bisher dort liegende Vorab-EXE würde
+   deshalb tatsächlich öffentlich hochgeladen, wenn lediglich die Git-Statussperre
+   ausgeblendet würde.
+2. Es wird ausdrücklich keine Ausnahme in `.gitignore` und keine Lockerung der
+   Statusprüfung für Testinstaller eingeführt. Die bestehende Sperre hat korrekt gearbeitet.
+3. Im Website-Ordner `up/download` dürfen nur ausdrücklich freigegebene öffentliche
+   Downloadartefakte liegen. Die öffentliche Datei `serkal-desktop.exe` und ihre
+   festgeschriebene Prüfsumme bleiben unberührt.
+4. Die vorhandene 1.007f1-EXE wird nicht gelöscht und nicht neu gebaut. Kurt verschiebt sie
+   einmalig in den neuen Versionsordner und benennt sie nach der neuen Regel um. Die
+   SHA-256-Prüfsumme wird vor und nach dem Verschieben verglichen; dadurch bleibt
+   nachgewiesen, dass es exakt derselbe Testkandidat ist.
+5. Die installierte SerKal-Fassung benötigt die EXE am alten Ort nicht. CE-Quellstand,
+   Installerstand, Binärinhalt und praktische Testkette werden durch den Ortswechsel nicht
+   verändert.
+6. Die beiden maßgeblichen Installer-Skripte auf `installer-1.007f1` schreiben neue
+   Testkandidaten jetzt direkt in den getrennten Versionsordner, überschreiben keine
+   vorhandene Testdatei und erzeugen zusätzlich eine SHA-256-Datei:
+   - `PULL-AUTOZIP-RC-1-007F1.BAT`, Commit
+     `f870152b507fac93697a8122d470ad16037bb1cd`;
+   - `SERKAL-1-007F1-UEBERNEHMEN-UND-BAUEN.BAT`, Commit
+     `48bc3f4a8a0d735e2080e6eceb2b02b62821e397`.
+7. `PULL-SD.BAT` und `PULL-PD.BAT` benötigen dafür keine Änderung.
+
+Getrennt offener Website-Punkt:
+
+`up/robots.txt` auf GitHub enthält unverändert nur `User-agent: *`, `Allow: /` und den
+Verweis auf `https://serkal.de/sitemap.xml`. Die lokale Abweichung auf Kurts Rechner ist
+von GitHub aus nicht sichtbar und darf nicht ungeprüft verworfen werden. Website-Chatty
+prüft deshalb nach dem Verschieben einmal `git diff -- up/robots.txt`. Eine inhaltlich
+beabsichtigte Änderung wird separat übernommen; eine reine Zeilenendenänderung darf erst
+nach dieser Feststellung kontrolliert auf den GitHub-Stand zurückgesetzt werden. Bis dahin
+bleibt der Website-Upload gesperrt.
+
+Kurts nächster praktischer Schritt ist ausschließlich das sichere Verschieben der vorhandenen
+1.007f1-Datei in den oben festgelegten Ordner. Danach übernimmt Website-Chatty die getrennte
+Prüfung von `robots.txt` und gibt den normalen Website-Upload wieder frei.
