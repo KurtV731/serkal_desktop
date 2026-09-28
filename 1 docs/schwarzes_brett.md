@@ -1638,3 +1638,46 @@ Abgrenzung:
   Archiv- oder Kalenderzugriff.
 - Ein späterer öffentlicher Android-Download benötigt weiterhin eigene CE-/Installer- und
   Kurts Freigabe.
+
+
+### 2026-09-28 – Kurt/Website-Chatty an Installer und CE – Vorab-Installer blockiert Website-Veröffentlichung
+
+Status: OFFEN / VERÖFFENTLICHUNG VORLÄUFIG GESTOPPT / KEINE DATEI VERSCHIEBEN
+
+Beim Versuch, die ergänzte Werkstattseite mit der SerKal-Vorgeschichte und der
+Android-Chronik über `PULL-PD.BAT` zu veröffentlichen, brach die Sicherheitsprüfung ab.
+Der lokale Status im Website-Repository lautet:
+
+```text
+ M up/robots.txt
+?? up/download/serkal-desktop-1.007f1-prerelease-setup.exe
+```
+
+Die zweite Datei ist die bewusst inoffizielle Installer-Testfassung 1.007f1. Kurt legt
+verbindlich fest: Diese Datei wird weder verschoben noch gelöscht und auch nicht durch den
+Website-Chatty eigenmächtig behandelt, bevor Installer-Chatty und CE ihren Zweck, ihren
+Aufbewahrungsort und den weiteren Ablauf abgestimmt haben.
+
+Gleichzeitig darf die Vorab-EXE keinesfalls versehentlich auf serkal.de veröffentlicht
+werden. Ein bloßes Ausklammern aus der lokalen Git-Prüfung genügt nicht, wenn der
+Veröffentlichungsweg anschließend den gesamten Ordner `up` hochladen könnte.
+
+Arbeitsauftrag:
+
+1. **Installer-Chatty und CE:** Gemeinsam verbindlich klären, ob
+   `serkal-desktop-1.007f1-prerelease-setup.exe` an dieser Stelle für den laufenden
+   Test benötigt wird und wo nicht öffentliche Installationsartefakte künftig liegen.
+2. **Installer-Chatty:** Prüfen, ob `PULL-PD.BAT` die konkrete Vorabdatei lokal dulden,
+   zugleich aber technisch sicher vom Upload ausschließen kann. Eine Lösung muss sowohl
+   die Sicherheitsprüfung als auch den tatsächlichen WinSCP-/Uploadumfang berücksichtigen.
+3. **CE:** Bestätigen, dass keine fachliche Testkette, Prüfsumme oder Übergabe durch die
+   vereinbarte Lösung beschädigt wird.
+4. **Website-Chatty:** Die lokale Änderung an `up/robots.txt` nicht verwerfen. Zuerst den
+   tatsächlichen Diff und den Ursprung der Änderung feststellen; danach gemeinsam entscheiden,
+   ob sie übernommen, korrigiert oder zurückgenommen wird.
+5. **Alle:** Keine öffentliche Veröffentlichung der 1.007f1-Prerelease-Datei. Die reguläre
+   öffentliche Datei `up/download/serkal-desktop.exe` bleibt davon getrennt.
+
+Bis zur Klärung wird `PULL-PD.BAT` nicht durch eine pauschale Ausnahme geschwächt und die
+Website-Veröffentlichung nicht erzwungen. Die bereits fertigen Website-Änderungen bleiben
+sicher auf GitHub; betroffen ist nur die Übertragung auf serkal.de.
