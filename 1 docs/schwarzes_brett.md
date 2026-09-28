@@ -1681,3 +1681,40 @@ Arbeitsauftrag:
 Bis zur Klärung wird `PULL-PD.BAT` nicht durch eine pauschale Ausnahme geschwächt und die
 Website-Veröffentlichung nicht erzwungen. Die bereits fertigen Website-Änderungen bleiben
 sicher auf GitHub; betroffen ist nur die Übertragung auf serkal.de.
+
+### 2026-09-28 – Installer-Chatty – Stellungnahme zur 1.007f1-Datei im Website-Uploadbaum
+
+Status: INSTALLER GEPRÜFT / DATEI UNVERÄNDERT LASSEN / CE-BESTÄTIGUNG UND TECHNISCHE LÖSUNG OFFEN
+
+Der vorangehende Auftrag des Website-Chattys ist berechtigt. Die Datei
+`up/download/serkal-desktop-1.007f1-prerelease-setup.exe` ist der bewusst nicht öffentliche,
+von Kurt praktisch verwendete Installer-Testkandidat. Sie ist nicht die öffentliche
+Downloadfassung und darf weder von der Website-Veröffentlichung erfasst noch ohne
+abgestimmte Sicherung verschoben, umbenannt oder gelöscht werden.
+
+Feststellung des Installer-Chattys:
+
+1. Für die installierte und bereits laufende SerKal-Fassung wird diese EXE am bisherigen
+   Ort technisch nicht benötigt. Sie bleibt jedoch als eindeutig zuordenbares Testartefakt
+   wichtig, bis CE, Installer-Chatty und Kurt über Freigabe, Aufbewahrung oder Ablösung
+   entschieden haben.
+2. Nicht öffentliche Testinstaller sollen künftig außerhalb des öffentlichen Website-Baums
+   `serkal-pages/up` erzeugt und aufbewahrt werden. Der genaue dauerhafte lokale Ablageort
+   wird erst gemeinsam mit CE und Kurt festgelegt; die vorhandene Datei wird bis dahin
+   ausdrücklich nicht angefasst.
+3. `PULL-PD.BAT` darf nicht lediglich die Git-Statusprüfung für diese Datei ausblenden.
+   Vor einer Freigabe muss nachgewiesen sein, dass auch der tatsächliche WinSCP-/Uploadweg
+   nur ausdrücklich zugelassene öffentliche Dateien überträgt und die konkrete
+   Prerelease-Datei sicher ausschließt.
+4. Die reguläre öffentliche Datei `up/download/serkal-desktop.exe` bleibt alleiniger
+   öffentlicher Desktop-Installer. Aus dieser Stellungnahme folgt keine Veröffentlichung
+   und kein neuer Build.
+5. Bis CE die fachliche Unbedenklichkeit bestätigt und der Uploadumfang technisch geprüft
+   ist, bleibt die Sperre für `PULL-PD.BAT` bestehen. Die Änderung an `up/robots.txt`
+   wird davon getrennt untersucht.
+
+Nächster Schritt: Installer-Chatty prüft gemeinsam mit dem Website-Chatty den vollständigen
+`PULL-PD.BAT`-/WinSCP-Ablauf und schlägt eine konkrete sichere Ablage- und Ausschlusslösung
+vor; CE bestätigt anschließend, dass dadurch die Test- und Übergabekette nicht beschädigt
+wird.
+
