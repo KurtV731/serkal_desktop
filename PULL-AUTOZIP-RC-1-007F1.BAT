@@ -1,8 +1,9 @@
 @echo off
 setlocal EnableExtensions
 set "PROJECT=C:\serkal_dev\serkal_desktop"
-set "PUBLISH=C:\serkal-pages\up\download"
-set "PUBLIC_NAME=serkal-desktop-1.007f1-prerelease-setup.exe"
+set "TEST_ROOT=C:\SerKal-Testinstallationen"
+set "PUBLISH=%TEST_ROOT%\1.007f1"
+set "PUBLIC_NAME=1.007f1-SerKal-Desktop-Testinstallation.exe"
 set "BRANCH=installer-1.007f1"
 set "REQUIRED_BASE=5185529b19251cc607733cab9bd8fba0cd33ea54"
 
@@ -54,8 +55,12 @@ echo Gefunden:
 echo "%SETUP%"
 
 echo.
-echo === Publish-Ziel pruefen ===
-if not exist "%PUBLISH%" goto :error_publish
+echo === Getrenntes Testziel vorbereiten ===
+if not exist "%TEST_ROOT%" mkdir "%TEST_ROOT%"
+if errorlevel 1 goto :error_publish
+if not exist "%PUBLISH%" mkdir "%PUBLISH%"
+if errorlevel 1 goto :error_publish
+if exist "%PUBLISH%\%PUBLIC_NAME%" goto :error_final_exists
 
 set "CANDIDATE=%PUBLISH%\%PUBLIC_NAME%.neu"
 if exist "%CANDIDATE%" del /f /q "%CANDIDATE%"
@@ -63,7 +68,15 @@ if exist "%CANDIDATE%" del /f /q "%CANDIDATE%"
 echo.
 echo === Zweisprachigen Ein-Datei-Installer bauen ===
 powershell -NoProfile -ExecutionPolicy Bypass -File "%PROJECT%\5 tools\installer\build-publish-installer.ps1" -SetupPath "%SETUP%" -OutputPath "%CANDIDATE%" -IconPath "%PROJECT%\4 assets\icon\serkal.ico"
-if errorlevel 1 goto :error_wrapper
+if errorlevel 1 goto :error_final_exists
+echo FEHLER: Der Test-Installer existiert bereits:
+echo "%PUBLISH%\%PUBLIC_NAME%"
+echo Es wurde nichts ueberschrieben.
+goto :error
+:error_hash
+echo FEHLER: Die SHA-256-Pruefsumme konnte nicht geschrieben werden.
+goto :error
+:error_wrapper
 if not exist "%CANDIDATE%" goto :error_wrapper
 
 for %%S in ("%SETUP%") do set "SETUP_SIZE=%%~zS"
@@ -73,8 +86,10 @@ if errorlevel 1 goto :error_wrapper
 
 echo.
 echo === Geprueften Release Candidate bereitstellen ===
-move /y "%CANDIDATE%" "%PUBLISH%\%PUBLIC_NAME%" >nul
+move "%CANDIDATE%" "%PUBLISH%\%PUBLIC_NAME%" >nul
 if errorlevel 1 goto :error_copy
+powershell -NoProfile -Command "$p='%PUBLISH%\%PUBLIC_NAME%'; $h=(Get-FileHash -Algorithm SHA256 -LiteralPath $p).Hash.ToLowerInvariant(); Set-Content -LiteralPath ($p + '.sha256') -Value ($h + '  ' + [IO.Path]::GetFileName($p)) -Encoding ascii"
+if errorlevel 1 goto :error_hash
 
 echo.
 echo ==========================================
@@ -123,7 +138,7 @@ echo FEHLER: Build beendet, aber SerKal_1.007f1_Setup.exe wurde nicht gefunden.
 echo Die vorhandene Publish-Datei bleibt unveraendert.
 goto :error
 :error_publish
-echo FEHLER: Publish-Ziel existiert nicht:
+echo FEHLER: Getrenntes Testziel konnte nicht angelegt werden:
 echo "%PUBLISH%"
 goto :error
 :error_wrapper
