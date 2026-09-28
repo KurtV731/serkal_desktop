@@ -2,7 +2,7 @@
 setlocal EnableExtensions
 set "SOURCE=C:\serkal_dev\serkal_desktop"
 set "BUILD=C:\serkal_dev\serkal_desktop_build_10007f1"
-set "TEST_ROOT=C:\PPD\SerKal\Testinstallationen"
+set "TEST_ROOT=C:\ppd\serkal\testinstallationen"
 set "PUBLISH=%TEST_ROOT%\1.007f1"
 set "REMOTE_BRANCH=installer-1.007f1"
 set "REQUIRED_CE=5185529b19251cc607733cab9bd8fba0cd33ea54"
