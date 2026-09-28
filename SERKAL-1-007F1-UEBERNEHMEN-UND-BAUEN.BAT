@@ -2,14 +2,15 @@
 setlocal EnableExtensions
 set "SOURCE=C:\serkal_dev\serkal_desktop"
 set "BUILD=C:\serkal_dev\serkal_desktop_build_10007f1"
-set "PUBLISH=C:\serkal-pages\up\download"
+set "TEST_ROOT=C:\SerKal-Testinstallationen"
+set "PUBLISH=%TEST_ROOT%\1.007f1"
 set "REMOTE_BRANCH=installer-1.007f1"
 set "REQUIRED_CE=5185529b19251cc607733cab9bd8fba0cd33ea54"
 set "REQUIRED_INSTALLER=6880a677a2bdac220f5dc49b3b9179c6a9ba2e6f"
 set "SOURCE_ICON=%SOURCE%\4 assets\icon\serkal.ico"
 set "BUILD_ICON=%BUILD%\4 assets\icon\serkal.ico"
 set "SETUP=%BUILD%\out\make\squirrel.windows\x64\SerKal_1.007f1_Setup.exe"
-set "FINAL=%PUBLISH%\serkal-desktop-1.007f1-prerelease-setup.exe"
+set "FINAL=%PUBLISH%\1.007f1-SerKal-Desktop-Testinstallation.exe"
 set "CANDIDATE=%FINAL%.neu"
 
 if not exist "%SOURCE%\.git" goto :error_project
@@ -62,20 +63,28 @@ echo === SerKal Desktop 1.007f1 bauen ===
 call npm run make
 if errorlevel 1 goto :error_make
 if not exist "%SETUP%" goto :error_setup
-if not exist "%PUBLISH%" goto :error_publish
+if not exist "%TEST_ROOT%" mkdir "%TEST_ROOT%"
+if errorlevel 1 goto :error_publish
+if not exist "%PUBLISH%" mkdir "%PUBLISH%"
+if errorlevel 1 goto :error_publish
 if exist "%CANDIDATE%" del /f /q "%CANDIDATE%"
 
 echo.
 echo === Zweisprachigen Ein-Datei-Installer bauen ===
 powershell -NoProfile -ExecutionPolicy Bypass -File "%BUILD%\5 tools\installer\build-publish-installer.ps1" -SetupPath "%SETUP%" -OutputPath "%CANDIDATE%" -IconPath "%BUILD_ICON%"
-if errorlevel 1 goto :error_wrapper
+if errorlevel 1 goto :error_hash
+echo FEHLER: Die SHA-256-Pruefsumme konnte nicht geschrieben werden.
+goto :error
+:error_wrapper
 if not exist "%CANDIDATE%" goto :error_wrapper
 for %%S in ("%SETUP%") do set "SETUP_SIZE=%%~zS"
 for %%C in ("%CANDIDATE%") do set "CANDIDATE_SIZE=%%~zC"
 powershell -NoProfile -Command "if ([int64]'%CANDIDATE_SIZE%' -le [int64]'%SETUP_SIZE%') { exit 1 }"
 if errorlevel 1 goto :error_wrapper
-move /y "%CANDIDATE%" "%FINAL%" >nul
+move "%CANDIDATE%" "%FINAL%" >nul
 if errorlevel 1 goto :error_copy
+powershell -NoProfile -Command "$p='%FINAL%'; $h=(Get-FileHash -Algorithm SHA256 -LiteralPath $p).Hash.ToLowerInvariant(); Set-Content -LiteralPath ($p + '.sha256') -Value ($h + '  ' + [IO.Path]::GetFileName($p)) -Encoding ascii"
+if errorlevel 1 goto :error_hash
 
 echo.
 echo ==========================================
@@ -142,7 +151,7 @@ goto :error
 echo FEHLER: SerKal_1.007f1_Setup.exe wurde nicht gefunden.
 goto :error
 :error_publish
-echo FEHLER: Publish-Ordner nicht gefunden: "%PUBLISH%"
+echo FEHLER: Getrenntes Testziel konnte nicht angelegt werden: "%PUBLISH%"
 goto :error
 :error_wrapper
 if exist "%CANDIDATE%" del /f /q "%CANDIDATE%"
