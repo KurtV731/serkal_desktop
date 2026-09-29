@@ -1,11 +1,27 @@
 const { FusesPlugin } = require('@electron-forge/plugin-fuses');
 const { FuseV1Options, FuseVersion } = require('@electron/fuses');
+const fs = require('fs');
+const path = require('path');
+
+// Die Desktop-OAuth-Clientkennung wird erst beim privaten Windows-Build
+// beigelegt und bleibt aus GitHub heraus. Persönliche Google-Tokens werden
+// niemals mitgeliefert, sondern pro Benutzer im SerKal-Profil gespeichert.
+const googleOauthSource = String(process.env.SERKAL_GOOGLE_OAUTH_FILE || '').trim()
+  || path.resolve(__dirname, '..', 'serkal_private', 'google_oauth_client.json');
+
+if (!fs.existsSync(googleOauthSource)) {
+  throw new Error(`Google-OAuth-Konfiguration für den Installer fehlt: ${googleOauthSource}`);
+}
 
 module.exports = {
   packagerConfig: {
     asar: true,
 
-    // SERKAL Desktop 1.0005:
+    // Außerhalb von app.asar in resources/google_oauth_client.json ablegen,
+    // damit eine Installation auf einem fremden Rechner Google einrichten kann.
+    extraResource: [googleOauthSource],
+
+    // SERKAL Desktop 1.007f2:
     // Nur Laufzeit-Abhaengigkeiten ins Paket nehmen. Forge/Electron-
     // Entwicklungswerkzeuge gehoeren nicht in app.asar.
     prune: true,
@@ -36,7 +52,7 @@ module.exports = {
         name: 'SerKalDesktop',
         authors: 'Kurt Vogelsaenger',
         description: 'SERKAL Desktop – Serienkalender',
-        setupExe: 'SerKal_1.0005_Setup.exe',
+        setupExe: 'SerKal_1.007f2_Setup.exe',
         setupIcon: '4 assets/icon/serkal.ico',
 
         // Squirrel versucht sonst zusaetzlich, Update.exe mit demselben Icon
