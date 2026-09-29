@@ -1394,6 +1394,10 @@ function googleOauthTokenPath_() {
 function googleOauthCredentialsPath_() {
     const candidates = [
         String(process.env.SERKAL_GOOGLE_OAUTH_FILE || "").trim(),
+        // In einer installierten Fassung liegt die beim Build beigelegte
+        // Desktop-OAuth-Konfiguration direkt im Electron-Ressourcenordner.
+        // Persönliche Tokens bleiben weiterhin ausschließlich im Benutzerprofil.
+        path.join(process.resourcesPath, "google_oauth_client.json"),
         path.resolve(app.getAppPath(), "..", "serkal_private", "google_oauth_client.json"),
         "C:\\serkal_dev\\serkal_private\\google_oauth_client.json"
     ].filter(Boolean);
@@ -1408,7 +1412,7 @@ function googleOauthCredentialsPath_() {
 function googleOauthClientConfig_() {
     const file = googleOauthCredentialsPath_();
     if (!file || !fs.existsSync(file)) {
-        throw new Error("Google-OAuth-Datei nicht gefunden: C:\\serkal_dev\\serkal_private\\google_oauth_client.json");
+        throw new Error("Google-OAuth-Konfiguration ist in dieser SerKal-Installation nicht enthalten.");
     }
     const raw = JSON.parse(fs.readFileSync(file, "utf8"));
     const cfg = raw.installed || raw.web || raw;
