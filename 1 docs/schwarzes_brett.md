@@ -1792,3 +1792,56 @@ Klarstellung von Kurt: Der gesamte neue PPD-Pfad wird einschließlich aller
 Projekt- und Unterordner konsequent in Kleinbuchstaben geschrieben. Verbindlich ist daher
 `C:\ppd\serkal\testinstallationen\<Version>\`; entsprechend werden spätere
 Projektordner beispielsweise unter `C:\ppd\serkal` und `C:\ppd\hasa` angelegt.
+
+
+### 2026-09-29 – Kurt/CE – Fremdrechner-Einrichtung für 1.007f2 korrigiert
+
+Status: CE-CODE FERTIG UND FREIGEGEBEN / INSTALLER DARF 1.007f2 BAUEN
+
+VelcroFists vollständiger Ersttest auf einem fremden Windows-Rechner hat den konkreten
+Installationsfehler nachgewiesen: SerKal 1.007f1 suchte seine Google-OAuth-Konfiguration
+weiterhin ausschließlich in der privaten Entwicklungsumgebung, zuletzt unter
+`C:\serkal_dev\serkal_private\google_oauth_client.json`. Diese Datei konnte auf dem
+Rechner eines Testers nicht vorhanden sein. Das lokale Archiv funktionierte, ein
+Google-Kalendereintrag musste jedoch bereits vor der Anmeldung scheitern.
+
+Korrektur auf `serkal-0.0.5-archiv-start`:
+
+1. Eine installierte Fassung sucht die beim Build beigelegte Desktop-OAuth-Konfiguration
+   zuerst als `resources/google_oauth_client.json` in ihrem eigenen Electron-Paket.
+2. `forge.config.js` übernimmt diese Konfiguration beim privaten Windows-Build als
+   externe Programmressource. Quelle ist wahlweise `SERKAL_GOOGLE_OAUTH_FILE` oder der
+   weiterhin nicht in GitHub liegende private Entwicklungsordner.
+3. Fehlt die Datei bereits beim Build, bricht der Build mit einer eindeutigen Fehlermeldung
+   ab. Es kann damit kein scheinbar fertiger Testinstaller ohne Google-Grundkonfiguration
+   mehr entstehen.
+4. Persönliche Google-Tokens, Konten und Kalenderkennungen werden ausdrücklich nicht
+   eingebaut. Sie entstehen weiterhin erst durch die Anmeldung des jeweiligen Nutzers in
+   dessen lokalem SerKal-Profil.
+5. Version und Setupname sind auf technisch `1.0.7-f2`, sichtbar `1.007f2` und
+   `SerKal_1.007f2_Setup.exe` angehoben.
+6. Ein neuer Regressionstest prüft Ressourcenpfad, private Buildquelle, Versionsstand und
+   dass keine konkrete Client-ID oder kein Client-Secret im öffentlichen Forge-Code steht.
+
+CE-Freigabestand: `ea35d2394d8ddc6e78f14e526238cd6fd66e3010`.
+
+Prüfungen bestanden: Archiv-Smoke-Test, Wartungs-Smoke-Test, DE/EN-Eintragsweg,
+globale Sprache, Kalenderreparatur 1.007f1, neuer OAuth-Pakettest sowie Syntaxprüfung von
+Backend und Testdatei.
+
+Auftrag und ausdrückliches Go an Installer-Chatty:
+
+- Grundlage ist der CE-Endstand einschließlich
+  `ea35d2394d8ddc6e78f14e526238cd6fd66e3010`;
+- einen neuen nicht öffentlichen Testinstaller 1.007f2 bauen;
+- vor dem Paketieren muss die private OAuth-Quelldatei vorhanden sein; der Build muss bei
+  Fehlen abbrechen;
+- das fertige Paket kontrollieren: `resources/google_oauth_client.json` muss enthalten
+  sein, persönliche Token-Dateien dürfen nicht enthalten sein;
+- Ablage ausschließlich unter
+  `C:\ppd\serkal\testinstallationen\1.007f2\1.007f2-SerKal-Desktop-Testinstallation.exe`
+  samt SHA-256-Datei;
+- zunächst nur Übergabe an Kurt und VelcroFist; keine öffentliche Veröffentlichung;
+- Kurts Nachtest: Neuinstallation beziehungsweise Nullstart, Google auswählen, Konto
+  anmelden, SerKal-Kalender automatisch finden oder anlegen und einen echten Termin
+  speichern. Kein manuelles Anlegen eines Kalenders und kein Kopieren privater Dateien.
