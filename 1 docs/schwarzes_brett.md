@@ -1845,3 +1845,32 @@ Auftrag und ausdrückliches Go an Installer-Chatty:
 - Kurts Nachtest: Neuinstallation beziehungsweise Nullstart, Google auswählen, Konto
   anmelden, SerKal-Kalender automatisch finden oder anlegen und einen echten Termin
   speichern. Kein manuelles Anlegen eines Kalenders und kein Kopieren privater Dateien.
+
+
+### 2026-09-30 – Kurt an CE – Sprachauftrag verschärft
+
+Status: VERBINDLICHE ERGÄNZUNG ZUR VOLLSTÄNDIGEN SPRACHINVENTUR
+
+Kurt präzisiert den bereits vorgemerkten Auftrag zur zentralen Sprachverwaltung:
+Kein Text, der einem Benutzer sichtbar werden kann, darf künftig als einzelner fest
+eingebauter deutscher Text im Programm verbleiben.
+
+Verbindliche Auslegung:
+
+1. Jeder sichtbare Text erhält einen gemeinsamen stabilen Sprachschlüssel und mindestens
+   eine vollständige deutsche sowie englische Fassung.
+2. Dies gilt für die normale Oberfläche ebenso wie für Assistenten, Schaltflächen,
+   Erklärungen, Hilfen, Bestätigungen, Warnungen, Fehler, Abbruchwege, Google-Anmeldung,
+   Browser-Rückmeldungen, Installertexte und alle im SerKal-Fenster sichtbaren Logtexte.
+3. Seltene Sonderfälle sind keine Ausnahme. Auch ein Text, der nur bei einem fehlenden
+   Schlüssel, einer fehlenden Datei, einer abgebrochenen Anmeldung oder einem unerwarteten
+   Serverergebnis erscheint, muss über dasselbe Sprachsystem ausgegeben werden.
+4. Bei englischer Oberfläche darf kein einzelner deutscher Benutzertext sichtbar werden;
+   bei deutscher Oberfläche kein einzelner englischer Bedienungstext.
+5. Nur rein interne technische Kennungen oder Diagnosedaten, die niemals als Text für den
+   Benutzer angezeigt werden, dürfen sprachneutral beziehungsweise technisch fest bleiben.
+6. Automatische Tests müssen neben identischen DE/EN-Schlüsselmengen gezielt die seltenen
+   Fehler- und Abbruchwege sowie die sichtbare Loganzeige prüfen.
+
+Diese Ergänzung gehört zum vollständigen CE-Arbeitspaket der Sprachbereinigung und darf
+nicht als spätere kosmetische Nacharbeit abgetrennt werden.
