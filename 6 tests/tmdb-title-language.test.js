@@ -1,6 +1,8 @@
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
 const path = require('node:path');
 const titles = require(path.join(__dirname, '..', '2 src', 'common', 'tmdb-title.js'));
+const html = fs.readFileSync(path.join(__dirname, '..', '2 src', 'frontend', 'index.html'), 'utf8');
 
 const koreanOriginal = {
   name:'나를 충전해줘',
@@ -42,5 +44,7 @@ const englishDetails = {
 result = titles.resolve(noGermanTitle, englishDetails, null, 'de');
 assert.equal(result.de, 'Take Charge of My Heart');
 assert.equal(result.en, 'Take Charge of My Heart');
+
+assert.match(html, /inpTitle\.value\s*=\s*localizedTitleFromAny_\(state\.currentPreview/);
 
 console.log('SERKAL TMDB localized title selection test: OK');

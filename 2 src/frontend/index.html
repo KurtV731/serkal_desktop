@@ -7181,6 +7181,13 @@ function enrichAndRender(d) {
     state.archivSelected = null;
     state.currentPreview = mergePreviewData_(state && state.currentPreview ? state.currentPreview : null, d);
 
+    // Nach erfolgreicher Auflösung soll im Suchfeld nicht die möglicherweise
+    // verkürzte oder falsch geschriebene Anfrage stehen bleiben, sondern der
+    // tatsächlich gefundene Titel in der aktuell gewählten Sprache.
+    try {
+      if (inpTitle) inpTitle.value = localizedTitleFromAny_(state.currentPreview, inpTitle.value || '');
+    } catch (_eTitle) {}
+
     if (
       state &&
       Array.isArray(state.tmdbResults) &&
