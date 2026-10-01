@@ -401,6 +401,63 @@ function archiveFileName_(title, year) {
     return safeTitle + (safeYear ? " (" + safeYear + ")" : "") + ".txt";
 }
 
+function archiveDataFiles_(folder) {
+    return fs.readdirSync(folder).filter(fileName => {
+        const lower = String(fileName || "").toLowerCase();
+        if (!lower.endsWith(".txt") || lower.startsWith("!!serkal_log_") || lower.startsWith("fanal_")) return false;
+        try { return fs.statSync(path.join(folder, fileName)).isFile(); }
+        catch (_err) { return false; }
+    });
+}
+
+function archiveFilesForTmdb_(folder, tmdbId) {
+    const wanted = Number(tmdbId || 0);
+    if (!wanted) return [];
+    return archiveDataFiles_(folder).map(fileName => {
+        const fullPath = path.join(folder, fileName);
+        const lines = fs.readFileSync(fullPath, "utf8").split(/\r?\n/).map(x => String(x || "").trim()).filter(Boolean);
+        return { fileName, fullPath, lines, matches:lines.some(line => Number(archiveField_(line, "tmdb") || 0) === wanted) };
+    }).filter(item => item.matches);
+}
+
+function archiveLineScore_(line) {
+    return (archiveField_(line, "note") ? 1000 : 0) +
+        (Number(archiveField_(line, "manualFlags") || 0) ? 500 : 0) +
+        (archiveField_(line, "datesDE") ? 100 : 0) +
+        (archiveField_(line, "descDE") ? 20 : 0) +
+        (archiveField_(line, "descEN") ? 20 : 0) +
+        String(line || "").length / 10000;
+}
+
+function archiveMergeLines_(sources) {
+    const bySeason = new Map();
+    for (const source of sources) {
+        for (const line of source.lines || []) {
+            const match = String(line || "").match(/^(S\d{1,2})(?:\b|;|\|)/i);
+            if (!match) continue;
+            const key = String(match[1]).toUpperCase();
+            const previous = bySeason.get(key);
+            if (!previous || archiveLineScore_(line) > archiveLineScore_(previous)) bySeason.set(key, line);
+        }
+    }
+    return Array.from(bySeason.values());
+}
+
+function archiveMoveMergedSource_(folder, sourceFileName) {
+    const sourcePath = path.join(folder, sourceFileName);
+    if (!fs.existsSync(sourcePath)) return;
+    const backupFolder = path.join(folder, "!!SERKAL_DUBLETTEN_SICHERUNG");
+    fs.mkdirSync(backupFolder, { recursive:true });
+    const parsed = path.parse(sourceFileName);
+    let targetPath = path.join(backupFolder, sourceFileName);
+    let counter = 1;
+    while (fs.existsSync(targetPath)) {
+        targetPath = path.join(backupFolder, parsed.name + "_" + counter + parsed.ext);
+        counter++;
+    }
+    fs.renameSync(sourcePath, targetPath);
+}
+
 function archiveEncode_(value) {
     return encodeURIComponent(String(value || "").trim());
 }
@@ -580,12 +637,9 @@ function archiveLoad_() {
     try {
         if (!archiveEnsureFolder_(folder)) return { ok:false, message:bt_("ARCHIVE_FOLDER_MISSING", { folder }), daten:{entries:[],meta:{source:"missing-folder"}}, count:0 };
         const entries = [];
-        for (const fileName of fs.readdirSync(folder)) {
-            const lower = fileName.toLowerCase();
-            if (!lower.endsWith(".txt") || lower.startsWith("!!serkal_log_") || lower.startsWith("fanal_")) continue;
+        for (const fileName of archiveDataFiles_(folder)) {
             const fullPath = path.join(folder,fileName);
             const stats = fs.statSync(fullPath);
-            if (!stats.isFile()) continue;
             const lines = fs.readFileSync(fullPath,"utf8").split(/\r?\n/).map(x=>String(x||"").trim()).filter(Boolean);
             for (const line of lines) {
                 const entry = archiveEntryFromLine_(fileName,stats,line);
@@ -614,11 +668,24 @@ function archiveInsert_(payload) {
         const folder = archiveFolderPath_();
         if (!folder) return { ok:false, message:bt_("ARCHIVE_FOLDER_UNSET") };
         if (!archiveEnsureFolder_(folder)) return { ok:false, message:bt_("ARCHIVE_FOLDER_MISSING", { folder }) };
-        const fileName = archiveFileName_(title,year);
+        const desiredFileName = archiveFileName_(title,year);
+        const tmdbMatches = archiveFilesForTmdb_(folder, tmdbId);
+        const desiredPath = path.join(folder, desiredFileName);
+        const desiredLines = fs.existsSync(desiredPath)
+            ? fs.readFileSync(desiredPath,"utf8").split(/\r?\n/).map(x=>String(x||"").trim()).filter(Boolean)
+            : [];
+        const desiredHasOtherTmdb = desiredLines.some(line => {
+            const lineId = Number(archiveField_(line,"tmdb") || 0);
+            return lineId && tmdbId && lineId !== tmdbId;
+        });
+        const fileName = desiredHasOtherTmdb && tmdbMatches.length ? tmdbMatches[0].fileName : desiredFileName;
         const fullPath = path.join(folder,fileName);
         const label = "S" + String(seasonNumber).padStart(2,"0");
-        const oldText = fs.existsSync(fullPath) ? fs.readFileSync(fullPath,"utf8") : "";
-        const oldLines = oldText.split(/\r?\n/).map(x=>String(x||"").trim()).filter(Boolean);
+        const sources = tmdbMatches.slice();
+        if (fs.existsSync(fullPath) && !sources.some(item => path.resolve(item.fullPath) === path.resolve(fullPath))) {
+            sources.push({ fileName, fullPath, lines:fs.readFileSync(fullPath,"utf8").split(/\r?\n/).map(x=>String(x||"").trim()).filter(Boolean) });
+        }
+        const oldLines = archiveMergeLines_(sources);
         const oldLine = oldLines.find(x=>new RegExp("^"+label+"(?:\\b|;|\\|)","i").test(x)) || "";
         let flags = Number(archiveField_(oldLine,"flags") || 0) || 0;
         const manualFlags = Number(archiveField_(oldLine,"manualFlags") || 0) || 0;
@@ -650,7 +717,13 @@ function archiveInsert_(payload) {
         const tempPath = fullPath+".serkal-tmp";
         fs.writeFileSync(tempPath,kept.join("\n")+"\n","utf8");
         fs.renameSync(tempPath,fullPath);
-        return { ok:true, message:bt_("ARCHIVE_SAVED", { file:fileName, season:label }), fileName, staffelLabel:label, archiv:archiveLoad_() };
+        const mergedFiles = [];
+        for (const source of tmdbMatches) {
+            if (path.resolve(source.fullPath) === path.resolve(fullPath)) continue;
+            archiveMoveMergedSource_(folder, source.fileName);
+            mergedFiles.push(source.fileName);
+        }
+        return { ok:true, message:bt_("ARCHIVE_SAVED", { file:fileName, season:label }), fileName, staffelLabel:label, mergedFiles, archiv:archiveLoad_() };
     } catch (err) {
         return { ok:false, message:bt_("ARCHIVE_SAVE_FAILED", { error:err.message }) };
     }

@@ -93,4 +93,35 @@ assert.equal(text.split(/\r?\n/).filter(line=>/^S02(?:\b|;|\|)/.test(line)).leng
 assert.match(text,/eps=9/);
 assert.match(text,/10\.09\./);
 
+// Dieselbe Serie darf unter einem geänderten/lokalisierten Titel nicht als
+// zweite Archivdatei weiterleben. Maßgeblich ist die TMDB-ID.
+fs.writeFileSync(path.join(archivePath,"나를 충전해줘 (2026).txt"),
+    "S01; startOriginal=2026-10-02; eps=12; tmdb=289423; titleOriginal=%EB%82%98%EB%A5%BC; dates=02.10.; note=Alte%20Notiz; flags=32\n",
+    "utf8");
+fs.writeFileSync(path.join(archivePath,"Take Charge of My Heart (2026).txt"),
+    "S02; startOriginal=2027-01-10; eps=10; tmdb=289423; titleOriginal=Take%20Charge%20of%20My%20Heart; dates=10.01.; flags=32\n",
+    "utf8");
+
+result = api.archiveInsert_({
+    title:"Take Charge of My Heart",
+    year:"2026",
+    seasonNumber:1,
+    episodeCount:12,
+    tmdbId:289423,
+    episodeDates:["2026-10-09"]
+});
+assert.equal(result.ok,true,result.message);
+assert.deepEqual(Array.from(result.mergedFiles),["나를 충전해줘 (2026).txt"]);
+const localizedPath = path.join(archivePath,"Take Charge of My Heart (2026).txt");
+assert.equal(fs.existsSync(localizedPath),true);
+assert.equal(fs.existsSync(path.join(archivePath,"나를 충전해줘 (2026).txt")),false);
+text = fs.readFileSync(localizedPath,"utf8");
+assert.match(text,/^S01; startOriginal=2026-10-09;/m);
+assert.match(text,/note=Alte%20Notiz/);
+assert.match(text,/^S02; startOriginal=2027-01-10;/m);
+const sameSeries = api.archiveLoad_().daten.entries.filter(entry=>entry.tmdbId===289423);
+assert.equal(sameSeries.length,2);
+assert.equal(new Set(sameSeries.map(entry=>entry.fileName)).size,1);
+assert.equal(fs.existsSync(path.join(archivePath,"!!SERKAL_DUBLETTEN_SICHERUNG","나를 충전해줘 (2026).txt")),true);
+
 console.log("SERKAL archive smoke test: OK");
