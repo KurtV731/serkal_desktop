@@ -1740,37 +1740,37 @@
     <div class="main">
       <!-- ===== Spalte 1: SUCHE & EINTRAG ===== -->
       <section class="panel" id="pSearch">
-        <div class="panelHeader">SUCHE &amp; EINTRAG</div>
+        <div class="panelHeader"></div>
         <div class="panelBody">
 
           <div class="fieldRow">
             <label for="inpTitle" class="fieldLabel">Titel</label>
-            <input id="inpTitle" class="fieldTitle" type="text" autocomplete="off" placeholder="Titel eingeben …" />
-            <input id="inpYear" class="fieldYear" type="number" inputmode="numeric" placeholder="Jahr" title="Optional: Jahr (YYYY) – schränkt Treffer ein" />
-            <input id="inpSeason" class="fieldSeason" type="number" inputmode="numeric" placeholder="S" title="Optional: Staffelnummer – erzwingt Sxx" />
+            <input id="inpTitle" class="fieldTitle" type="text" autocomplete="off" placeholder="" />
+            <input id="inpYear" class="fieldYear" type="number" inputmode="numeric" placeholder="" title="" />
+            <input id="inpSeason" class="fieldSeason" type="number" inputmode="numeric" placeholder="S" title="" />
           </div>
 
-          <div class="btnRow actionRow" aria-label="Aktionen">
+          <div class="btnRow actionRow" aria-label="">
             <button class="btnSmall" id="btnReset" type="button" title="Reset">✖ Reset</button>
-            <button class="btnPrimary" id="btnInsert" type="button" title="Eintragen">🗓 Eintrag</button>
+            <button class="btnPrimary" id="btnInsert" type="button" title=""></button>
 
-            <div class="hitNavInline" id="hitNavRow" aria-label="Treffersteuerung" title="Treffer wechseln">
-              <button class="btnSmall" id="btnPrev" type="button" title="Vorheriger Treffer">◀</button>
-              <button class="btnSmall" id="btnNext" type="button" title="Nächster Treffer">▶</button>
+            <div class="hitNavInline" id="hitNavRow" aria-label="" title="">
+              <button class="btnSmall" id="btnPrev" type="button" title="">◀</button>
+              <button class="btnSmall" id="btnNext" type="button" title="">▶</button>
             </div>
           </div>
 
-          <div class="previewFixed" id="tmdbPreview" aria-label="Vorschau">
+          <div class="previewFixed" id="tmdbPreview" aria-label="">
             <div class="posterBox" id="posterBox">Pic</div>
             <div class="previewText" id="previewText">
-              <div class="hint">Noch keine Suche.</div>
+              <div class="hint"></div>
             </div>
           </div>
 
           <div class="statusZone" id="globalStatus">
             <div class="spinner" id="globalSpinner" aria-hidden="true"></div>
             <div class="statusBox" id="searchHint">Bereit.</div>
-            <div class="statusHitCount" id="hitCountText" aria-label="Trefferinfo"></div>
+            <div class="statusHitCount" id="hitCountText" aria-label=""></div>
           </div>
 
         </div>
@@ -1784,14 +1784,14 @@
           <div class="block detailsStatusBlock">
             <div class="blockHead" id="hdDetStatus">Status</div>
             <div class="blockBody" id="detailsStatus">
-              <div class="hint">Auswahl aus Archiv oder Suche.</div>
+              <div class="hint"></div>
             </div>
           </div>
 
           <div class="block">
             <div class="blockHead" id="hdDetSummary">Zusammenfassung</div>
             <div class="blockBody" id="detailsSummary">
-              <div class="hint">Noch keine Auswahl.</div>
+              <div class="hint"></div>
             </div>
           </div>
 
@@ -1809,9 +1809,9 @@
 
           <div class="block">
             <div class="blockHead noteBlockHead">
-              <span id="hdDetNote">Eigene Notiz</span>
+              <span id="hdDetNote"></span>
               <button class="btnSmall noteHelpToggle" id="btnNoteSyntaxHelp" type="button"
-                title="Hilfe zu auswertbaren Notizzeilen" aria-label="Hilfe zu auswertbaren Notizzeilen"
+                title="" aria-label=""
                 aria-expanded="false">?</button>
             </div>
             <div class="blockBody">
@@ -1833,18 +1833,18 @@
 
           <div class="archivHeaderRight">
             <!-- Umschalter: Status ? A–Z -->
-            <button class="btnSmall" id="btnSortToggle" type="button" title="Sortierung umschalten (Status / A–Z)">Status</button>
+            <button class="btnSmall" id="btnSortToggle" type="button" title="">Status</button>
 
-            <span class="pillCount" id="archivCount" title="Anzahl Archiv-Einträge">0</span>
+            <span class="pillCount" id="archivCount" title="">0</span>
 
-            <button class="btnDanger btnSmall" id="btnDeleteFile" type="button" title="Archivdatei löschen">🗑 Löschen</button>
+            <button class="btnDanger btnSmall" id="btnDeleteFile" type="button" title=""></button>
           </div>
         </div>
 
         <div class="panelBody">
           <!-- keine Filter-Chips mehr -->
 
-          <div class="list" id="archivList" aria-label="Archivliste">
+          <div class="list" id="archivList" aria-label="">
             <!-- Einträge werden per apiLadeArchivDaten gefüllt -->
           </div>
 
@@ -1855,15 +1855,15 @@
     </div>
     <!-- ===================== Status-/Schalterleiste unten ===================== -->
     <div class="debugDock" id="dbgDock">
-      <div class="langSwitch" id="langSwitch" aria-label="Sprache / Language">
-        <button id="btnLangDe" class="langBtn" type="button" title="Deutsch" aria-label="Deutsch">
+      <div class="langSwitch" id="langSwitch" aria-label="">
+        <button id="btnLangDe" class="langBtn" type="button" title="" aria-label="">
           <svg class="langFlag" viewBox="0 0 30 18" aria-hidden="true">
             <rect width="30" height="6" y="0" fill="#000"></rect>
             <rect width="30" height="6" y="6" fill="#dd0000"></rect>
             <rect width="30" height="6" y="12" fill="#ffce00"></rect>
           </svg>
         </button>
-        <div id="langToggleTrack" class="langToggleTrack" title="Sprache umschalten">
+        <div id="langToggleTrack" class="langToggleTrack" title="">
           <div id="langToggleKnob" class="langToggleKnob"></div>
         </div>
         <button id="btnLangEn" class="langBtn" type="button" title="English" aria-label="English">
@@ -1877,24 +1877,24 @@
         </button>
       </div>
 
-      <button id="btnWartung" class="btnSmall" type="button" title="Wartung / Maintenance">🔧 Wartung</button>
-      <button id="btnCalendarDock" class="btnSmall" type="button" title="Google Kalender öffnen">📅 Kalender</button>
-      <button id="btnThemeDock" class="btnSmall" type="button" title="Farbschema umschalten">🌙 Dark</button>
+      <button id="btnWartung" class="btnSmall" type="button" title=""></button>
+      <button id="btnCalendarDock" class="btnSmall" type="button" title=""></button>
+      <button id="btnThemeDock" class="btnSmall" type="button" title="">🌙 Dark</button>
       <!-- <button id="btnAnalyseDock" class="btnSmall" type="button" title="fanal / Analyse">🧠 Analyse</button> -->
-      <button id="btnLogDock" class="btnSmall" type="button" title="Log ansehen">📜 Log</button>
-      <button id="btnSaveDock" class="btnSmall btnPrimary" type="button" title="Speichern">💾 Speichern</button>
+      <button id="btnLogDock" class="btnSmall" type="button" title="">📜 Log</button>
+      <button id="btnSaveDock" class="btnSmall btnPrimary" type="button" title="">💾 Speichern</button>
       <span id="saveLamp" style="width:16px;height:16px;border-radius:50%;display:inline-block;background:#2ecc71;border:1px solid rgba(0,0,0,0.25);"></span>
-      <span id="dockStatus" class="dockStatus">Alles gespeichert</span>
+      <span id="dockStatus" class="dockStatus"></span>
     </div>
 
 
-    <div id="logPanel" class="logPanel" aria-label="Loganzeige">
+    <div id="logPanel" class="logPanel" aria-label="">
       <div id="logPanelResizeHandle" class="logPanelResizeHandle" role="separator" aria-orientation="horizontal"
-        aria-label="Logfensterhöhe ändern" title="Ziehen: Höhe des Logfensters ändern" tabindex="0"></div>
+        aria-label="" title="" tabindex="0"></div>
       <div class="logPanelHead">
         <span id="logPanelTitle">📜 Log</span>
         <div class="logPanelBtns">
-          <div class="logDayRow" id="logDayRow" aria-label="Logtag wählen">
+          <div class="logDayRow" id="logDayRow" aria-label="">
             <button class="btnSmall logDayBtn" data-log-day="mo" type="button">Mo</button>
             <button class="btnSmall logDayBtn" data-log-day="di" type="button">Di</button>
             <button class="btnSmall logDayBtn" data-log-day="mi" type="button">Mi</button>
@@ -1903,24 +1903,24 @@
             <button class="btnSmall logDayBtn" data-log-day="sa" type="button">Sa</button>
             <button class="btnSmall logDayBtn" data-log-day="so" type="button">So</button>
           </div>
-          <input id="logSearchInput" class="logSearchInput" type="text" placeholder="Im Log suchen …" autocomplete="off" />
-          <button id="btnLogFindNext" class="btnSmall" type="button" title="Nächsten Treffer suchen">🔎 Weiter</button>
-          <button id="btnLogSelectAll" class="btnSmall" type="button" title="Den gesamten sichtbaren Logtext markieren">☑ Alles markieren</button>
-          <button id="btnLogCopy" class="btnSmall" type="button" title="Log oder Auswahl kopieren">📋 Kopieren</button>
-          <button id="btnLogDeleteSelection" class="btnSmall" type="button" title="Markierten Text dauerhaft aus der ausgewählten TXT-Logdatei löschen">✂ Markiertes</button>
-          <button id="btnLogClearView" class="btnSmall" type="button" title="Das ausgewählte TXT-Log vollständig leeren">🧹 Log leeren</button>
-          <button id="btnLogRefresh" class="btnSmall" type="button" title="Log neu laden">↻ Neu laden</button>
-          <button id="btnLogHelp" class="btnSmall" type="button" title="Funktionen des Logfensters erklären" aria-label="Hilfe zu den Logfunktionen">?</button>
-          <button id="btnLogClose" class="btnSmall" type="button" title="Logfenster schließen">✖</button>
+          <input id="logSearchInput" class="logSearchInput" type="text" placeholder="" autocomplete="off" />
+          <button id="btnLogFindNext" class="btnSmall" type="button" title="">🔎 Weiter</button>
+          <button id="btnLogSelectAll" class="btnSmall" type="button" title="">☑ Alles markieren</button>
+          <button id="btnLogCopy" class="btnSmall" type="button" title="">📋 Kopieren</button>
+          <button id="btnLogDeleteSelection" class="btnSmall" type="button" title="">✂ Markiertes</button>
+          <button id="btnLogClearView" class="btnSmall" type="button" title="">🧹 Log leeren</button>
+          <button id="btnLogRefresh" class="btnSmall" type="button" title="">↻ Neu laden</button>
+          <button id="btnLogHelp" class="btnSmall" type="button" title="" aria-label="">?</button>
+          <button id="btnLogClose" class="btnSmall" type="button" title="">✖</button>
         </div>
       </div>
       <div class="logPanelBody">
-        <pre id="logPanelPre" class="logPre">Log wird geladen …</pre>
+        <pre id="logPanelPre" class="logPre"></pre>
       </div>
-      <div id="logPanelMiniStatus" class="logPanelMiniStatus">Markieren und Strg+C funktionieren direkt. Löschfunktionen ändern die ausgewählte TXT-Logdatei.</div>
+      <div id="logPanelMiniStatus" class="logPanelMiniStatus"></div>
     </div>
 
-    <div id="posterOverlay" class="posterOverlay" aria-label="Poster groß anzeigen" title="Zum Schließen klicken">
+    <div id="posterOverlay" class="posterOverlay" aria-label="" title="">
       <div class="posterOverlayInner">
         <img id="posterOverlayImg" src="" alt="" />
       </div>
@@ -1931,7 +1931,7 @@
       <div id="skFanalPanel">
         <div id="skFanalBar">
           <div id="skFanalTitle">Fanal Analyse</div>
-          <button id="skFanalCloseBtn" type="button">← Zurück zu SerKal</button>
+          <button id="skFanalCloseBtn" type="button"></button>
         </div>
         <iframe id="skFanalFrame" title="Fanal Analyse"></iframe>
       </div>
@@ -1952,7 +1952,7 @@
       </div>
       <div id="skDialogText" class="skDialogText"></div>
       <div class="skDialogActions">
-        <button id="skDialogCancel" type="button">Abbrechen</button>
+        <button id="skDialogCancel" type="button"></button>
         <button id="skDialogConfirm" class="skDialogPrimary" type="button">OK</button>
       </div>
     </section>
@@ -1983,38 +1983,55 @@
   <div id="skCalendarSetupOverlay" class="skCalendarSetupOverlay" aria-hidden="true">
     <section class="skCalendarSetupBox" role="dialog" aria-modal="true" aria-labelledby="skCalendarSetupTitle">
       <div id="skSetupProgress" class="skSetupProgress"></div>
-      <div class="skSetupLanguage" aria-label="Sprache / Language"><span id="skSetupLanguageLabel" class="skSetupLanguageLabel">Sprache:</span><button id="skSetupLangDe" type="button" lang="de">DE</button><button id="skSetupLangEn" type="button" lang="en">EN</button></div>
-      <h2 id="skCalendarSetupTitle">SerKal einrichten</h2>
+      <div class="skSetupLanguage" aria-label=""><span id="skSetupLanguageLabel" class="skSetupLanguageLabel"></span><button id="skSetupLangDe" type="button" lang="de">DE</button><button id="skSetupLangEn" type="button" lang="en">EN</button></div>
+      <h2 id="skCalendarSetupTitle"></h2>
 
       <div id="skSetupTmdbStep" class="skSetupStep" data-sk-setup-step="tmdb">
-        <p id="skSetupTmdbIntro" class="skCalendarSetupIntro">Zuerst dein persönlicher kostenloser TMDB-API-Key. Deine Eingabe bleibt bis zum letzten Schritt nur ein Entwurf und wird noch nicht gespeichert.</p>
-        <label id="skSetupTmdbLabel" class="skSetupFieldLabel" for="skSetupTmdbKey">TMDB-API-Key</label>
-        <input id="skSetupTmdbKey" class="skSetupKeyInput" type="text" autocomplete="off" spellcheck="false" placeholder="Persönlicher TMDB-API-Key (v3 auth)">
+        <p id="skSetupTmdbIntro" class="skCalendarSetupIntro"></p>
+        <label id="skSetupTmdbLabel" class="skSetupFieldLabel" for="skSetupTmdbKey"></label>
+        <input id="skSetupTmdbKey" class="skSetupKeyInput" type="text" autocomplete="off" spellcheck="false" placeholder="">
         <div id="skSetupTmdbError" class="skSetupError"></div>
-        <div class="skCalendarSetupActions"><button id="skSetupTmdbCreate" type="button">TMDB-Key jetzt erstellen</button><button id="skSetupTmdbHelp" type="button">Hilfe öffnen</button><button id="skSetupTmdbNext" type="button" disabled>Weiter</button></div>
+        <div class="skCalendarSetupActions"><button id="skSetupTmdbCreate" type="button"></button><button id="skSetupTmdbHelp" type="button"></button><button id="skSetupTmdbNext" type="button" disabled></button></div>
       </div>
 
       <div id="skSetupCalendarStep" class="skSetupStep" data-sk-setup-step="calendar" hidden>
-        <p id="skSetupCalendarIntro" class="skCalendarSetupIntro">Wähle, was SerKal mit deinen Terminen tun soll. Du kannst diese Einstellung später jederzeit über „Kalender“ ändern.</p>
-        <label class="skCalendarChoice"><input type="radio" name="skCalendarMode" value="google"><span class="skCalendarChoiceText"><strong id="skChoiceGoogleTitle">Google Kalender (empfohlen)</strong><span id="skChoiceGoogleHint" class="skCalendarChoiceHint">SerKal trägt Termine automatisch in den Kalender „SerKal“ ein. Die Google-Anmeldung folgt beim ersten tatsächlichen Eintrag.</span></span></label>
-        <div id="skCalendarGoogleData" class="skCalendarGoogleData"><div id="skCalendarGoogleHint" class="skCalendarHint">Eine Kalender-ID musst du nicht eingeben. SerKal findet oder erstellt den Kalender „SerKal“ automatisch.</div></div>
-        <label class="skCalendarChoice"><input type="radio" name="skCalendarMode" value="none"><span class="skCalendarChoiceText"><strong id="skChoiceNoneTitle">Keinen Kalender verwenden</strong><span id="skChoiceNoneHint" class="skCalendarChoiceHint">SerKal führt nur dein Serienarchiv und legt keine Kalendertermine an.</span></span></label>
-        <p id="skCalendarExportHint" class="skCalendarHint">ICS ist keine Kalenderwahl, sondern ein zusätzliches Exportformat. Sobald der Export verfügbar ist, fragt SerKal nach einem Eintrag gesondert danach.</p>
+        <p id="skSetupCalendarIntro" class="skCalendarSetupIntro"></p>
+        <label class="skCalendarChoice"><input type="radio" name="skCalendarMode" value="google"><span class="skCalendarChoiceText"><strong id="skChoiceGoogleTitle"></strong><span id="skChoiceGoogleHint" class="skCalendarChoiceHint"></span></span></label>
+        <div id="skCalendarGoogleData" class="skCalendarGoogleData"><div id="skCalendarGoogleHint" class="skCalendarHint"></div></div>
+        <label class="skCalendarChoice"><input type="radio" name="skCalendarMode" value="none"><span class="skCalendarChoiceText"><strong id="skChoiceNoneTitle"></strong><span id="skChoiceNoneHint" class="skCalendarChoiceHint"></span></span></label>
+        <p id="skCalendarExportHint" class="skCalendarHint"></p>
         <div id="skSetupCalendarError" class="skSetupError"></div>
-        <div class="skCalendarSetupActions"><button id="skSetupCalendarCancel" type="button">Abbrechen</button><button id="skSetupCalendarBack" type="button">Zurück</button><button id="skCalendarSetupHelp" type="button">Hilfe öffnen</button><button id="skSetupCalendarNext" type="button">Weiter</button><button id="skCalendarSetupSave" type="button">Speichern</button></div>
+        <div class="skCalendarSetupActions"><button id="skSetupCalendarCancel" type="button"></button><button id="skSetupCalendarBack" type="button"></button><button id="skCalendarSetupHelp" type="button"></button><button id="skSetupCalendarNext" type="button"></button><button id="skCalendarSetupSave" type="button"></button></div>
       </div>
 
       <div id="skSetupReviewStep" class="skSetupStep" data-sk-setup-step="review" hidden>
-        <p id="skSetupReviewIntro" class="skCalendarSetupIntro">Bitte prüfe alles in Ruhe. Erst „Alles speichern“ macht die Angaben dauerhaft.</p>
+        <p id="skSetupReviewIntro" class="skCalendarSetupIntro"></p>
         <div id="skSetupReview" class="skSetupReview"></div>
         <div id="skSetupCommitError" class="skSetupError"></div>
-        <div class="skCalendarSetupActions"><button id="skSetupReviewBack" type="button">Zurück</button><button id="skSetupCommit" type="button">Alles speichern</button></div>
+        <div class="skCalendarSetupActions"><button id="skSetupReviewBack" type="button"></button><button id="skSetupCommit" type="button"></button></div>
       </div>
     </section>
   </div>
   <script src="../common/entry-flow.js"></script>
   <script>
   (function(){
+    var SETUP_I18N={
+      de:{
+        LANGUAGE:'Sprache:',TMDB_INTRO:'Zuerst dein persönlicher kostenloser TMDB-API-Key. Deine Eingabe bleibt bis zum letzten Schritt nur ein Entwurf und wird noch nicht gespeichert.',TMDB_LABEL:'TMDB-API-Key',TMDB_PLACEHOLDER:'Persönlicher TMDB-API-Key (v3 auth)',TMDB_CREATE:'TMDB-Key jetzt erstellen',OPEN_HELP:'Hilfe öffnen',NEXT:'Weiter',BACK:'Zurück',CANCEL:'Abbrechen',SAVE:'Speichern',SAVE_ALL:'Alles speichern',
+        CALENDAR_INTRO:'Wähle, was SerKal mit deinen Terminen tun soll. Du kannst diese Einstellung später jederzeit über „Kalender“ ändern.',GOOGLE_TITLE:'Google Kalender (empfohlen)',GOOGLE_HINT:'SerKal trägt Termine automatisch in den Kalender „SerKal“ ein. Die Google-Anmeldung folgt beim ersten tatsächlichen Eintrag.',GOOGLE_ID_HINT:'Eine Kalender-ID musst du nicht eingeben. SerKal findet oder erstellt den Kalender „SerKal“ automatisch.',NONE_TITLE:'Keinen Kalender verwenden',NONE_HINT:'SerKal führt nur dein Serienarchiv und legt keine Kalendertermine an.',EXPORT_HINT:'ICS ist keine Kalenderwahl, sondern ein zusätzliches Exportformat. Sobald der Export verfügbar ist, fragt SerKal nach einem Eintrag gesondert danach.',REVIEW_INTRO:'Bitte prüfe alles in Ruhe. Erst „Alles speichern“ macht die Angaben dauerhaft.',
+        STEP_1:'Schritt 1 von 3',STEP_2:'Schritt 2 von 3',STEP_3:'Schritt 3 von 3',TITLE_TMDB:'TMDB einrichten',TITLE_CALENDAR:'Kalender einrichten',TITLE_REVIEW:'Einstellungen prüfen',
+        ICS_INFO:'Eine ICS-Datei kann geöffnet werden mit:\n\n• Apple Kalender / iCal\n• Microsoft Outlook\n• anderen ICS-fähigen Kalenderprogrammen\n\nDer ICS-Export ist in dieser SerKal-Version noch nicht aktiv. Du kannst diese Einstellung später jederzeit über „Kalender“ ändern.',ADD_TO_CALENDAR:'Zum Kalender hinzufügen',TMDB_CREATE_FAILED:'Die TMDB-Seite zum Erstellen des API-Keys konnte nicht geöffnet werden.',TMDB_HELP_FAILED:'Die TMDB-Hilfe konnte nicht geöffnet werden.',TMDB_REQUIRED:'SerKal benötigt einen gültigen persönlichen TMDB-API-Key. Ohne diesen Key kann die Einrichtung nicht fortgesetzt werden.',CHECKING:'Prüfe …',TMDB_INVALID:'Dieser TMDB-API-Key funktioniert nicht. Bitte prüfe ihn.',TMDB_CHECK_FAILED:'Der TMDB-API-Key konnte nicht geprüft werden: {error}',
+        GOOGLE_HELP:'Google Kalender erzeugt funktionierende automatische Einträge. Die Google-Kontoauswahl erscheint erst beim ersten tatsächlichen Eintrag; anschließend findet oder erstellt SerKal seinen Kalender automatisch.',SELECTION_HELP_TITLE:'Hilfe zu dieser Auswahl',OPEN_DETAILED_HELP:'Ausführliche Hilfe öffnen',CLOSE:'Schließen',CALENDAR_HELP_FAILED:'Kalender-Hilfe konnte nicht geöffnet werden: {error}',SELECT_FIRST:'Bitte zuerst eine Kalender-Option auswählen. Danach erklärt diese Hilfe genau die gewählte Möglichkeit.',NONE_HELP:'SerKal verwaltet dann nur das Serienarchiv. Es werden keine Termine in einen Kalender geschrieben.',SELECT_CALENDAR:'Bitte eine Kalender-Option auswählen.',GOOGLE_NAME:'Google Kalender – automatische Einträge',NONE_NAME:'Kein Kalender',REVIEW:'TMDB: API-Key geprüft; wird erst jetzt gespeichert\nKalender: {calendar}\n{google}\nMit „Zurück“ kannst du beide Entscheidungen noch ändern.',REVIEW_GOOGLE:'Google: Kontoauswahl und automatische Kalendereinrichtung folgen beim ersten Kalendereintrag.\n',KEY_REQUIRED:'Ohne gültigen TMDB-API-Key kann SerKal nicht eingerichtet werden. Bitte gehe zurück und gib deinen persönlichen Key ein.',KEY_CHANGED:'Der TMDB-Key wurde nach der Prüfung verändert. Bitte gehe zurück und prüfe ihn erneut.',SETUP_SAVE_FAILED:'Die Ersteinrichtung konnte nicht gespeichert werden{error}.',SETTINGS_SAVE_FAILED:'Einstellungen konnten nicht gespeichert werden: {error}',SAVING:'Speichere …'
+      },
+      en:{
+        LANGUAGE:'Language:',TMDB_INTRO:'First enter your personal free TMDB API key. Your entry remains a draft until the final step and is not saved yet.',TMDB_LABEL:'TMDB API key',TMDB_PLACEHOLDER:'Personal TMDB API key (v3 auth)',TMDB_CREATE:'Create TMDB key now',OPEN_HELP:'Open help',NEXT:'Next',BACK:'Back',CANCEL:'Cancel',SAVE:'Save',SAVE_ALL:'Save all',
+        CALENDAR_INTRO:'Choose what SerKal should do with your dates. You can change this setting later at any time via “Calendar”.',GOOGLE_TITLE:'Google Calendar (recommended)',GOOGLE_HINT:'SerKal automatically adds dates to the “SerKal” calendar. Google sign-in follows with the first actual entry.',GOOGLE_ID_HINT:'You do not need to enter a calendar ID. SerKal automatically finds or creates the “SerKal” calendar.',NONE_TITLE:'Do not use a calendar',NONE_HINT:'SerKal manages your series archive only and creates no calendar events.',EXPORT_HINT:'ICS is not a calendar choice but an additional export format. Once export is available, SerKal will ask about it separately after an entry.',REVIEW_INTRO:'Please review everything carefully. Only “Save all” makes the settings permanent.',
+        STEP_1:'Step 1 of 3',STEP_2:'Step 2 of 3',STEP_3:'Step 3 of 3',TITLE_TMDB:'Set up TMDB',TITLE_CALENDAR:'Set up calendar',TITLE_REVIEW:'Review settings',
+        ICS_INFO:'An ICS file can be opened with:\n\n• Apple Calendar / iCal\n• Microsoft Outlook\n• other ICS-compatible calendar applications\n\nICS export is not active in this SerKal version yet. You can change this setting later at any time via “Calendar”.',ADD_TO_CALENDAR:'Add to calendar',TMDB_CREATE_FAILED:'The TMDB page for creating the API key could not be opened.',TMDB_HELP_FAILED:'TMDB help could not be opened.',TMDB_REQUIRED:'SerKal requires a valid personal TMDB API key. Setup cannot continue without it.',CHECKING:'Checking …',TMDB_INVALID:'This TMDB API key does not work. Please check it.',TMDB_CHECK_FAILED:'The TMDB API key could not be checked: {error}',
+        GOOGLE_HELP:'Google Calendar creates working automatic entries. Google account selection appears only with the first actual entry; SerKal then finds or creates its calendar automatically.',SELECTION_HELP_TITLE:'Help for this selection',OPEN_DETAILED_HELP:'Open detailed help',CLOSE:'Close',CALENDAR_HELP_FAILED:'Calendar help could not be opened: {error}',SELECT_FIRST:'Please select a calendar option first. This help will then explain the selected option.',NONE_HELP:'SerKal will manage the series archive only. No calendar events will be created.',SELECT_CALENDAR:'Please select one calendar option.',GOOGLE_NAME:'Google Calendar — automatic entries',NONE_NAME:'No calendar',REVIEW:'TMDB: API key verified; it will now be saved\nCalendar: {calendar}\n{google}\nUse “Back” to change either decision.',REVIEW_GOOGLE:'Google: Account selection and automatic calendar setup follow with the first calendar entry.\n',KEY_REQUIRED:'SerKal cannot be set up without a valid TMDB API key. Please go back and enter your personal key.',KEY_CHANGED:'The TMDB key was changed after verification. Please go back and check it again.',SETUP_SAVE_FAILED:'Initial setup could not be saved{error}.',SETTINGS_SAVE_FAILED:'Settings could not be saved: {error}',SAVING:'Saving …'
+      }
+    };
+    function setupT_(key,values){var pack=SETUP_I18N[setupLang_()]||SETUP_I18N.de;var value=String(pack[key]||key);Object.keys(values||{}).forEach(function(name){value=value.replace(new RegExp('\\{'+name+'\\}','g'),String(values[name]))});return value}
     var overlay=document.getElementById('skCalendarSetupOverlay');
     var title=document.getElementById('skCalendarSetupTitle');
     var progress=document.getElementById('skSetupProgress');
@@ -2030,38 +2047,18 @@
     var testedTmdbKey='';
 
     function setupLang_(){try{return String(localStorage.getItem('serkal_lang')||'de').toLowerCase()==='en'?'en':'de'}catch(_e){return 'de'}}
-    function setupText_(de,en){return setupLang_()==='en'?en:de}
     function setText_(id,value){var e=document.getElementById(id);if(e)e.textContent=value}
     function applySetupLanguage_(){
       var en=setupLang_()==='en';
-      setText_('skSetupLanguageLabel',en?'Language:':'Sprache:');
+      setText_('skSetupLanguageLabel',setupT_('LANGUAGE'));
       document.getElementById('skSetupLangDe').classList.toggle('active',!en);
       document.getElementById('skSetupLangEn').classList.toggle('active',en);
-      setText_('skSetupTmdbIntro',en?'First enter your personal free TMDB API key. Your entry remains a draft until the final step and is not saved yet.':'Zuerst dein persönlicher kostenloser TMDB-API-Key. Deine Eingabe bleibt bis zum letzten Schritt nur ein Entwurf und wird noch nicht gespeichert.');
-      setText_('skSetupTmdbLabel','TMDB API key');
-      tmdbInput.placeholder=en?'Personal TMDB API key (v3 auth)':'Persönlicher TMDB-API-Key (v3 auth)';
-      setText_('skSetupTmdbCreate',en?'Create TMDB key now':'TMDB-Key jetzt erstellen');
-      setText_('skSetupTmdbHelp',en?'Open help':'Hilfe öffnen');
-      setText_('skSetupTmdbNext',en?'Next':'Weiter');
-      setText_('skSetupCalendarIntro',en?'Choose what SerKal should do with your dates. You can change this setting later at any time via “Calendar”.':'Wähle, was SerKal mit deinen Terminen tun soll. Du kannst diese Einstellung später jederzeit über „Kalender“ ändern.');
-      setText_('skChoiceGoogleTitle',en?'Google Calendar (recommended)':'Google Kalender (empfohlen)');
-      setText_('skChoiceGoogleHint',en?'SerKal automatically adds dates to the “SerKal” calendar. Google sign-in follows with the first actual entry.':'SerKal trägt Termine automatisch in den Kalender „SerKal“ ein. Die Google-Anmeldung folgt beim ersten tatsächlichen Eintrag.');
-      setText_('skCalendarGoogleHint',en?'You do not need to enter a calendar ID. SerKal automatically finds or creates the “SerKal” calendar.':'Eine Kalender-ID musst du nicht eingeben. SerKal findet oder erstellt den Kalender „SerKal“ automatisch.');
-      setText_('skChoiceIcsTitle',en?'ICS file / another calendar':'ICS-Datei / anderer Kalender');
-      setText_('skChoiceIcsHint',en?'For Apple Calendar, Outlook, and other calendar applications. Export is not active in this version yet.':'Für Apple Kalender, Outlook und andere Kalenderprogramme. Der Export ist in dieser Version noch nicht aktiv.');
-      setText_('skChoiceNoneTitle',en?'Do not use a calendar':'Keinen Kalender verwenden');
-      setText_('skChoiceNoneHint',en?'SerKal manages your series archive only and creates no calendar events.':'SerKal führt nur dein Serienarchiv und legt keine Kalendertermine an.');
-      setText_('skChoiceAutoTitle',en?'Let SerKal decide':'SerKal entscheiden lassen');
-      setText_('skChoiceAutoHint',en?'Currently this means: archive only, no calendar export yet. SerKal can decide automatically here in a later version.':'Derzeit bedeutet dies: nur Archiv, noch kein Kalenderexport. Später kann SerKal hier automatisch entscheiden.');
-      setText_('skCalendarExportHint',en?'ICS is not a calendar choice but an additional export format. Once export is available, SerKal will ask about it separately after an entry.':'ICS ist keine Kalenderwahl, sondern ein zusätzliches Exportformat. Sobald der Export verfügbar ist, fragt SerKal nach einem Eintrag gesondert danach.');
-      setText_('skSetupCalendarBack',en?'Back':'Zurück');
-      setText_('skSetupCalendarCancel',en?'Cancel':'Abbrechen');
-      setText_('skSetupReviewBack',en?'Back':'Zurück');
-      setText_('skCalendarSetupHelp',en?'Open help':'Hilfe öffnen');
-      setText_('skSetupCalendarNext',en?'Next':'Weiter');
-      setText_('skCalendarSetupSave',en?'Save':'Speichern');
-      setText_('skSetupCommit',en?'Save all':'Alles speichern');
-      setText_('skSetupReviewIntro',en?'Please review everything carefully. Only “Save all” makes the settings permanent.':'Bitte prüfe alles in Ruhe. Erst „Alles speichern“ macht die Angaben dauerhaft.');
+      setText_('skSetupTmdbIntro',setupT_('TMDB_INTRO')); setText_('skSetupTmdbLabel',setupT_('TMDB_LABEL')); tmdbInput.placeholder=setupT_('TMDB_PLACEHOLDER');
+      setText_('skSetupTmdbCreate',setupT_('TMDB_CREATE')); setText_('skSetupTmdbHelp',setupT_('OPEN_HELP')); setText_('skSetupTmdbNext',setupT_('NEXT'));
+      setText_('skSetupCalendarIntro',setupT_('CALENDAR_INTRO'));
+      setText_('skChoiceGoogleTitle',setupT_('GOOGLE_TITLE')); setText_('skChoiceGoogleHint',setupT_('GOOGLE_HINT')); setText_('skCalendarGoogleHint',setupT_('GOOGLE_ID_HINT'));
+      setText_('skChoiceNoneTitle',setupT_('NONE_TITLE')); setText_('skChoiceNoneHint',setupT_('NONE_HINT'));
+      setText_('skCalendarExportHint',setupT_('EXPORT_HINT')); setText_('skSetupCalendarBack',setupT_('BACK')); setText_('skSetupCalendarCancel',setupT_('CANCEL')); setText_('skSetupReviewBack',setupT_('BACK')); setText_('skCalendarSetupHelp',setupT_('OPEN_HELP')); setText_('skSetupCalendarNext',setupT_('NEXT')); setText_('skCalendarSetupSave',setupT_('SAVE')); setText_('skSetupCommit',setupT_('SAVE_ALL')); setText_('skSetupReviewIntro',setupT_('REVIEW_INTRO'));
     }
 
     function mode(){var e=document.querySelector('input[name="skCalendarMode"]:checked');return e?String(e.value||''):''}
@@ -2077,13 +2074,12 @@
       tmdbStep.hidden=name!=='tmdb';
       calendarStep.hidden=name!=='calendar';
       reviewStep.hidden=name!=='review';
-      var en=setupLang_()==='en';
       if(firstRun){
-        progress.textContent=name==='tmdb'?(en?'Step 1 of 3':'Schritt 1 von 3'):(name==='calendar'?(en?'Step 2 of 3':'Schritt 2 von 3'):(en?'Step 3 of 3':'Schritt 3 von 3'));
-        title.textContent=name==='tmdb'?(en?'Set up TMDB':'TMDB einrichten'):(name==='calendar'?(en?'Set up calendar':'Kalender einrichten'):(en?'Review settings':'Einstellungen prüfen'));
+        progress.textContent=setupT_(name==='tmdb'?'STEP_1':(name==='calendar'?'STEP_2':'STEP_3'));
+        title.textContent=setupT_(name==='tmdb'?'TITLE_TMDB':(name==='calendar'?'TITLE_CALENDAR':'TITLE_REVIEW'));
       }else{
         progress.textContent='';
-        title.textContent=en?'Set up calendar':'Kalender einrichten';
+        title.textContent=setupT_('TITLE_CALENDAR');
       }
     }
     async function getSettings(){try{return window.serkal&&window.serkal.settings?await window.serkal.settings.get():null}catch(_e){return null}}
@@ -2124,11 +2120,8 @@
     function showIcsSelectionInfo_(){
       var lang='de';
       try{lang=String(localStorage.getItem('serkal_lang')||'de').toLowerCase()==='en'?'en':'de'}catch(_e){}
-      var isEn=lang==='en';
-      var message=isEn
-        ? 'An ICS file can be opened with:\n\n• Apple Calendar / iCal\n• Microsoft Outlook\n• other ICS-compatible calendar applications\n\nICS export is not active in this SerKal version yet. You can change this setting later at any time via “Calendar”.'
-        : 'Eine ICS-Datei kann geöffnet werden mit:\n\n• Apple Kalender / iCal\n• Microsoft Outlook\n• anderen ICS-fähigen Kalenderprogrammen\n\nDer ICS-Export ist in dieser SerKal-Version noch nicht aktiv. Du kannst diese Einstellung später jederzeit über „Kalender“ ändern.';
-      if(typeof showSerKalDialog_==='function')showSerKalDialog_({kind:'info',icon:'📅',title:isEn?'Add to calendar':'Zum Kalender hinzufügen',message:message,confirmText:'OK',showCancel:false});
+      var message=setupT_('ICS_INFO');
+      if(typeof showSerKalDialog_==='function')showSerKalDialog_({kind:'info',icon:'📅',title:setupT_('ADD_TO_CALENDAR'),message:message,confirmText:'OK',showCancel:false});
       else alert(message);
     }
 
@@ -2142,24 +2135,24 @@
     document.getElementById('skSetupTmdbCreate').addEventListener('click',async function(){
       tmdbError.style.display='none';
       var en=setupLang_()==='en';
-      try{await window.serkal.help.tmdbCreate(setupLang_())}catch(_e){tmdbError.textContent=en?'The TMDB page for creating the API key could not be opened.':'Die TMDB-Seite zum Erstellen des API-Keys konnte nicht geöffnet werden.';tmdbError.style.display='block'}
+      try{await window.serkal.help.tmdbCreate(setupLang_())}catch(_e){tmdbError.textContent=setupT_('TMDB_CREATE_FAILED');tmdbError.style.display='block'}
     });
     document.getElementById('skSetupTmdbHelp').addEventListener('click',async function(){
       var lang='de';try{lang=String(localStorage.getItem('serkal_lang')||'de').toLowerCase()==='en'?'en':'de'}catch(_e){}
-      try{await window.serkal.help.tmdb(lang)}catch(_e){tmdbError.textContent=lang==='en'?'TMDB help could not be opened.':'Die TMDB-Hilfe konnte nicht geöffnet werden.';tmdbError.style.display='block'}
+      try{await window.serkal.help.tmdb(lang)}catch(_e){tmdbError.textContent=setupT_('TMDB_HELP_FAILED');tmdbError.style.display='block'}
     });
     document.getElementById('skSetupTmdbNext').addEventListener('click',async function(){
       var key=String(tmdbInput.value||'').trim();
       tmdbError.style.display='none';
-      if(!key){tmdbError.textContent=setupText_('SerKal benötigt einen gültigen persönlichen TMDB-API-Key. Ohne diesen Key kann die Einrichtung nicht fortgesetzt werden.','SerKal requires a valid personal TMDB API key. Setup cannot continue without it.');tmdbError.style.display='block';tmdbInput.focus();this.disabled=true;return}
-      this.disabled=true;this.textContent=setupText_('Prüfe …','Checking …');
+      if(!key){tmdbError.textContent=setupT_('TMDB_REQUIRED');tmdbError.style.display='block';tmdbInput.focus();this.disabled=true;return}
+      this.disabled=true;this.textContent=setupT_('CHECKING');
       try{
         var result=await window.serkal.tmdb.testKey(key,setupLang_());
-        if(!result||result.ok!==true){testedTmdbKey='';tmdbError.textContent=(result&&result.message)||setupText_('Dieser TMDB-API-Key funktioniert nicht. Bitte prüfe ihn.','This TMDB API key does not work. Please check it.');tmdbError.style.display='block';tmdbInput.focus();tmdbInput.select();return}
+        if(!result||result.ok!==true){testedTmdbKey='';tmdbError.textContent=(result&&result.message)||setupT_('TMDB_INVALID');tmdbError.style.display='block';tmdbInput.focus();tmdbInput.select();return}
         testedTmdbKey=key;
         setStep('calendar');
-      }catch(e){testedTmdbKey='';tmdbError.textContent=setupText_('Der TMDB-API-Key konnte nicht geprüft werden: ','The TMDB API key could not be checked: ')+String(e&&e.message||e);tmdbError.style.display='block'}
-      finally{this.disabled=!String(tmdbInput.value||'').trim();this.textContent=setupText_('Weiter','Next')}
+      }catch(e){testedTmdbKey='';tmdbError.textContent=setupT_('TMDB_CHECK_FAILED',{error:String(e&&e.message||e)});tmdbError.style.display='block'}
+      finally{this.disabled=!String(tmdbInput.value||'').trim();this.textContent=setupT_('NEXT')}
     });
     document.getElementById('skSetupCalendarBack').addEventListener('click',function(){setStep('tmdb');tmdbInput.focus()});
     document.getElementById('skSetupReviewBack').addEventListener('click',function(){setStep('calendar')});
@@ -2169,48 +2162,43 @@
       var lang='de',m=mode();
       try{lang=String(localStorage.getItem('serkal_lang')||'de').toLowerCase()==='en'?'en':'de'}catch(_e){}
       if(m==='google'){
-        var googleMessage=lang==='en'?'Google Calendar creates working automatic entries. Google account selection appears only with the first actual entry; SerKal then finds or creates its calendar automatically.':'Google Kalender erzeugt funktionierende automatische Einträge. Die Google-Kontoauswahl erscheint erst beim ersten tatsächlichen Eintrag; anschließend findet oder erstellt SerKal seinen Kalender automatisch.';
-        if(typeof showSerKalDialog_==='function')showSerKalDialog_({kind:'info',icon:'📅',title:lang==='en'?'Help for this selection':'Hilfe zu dieser Auswahl',message:googleMessage,confirmText:lang==='en'?'Open detailed help':'Ausführliche Hilfe öffnen',showCancel:true,cancelText:lang==='en'?'Close':'Schließen',onConfirm:async function(){try{await window.serkal.help.google(lang)}catch(e){alert('Kalender-Hilfe konnte nicht geöffnet werden: '+String(e||''))}}});
+        var googleMessage=setupT_('GOOGLE_HELP');
+        if(typeof showSerKalDialog_==='function')showSerKalDialog_({kind:'info',icon:'📅',title:setupT_('SELECTION_HELP_TITLE'),message:googleMessage,confirmText:setupT_('OPEN_DETAILED_HELP'),showCancel:true,cancelText:setupT_('CLOSE'),onConfirm:async function(){try{await window.serkal.help.google(lang)}catch(e){alert(setupT_('CALENDAR_HELP_FAILED',{error:String(e||'')}))}}});
         else alert(googleMessage);
         return;
       }
-      var de={'':'Bitte zuerst eine Kalender-Option auswählen. Danach erklärt diese Hilfe genau die gewählte Möglichkeit.',ics:'ICS ist für andere Kalenderprogramme gedacht. Der eigentliche ICS-Export ist in dieser SerKal-Version noch nicht aktiv. Für sofortige automatische Kalendereinträge bitte „Google Kalender“ wählen.',none:'SerKal verwaltet dann nur das Serienarchiv. Es werden keine Termine in einen Kalender geschrieben.',auto:'Diese automatische Auswahl ist für eine spätere vollständig selbständige Kalenderentscheidung vorgesehen. Derzeit führt sie zum noch nicht aktiven ICS-Export und erzeugt deshalb keine Kalendereinträge. Für funktionierende automatische Einträge bitte „Google Kalender“ wählen.'};
-      var en={'':'Please select a calendar option first. This help will then explain the selected option.',ics:'ICS is intended for other calendar applications. ICS export is not active in this SerKal version yet. For working automatic calendar entries, please select “Google Calendar”.',none:'SerKal will manage the series archive only. No calendar events will be created.',auto:'This automatic choice is intended for a later fully automatic calendar decision. It currently selects the unfinished ICS export and therefore creates no calendar events. For working automatic entries, please select “Google Calendar”.'};
-      var message=(lang==='en'?en:de)[m]||(lang==='en'?en['']:de['']);
-      if(typeof showSerKalDialog_==='function')showSerKalDialog_({kind:'info',icon:'?',title:lang==='en'?'Help for this selection':'Hilfe zu dieser Auswahl',message:message,confirmText:'OK',showCancel:false});
+      var message=m==='none'?setupT_('NONE_HELP'):setupT_('SELECT_FIRST');
+      if(typeof showSerKalDialog_==='function')showSerKalDialog_({kind:'info',icon:'?',title:setupT_('SELECTION_HELP_TITLE'),message:message,confirmText:'OK',showCancel:false});
       else alert(message);
     });
 
     document.getElementById('skSetupCalendarNext').addEventListener('click',function(){
       var m=mode();
-      var en=setupLang_()==='en';
-      if(!m){calendarError.textContent=en?'Please select one calendar option.':'Bitte eine Kalender-Option auswählen.';calendarError.style.display='block';return}
-      var names=en?{google:'Google Calendar — automatic entries',ics:'ICS file / another calendar (export not active yet)',none:'No calendar',auto:'Let SerKal decide (currently archive only)'}:{google:'Google Kalender – automatische Einträge',ics:'ICS-Datei / anderer Kalender (Export noch nicht aktiv)',none:'Kein Kalender',auto:'SerKal entscheiden lassen (derzeit nur Archiv)'};
+      if(!m){calendarError.textContent=setupT_('SELECT_CALENDAR');calendarError.style.display='block';return}
+      var names={google:setupT_('GOOGLE_NAME'),none:setupT_('NONE_NAME')};
       var key=String(tmdbInput.value||'').trim();
-      document.getElementById('skSetupReview').textContent=en
-        ? 'TMDB: API key verified; it will now be saved\nCalendar: '+(names[m]||m)+'\n'+(m==='google'?'Google: Account selection and automatic calendar setup follow with the first calendar entry.\n':'')+'\nUse “Back” to change either decision.'
-        : 'TMDB: API-Key geprüft; wird erst jetzt gespeichert\nKalender: '+(names[m]||m)+'\n'+(m==='google'?'Google: Kontoauswahl und automatische Kalendereinrichtung folgen beim ersten Kalendereintrag.\n':'')+'\nMit „Zurück“ kannst du beide Entscheidungen noch ändern.';
+      document.getElementById('skSetupReview').textContent=setupT_('REVIEW',{calendar:names[m]||m,google:m==='google'?setupT_('REVIEW_GOOGLE'):''});
       setStep('review');
     });
 
     document.getElementById('skSetupCommit').addEventListener('click',async function(){
       var m=mode(),key=String(tmdbInput.value||'').trim();
       commitError.style.display='none';
-      if(!key||testedTmdbKey!==key){commitError.textContent=!key?setupText_('Ohne gültigen TMDB-API-Key kann SerKal nicht eingerichtet werden. Bitte gehe zurück und gib deinen persönlichen Key ein.','SerKal cannot be set up without a valid TMDB API key. Please go back and enter your personal key.'):setupText_('Der TMDB-Key wurde nach der Prüfung verändert. Bitte gehe zurück und prüfe ihn erneut.','The TMDB key was changed after verification. Please go back and check it again.');commitError.style.display='block';return}
-      this.disabled=true;this.textContent=setupText_('Speichere …','Saving …');
+      if(!key||testedTmdbKey!==key){commitError.textContent=setupT_(!key?'KEY_REQUIRED':'KEY_CHANGED');commitError.style.display='block';return}
+      this.disabled=true;this.textContent=setupT_('SAVING');
       try{
-        var result=await window.serkal.setup.commit({tmdbKey:key,settings:{setupDone:true,calendar:{mode:m,googleCalendarId:''}}});
-        if(!result||result.ok!==true){commitError.textContent=(result&&result.message)||'Die Ersteinrichtung konnte nicht gespeichert werden.';commitError.style.display='block';return}
+        var result=await window.serkal.setup.commit({tmdbKey:key,settings:{setupDone:true,language:setupLang_(),calendar:{mode:m,googleCalendarId:''}}});
+        if(!result||result.ok!==true){commitError.textContent=(result&&result.message)||setupT_('SETUP_SAVE_FAILED',{error:''});commitError.style.display='block';return}
         hide();
         if(typeof loadArchiv==='function')loadArchiv();
-      }catch(e){commitError.textContent=setupText_('Die Ersteinrichtung konnte nicht gespeichert werden: ','Setup could not be saved: ')+String(e&&e.message||e);commitError.style.display='block'}
-      finally{this.disabled=false;this.textContent=setupText_('Alles speichern','Save all')}
+      }catch(e){commitError.textContent=setupT_('SETUP_SAVE_FAILED',{error:': '+String(e&&e.message||e)});commitError.style.display='block'}
+      finally{this.disabled=false;this.textContent=setupT_('SAVE_ALL')}
     });
 
     document.getElementById('skCalendarSetupSave').addEventListener('click',async function(){
       var m=mode();
-      if(!m){calendarError.textContent=setupText_('Bitte eine Kalender-Option auswählen.','Please select one calendar option.');calendarError.style.display='block';return}
-      try{await window.serkal.settings.save({setupDone:true,calendar:{mode:m}});hide()}catch(e){calendarError.textContent=setupText_('Einstellungen konnten nicht gespeichert werden: ','Settings could not be saved: ')+String(e||'');calendarError.style.display='block'}
+      if(!m){calendarError.textContent=setupT_('SELECT_CALENDAR');calendarError.style.display='block';return}
+      try{await window.serkal.settings.save({setupDone:true,language:setupLang_(),calendar:{mode:m}});hide()}catch(e){calendarError.textContent=setupT_('SETTINGS_SAVE_FAILED',{error:String(e||'')});calendarError.style.display='block'}
     });
 
     document.addEventListener('DOMContentLoaded',async function(){var s=await getSettings();if(s&&s.setupDone!==true)show(s,true)});
@@ -2337,7 +2325,7 @@
       title.textContent = String(o.title || 'Hinweis');
       text.textContent = String(o.message || '');
       btnConfirm.textContent = String(o.confirmText || 'OK');
-      btnCancel.textContent = String(o.cancelText || 'Abbrechen');
+      btnCancel.textContent = String(o.cancelText || t('CANCEL'));
       btnCancel.style.display = (o.showCancel === false) ? 'none' : '';
       btnConfirm.classList.toggle('skDialogDanger', kind === 'danger');
 
@@ -2607,11 +2595,11 @@ function setSearchMode_() {
 
     var hint = document.getElementById('searchHint');
     if (hint) {
-      hint.textContent = 'Eingabe geändert – bitte neu suchen.';
+      hint.textContent = t('INPUT_CHANGED');
       hint.classList.remove('isError');
     }
   } catch (e) {
-    console.log('setSearchMode_ Fehler:', e);
+    console.log('setSearchMode_ error:', e);
   }
 }
 
@@ -2639,7 +2627,7 @@ function markInputDirty_() {
 
     setSearchMode_();
   } catch (e) {
-    console.log('markInputDirty_ Fehler:', e);
+    console.log('markInputDirty_ error:', e);
   }
 }
 
@@ -3102,7 +3090,7 @@ function requestPosterFromDesktop_(tmdbId, lang) {
         return;
       }
 
-      reject(new Error('Keine TMDB-Posterbrücke verfügbar.'));
+      reject(new Error(t('POSTER_BRIDGE_MISSING')));
     } catch (err) {
       reject(err);
     }
@@ -3130,12 +3118,12 @@ function schedulePreviewPosterLoad_(it) {
         applyArchivPosterResult_(state.currentPreview, res);
       } else {
         renderNoPicPlaceholder_();
-        try { uiLogAction_('Poster konnte nicht geladen werden', { tmdbId:tmdbId, bereich:'suche', code:String(res && res.code || '') }); } catch (_e) {}
+        try { uiLogAction_(t('POSTER_LOAD_FAILED'), { tmdbId:tmdbId, bereich:'search', code:String(res && res.code || '') }); } catch (_e) {}
       }
     })
     .catch(function(err) {
       renderNoPicPlaceholder_();
-      try { uiLogAction_('Poster konnte nicht geladen werden', { tmdbId:tmdbId, bereich:'suche', fehler:String(err && err.message || err) }); } catch (_e) {}
+      try { uiLogAction_(t('POSTER_LOAD_FAILED'), { tmdbId:tmdbId, bereich:'search', fehler:String(err && err.message || err) }); } catch (_e) {}
     });
 }
 
@@ -3162,14 +3150,14 @@ function scheduleArchivPosterLoad_(it) {
   var tmdbId = getArchivTmdbId_(it);
   if (!tmdbId) {
     renderNoPicPlaceholder_();
-    try { uiLogAction_('Posteranforderung ohne TMDB-ID verworfen', { bereich:'archiv' }); } catch (_e0) {}
+    try { uiLogAction_(t('POSTER_REQUEST_NO_ID'), { bereich:'archive' }); } catch (_e0) {}
     return;
   }
 
   var key = String(tmdbId);
   if (state && state.archivPosterCache && state.archivPosterCache[key]) {
     applyArchivPosterResult_(it, state.archivPosterCache[key]);
-    try { uiLogAction_('Poster aus Sitzungscache übernommen', { tmdbId:tmdbId, bereich:'archiv' }); } catch (_e1) {}
+    try { uiLogAction_(t('POSTER_CACHE_USED'), { tmdbId:tmdbId, bereich:'archive' }); } catch (_e1) {}
     return;
   }
 
@@ -3188,7 +3176,7 @@ function scheduleArchivPosterLoad_(it) {
             state.archivPosterCache[key] = res;
             applyArchivPosterResult_(state.archivSelected, res);
             try {
-              uiLogAction_('Posterantwort übernommen', {
+              uiLogAction_(t('POSTER_RESPONSE_USED'), {
                 tmdbId:tmdbId,
                 bereich:'archiv',
                 nopic:Boolean(res.nopic),
@@ -3198,7 +3186,7 @@ function scheduleArchivPosterLoad_(it) {
           } else {
             renderNoPicPlaceholder_();
             try {
-              uiLogAction_('Poster konnte nicht geladen werden', {
+              uiLogAction_(t('POSTER_LOAD_FAILED'), {
                 tmdbId:tmdbId,
                 bereich:'archiv',
                 code:String(res && res.code || '')
@@ -3207,17 +3195,17 @@ function scheduleArchivPosterLoad_(it) {
           }
         } catch (err) {
           renderNoPicPlaceholder_();
-          try { uiLogAction_('Posterantwort konnte nicht verarbeitet werden', { tmdbId:tmdbId, fehler:String(err && err.message || err) }); } catch (_e5) {}
+          try { uiLogAction_(t('POSTER_RESPONSE_FAILED'), { tmdbId:tmdbId, fehler:String(err && err.message || err) }); } catch (_e5) {}
         }
       })
       .withFailureHandler(function(err) {
         renderNoPicPlaceholder_();
-        try { uiLogAction_('Posterbrücke meldet Fehler', { tmdbId:tmdbId, fehler:String(err && err.message || err) }); } catch (_e6) {}
+        try { uiLogAction_(t('POSTER_BRIDGE_ERROR'), { tmdbId:tmdbId, fehler:String(err && err.message || err) }); } catch (_e6) {}
       })
       .apiHoleArchivPoster(tmdbId, (typeof getLang_ === 'function') ? getLang_() : LANG);
   } catch (err) {
     renderNoPicPlaceholder_();
-    try { uiLogAction_('Posterbrücke konnte nicht gestartet werden', { tmdbId:tmdbId, fehler:String(err && err.message || err) }); } catch (_e7) {}
+    try { uiLogAction_(t('POSTER_BRIDGE_START_FAILED'), { tmdbId:tmdbId, fehler:String(err && err.message || err) }); } catch (_e7) {}
   }
 }
 
@@ -3297,9 +3285,9 @@ function renderPreviewFromResult(r) {
     if (termCount) html += '<div><b>' + escapeHtml(t('PV_DATES')) + ':</b> ' + escapeHtml(String(termCount)) + '</div>';
     if (showAnnounced) {
       if (futureLabels.length > 0) {
-        html += '<div style="margin-top:6px"><b>TMDB:</b> Weitere Staffel ' + escapeHtml(futureLabels.join(', ')) + ' angekündigt.</div>';
+        html += '<div style="margin-top:6px"><b>TMDB:</b> ' + escapeHtml(t('TMDB_FUTURE_PREVIEW',{seasons:futureLabels.join(', ')})) + '</div>';
       } else {
-        html += '<div style="margin-top:6px"><b>TMDB:</b> ' + escapeHtml(season || 'Diese Staffel') + ' angekündigt / noch ohne bestätigte Termine.</div>';
+        html += '<div style="margin-top:6px"><b>TMDB:</b> ' + escapeHtml(t('TMDB_SEASON_PENDING',{season:season || t('PV_SEASON')})) + '</div>';
       }
     }
 
@@ -3596,7 +3584,7 @@ function testDebugEcho_(daten) {
         traceUI_('debugEcho_ RETURN', res || {});
       })
       .withFailureHandler(function(err) {
-        uiLogSheet('TRACE_UI debugEcho_ FEHLER', { message: String((err && (err.message || err)) || '') });
+        uiLogSheet(t('LOG_DEBUG_ECHO_ERROR'), { message: String((err && (err.message || err)) || '') });
       })
       .debugEcho_(daten || {});
   } catch (_e2) {}
@@ -3703,7 +3691,7 @@ function setDetailsdesc_(it, originTag) {
 
     el.textContent = truncateText_(String(txt), 600);
   } catch (e) {
-    try { uiLogSheet('ERROR detailsDesc Fehler', { origin: String(originTag || ''), error: String(e) }); } catch (_e2) {}
+    try { uiLogSheet(t('LOG_DETAILS_ERROR'), { origin: String(originTag || ''), error: String(e) }); } catch (_e2) {}
   }
 }
 
@@ -3811,6 +3799,31 @@ const I18N = {
     MAINT_FAILED: 'Wartung fehlgeschlagen',
     MAINT_PROGRESS: '{files} Dateien / {seasons} Staffeln geprüft, {changed} geändert',
     NO_PIC_AVAILABLE: 'Kein Bild verfügbar',
+    ARIA_ACTIONS: 'Aktionen', ARIA_RESULT_NAV: 'Treffersteuerung', TT_RESULT_NAV: 'Treffer wechseln', ARIA_PREVIEW: 'Vorschau', ARIA_RESULT_INFO: 'Trefferinfo',
+    NOTE_HELP: 'Hilfe zu auswertbaren Notizzeilen', TT_SORT_SWITCH: 'Sortierung umschalten (Status / A–Z)', TT_ARCHIVE_COUNT: 'Anzahl Archiv-Einträge', TT_DELETE_FILE: 'Archivdatei löschen', ARIA_ARCHIVE_LIST: 'Archivliste',
+    TT_GERMAN: 'Deutsch', TT_LANGUAGE_SWITCH: 'Sprache umschalten', TT_CALENDAR_OPEN: 'Google Kalender öffnen', TT_THEME_SWITCH: 'Farbschema umschalten', TT_LOG_OPEN: 'Log ansehen',
+    ARIA_LOG: 'Loganzeige', ARIA_LOG_RESIZE: 'Logfensterhöhe ändern', TT_LOG_RESIZE: 'Ziehen: Höhe des Logfensters ändern', ARIA_LOG_DAY: 'Logtag wählen', PH_LOG_SEARCH: 'Im Log suchen …',
+    TT_LOG_FIND: 'Nächsten Treffer suchen', LOG_FIND: '🔎 Weiter', TT_LOG_SELECT_ALL: 'Den gesamten sichtbaren Logtext markieren', LOG_SELECT_ALL: '☑ Alles markieren', TT_LOG_COPY: 'Log oder Auswahl kopieren', LOG_COPY: '📋 Kopieren',
+    TT_LOG_DELETE_SELECTION: 'Markierten Text dauerhaft aus der ausgewählten TXT-Logdatei löschen', LOG_DELETE_SELECTION: '✂ Markiertes', TT_LOG_CLEAR: 'Das ausgewählte TXT-Log vollständig leeren', LOG_CLEAR: '🧹 Log leeren', TT_LOG_HELP: 'Funktionen des Logfensters erklären', ARIA_LOG_HELP: 'Hilfe zu den Logfunktionen', TT_LOG_CLOSE: 'Logfenster schließen',
+    ARIA_POSTER: 'Poster groß anzeigen', TT_POSTER_CLOSE: 'Zum Schließen klicken', SEEN_TITLE: 'Hab ich geschaut', INPUT_CHANGED: 'Eingabe geändert – bitte neu suchen.', HELP_OPEN: 'SerKal-Hilfe öffnen',
+    CALENDAR_HELP_FAILED: 'Kalender-Hilfe konnte nicht geöffnet werden: {error}', CALENDAR_OPEN_FAILED: 'Kalender konnte nicht geöffnet werden: {error}',
+    CALENDAR_ICS_SELECTED: 'ICS ist ausgewählt. Der eigentliche ICS-Export folgt in einer späteren SerKal-Version.', CALENDAR_DISABLED: 'Kalender ist in SerKal deaktiviert.',
+    CANCEL:'Abbrechen', CLOSE:'Schließen', UNKNOWN_ERROR:'Unbekannter Fehler', UNKNOWN_ERROR_LOWER:'unbekannter Fehler', POSTER_BRIDGE_MISSING:'Keine TMDB-Posterbrücke verfügbar.', POSTER_LOAD_FAILED:'Poster konnte nicht geladen werden', POSTER_CACHE_USED:'Poster aus Sitzungscache übernommen', POSTER_RESPONSE_USED:'Posterantwort übernommen', POSTER_RESPONSE_FAILED:'Posterantwort konnte nicht verarbeitet werden', POSTER_BRIDGE_ERROR:'Posterbrücke meldet Fehler', POSTER_BRIDGE_START_FAILED:'Posterbrücke konnte nicht gestartet werden',
+    LOG_SEARCH_MODE_ERROR:'Suchmodus konnte nicht gesetzt werden', LOG_INPUT_DIRTY_ERROR:'Eingabeänderung konnte nicht verarbeitet werden', LOG_LANGUAGE_CHANGED:'Sprache geändert', LOG_NOTE_NORMALIZED:'Notiz-Steuerwort vereinheitlicht', LOG_NOTE_UNKNOWN:'Unbekanntes Steuerwort in Notiz', NOTE_NORMALIZED:'Steuerwort in Notiz vereinheitlicht.',
+    LOG_MAINT_STARTED:'Wartung gestartet', MAINT_BRIDGE_UNAVAILABLE:'Wartungsbrücke nicht verfügbar', LOG_MAINT_DONE:'Wartung abgeschlossen', LOG_MAINT_FAILED:'Wartung fehlgeschlagen', LOG_ARCHIVE_LOAD_ERROR:'Archiv konnte nicht geladen werden', MAINT_CHECK:'Wartung prüfen',
+    LOG_ARCHIVE_SELECTED:'Archiv-Eintrag ausgewählt', LOG_POSTER_START_FAILED:'Posterfunktion konnte nicht gestartet werden', LOG_ARCHIVE_DETAILS_FAILED:'Archivdetails konnten nicht vollständig aufgebaut werden', LOG_ARCHIVE_PREVIEW_FAILED:'Archivvorschau konnte nicht vollständig aufgebaut werden', LOG_SEARCH_STARTED:'Suche gestartet', LOG_SEARCH_RESULT:'Suchergebnis', LOG_SEARCH_FAILED:'Suche fehlgeschlagen', LOG_PREVIOUS_RESULT:'Vorheriger Treffer', LOG_NEXT_RESULT:'Nächster Treffer', LOG_INSERT_STARTED:'Eintrag gestartet', LOG_INSERT_FAILED_DOMAIN:'Eintrag fachlich fehlgeschlagen', LOG_INSERT_DONE:'Eintrag abgeschlossen', LOG_ARCHIVE_CALENDAR_FAILED:'Archiv gespeichert, Kalender fehlgeschlagen', LOG_CALENDAR_PAST_SKIPPED:'Kalender nach Originalregel übersprungen', LOG_GOOGLE_SAVED:'Google-Kalender direkt gespeichert', LOG_ARCHIVE_ONLY_SAVED:'Archiv ohne Kalender gespeichert', LOG_INSERT_FAILED:'Eintrag fehlgeschlagen', LOG_RESET:'Reset ausgeführt', LOG_DELETE_REQUESTED:'Löschen angefordert', DELETE_SERIES:'Serie löschen', DELETE_NOT_DONE:'Nicht gelöscht: {error}', LOG_DELETE_DONE:'Löschen abgeschlossen', DELETE_FAILED_DETAIL:'Löschen fehlgeschlagen: {error}', LOG_SORT_CHANGED:'Archiv-Sortierung geändert',
+    LOG_HEIGHT_SAVED:'Logfensterhöhe gespeichert.', COPY_FAILED:'Kopieren nicht möglich.', LOG_SELECT_FAILED:'Logtext konnte nicht vollständig markiert werden.', LOG_NO_SELECTION:'Keine Markierung im Logfenster.', LOG_SELECTION_SAVING:'Markierter Text gelöscht – speichere TXT-Log …', LOG_SELECTION_SAVED:'Markierung gelöscht und im heutigen TXT-Log gespeichert.', LOG_SELECTION_FAILED:'Markierung konnte nicht gelöscht werden.', LOG_SAVED:'Log gespeichert.', LOG_SAVE_FAILED_DETAIL:'Log konnte nicht gespeichert werden: {error}', LOG_SAVE_START_FAILED:'Log-Speichern konnte nicht gestartet werden.', LOG_CLEARING:'Loganzeige geleert – lösche ausgewähltes TXT-Log …', LOG_CLEARED:'Ausgewähltes TXT-Log geleert.', LOG_CLEAR_FAILED_DETAIL:'Log konnte nicht geleert werden: {error}', LOG_DELETE_FAILED_DETAIL:'Log-Löschen fehlgeschlagen: {error}', LOG_CLEARED_SAVED:'Loganzeige geleert und im heutigen TXT-Log gespeichert.',
+    ANALYSIS_CHECKING:'Fanal-Analyse wird geprüft …', BACK_TO_SERKAL:'Zurück in SerKal.', ANALYSIS_LOADING:'Analyse wird geladen … Bitte kurz warten.', ANALYSIS_NO_REPORT:'Es wurde kein HTML-Report zurückgegeben.', ANALYSIS_LOAD_FAILED:'Fanal-Analyse konnte nicht geladen werden.', ANALYSIS_FAILED:'Analyse konnte nicht geladen werden', ANALYSIS_NO_HTML:'Keine Fanal-HTML-Ausgabe', ANALYSIS_NO_OUTPUT:'Keine Fanal-Ausgaben', LOG_CALENDAR_OPENED:'Kalender geöffnet', LOG_ANALYSIS_OPENED:'Analyse geöffnet', LOG_OPENED:'Log geöffnet', LOG_HELP_OPENED:'Log-Hilfe geöffnet', LOG_DAY_SELECTED:'Logtag gewählt',
+    LOG_HELP_TEXT:'Mo–So: Lädt die Logdatei des gewählten Wochentags.\n\nWeiter: Markiert den nächsten Treffer; nach dem letzten beginnt die Suche wieder oben.\n\nAlles markieren: Markiert den gesamten sichtbaren Logtext.\nKopieren: Kopiert die Markierung oder den gesamten sichtbaren Logtext.\nMarkiertes: Löscht den markierten Text dauerhaft aus der ausgewählten TXT-Logdatei.\nLog leeren: Leert die gesamte ausgewählte TXT-Logdatei dauerhaft.\nNeu laden: Lädt die ausgewählte Logdatei erneut vom Speicher.\nOberer Ziehbalken: Verändert die Höhe des Logfensters. Die gewählte Höhe wird gespeichert.\nX: Schließt das Logfenster.',
+    STATUS_FAR:'fern', STATUS_PLANNED:'geplant', STATUS_RUNNING:'läuft', STATUS_OPEN:'offen', STATUS_FINISHED:'fertig',
+    LOG_DEBUG_ECHO_ERROR:'Debug-Rückgabe fehlgeschlagen', LOG_DETAILS_ERROR:'Detailbeschreibung fehlgeschlagen', NOTE_NORMALIZED_DETAIL:'Notiz-Steuerwort vereinheitlicht: „{old}“ → „{new}“', NOTE_UNKNOWN_DETAIL:'Unbekanntes Steuerwort in Notiz: „{word}“', SCRIPT_RUN_UNAVAILABLE:'Programmschnittstelle nicht verfügbar', LOG_ENTRY_PROCESSING_ERROR:'Eintrag konnte nicht verarbeitet werden',
+    TMDB_FUTURE_PREVIEW:'Weitere Staffel {seasons} angekündigt.', TMDB_SEASON_PENDING:'{season} angekündigt / noch ohne bestätigte Termine.', TMDB_FUTURE_NOTE:'TMDB kennt zusätzlich {seasons} als angekündigte Staffel.', TMDB_PENDING_NOTE:'TMDB meldet diese Staffel als angekündigt / noch ohne bestätigte Termine.', TMDB_ACTIVE_FUTURE:'Aktive Staffel: {season}. Zusätzlich bei TMDB vorhanden: {future} (angekündigt / noch ohne bestätigte Termine). Die aktuell angezeigte Staffel kann normal verwendet werden.', TMDB_UNCLEAR:'Achtung: {season} ist bei TMDB als angekündigt / unklar datiert ({flag}) vorhanden.', TMDB_ADDITIONAL:' Zusätzlich bekannt: {future}.', TMDB_NO_CALENDAR:' Diese Staffel wird NICHT in den Kalender eingetragen.', TMDB_FUTURE_INFO:'Bei TMDB zusätzlich vorhanden: {future} (angekündigt / noch ohne bestätigte Termine).', TMDB_SUMMARY_ACTIVE:'Aktive Staffel: {season} · zusätzlich bei TMDB: {future} (angekündigt / noch ohne bestätigte Termine)', TMDB_SUMMARY_UNCLEAR:'{season} ist bei TMDB als angekündigt / unklar datiert ({flag}) vorhanden. Kein automatischer Kalendereintrag.', TMDB_SUMMARY_FUTURE:'Weitere Staffeln laut TMDB: {future} (angekündigt / noch ohne bestätigte Termine)',
+    NOTE_HELP_HTML:'<b>Auswertbare Notizzeilen:</b><br><code>Offset 1D</code> – alle deutschen Termine 1 Tag später<br><code>Offset +2D</code> – alle deutschen Termine 2 Tage später<br><code>Offset -2D</code> – alle deutschen Termine 2 Tage früher<br><code>Termine DE: 14.09., 21.09., 28.09.</code> – einzelne Termine festlegen<br><span style="opacity:.78">Groß-/Kleinschreibung ist egal. Alle anderen Texte bleiben freie Notizen.</span>', LOG_CONTROLS:'Funktionen im Logfenster',
+    MAINT_SNAPSHOT:'TMDB-Prüfung: {series} Serien, {requests} TMDB-Anfragen, {cache} aus Cache. Bewertung: {ready} übernehmbar, {review} Rückfrage, {observe} beobachten, {protected} geschützt. Archiv und Kalender unverändert.', ENTRY_N:'Eintrag {n}', ENTRY_BLOCKED_GENERIC:'Eintrag blockiert (unklare Staffel).',
+    TMDB_NOT_CONFIGURED_FULL:'TMDB ist noch nicht eingerichtet.\nBitte zuerst den TMDB-API-Key eintragen.', POSTER_REQUEST_NO_ID:'Posteranforderung ohne TMDB-ID verworfen', NOTHING_TO_COPY:'Nichts zum Kopieren.', LOG_VISIBLE_EMPTY:'Das sichtbare Log ist leer.', FANAL_OVERLAY_MISSING:'Fanal-Overlay ist in der Oberfläche nicht vorhanden.', FANAL_NOT_CONFIGURED:'Die Analyse-Funktion ist noch nicht eingerichtet.\nBitte das Fanal-Zusatzpaket installieren.', FANAL_NOT_CONFIGURED_TITLE:'Fanal nicht eingerichtet', LOG_INITIAL_HINT:'Markieren und Strg+C funktionieren direkt. Löschfunktionen ändern die ausgewählte TXT-Logdatei.',
+    ARCHIV_LOAD_FAILED:'Archiv konnte nicht geladen werden.',
+    FANAL_CLOSE:'← Zurück zu SerKal',
+    LOG_NOT_FOUND:'Nicht gefunden: {query}', FANAL_LOADED:'Fanal-Analyse geladen: {name}', LOG_RELOADED:'Log neu geladen',
 
 },
   en: {
@@ -3915,6 +3928,31 @@ const I18N = {
     MAINT_FAILED: 'Maintenance failed',
     MAINT_PROGRESS: '{files} files / {seasons} seasons checked, {changed} changed',
     NO_PIC_AVAILABLE: 'No picture available',
+    ARIA_ACTIONS: 'Actions', ARIA_RESULT_NAV: 'Result navigation', TT_RESULT_NAV: 'Change result', ARIA_PREVIEW: 'Preview', ARIA_RESULT_INFO: 'Result information',
+    NOTE_HELP: 'Help for evaluable note lines', TT_SORT_SWITCH: 'Change sorting (status / A–Z)', TT_ARCHIVE_COUNT: 'Number of archive entries', TT_DELETE_FILE: 'Delete archive file', ARIA_ARCHIVE_LIST: 'Archive list',
+    TT_GERMAN: 'German', TT_LANGUAGE_SWITCH: 'Change language', TT_CALENDAR_OPEN: 'Open Google Calendar', TT_THEME_SWITCH: 'Change color scheme', TT_LOG_OPEN: 'View log',
+    ARIA_LOG: 'Log display', ARIA_LOG_RESIZE: 'Resize log window', TT_LOG_RESIZE: 'Drag to resize the log window', ARIA_LOG_DAY: 'Choose log day', PH_LOG_SEARCH: 'Search log …',
+    TT_LOG_FIND: 'Find next result', LOG_FIND: '🔎 Next', TT_LOG_SELECT_ALL: 'Select all visible log text', LOG_SELECT_ALL: '☑ Select all', TT_LOG_COPY: 'Copy log or selection', LOG_COPY: '📋 Copy',
+    TT_LOG_DELETE_SELECTION: 'Permanently delete selected text from the selected TXT log file', LOG_DELETE_SELECTION: '✂ Selection', TT_LOG_CLEAR: 'Completely clear the selected TXT log', LOG_CLEAR: '🧹 Clear log', TT_LOG_HELP: 'Explain log window functions', ARIA_LOG_HELP: 'Help for log functions', TT_LOG_CLOSE: 'Close log window',
+    ARIA_POSTER: 'Show large poster', TT_POSTER_CLOSE: 'Click to close', SEEN_TITLE: 'I watched this', INPUT_CHANGED: 'Input changed — please search again.', HELP_OPEN: 'Open SerKal Help',
+    CALENDAR_HELP_FAILED: 'Calendar help could not be opened: {error}', CALENDAR_OPEN_FAILED: 'Calendar could not be opened: {error}',
+    CALENDAR_ICS_SELECTED: 'ICS is selected. The actual ICS export will follow in a later SerKal version.', CALENDAR_DISABLED: 'Calendar is disabled in SerKal.',
+    CANCEL:'Cancel', CLOSE:'Close', UNKNOWN_ERROR:'Unknown error', UNKNOWN_ERROR_LOWER:'unknown error', POSTER_BRIDGE_MISSING:'No TMDB poster bridge is available.', POSTER_LOAD_FAILED:'Poster could not be loaded', POSTER_CACHE_USED:'Poster restored from session cache', POSTER_RESPONSE_USED:'Poster response applied', POSTER_RESPONSE_FAILED:'Poster response could not be processed', POSTER_BRIDGE_ERROR:'Poster bridge reported an error', POSTER_BRIDGE_START_FAILED:'Poster bridge could not be started',
+    LOG_SEARCH_MODE_ERROR:'Search mode could not be set', LOG_INPUT_DIRTY_ERROR:'Input change could not be processed', LOG_LANGUAGE_CHANGED:'Language changed', LOG_NOTE_NORMALIZED:'Note control word normalized', LOG_NOTE_UNKNOWN:'Unknown control word in note', NOTE_NORMALIZED:'Control word in note normalized.',
+    LOG_MAINT_STARTED:'Maintenance started', MAINT_BRIDGE_UNAVAILABLE:'Maintenance bridge unavailable', LOG_MAINT_DONE:'Maintenance completed', LOG_MAINT_FAILED:'Maintenance failed', LOG_ARCHIVE_LOAD_ERROR:'Archive could not be loaded', MAINT_CHECK:'Check maintenance',
+    LOG_ARCHIVE_SELECTED:'Archive entry selected', LOG_POSTER_START_FAILED:'Poster function could not be started', LOG_ARCHIVE_DETAILS_FAILED:'Archive details could not be built completely', LOG_ARCHIVE_PREVIEW_FAILED:'Archive preview could not be built completely', LOG_SEARCH_STARTED:'Search started', LOG_SEARCH_RESULT:'Search result', LOG_SEARCH_FAILED:'Search failed', LOG_PREVIOUS_RESULT:'Previous result', LOG_NEXT_RESULT:'Next result', LOG_INSERT_STARTED:'Entry started', LOG_INSERT_FAILED_DOMAIN:'Entry failed validation', LOG_INSERT_DONE:'Entry completed', LOG_ARCHIVE_CALENDAR_FAILED:'Archive saved, calendar failed', LOG_CALENDAR_PAST_SKIPPED:'Calendar skipped according to the original rule', LOG_GOOGLE_SAVED:'Saved directly to Google Calendar', LOG_ARCHIVE_ONLY_SAVED:'Archive saved without calendar', LOG_INSERT_FAILED:'Entry failed', LOG_RESET:'Reset completed', LOG_DELETE_REQUESTED:'Deletion requested', DELETE_SERIES:'Delete series', DELETE_NOT_DONE:'Not deleted: {error}', LOG_DELETE_DONE:'Deletion completed', DELETE_FAILED_DETAIL:'Deletion failed: {error}', LOG_SORT_CHANGED:'Archive sorting changed',
+    LOG_HEIGHT_SAVED:'Log window height saved.', COPY_FAILED:'Copying is not possible.', LOG_SELECT_FAILED:'Log text could not be selected completely.', LOG_NO_SELECTION:'No selection in the log window.', LOG_SELECTION_SAVING:'Selected text deleted — saving TXT log …', LOG_SELECTION_SAVED:'Selection deleted and saved in today’s TXT log.', LOG_SELECTION_FAILED:'Selection could not be deleted.', LOG_SAVED:'Log saved.', LOG_SAVE_FAILED_DETAIL:'Log could not be saved: {error}', LOG_SAVE_START_FAILED:'Log saving could not be started.', LOG_CLEARING:'Log view cleared — clearing selected TXT log …', LOG_CLEARED:'Selected TXT log cleared.', LOG_CLEAR_FAILED_DETAIL:'Log could not be cleared: {error}', LOG_DELETE_FAILED_DETAIL:'Log deletion failed: {error}', LOG_CLEARED_SAVED:'Log view cleared and saved in today’s TXT log.',
+    ANALYSIS_CHECKING:'Fanal analysis is being checked …', BACK_TO_SERKAL:'Back in SerKal.', ANALYSIS_LOADING:'Analysis is loading … Please wait briefly.', ANALYSIS_NO_REPORT:'No HTML report was returned.', ANALYSIS_LOAD_FAILED:'Fanal analysis could not be loaded.', ANALYSIS_FAILED:'Analysis could not be loaded', ANALYSIS_NO_HTML:'No Fanal HTML output', ANALYSIS_NO_OUTPUT:'No Fanal output', LOG_CALENDAR_OPENED:'Calendar opened', LOG_ANALYSIS_OPENED:'Analysis opened', LOG_OPENED:'Log opened', LOG_HELP_OPENED:'Log help opened', LOG_DAY_SELECTED:'Log day selected',
+    LOG_HELP_TEXT:'Mon–Sun: Loads the log file for the selected weekday.\n\nNext: Selects the next result; after the final result the search starts again at the top.\n\nSelect all: Selects all visible log text.\nCopy: Copies the selection or all visible log text.\nSelection: Permanently deletes the selected text from the selected TXT log file.\nClear log: Permanently clears the selected TXT log file.\nRefresh: Reloads the selected log file.\nTop resize bar: Changes the log window height. The selected height is saved.\nX: Closes the log window.',
+    STATUS_FAR:'far away', STATUS_PLANNED:'planned', STATUS_RUNNING:'running', STATUS_OPEN:'open', STATUS_FINISHED:'finished',
+    LOG_DEBUG_ECHO_ERROR:'Debug response failed', LOG_DETAILS_ERROR:'Detail description failed', NOTE_NORMALIZED_DETAIL:'Note control word normalized: “{old}” → “{new}”', NOTE_UNKNOWN_DETAIL:'Unknown control word in note: “{word}”', SCRIPT_RUN_UNAVAILABLE:'Program interface unavailable', LOG_ENTRY_PROCESSING_ERROR:'Entry could not be processed',
+    TMDB_FUTURE_PREVIEW:'Additional season {seasons} announced.', TMDB_SEASON_PENDING:'{season} announced / no confirmed dates yet.', TMDB_FUTURE_NOTE:'TMDB also lists {seasons} as an announced season.', TMDB_PENDING_NOTE:'TMDB lists this season as announced / without confirmed dates yet.', TMDB_ACTIVE_FUTURE:'Active season: {season}. Also on TMDB: {future} (announced / no confirmed dates yet). The currently displayed season can be used normally.', TMDB_UNCLEAR:'Warning: {season} is listed on TMDB as announced / unclear dated ({flag}).', TMDB_ADDITIONAL:' Also known: {future}.', TMDB_NO_CALENDAR:' This season will NOT be added to the calendar.', TMDB_FUTURE_INFO:'Also on TMDB: {future} (announced / no confirmed dates yet).', TMDB_SUMMARY_ACTIVE:'Active season: {season} · additional on TMDB: {future} (announced / no confirmed dates yet)', TMDB_SUMMARY_UNCLEAR:'{season} is listed on TMDB as announced / unclear dated ({flag}). Not added to calendar automatically.', TMDB_SUMMARY_FUTURE:'Additional seasons on TMDB: {future} (announced / no confirmed dates yet)',
+    NOTE_HELP_HTML:'<b>Evaluable note lines:</b><br><code>Offset 1D</code> – all German dates 1 day later<br><code>Offset +2D</code> – all German dates 2 days later<br><code>Offset -2D</code> – all German dates 2 days earlier<br><code>Dates DE: 14.09., 21.09., 28.09.</code> – set individual dates<br><span style="opacity:.78">Capitalization does not matter. All other text remains a free note.</span>', LOG_CONTROLS:'Log controls',
+    MAINT_SNAPSHOT:'TMDB check: {series} series, {requests} TMDB requests, {cache} from cache. Assessment: {ready} ready, {review} to review, {observe} observed, {protected} protected. Archive and calendar unchanged.', ENTRY_N:'Entry {n}', ENTRY_BLOCKED_GENERIC:'Entry blocked (unclear season).',
+    TMDB_NOT_CONFIGURED_FULL:'TMDB is not configured yet.\nPlease enter the TMDB API key first.', POSTER_REQUEST_NO_ID:'Poster request without a TMDB ID discarded', NOTHING_TO_COPY:'Nothing to copy.', LOG_VISIBLE_EMPTY:'The visible log is empty.', FANAL_OVERLAY_MISSING:'The Fanal overlay is not present in the interface.', FANAL_NOT_CONFIGURED:'The analysis function is not configured yet.\nPlease install the Fanal add-on package.', FANAL_NOT_CONFIGURED_TITLE:'Fanal is not configured', LOG_INITIAL_HINT:'Selection and Ctrl+C work directly. Delete functions change the selected TXT log file.',
+    ARCHIV_LOAD_FAILED:'Archive could not be loaded.',
+    FANAL_CLOSE:'← Back to SerKal',
+    LOG_NOT_FOUND:'Not found: {query}', FANAL_LOADED:'Fanal analysis loaded: {name}', LOG_RELOADED:'Log reloaded',
 
 }
 };
@@ -4039,8 +4077,8 @@ function cleanUserErrorMessage_(err) {
 
   msg = msg.replace(/^Error:\s*/, '');
 
-  if (msg.indexOf('TMDB ist noch nicht eingerichtet.') !== -1) {
-    return 'TMDB ist noch nicht eingerichtet.\nBitte zuerst den TMDB API-Key eintragen.';
+  if (msg.indexOf('TMDB_NOT_CONFIGURED') !== -1 || msg.indexOf(t('TMDB_NOT_CONFIGURED_FULL').split('\n')[0]) !== -1) {
+    return t('TMDB_NOT_CONFIGURED_FULL');
   }
 
   return msg || t('ERR_SEARCH_FAILED');
@@ -4076,10 +4114,15 @@ function setLang_(lang, force) {
   }
 
   uiLogSheet('setLang APPLY', { from: LANG, to: l });
-  try { uiLogAction_('Sprache geändert', { from: LANG, to: l }); } catch (_eAction) {}
+  try { uiLogAction_(t('LOG_LANGUAGE_CHANGED'), { from: LANG, to: l }); } catch (_eAction) {}
   LANG = l;
 
   try { if (window.localStorage) localStorage.setItem('serkal_lang', l); } catch (e) {}
+  try {
+    if (window.serkal && window.serkal.settings && window.serkal.settings.setLanguage) {
+      window.serkal.settings.setLanguage(l).catch(function(){});
+    }
+  } catch (_eLanguagePersist) {}
 
   refreshTexts_();
   uiSetHitInfo_();
@@ -4596,7 +4639,7 @@ function logNoteCanonicalization_(before, after, it) {
         geaendertZu: newLine
       });
       uiLogAction_(
-        'Notiz-Steuerwort vereinheitlicht: "' + oldLine + '" → "' + newLine + '"',
+        t('NOTE_NORMALIZED_DETAIL', { old:oldLine, new:newLine }),
         info
       );
     }
@@ -4626,7 +4669,7 @@ function applyNoteAutofill_(ta, it) {
     var checked = validateNoteText_(ta.value || '');
     if (!checked.ok) {
       var first = checked.problems[0] || {};
-      uiStatus('Unbekanntes Steuerwort in Notiz: "' + String(first.word || '?') + '"', { spinner:false, kind:'error', sound:true });
+      uiStatus(t('NOTE_UNKNOWN_DETAIL', { word:String(first.word || '?') }), { spinner:false, kind:'error', sound:true });
       ta.style.boxShadow = '0 0 0 2px rgba(200,42,42,0.25) inset';
       return checked;
     }
@@ -4634,7 +4677,7 @@ function applyNoteAutofill_(ta, it) {
       var noteBefore = String(ta.value || '');
       ta.value = String(checked.canonical || '');
       logNoteCanonicalization_(noteBefore, ta.value, it);
-      uiStatus('Steuerwort in Notiz vereinheitlicht.', { spinner:false, kind:'info' });
+      uiStatus(t('NOTE_NORMALIZED'), { spinner:false, kind:'info' });
     }
     setDirtyForEntry_(it, { note: String(ta.value || '') });
     ta.style.boxShadow = '0 0 0 2px rgba(231,111,81,0.22) inset';
@@ -4922,6 +4965,34 @@ const I18N_MAP = [
   { sel: '#inpTitle',                          attr: { placeholder: 'PH_TITLE' } },
   { sel: '#inpYear',                           attr: { placeholder: 'PH_YEAR',   title: 'TT_YEAR_OPT' } },
   { sel: '#inpSeason',                         attr: { placeholder: 'PH_SEASON', title: 'TT_SEASON_OPT' } },
+  { sel: '.actionRow',                         attr: { 'aria-label': 'ARIA_ACTIONS' } },
+  { sel: '#hitNavRow',                         attr: { 'aria-label': 'ARIA_RESULT_NAV', title: 'TT_RESULT_NAV' } },
+  { sel: '#tmdbPreview',                       attr: { 'aria-label': 'ARIA_PREVIEW' } },
+  { sel: '#hitCountText',                      attr: { 'aria-label': 'ARIA_RESULT_INFO' } },
+  { sel: '#noteHelpBtn',                       attr: { title: 'NOTE_HELP', 'aria-label': 'NOTE_HELP' } },
+  { sel: '#btnSortToggle',                     attr: { title: 'TT_SORT_SWITCH' } },
+  { sel: '#archivCount',                       attr: { title: 'TT_ARCHIVE_COUNT' } },
+  { sel: '#btnDeleteFile',                     attr: { title: 'TT_DELETE_FILE' } },
+  { sel: '#archivList',                        attr: { 'aria-label': 'ARIA_ARCHIVE_LIST' } },
+  { sel: '#btnLangDe',                         attr: { title: 'TT_GERMAN', 'aria-label': 'TT_GERMAN' } },
+  { sel: '#langToggleTrack',                   attr: { title: 'TT_LANGUAGE_SWITCH' } },
+  { sel: '#btnCalendarDock',                   attr: { title: 'TT_CALENDAR_OPEN' } },
+  { sel: '#btnThemeDock',                      attr: { title: 'TT_THEME_SWITCH' } },
+  { sel: '#btnLogDock',                        attr: { title: 'TT_LOG_OPEN' } },
+  { sel: '#logPanel',                          attr: { 'aria-label': 'ARIA_LOG' } },
+  { sel: '#logPanelResizer',                   attr: { 'aria-label': 'ARIA_LOG_RESIZE', title: 'TT_LOG_RESIZE' } },
+  { sel: '#logDayRow',                         attr: { 'aria-label': 'ARIA_LOG_DAY' } },
+  { sel: '#logSearchInput',                    attr: { placeholder: 'PH_LOG_SEARCH' } },
+  { sel: '#btnLogFindNext',                    text: 'LOG_FIND', attr: { title: 'TT_LOG_FIND' } },
+  { sel: '#btnLogSelectAll',                   text: 'LOG_SELECT_ALL', attr: { title: 'TT_LOG_SELECT_ALL' } },
+  { sel: '#btnLogCopy',                        text: 'LOG_COPY', attr: { title: 'TT_LOG_COPY' } },
+  { sel: '#btnLogDeleteSelection',             text: 'LOG_DELETE_SELECTION', attr: { title: 'TT_LOG_DELETE_SELECTION' } },
+  { sel: '#btnLogClearView',                   text: 'LOG_CLEAR', attr: { title: 'TT_LOG_CLEAR' } },
+  { sel: '#btnLogHelp',                        attr: { title: 'TT_LOG_HELP', 'aria-label': 'ARIA_LOG_HELP' } },
+  { sel: '#btnLogClose',                       attr: { title: 'TT_LOG_CLOSE' } },
+  { sel: '#posterOverlay',                     attr: { 'aria-label': 'ARIA_POSTER', title: 'TT_POSTER_CLOSE' } },
+  { sel: '#logPanelMiniStatus',                text: 'LOG_INITIAL_HINT' },
+  { sel: '#skFanalCloseBtn',                   text: 'FANAL_CLOSE' },
 
   // Preview hint
   { sel: '#tmdbPreview #previewText .hint',    text: 'HINT_NO_SEARCH' },
@@ -5301,7 +5372,7 @@ function stopMaintenanceStatusPolling_() {
  */
 function runMaintenance_() {
   try {
-    try { uiLogAction_('Wartung gestartet', {}); } catch (_eAction) {}
+    try { uiLogAction_(t('LOG_MAINT_STARTED'), {}); } catch (_eAction) {}
     if (guardDirtyBeforeAction_()) return;
     if (state && state.busy) return;
     uiSetBusy_(true);
@@ -5309,7 +5380,7 @@ function runMaintenance_() {
     startMaintenanceStatusPolling_();
 
     var runner = google && google.script && google.script.run ? google.script.run : null;
-    if (!runner) throw new Error('google.script.run nicht verfügbar');
+    if (!runner) throw new Error(t('SCRIPT_RUN_UNAVAILABLE'));
 
     runner
       .withSuccessHandler(function(res){
@@ -5323,13 +5394,7 @@ function runMaintenance_() {
         }
         var isSnapshot = !!(res && res.readOnly && res.phase === 'tmdb_snapshot');
         var progress = isSnapshot
-          ? ('TMDB-Prüfung: ' + String(res.gepruefteSerien || 0) + ' Serien, ' +
-             String(res.tmdbAnfragen || 0) + ' TMDB-Anfragen, ' +
-             String(res.ausCache || 0) + ' aus Cache. Bewertung: ' +
-             String(res.uebernehmbar || 0) + ' übernehmbar, ' +
-             String(res.rueckfragen || 0) + ' Rückfrage, ' +
-             String(res.beobachten || 0) + ' beobachten, ' +
-             String(res.geschuetzt || 0) + ' geschützt. Archiv und Kalender unverändert.')
+          ? t('MAINT_SNAPSHOT',{series:String(res.gepruefteSerien||0),requests:String(res.tmdbAnfragen||0),cache:String(res.ausCache||0),ready:String(res.uebernehmbar||0),review:String(res.rueckfragen||0),observe:String(res.beobachten||0),protected:String(res.geschuetzt||0)})
           : t('MAINT_PROGRESS', {
               files: String(res.geprueftDateien || 0),
               seasons: String(res.geprueftStaffeln || 0),
@@ -5337,7 +5402,7 @@ function runMaintenance_() {
             });
         uiStatus(progress || t('MAINT_DONE'), { spinner:false, kind:'info' });
         try {
-          uiLogAction_('Wartung abgeschlossen', {
+          uiLogAction_(t('MAINT_DONE'), {
             ok: true,
             geprueftDateien: res && res.geprueftDateien || 0,
             gepruefteSerien: res && res.gepruefteSerien || 0,
@@ -5361,7 +5426,7 @@ function runMaintenance_() {
         uiSetBusy_(false);
         var msgErr = t('MAINT_FAILED') + (err ? (': ' + (err.message || String(err))) : '');
         uiStatus(msgErr, { spinner:false, kind:'error', sound:true });
-        try { uiLogAction_('Wartung fehlgeschlagen', { message: msgErr }); } catch (_eAction) {}
+        try { uiLogAction_(t('MAINT_FAILED'), { message: msgErr }); } catch (_eAction) {}
       })
       .apiStarteZukunftspruefung();
   } catch (e) {
@@ -5390,7 +5455,7 @@ function runMaintenance_() {
       // Archiv-UI Texte
       try {
         const msg = $('archivMsg');
-        if (msg && msg.textContent && msg.textContent.trim() === 'Archiv konnte nicht geladen werden.') {
+        if (msg && msg.textContent && msg.textContent.trim() === t('ERR_ARCHIV_LOAD')) {
           msg.textContent = t('ARCHIV_LOAD_FAILED');
         }
       } catch(_e) {}
@@ -5497,7 +5562,7 @@ function uiStatus(msg, opts) {
       const helpButton = document.createElement('button');
       helpButton.type = 'button';
       helpButton.className = 'btnSmall';
-      helpButton.textContent = 'SerKal-Hilfe öffnen';
+      helpButton.textContent = t('HELP_OPEN');
       helpButton.style.marginLeft = '12px';
       helpButton.addEventListener('click', function(){
         try {
@@ -5944,7 +6009,7 @@ function loadArchiv() {
   try {
     uiSetBusy_(true);
     uiStatus(t('STATUS_LOADING_ARCHIV'), {spinner:true, kind:'info'});
-    setHint(archivHint, 'Archiv wird geladen …', {spinner:true});
+    setHint(archivHint, t('STATUS_LOADING_ARCHIV'), {spinner:true});
 
     try {
       uiLogSheet('ARCHIV LADEN START', {
@@ -5960,7 +6025,7 @@ function loadArchiv() {
 
         if (!ok) {
           try {
-            uiLogSheet('ERROR ARCHIV LADEN FEHLER', {
+            uiLogSheet(t('LOG_ARCHIVE_LOAD_ERROR'), {
               ok: false,
               message: res && res.message ? String(res.message) : ''
             });
@@ -5969,7 +6034,7 @@ function loadArchiv() {
           state.archivEntries = [];
           renderArchivList();
           uiResetDetails_();
-          setHint(archivHint, (res && res.message) ? res.message : 'Archiv konnte nicht geladen werden.', {kind:'error', sound:true});
+          setHint(archivHint, (res && res.message) ? res.message : t('ERR_ARCHIV_LOAD'), {kind:'error', sound:true});
           return;
         }
 
@@ -6017,7 +6082,7 @@ function loadArchiv() {
         state.archivEntries = [];
         renderArchivList();
         uiResetDetails_();
-        setHint(archivHint, 'Archiv konnte nicht geladen werden.', {kind:'error', sound:true});
+        setHint(archivHint, t('ERR_ARCHIV_LOAD'), {kind:'error', sound:true});
       })
       .apiLadeArchivDaten();
 
@@ -6027,7 +6092,7 @@ function loadArchiv() {
     try {
       uiLogSheet('ERROR ARCHIV LADEN EXCEPTION', { message: String(e) });
     } catch (_e2) {}
-    setHint(archivHint, 'Archiv konnte nicht geladen werden.', {kind:'error', sound:true});
+    setHint(archivHint, t('ERR_ARCHIV_LOAD'), {kind:'error', sound:true});
   }
 }
 
@@ -6216,13 +6281,13 @@ function deriveStatus_(it) {
  */
 function statusToLabel_(status) {
   switch (Number(status)) {
-    case 0: return 'fern';
-    case 1: return 'geplant';
-    case 2: return 'läuft';
-    case 3: return 'offen';
-    case 4: return 'fertig';
-    case 5: return 'Wartung prüfen';
-    default: return 'Wartung prüfen';
+    case 0: return t('STATUS_FAR');
+    case 1: return t('STATUS_PLANNED');
+    case 2: return t('STATUS_RUNNING');
+    case 3: return t('STATUS_OPEN');
+    case 4: return t('STATUS_FINISHED');
+    case 5: return t('MAINT_CHECK');
+    default: return t('MAINT_CHECK');
   }
 }
 
@@ -6289,9 +6354,9 @@ function statusToIcon_(status) {
   switch (Number(status)) {
     case 0: return '⚪';
     case 1: return '🟡';
-    case 2: return '⏳';
+    case 2: return t('BTN_BUSY');
     case 3: return '☐';
-    case 4: return '✅';
+    case 4: return t('FILTER_DONE');
     case 5: return '❗';
     default: return '❗';
   }
@@ -6403,9 +6468,9 @@ function renderArchivList() {
     const row = document.createElement('div');
     row.className = 'liRow';
 
-    const t = document.createElement('div');
-    t.className = 'liTitle';
-    t.textContent = buildTitle_(it, { fallback: ('Eintrag ' + (idx + 1)) });
+    const titleEl = document.createElement('div');
+    titleEl.className = 'liTitle';
+    titleEl.textContent = buildTitle_(it, { fallback:t('ENTRY_N',{n:String(idx + 1)}) });
 
     const meta = document.createElement('div');
     meta.className = 'liMeta';
@@ -6428,7 +6493,7 @@ function renderArchivList() {
       const btnSeen = document.createElement('span');
       btnSeen.className = 'amSym';
       btnSeen.textContent = '✓';
-      btnSeen.title = 'Hab ich geschaut';
+      btnSeen.title = t('SEEN_TITLE');
       btnSeen.style.cursor = 'pointer';
 
       btnSeen.addEventListener('click', function(ev) {
@@ -6459,7 +6524,7 @@ function renderArchivList() {
       meta.appendChild(symSpan);
     }
 
-    row.appendChild(t);
+    row.appendChild(titleEl);
     row.appendChild(meta);
     div.appendChild(row);
 
@@ -6538,9 +6603,9 @@ function fillDetailsFromPreview_(p) {
   const dateFlag = String(pp && (pp.dateFlag || '') || '').trim();
   let noteText = t('DETAILS_HINT_DASH');
   if (futureLabels.length) {
-    noteText = 'TMDB kennt zusätzlich ' + futureLabels.join(', ') + ' als angekündigte Staffel.';
+    noteText = t('TMDB_FUTURE_NOTE',{seasons:futureLabels.join(', ')});
   } else if (dateFlag) {
-    noteText = 'TMDB meldet diese Staffel als angekündigt / noch ohne bestätigte Termine.';
+    noteText = t('TMDB_PENDING_NOTE');
   }
   if (note) note.textContent = noteText;
 
@@ -6567,12 +6632,12 @@ function setEntryBlocked(blocked, reason) {
     var box = document.getElementById('searchHint'); // linke Statusbox
     if (!box) return;
     if (blocked) {
-      box.textContent = reason || t('ENTRY_BLOCKED_GENERIC') || 'Eintrag blockiert (unklare Staffel).';
+      box.textContent = reason || t('ENTRY_BLOCKED_GENERIC');
     } else {
       // Nur zurücksetzen, wenn dort gerade die Block-Meldung steht (sonst andere Statusmeldungen nicht überschreiben)
       var txt = String(box.textContent || '');
-      if (txt.indexOf('Eintrag blockiert') !== -1 || txt.indexOf('blockiert') !== -1) {
-        box.textContent = t('READY') || 'Fertig.';
+      if (txt === t('ENTRY_BLOCKED_GENERIC')) {
+        box.textContent = t('STATUS_READY');
       }
     }
   } catch (e) {}
@@ -6581,18 +6646,18 @@ function setEntryBlocked(blocked, reason) {
 /** setInfoBox_(show, headline, text) {
   var box = document.getElementById('infoBox');
   var hd  = document.getElementById('hdDetInfo');
-  var t   = document.getElementById('infoText');
-  if (!box || !hd || !t) return;
+  var textEl = document.getElementById('infoText');
+  if (!box || !hd || !textEl) return;
 
   if (!show) {
     box.style.display = 'none';
-    if (t) t.innerHTML = '<div class="hint">—</div>';
+    if (textEl) textEl.innerHTML = '<div class="hint">—</div>';
     return;
   }
 
   box.style.display = '';
   if (headline) hd.textContent = headline;
-  t.textContent = String(text || '').trim() || '—';
+  textEl.textContent = String(text || '').trim() || t('DETAILS_HINT_DASH');
 } /* ALT-Kommentarrest bereinigt */
 
 /**
@@ -6629,7 +6694,7 @@ function updateInfoFromPreview__ALT_DISABLED_(p) {
 
   if (td.length > 0 && eps > 0) {
     if (futureLabels.length > 0) {
-      setInfoBox_(true, 'Info', 'Aktive Staffel: ' + (currentSeason || '—') + '. Zusätzlich bei TMDB vorhanden: ' + futureLabels.join(', ') + ' (angekündigt / noch ohne bestätigte Termine). Die aktuell angezeigte Staffel kann normal verwendet werden.');
+      setInfoBox_(true, 'Info', t('TMDB_ACTIVE_FUTURE',{season:currentSeason || t('DETAILS_HINT_DASH'),future:futureLabels.join(', ')}));
     } else {
       setInfoBox_(false);
     }
@@ -6638,16 +6703,16 @@ function updateInfoFromPreview__ALT_DISABLED_(p) {
   }
 
   if (dateFlag) {
-    var txt = 'Achtung: ' + (currentSeason || 'Diese Staffel') + ' ist bei TMDB als angekündigt / unklar datiert (' + dateFlag + ') vorhanden.';
-    if (futureLabels.length > 0) txt += ' Zusätzlich bekannt: ' + futureLabels.join(', ') + '.';
-    txt += ' Diese Staffel wird NICHT in den Kalender eingetragen.';
+    var txt = t('TMDB_UNCLEAR',{season:currentSeason || t('PV_SEASON'),flag:dateFlag});
+    if (futureLabels.length > 0) txt += t('TMDB_ADDITIONAL',{future:futureLabels.join(', ')});
+    txt += t('TMDB_NO_CALENDAR');
     setInfoBox_(true, 'Info', txt);
     setEntryBlocked(false);
     return;
   }
 
   if (futureLabels.length > 0) {
-    setInfoBox_(true, 'Info', 'Bei TMDB zusätzlich vorhanden: ' + futureLabels.join(', ') + ' (angekündigt / noch ohne bestätigte Termine).');
+    setInfoBox_(true, 'Info', t('TMDB_FUTURE_INFO',{future:futureLabels.join(', ')}));
     setEntryBlocked(false);
     return;
   }
@@ -6677,7 +6742,6 @@ function updateInfoFromPreview__ALT_DISABLED_(p) {
 function summaryInfoHtml_(p) {
   try {
     p = p || {};
-    var isEn = String(LANG || 'de').toLowerCase() === 'en';
     var futureLabels = futureSeasonLabels_(p);
     var dateFlag = String(p && (p.dateFlag || '') || '').trim();
 
@@ -6688,24 +6752,18 @@ function summaryInfoHtml_(p) {
     var currentSeason = seasonLabelFromAny_(
       p && (p.season || p.staffelLabel || p.seasonLabel || p.seasonNumber || p.staffelNummer)
     );
-    var seasonTxt = currentSeason || '—';
+    var seasonTxt = currentSeason || t('DETAILS_HINT_DASH');
     var txt = '';
 
     if (td.length > 0 && eps > 0 && futureLabels.length > 0) {
-      txt = isEn
-        ? 'Active season: ' + seasonTxt + ' · additional on TMDB: ' + futureLabels.join(', ') + ' (announced / no confirmed dates yet)'
-        : 'Aktive Staffel: ' + seasonTxt + ' · zusätzlich bei TMDB: ' + futureLabels.join(', ') + ' (angekündigt / noch ohne bestätigte Termine)';
+      txt = t('TMDB_SUMMARY_ACTIVE',{season:seasonTxt,future:futureLabels.join(', ')});
     } else if (dateFlag) {
-      txt = isEn
-        ? (seasonTxt + ' is listed on TMDB as announced / unclear dated (' + dateFlag + '). Not added to calendar automatically.')
-        : (seasonTxt + ' ist bei TMDB als angekündigt / unklar datiert (' + dateFlag + ') vorhanden. Kein automatischer Kalendereintrag.');
+      txt = t('TMDB_SUMMARY_UNCLEAR',{season:seasonTxt,flag:dateFlag});
       if (futureLabels.length > 0) {
-        txt += isEn ? (' Also known: ' + futureLabels.join(', ') + '.') : (' Zusätzlich bekannt: ' + futureLabels.join(', ') + '.');
+        txt += t('TMDB_ADDITIONAL',{future:futureLabels.join(', ')});
       }
     } else if (futureLabels.length > 0) {
-      txt = isEn
-        ? 'Additional seasons on TMDB: ' + futureLabels.join(', ') + ' (announced / no confirmed dates yet)'
-        : 'Weitere Staffeln laut TMDB: ' + futureLabels.join(', ') + ' (angekündigt / noch ohne bestätigte Termine)';
+      txt = t('TMDB_SUMMARY_FUTURE',{future:futureLabels.join(', ')});
     }
 
     if (!txt) return '';
@@ -6735,18 +6793,18 @@ function summaryInfoHtml_(p) {
 function setInfoBox_(show, headline, text) {
   var box = document.getElementById('infoBox');
   var hd  = document.getElementById('hdDetInfo');
-  var t   = document.getElementById('infoText');
-  if (!box || !hd || !t) return;
+  var textEl = document.getElementById('infoText');
+  if (!box || !hd || !textEl) return;
 
   if (!show) {
     box.style.display = 'none';
-    t.innerHTML = '<div class="hint">—</div>';
+    textEl.innerHTML = '<div class="hint">—</div>';
     return;
   }
 
   box.style.display = '';
   hd.textContent = String(headline || '').trim() || ((LANG === 'en') ? 'Info' : 'Info');
-  t.textContent = String(text || '').trim() || '—';
+  textEl.textContent = String(text || '').trim() || t('DETAILS_HINT_DASH');
 }
 
 /**
@@ -6885,13 +6943,7 @@ function fillDetailsFromArchiv_(it) {
     noteHelp.style.border = '1px solid rgba(99,102,241,0.22)';
     noteHelp.style.fontSize = '0.92em';
     noteHelp.style.lineHeight = '1.45';
-    noteHelp.innerHTML =
-      '<b>Auswertbare Notizzeilen:</b><br>' +
-      '<code>Offset 1D</code> – alle deutschen Termine 1 Tag später<br>' +
-      '<code>Offset +2D</code> – alle deutschen Termine 2 Tage später<br>' +
-      '<code>Offset -2D</code> – alle deutschen Termine 2 Tage früher<br>' +
-      '<code>Termine DE: 14.09., 21.09., 28.09.</code> – einzelne Termine festlegen<br>' +
-      '<span style="opacity:.78">Groß-/Kleinschreibung ist egal. Alle anderen Texte bleiben freie Notizen.</span>';
+    noteHelp.innerHTML = t('NOTE_HELP_HTML');
 
     var noteNormalizeTimer = 0;
     ta.addEventListener('input', function() {
@@ -6906,7 +6958,7 @@ function fillDetailsFromArchiv_(it) {
           ta.value = String(canonical || '');
           logNoteCanonicalization_(noteBefore, ta.value, it);
           setDirtyForEntry_(it, { note: String(ta.value || '') });
-          uiStatus('Steuerwort in Notiz vereinheitlicht.', { spinner:false, kind:'info' });
+          uiStatus(t('NOTE_NORMALIZED'), { spinner:false, kind:'info' });
         }
       }, 1500);
     });
@@ -6959,7 +7011,7 @@ function fillDetailsFromArchiv_(it) {
 function selectArchivItem(it) {
   state.archivSelected = it;
   state.currentPreview = null;
-  try { uiLogAction_('Archiv-Eintrag ausgewählt', uiActionEntryInfo_(it)); } catch (_eAction) {}
+  try { uiLogAction_(t('LOG_ARCHIVE_SELECTED'), uiActionEntryInfo_(it)); } catch (_eAction) {}
   try {
     uiLogSheet('TRACE UI Archivklick', {
       fileName: it && (it.fileName || it.datei || it.filename || ''),
@@ -6972,19 +7024,19 @@ function selectArchivItem(it) {
   try {
     scheduleArchivPosterLoad_(it);
   } catch (e) {
-    try { uiLogAction_('Posterfunktion konnte nicht gestartet werden', { fehler:String(e && e.message || e) }); } catch (_ePoster) {}
+    try { uiLogAction_(t('LOG_POSTER_START_FAILED'), { fehler:String(e && e.message || e) }); } catch (_ePoster) {}
   }
 
   try {
     fillDetailsFromArchiv_(it);
   } catch (e) {
-    try { uiLogAction_('Archivdetails konnten nicht vollständig aufgebaut werden', { fehler:String(e && e.message || e) }); } catch (_eDetails) {}
+    try { uiLogAction_(t('LOG_ARCHIVE_DETAILS_FAILED'), { fehler:String(e && e.message || e) }); } catch (_eDetails) {}
   }
 
   try {
     renderLeftPreviewFromAny_(it);
   } catch (e) {
-    try { uiLogAction_('Archivvorschau konnte nicht vollständig aufgebaut werden', { fehler:String(e && e.message || e) }); } catch (_ePreview) {}
+    try { uiLogAction_(t('LOG_ARCHIVE_PREVIEW_FAILED'), { fehler:String(e && e.message || e) }); } catch (_ePreview) {}
   }
 }
 
@@ -7022,7 +7074,7 @@ function doSearch() {
 
   const q = (inpTitle.value || '').trim();
   state.lastQuery = q;
-  try { uiLogAction_('Suche gestartet', { titel: q, jahr: getYearOverride_(), staffel: getSeasonOverride_() }); } catch (_eAction) {}
+  try { uiLogAction_(t('LOG_SEARCH_STARTED'), { titel: q, jahr: getYearOverride_(), staffel: getSeasonOverride_() }); } catch (_eAction) {}
   if (!q) {
     state.phase = 'idle';
     updateMainUi_();
@@ -7050,7 +7102,7 @@ clearPreview();
 
         state.tmdbResults = Array.isArray(arr) ? arr : [];
         state.tmdbIndex = 0;
-        try { uiLogAction_('Suche Ergebnis', { titel: q, anzahl: state.tmdbResults.length }); } catch (_eAction) {}
+        try { uiLogAction_(t('LOG_SEARCH_RESULT'), { titel: q, anzahl: state.tmdbResults.length }); } catch (_eAction) {}
 
         if (!state.tmdbResults.length) {
           state.phase = 'idle';
@@ -7080,7 +7132,7 @@ clearPreview();
         uiStatus(msg, {spinner:false, kind:'error', sound:true});
         uiSetBusy_(false);
         uiSetHitInfo_();
-        try { uiLogAction_('Suche fehlgeschlagen', { titel: q, message: msg }); } catch (_eAction) {}
+        try { uiLogAction_(t('LOG_SEARCH_FAILED'), { titel: q, message: msg }); } catch (_eAction) {}
       })
       .apiSucheSerieKomplett(q, getLang_(), { yearOverride: getYearOverride_(), seasonOverride: getSeasonOverride_() });
   } catch (e) {
@@ -7192,7 +7244,7 @@ function prevResult() {
   if (!uiDebounceOk_()) return;
   if (!state.tmdbResults.length) return;
   state.tmdbIndex = (state.tmdbIndex - 1 + state.tmdbResults.length) % state.tmdbResults.length;
-  try { uiLogAction_('Treffer zurück', { index: state.tmdbIndex + 1, anzahl: state.tmdbResults.length }); } catch (_eAction) {}
+  try { uiLogAction_(t('LOG_PREVIOUS_RESULT'), { index: state.tmdbIndex + 1, anzahl: state.tmdbResults.length }); } catch (_eAction) {}
   enrichAndRender(state.tmdbResults[state.tmdbIndex]);
 }
 
@@ -7219,7 +7271,7 @@ function nextResult() {
   if (!uiDebounceOk_()) return;
   if (!state.tmdbResults.length) return;
   state.tmdbIndex = (state.tmdbIndex + 1) % state.tmdbResults.length;
-  try { uiLogAction_('Treffer vor', { index: state.tmdbIndex + 1, anzahl: state.tmdbResults.length }); } catch (_eAction) {}
+  try { uiLogAction_(t('LOG_NEXT_RESULT'), { index: state.tmdbIndex + 1, anzahl: state.tmdbResults.length }); } catch (_eAction) {}
   enrichAndRender(state.tmdbResults[state.tmdbIndex]);
 }
 
@@ -7250,7 +7302,7 @@ function nextResult() {
       state.insertLock = true;
       const cur = (state && state.currentPreview) ? state.currentPreview : ((state.tmdbResults && state.tmdbResults.length) ? state.tmdbResults[state.tmdbIndex] : null);
       if (!cur) { state.insertLock = false; return; }
-      try { uiLogAction_('Eintrag gestartet', uiActionEntryInfo_(cur)); } catch (_eAction) {}
+      try { uiLogAction_(t('LOG_INSERT_STARTED'), uiActionEntryInfo_(cur)); } catch (_eAction) {}
 
       // G2-Fix: Eintrag nur mit vollständigem Preview-Datensatz zulassen.
       // S00/null deutet darauf hin, dass noch ein roher Treffer statt der angereicherten Vorschau aktiv ist.
@@ -7327,7 +7379,7 @@ function nextResult() {
               }
               uiStatus(msg, {spinner:false, kind:'error', sound:true, helpUrl:helpUrl});
               if (!helpUrl) setHint(searchHint, msg);
-              try { uiLogAction_('Eintrag fachlich fehlgeschlagen', { message: msg, response: res }); } catch (_eAction) {}
+              try { uiLogAction_(t('LOG_INSERT_FAILED_DOMAIN'), { message: msg, response: res }); } catch (_eAction) {}
               return;
             }
 
@@ -7338,7 +7390,7 @@ function nextResult() {
             loadArchiv();
             uiSetBusy_(false);
             uiStatus(t('STATUS_INSERT_DONE'), {spinner:false, kind:'info'});
-            try { uiLogAction_('Eintrag abgeschlossen', uiActionEntryInfo_(cur)); } catch (_eAction) {}
+            try { uiLogAction_(t('LOG_INSERT_DONE'), uiActionEntryInfo_(cur)); } catch (_eAction) {}
             uiSetReadyState_({ clearTitle: true, clearDetails: true });
             var entryOutcome = window.SerKalEntryFlow.outcome(res);
             if (entryOutcome === 'archiveCalendarPartial') {
@@ -7347,7 +7399,7 @@ function nextResult() {
                 : 'https://serkal.de/google-kalender-hilfe.html';
               uiStatus(window.SerKalEntryFlow.outcomeText(LANG, res),
                 {spinner:false, kind:'warn', sound:true, helpUrl:partialHelpUrl});
-              try { uiLogAction_('Archiv gespeichert, Kalender fehlgeschlagen', {
+              try { uiLogAction_(t('LOG_ARCHIVE_CALENDAR_FAILED'), {
                 code:String(res && res.code || ''),
                 calendarMessage:String(res && res.calendar && res.calendar.message || '')
               }); } catch (_ePartialLog) {}
@@ -7356,7 +7408,7 @@ function nextResult() {
               if (cal.skipped === true && cal.reason === 'past_season') {
                 uiStatus(window.SerKalEntryFlow.outcomeText(LANG, res),
                   {spinner:false, kind:'info'});
-                try { uiLogAction_('Kalender nach Originalregel übersprungen', {
+                try { uiLogAction_(t('LOG_CALENDAR_PAST_SKIPPED'), {
                   grund:'past_season',
                   letzterTermin:String(cal.lastDate || ''),
                   aktuellesJahr:Number(cal.currentYear || 0)
@@ -7364,7 +7416,7 @@ function nextResult() {
               } else {
                 uiStatus(window.SerKalEntryFlow.outcomeText(LANG, res),
                   {spinner:false, kind:'info'});
-                try { uiLogAction_('Google-Kalender direkt gespeichert', {
+                try { uiLogAction_(t('LOG_GOOGLE_SAVED'), {
                   erstellt:Number(cal.created || 0),
                   aktualisiert:Number(cal.updated || 0),
                   events:Number(cal.events || 0)
@@ -7375,20 +7427,20 @@ function nextResult() {
             } else {
               uiStatus(window.SerKalEntryFlow.outcomeText(LANG, res),
                 {spinner:false, kind:'info'});
-              try { uiLogAction_('Archiv ohne Kalender gespeichert', {
+              try { uiLogAction_(t('LOG_ARCHIVE_ONLY_SAVED'), {
                 kalenderModus:String(res && res.calendarMode || 'none')
               }); } catch (_eNoCalendarLog) {}
             }
           })
           .withFailureHandler(function(err) {
             state.insertLock = false;
-            uiLogSheet('TRACE_UI verarbeiteTmdbAuswahl FEHLER', { message: String((err && (err.message || err)) || '') });
+            uiLogSheet(t('LOG_ENTRY_PROCESSING_ERROR'), { message: String((err && (err.message || err)) || '') });
             state.phase='searched';
             updateMainUi_();
             uiSetBusy_(false);
             uiStatus(t('ERR_INSERT_FAILED'), {spinner:false, kind:'error', sound:true});
             setHint(searchHint, window.SerKalEntryFlow.text(LANG, 'insertFailed'));
-            try { uiLogAction_('Eintrag fehlgeschlagen', { message: String((err && (err.message || err)) || '') }); } catch (_eAction) {}
+            try { uiLogAction_(t('LOG_INSERT_FAILED'), { message: String((err && (err.message || err)) || '') }); } catch (_eAction) {}
           })
           .verarbeiteTmdbAuswahl(cur);
       } catch (e) {
@@ -7486,7 +7538,7 @@ function nextResult() {
  * @loeschung nein
  */
     function doReset(clearTitle) {
-      try { uiLogAction_('Reset ausgeführt', { clearTitle: (clearTitle !== false) }); } catch (_eAction) {}
+      try { uiLogAction_(t('LOG_RESET'), { clearTitle: (clearTitle !== false) }); } catch (_eAction) {}
       uiSetReadyState_({ clearTitle: (clearTitle !== false), clearDetails: true });
     }
     // --------- Löschen (Archivdatei) ----------
@@ -7519,7 +7571,7 @@ function nextResult() {
       }
 
       const fileName = it.fileName || it.datei || it.filename || it.file;
-      try { uiLogAction_('Löschen angefordert', uiActionEntryInfo_(it)); } catch (_eAction) {}
+      try { uiLogAction_(t('LOG_DELETE_REQUESTED'), uiActionEntryInfo_(it)); } catch (_eAction) {}
       if (!fileName) {
         setHint(archivHint, t('ERR_BAD_ENTRY'));
         return;
@@ -7539,8 +7591,8 @@ function nextResult() {
         icon: '🗑️',
         title: t('CONF_DELETE_TITLE'),
         message: t('CONF_DELETE_BODY', { title: title, file: fileName }),
-        confirmText: 'Serie löschen',
-        cancelText: 'Abbrechen',
+        confirmText: t('DELETE_SERIES'),
+        cancelText: t('CANCEL'),
         onCancel: function() {
           uiStatus(t('STATUS_CANCELLED'), {kind:'error', sound:true, spinner:false});
         },
@@ -7556,7 +7608,7 @@ function nextResult() {
 
             if (!ok) {
               uiSetBusy_(false);
-              setHint(archivHint, 'Nicht gelöscht: ' + (res && res.message ? res.message : 'unbekannt'), {kind:'error', sound:true, spinner:false});
+              setHint(archivHint, t('DELETE_NOT_DONE',{error:res && res.message ? res.message : t('UNKNOWN_ERROR_LOWER')}), {kind:'error', sound:true, spinner:false});
               return;
             }
 
@@ -7573,14 +7625,14 @@ function nextResult() {
             state.phase = 'idle';
             updateMainUi_();
 
-            setHint(archivHint, 'Gelöscht.', {spinner:false});
-            try { uiLogAction_('Löschen abgeschlossen', { fileName: String(fileName) }); } catch (_eAction) {}
+            setHint(archivHint, t('STATUS_DELETED'), {spinner:false});
+            try { uiLogAction_(t('LOG_DELETE_DONE'), { fileName: String(fileName) }); } catch (_eAction) {}
             loadArchiv();
           })
           .withFailureHandler(function(err) {
             uiSetBusy_(false);
-            const detail = String((err && (err.message || err)) || 'unbekannter Fehler');
-            setHint(archivHint, 'Löschen fehlgeschlagen: ' + detail, {kind:'error', sound:true, spinner:false});
+            const detail = String((err && (err.message || err)) || t('UNKNOWN_ERROR_LOWER'));
+            setHint(archivHint, t('DELETE_FAILED_DETAIL',{error:detail}), {kind:'error', sound:true, spinner:false});
           })
           // Backend: ganze Serie löschen
           .apiLoescheArchivEintrag({
@@ -7590,7 +7642,7 @@ function nextResult() {
           });
       } catch (e) {
         uiSetBusy_(false);
-        setHint(archivHint, 'Löschen fehlgeschlagen.', {kind:'error', sound:true, spinner:false});
+        setHint(archivHint, t('ERR_DELETE_FAILED'), {kind:'error', sound:true, spinner:false});
       }
         }
       });
@@ -7656,7 +7708,7 @@ function refreshSortToggle_() {
 if (btnSortToggle) {
   btnSortToggle.addEventListener('click', () => {
     state.sortMode = (state.sortMode === 'alpha') ? 'date' : 'alpha';
-    try { uiLogAction_('Archiv-Sortierung geändert', { sortMode: state.sortMode }); } catch (_eAction) {}
+    try { uiLogAction_(t('LOG_SORT_CHANGED'), { sortMode: state.sortMode }); } catch (_eAction) {}
     refreshSortToggle_();
     renderArchivList();
   });
@@ -7707,8 +7759,8 @@ function startFromDock_() {
           kind: 'error',
           icon: '⛔',
           title: 'SerKal-Start fehlgeschlagen',
-          message: ((err && err.message) ? err.message : String(err || 'Unbekannter Fehler')),
-          confirmText: 'Schließen',
+          message: ((err && err.message) ? err.message : String(err || t('UNKNOWN_ERROR'))),
+          confirmText: t('CLOSE'),
           showCancel: false
         });
       })
@@ -7799,7 +7851,7 @@ function initLogPanelResize_() {
       document.body.style.cursor = '';
       document.body.style.userSelect = '';
       applyLogPanelHeight_(logPanel.getBoundingClientRect().height, true);
-      setLogMiniStatus_('Logfensterhöhe gespeichert.');
+      setLogMiniStatus_(t('LOG_HEIGHT_SAVED'));
     }
     window.addEventListener('pointermove', move);
     window.addEventListener('pointerup', stop);
@@ -7811,7 +7863,7 @@ function initLogPanelResize_() {
     ev.preventDefault();
     var current = logPanel.getBoundingClientRect().height || defaultLogPanelHeight_();
     applyLogPanelHeight_(current + (ev.key === 'ArrowUp' ? 24 : -24), true);
-    setLogMiniStatus_('Logfensterhöhe gespeichert.');
+    setLogMiniStatus_(t('LOG_HEIGHT_SAVED'));
   });
 
   window.addEventListener('resize', function() {
@@ -7871,36 +7923,11 @@ function setActiveLogDay_(day) {
  * @loeschung nein
  */
 function showLogHelp_() {
-  var lines = (String(LANG || 'de').toLowerCase() === 'en')
-    ? [
-        'Mo–So: Load the log file for the selected weekday.',
-        'Search field: Enter text to find in the displayed log.',
-        'Weiter: Select the next match; after the last match, search starts again at the top.',
-        'Alles markieren: Select all currently displayed log text.',
-        'Kopieren: Copy the selection; without a selection, copy the entire displayed log.',
-        'Markiertes: Permanently delete the selected text from the selected TXT log file.',
-        'Log leeren: Permanently clear the entire selected TXT log file.',
-        'Neu laden: Reload the selected log file from storage.',
-        'Upper handle: Drag up or down to resize the log window. The selected height is saved.',
-        'X: Close the log window.'
-      ]
-    : [
-        'Mo–So: Lädt die Logdatei des gewählten Wochentags.',
-        'Suchfeld: Hier den Text eingeben, der im angezeigten Log gesucht werden soll.',
-        'Weiter: Markiert den nächsten Treffer; nach dem letzten beginnt die Suche wieder oben.',
-        'Alles markieren: Markiert den gesamten momentan angezeigten Logtext.',
-        'Kopieren: Kopiert die Markierung; ohne Markierung wird der gesamte angezeigte Logtext kopiert.',
-        'Markiertes: Löscht den markierten Text dauerhaft aus der ausgewählten TXT-Logdatei.',
-        'Log leeren: Leert die gesamte ausgewählte TXT-Logdatei dauerhaft.',
-        'Neu laden: Lädt die ausgewählte Logdatei erneut vom Speicher.',
-        'Oberer Ziehbalken: Verändert die Höhe des Logfensters. Die gewählte Höhe wird gespeichert.',
-        'X: Schließt das Logfenster.'
-      ];
   showSerKalDialog_({
     kind: 'info',
     icon: '?',
-    title: (String(LANG || 'de').toLowerCase() === 'en') ? 'Log controls' : 'Funktionen im Logfenster',
-    message: lines.join('\n\n'),
+    title: t('LOG_CONTROLS'),
+    message: t('LOG_HELP_TEXT'),
     confirmText: 'OK',
     showCancel: false
   });
@@ -7916,7 +7943,7 @@ function loadLogDay_(day) {
       logPanelPre.textContent = t('LOG_LOADING');
       logPanelPre.setAttribute('data-search-index', '0');
     }
-    setLogMiniStatus_('Log wird geladen …');
+    setLogMiniStatus_(t('LOG_LOADING'));
     google.script.run
       .withSuccessHandler(function(res) { renderLogLines_(res || null); })
       .withFailureHandler(function(err) { renderLogLines_({ ok:false, message:String(err || '') }); })
@@ -8014,7 +8041,7 @@ function copyLogSelectionOrAll_() {
   try {
     var selected = getLogSelectionText_();
     var txt = selected || (logPanelPre ? String(logPanelPre.textContent || '') : '');
-    if (!txt) { setLogMiniStatus_('Nichts zum Kopieren.'); return; }
+    if (!txt) { setLogMiniStatus_(t('NOTHING_TO_COPY')); return; }
     if (navigator && navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(txt)
         .then(function(){ setLogMiniStatus_(selected ? 'Markierung kopiert.' : 'Loganzeige kopiert.'); })
@@ -8049,7 +8076,7 @@ function fallbackCopyLogText_(txt, selected) {
     document.body.removeChild(ta);
     setLogMiniStatus_(selected ? 'Markierung kopiert.' : 'Loganzeige kopiert.');
   } catch (e) {
-    setLogMiniStatus_('Kopieren nicht möglich.');
+    setLogMiniStatus_(t('COPY_FAILED'));
   }
 }
 
@@ -8074,7 +8101,7 @@ function findNextInLog_() {
     var idx = lower.indexOf(qLower, start);
     if (idx < 0 && start > 0) idx = lower.indexOf(qLower, 0);
     if (idx < 0) {
-      setLogMiniStatus_('Nicht gefunden: ' + q);
+      setLogMiniStatus_(t('LOG_NOT_FOUND',{query:q}));
       logPanelPre.setAttribute('data-search-index', '0');
       return;
     }
@@ -8082,7 +8109,7 @@ function findNextInLog_() {
     logPanelPre.setAttribute('data-search-index', String(idx + q.length));
     setLogMiniStatus_('Gefunden: ' + q);
   } catch (e) {
-    setLogMiniStatus_('Suche fehlgeschlagen.');
+    setLogMiniStatus_(t('ERR_SEARCH_FAILED'));
   }
 }
 
@@ -8130,13 +8157,13 @@ function selectAllLogText_() {
     if (!logPanelPre) return;
     var txt = String(logPanelPre.textContent || '');
     if (!txt) {
-      setLogMiniStatus_('Das sichtbare Log ist leer.');
+      setLogMiniStatus_(t('LOG_VISIBLE_EMPTY'));
       return;
     }
     selectTextInPre_(logPanelPre, 0, txt.length);
     setLogMiniStatus_('Gesamter sichtbarer Logtext markiert.');
   } catch (_e) {
-    setLogMiniStatus_('Logtext konnte nicht vollständig markiert werden.');
+    setLogMiniStatus_(t('LOG_SELECT_FAILED'));
   }
 }
 
@@ -8151,15 +8178,15 @@ function selectAllLogText_() {
 function deleteSelectedLogText_() {
   try {
     var selected = getLogSelectionText_();
-    if (!selected) { setLogMiniStatus_('Keine Markierung im Logfenster.'); return; }
+    if (!selected) { setLogMiniStatus_(t('LOG_NO_SELECTION')); return; }
     var sel = window.getSelection();
     var range = sel.getRangeAt(0);
     range.deleteContents();
     sel.removeAllRanges();
-    setLogMiniStatus_('Markierter Text gelöscht – speichere TXT-Log …');
-    persistVisibleLogText_('Markierung gelöscht und im heutigen TXT-Log gespeichert.');
+    setLogMiniStatus_(t('LOG_SELECTION_SAVING'));
+    persistVisibleLogText_(t('LOG_SELECTION_SAVED'));
   } catch (e) {
-    setLogMiniStatus_('Markierung konnte nicht gelöscht werden.');
+    setLogMiniStatus_(t('LOG_SELECTION_FAILED'));
   }
 }
 
@@ -8179,9 +8206,9 @@ function persistVisibleLogText_(successMsg) {
     google.script.run
       .withSuccessHandler(function(res) {
         if (res && res.ok) {
-          setLogMiniStatus_(successMsg || res.message || 'Log gespeichert.');
+          setLogMiniStatus_(successMsg || res.message || t('LOG_SAVED'));
         } else {
-          setLogMiniStatus_('Log konnte nicht gespeichert werden: ' + String((res && res.message) || 'unbekannter Fehler'));
+          setLogMiniStatus_(t('LOG_SAVE_FAILED_DETAIL',{error:String((res && res.message) || t('UNKNOWN_ERROR_LOWER'))}));
         }
       })
       .withFailureHandler(function(err) {
@@ -8189,7 +8216,7 @@ function persistVisibleLogText_(successMsg) {
       })
       .apiSpeichereLogText(currentLogDay_ || 'today', txt);
   } catch (e) {
-    setLogMiniStatus_('Log-Speichern konnte nicht gestartet werden.');
+    setLogMiniStatus_(t('LOG_SAVE_START_FAILED'));
   }
 }
 
@@ -8206,18 +8233,18 @@ function clearVisibleLog_() {
   try {
     if (logPanelPre) logPanelPre.textContent = '';
     if (logPanelPre) logPanelPre.setAttribute('data-search-index', '0');
-    setLogMiniStatus_('Loganzeige geleert – lösche ausgewähltes TXT-Log …');
+    setLogMiniStatus_(t('LOG_CLEARING'));
     try {
       google.script.run
         .withSuccessHandler(function(res) {
-          setLogMiniStatus_((res && res.ok) ? 'Ausgewähltes TXT-Log geleert.' : ('Log konnte nicht geleert werden: ' + String((res && res.message) || 'unbekannter Fehler')));
+          setLogMiniStatus_((res && res.ok) ? t('LOG_CLEARED') : t('LOG_CLEAR_FAILED_DETAIL',{error:String((res && res.message) || t('UNKNOWN_ERROR_LOWER'))}));
         })
         .withFailureHandler(function(err) {
-          setLogMiniStatus_('Log-Löschen fehlgeschlagen: ' + String((err && (err.message || err)) || ''));
+          setLogMiniStatus_(t('LOG_DELETE_FAILED_DETAIL',{error:String((err && (err.message || err)) || '')}));
         })
         .apiLoescheLog(currentLogDay_ || 'today');
     } catch (_e2) {
-      persistVisibleLogText_('Loganzeige geleert und im heutigen TXT-Log gespeichert.');
+      persistVisibleLogText_(t('LOG_CLEARED_SAVED'));
     }
   } catch (_e) {}
 }
@@ -8300,12 +8327,12 @@ async function openCalendarFromDock_() {
     }
     var result = await window.serkal.calendar.open(settings, getLang_());
     if (result && result.ok) return;
-    if (result && result.action === 'ics') { alert('ICS ist ausgewählt. Der eigentliche ICS-Export folgt in einer späteren SERKAL-Version.'); return; }
-    if (result && result.action === 'none') { alert('Kalender ist in SERKAL deaktiviert.'); return; }
+    if (result && result.action === 'ics') { alert(t('CALENDAR_ICS_SELECTED')); return; }
+    if (result && result.action === 'none') { alert(t('CALENDAR_DISABLED')); return; }
     if (result && result.action === 'setup') { if (typeof window.serkalCalendarSetupShow === 'function') await window.serkalCalendarSetupShow(); return; }
     if (result && result.message) alert(result.message);
   } catch (e) {
-    alert('Kalender konnte nicht geöffnet werden: ' + String(e || ''));
+    alert(t('CALENDAR_OPEN_FAILED', { error:String(e || '') }));
   }
 }
 
@@ -8349,18 +8376,18 @@ function openFanalAnalyseOverlay_() {
     var frame = document.getElementById('skFanalFrame');
 
     if (!overlay || !frame) {
-      serkalFanalShowNotConfigured_('Fanal-Overlay ist in der UI nicht vorhanden.');
+      serkalFanalShowNotConfigured_(t('FANAL_OVERLAY_MISSING'));
       return;
     }
 
     if (typeof setHint === 'function') {
-      setHint(skFanalViewerLang_ === 'en' ? 'Checking fanal analysis …' : 'Fanal-Analyse wird geprüft …');
+      setHint(skFanalViewerLang_ === 'en' ? 'Checking fanal analysis …' : t('ANALYSIS_CHECKING'));
     }
 
     google.script.run
       .withSuccessHandler(function(res) {
         if (!res || !res.ok || !res.html) {
-          serkalFanalShowNotConfigured_((res && (res.message || res.error)) || 'Die Analyse-Funktion ist noch nicht eingerichtet.\nBitte Fanal-Zusatzpaket installieren.');
+          serkalFanalShowNotConfigured_((res && (res.message || res.error)) || t('FANAL_NOT_CONFIGURED'));
           return;
         }
 
@@ -8399,7 +8426,7 @@ function closeFanalAnalyseOverlay_() {
     }
 
     if (typeof setHint === 'function') {
-      setHint(skFanalViewerLang_ === 'en' ? 'Back in SerKal.' : 'Zurück in SerKal.');
+      setHint(t('BACK_TO_SERKAL'));
     }
   } catch (_e) {}
 }
@@ -8416,7 +8443,7 @@ function closeFanalAnalyseOverlay_() {
 function serkalFanalOverlaySetLoading_() {
   var frame = document.getElementById('skFanalFrame');
   if (!frame) return;
-  frame.srcdoc = '<!doctype html><html><head><meta charset="utf-8"></head><body style="font-family:Arial,sans-serif;padding:24px;"><h2>Analyse wird geladen…</h2><p>Bitte kurz warten.</p></body></html>';
+  frame.srcdoc = '<!doctype html><html><head><meta charset="utf-8"></head><body style="font-family:Arial,sans-serif;padding:24px;"><p>' + escapeHtml(t('ANALYSIS_LOADING')) + '</p></body></html>';
 }
 
 /**
@@ -8434,7 +8461,7 @@ function serkalFanalOverlaySuccess_(res) {
     if (!frame) return;
 
     if (!res || !res.ok || !res.html) {
-      serkalFanalOverlayFailure_((res && (res.message || res.error)) || 'Es wurde kein HTML-Report zurückgegeben.');
+      serkalFanalOverlayFailure_((res && (res.message || res.error)) || t('ANALYSIS_NO_REPORT'));
       return;
     }
 
@@ -8442,7 +8469,7 @@ function serkalFanalOverlaySuccess_(res) {
 
     if (typeof setHint === 'function') {
       var name = (res.file && res.file.name) ? res.file.name : 'HTML';
-      setHint((skFanalViewerLang_ === 'en' ? 'Fanal analysis loaded: ' : 'Fanal-Analyse geladen: ') + name);
+      setHint(t('FANAL_LOADED',{name:name}));
     }
   } catch (e) {
     serkalFanalOverlayFailure_(e);
@@ -8459,7 +8486,7 @@ function serkalFanalOverlaySuccess_(res) {
  * @loeschung nein
  */
 function serkalFanalOverlayFailure_(err) {
-  var msg = String(err && err.message ? err.message : (err || 'Fanal-Analyse konnte nicht geladen werden.'));
+  var msg = String(err && err.message ? err.message : (err || t('ANALYSIS_LOAD_FAILED')));
   try {
     var overlay = document.getElementById('skFanalOverlay');
     var frame = document.getElementById('skFanalFrame');
@@ -8470,7 +8497,7 @@ function serkalFanalOverlayFailure_(err) {
     }
 
     if (frame) {
-      frame.srcdoc = '<!doctype html><html><head><meta charset="utf-8"></head><body style="font-family:Arial,sans-serif;padding:24px;color:#991b1b;"><h2>Analyse konnte nicht geladen werden</h2><pre style="white-space:pre-wrap;">' + serkalFanalOverlayEscapeHtml_(msg) + '</pre></body></html>';
+      frame.srcdoc = '<!doctype html><html><head><meta charset="utf-8"></head><body style="font-family:Arial,sans-serif;padding:24px;color:#991b1b;"><h2>' + serkalFanalOverlayEscapeHtml_(t('ANALYSIS_FAILED')) + '</h2><pre style="white-space:pre-wrap;">' + serkalFanalOverlayEscapeHtml_(msg) + '</pre></body></html>';
     }
 
     if (typeof setHint === 'function') setHint(msg, true);
@@ -8479,9 +8506,9 @@ function serkalFanalOverlayFailure_(err) {
       showSerKalDialog_({
         kind: 'error',
         icon: '⛔',
-        title: 'Analyse konnte nicht geladen werden',
+        title: t('ANALYSIS_FAILED'),
         message: msg,
-        confirmText: 'Schließen',
+        confirmText: t('CLOSE'),
         showCancel: false
       });
     } catch (_e2) {}
@@ -8500,17 +8527,17 @@ function serkalFanalOverlayFailure_(err) {
  */
 function serkalFanalShowNotConfigured_(err) {
   var raw = String(err && err.message ? err.message : (err || ''));
-  var msg = raw || 'Die Analyse-Funktion ist noch nicht eingerichtet.\nBitte Fanal-Zusatzpaket installieren.';
+  var msg = raw || t('FANAL_NOT_CONFIGURED');
 
   // Einheitliche, freundliche Nutzerfassung fuer den typischen Fall: kein Fanal-Report vorhanden.
   if (
     !raw ||
-    raw.indexOf('Keine Fanal-HTML-Ausgabe') !== -1 ||
-    raw.indexOf('Keine Fanal-Ausgaben') !== -1 ||
-    raw.indexOf('nicht eingerichtet') !== -1 ||
-    raw.indexOf('kein HTML-Report') !== -1
+    raw.indexOf(t('ANALYSIS_NO_HTML')) !== -1 ||
+    raw.indexOf(t('ANALYSIS_NO_OUTPUT')) !== -1 ||
+    raw.indexOf(t('FANAL_NOT_CONFIGURED_TITLE')) !== -1 ||
+    raw.indexOf(t('ANALYSIS_NO_REPORT')) !== -1
   ) {
-    msg = 'Die Analyse-Funktion ist noch nicht eingerichtet.\nBitte Fanal-Zusatzpaket installieren.';
+    msg = t('FANAL_NOT_CONFIGURED');
   }
 
   try {
@@ -8521,9 +8548,9 @@ function serkalFanalShowNotConfigured_(err) {
     showSerKalDialog_({
       kind: 'warning',
       icon: '⚠️',
-      title: 'Fanal nicht eingerichtet',
+      title: t('FANAL_NOT_CONFIGURED_TITLE'),
       message: msg,
-      confirmText: 'Schließen',
+      confirmText: t('CLOSE'),
       showCancel: false
     });
   } catch (_eAlert) {}
@@ -8550,14 +8577,14 @@ if (btnLangDe) btnLangDe.addEventListener('click', function(){ setLang_('de', tr
 if (btnLangEn) btnLangEn.addEventListener('click', function(){ setLang_('en', true); });
 if (langToggleTrack) langToggleTrack.addEventListener('click', function(){ toggleLang_(); });
 if (btnWartung) btnWartung.addEventListener('click', function(){ runMaintenance_(); });
-if (btnCalendarDock) btnCalendarDock.addEventListener('click', function(){ try { uiLogAction_('Kalender geöffnet', {}); } catch (_eAction) {} openCalendarFromDock_(); });
-if (btnAnalyseDock) btnAnalyseDock.addEventListener('click', function(){ try { uiLogAction_('Analyse geöffnet', {}); } catch (_eAction) {} openAnalyseFromDock_(); });
+if (btnCalendarDock) btnCalendarDock.addEventListener('click', function(){ try { uiLogAction_(t('LOG_CALENDAR_OPENED'), {}); } catch (_eAction) {} openCalendarFromDock_(); });
+if (btnAnalyseDock) btnAnalyseDock.addEventListener('click', function(){ try { uiLogAction_(t('LOG_ANALYSIS_OPENED'), {}); } catch (_eAction) {} openAnalyseFromDock_(); });
 var skFanalCloseBtn_ = document.getElementById('skFanalCloseBtn');
 if (skFanalCloseBtn_) skFanalCloseBtn_.addEventListener('click', function(){ closeFanalAnalyseOverlay_(); });
-if (btnLogDock) btnLogDock.addEventListener('click', function(){ try { uiLogAction_('Log geöffnet', {}); } catch (_eAction) {} openLogFromDock_(); });
+if (btnLogDock) btnLogDock.addEventListener('click', function(){ try { uiLogAction_(t('LOG_OPENED'), {}); } catch (_eAction) {} openLogFromDock_(); });
 initLogPanelResize_();
-if (btnLogRefresh) btnLogRefresh.addEventListener('click', function(){ try { uiLogAction_('Log neu geladen', {}); } catch (_eAction) {} loadLogPanel_(false); });
-if (btnLogHelp) btnLogHelp.addEventListener('click', function(){ try { uiLogAction_('Log-Hilfe geöffnet', {}); } catch (_eAction) {} showLogHelp_(); });
+if (btnLogRefresh) btnLogRefresh.addEventListener('click', function(){ try { uiLogAction_(t('LOG_RELOADED'), {}); } catch (_eAction) {} loadLogPanel_(false); });
+if (btnLogHelp) btnLogHelp.addEventListener('click', function(){ try { uiLogAction_(t('LOG_HELP_OPENED'), {}); } catch (_eAction) {} showLogHelp_(); });
 if (btnLogClose) btnLogClose.addEventListener('click', function(){ closeLogPanel_(); });
 if (btnLogFindNext) btnLogFindNext.addEventListener('click', function(){ findNextInLog_(); });
 if (logSearchInput) logSearchInput.addEventListener('keydown', function(ev){ if (ev && ev.key === 'Enter') findNextInLog_(); });
@@ -8569,7 +8596,7 @@ if (logDayButtons && logDayButtons.length) {
   logDayButtons.forEach(function(btn) {
     btn.addEventListener('click', function() {
       var d = String(btn.getAttribute('data-log-day') || '').toLowerCase();
-      try { uiLogAction_('Logtag gewählt', { day: d }); } catch (_eAction) {}
+      try { uiLogAction_(t('LOG_DAY_SELECTED'), { day: d }); } catch (_eAction) {}
       loadLogDay_(d);
     });
   });

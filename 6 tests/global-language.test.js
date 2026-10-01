@@ -24,7 +24,10 @@ assert.match(preload, /testKey:\(apiKey,lang\).*serkal:tmdb:testKey/);
 assert.match(preload, /open:\(settings,lang\).*serkal:calendar:open/);
 assert.match(backend, /language=" \+ encodeURIComponent\(locale\)/);
 assert.match(backend, /url\.searchParams\.set\("hl", serkalLanguage_\(lang\)\)/);
-assert.match(backend, /TMDB connection works\./);
+const backendI18n = require(path.join(root, '2 src', 'common', 'backend-i18n.js'));
+assert.equal(backendI18n.text('en', 'TMDB_CONNECTION_OK'), 'TMDB connection works.');
+assert.match(preload, /setLanguage:\(language\).*serkal:language:set/);
+assert.match(html, /window\.serkal\.settings\.setLanguage\(l\)/);
 
 // The setup itself must remain bilingual, including TMDB and calendar stages.
 assert.match(html, /First enter your personal free TMDB API key/);

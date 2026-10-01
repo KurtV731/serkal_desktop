@@ -36,7 +36,8 @@ contextBridge.exposeInMainWorld("serkal", {
     channel:SERKAL_CHANNEL,
     settings:{
         get:()=>ipcRenderer.invoke("serkal:settings:get"),
-        save:(settings)=>ipcRenderer.invoke("serkal:settings:save",settings)
+        save:(settings)=>ipcRenderer.invoke("serkal:settings:save",settings),
+        setLanguage:(language)=>ipcRenderer.invoke("serkal:language:set",language)
     },
     setup:{
         commit:(payload)=>ipcRenderer.invoke("serkal:setup:commit",payload)

@@ -7,7 +7,10 @@ const backend = fs.readFileSync(path.resolve("2 src/backend/main.js"), "utf8");
 assert.doesNotMatch(backend, /for \(const eventId of googleCalendarEventIdCandidates_\(idPayload, block\)\)/);
 assert.match(backend, /const actualEvents = new Map\(\)/);
 assert.match(backend, /googleCalendarFindSummaryAnywhere_\(calendarId, summary\)/);
-assert.match(backend, /Kalendertermin mit neuer Google-ID wiederangelegt/);
+assert.match(backend, /bt_\("GOOGLE_EVENT_RECREATED"\)/);
+const backendI18n = require(path.resolve("2 src/common/backend-i18n.js"));
+assert.equal(backendI18n.text("de", "GOOGLE_EVENT_RECREATED"), "Kalendertermin mit neuer Google-ID wiederangelegt");
+assert.equal(backendI18n.text("en", "GOOGLE_EVENT_RECREATED"), "Calendar event recreated with a new Google ID");
 assert.match(backend, /status \|\| ""\)\.toLowerCase\(\) === "cancelled"/);
 
 let exposed = null;
