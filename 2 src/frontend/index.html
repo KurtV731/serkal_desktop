@@ -3241,7 +3241,7 @@ function renderPreviewFromResult(r) {
     if (typeof previewText === 'undefined' || !previewText) return;
 
     const previewLang = getLang_();
-    const name = String(rr && (rr.name || rr.title || rr.original_name || rr.titel) || '—');
+    const name = localizedTitleFromAny_(rr, '—');
     const year = (rr && rr.year != null && String(rr.year).trim()) ? String(rr.year).trim() : '';
     const yearPart = year ? (' (' + escapeHtml(year) + ')') : '';
 
@@ -3607,11 +3607,20 @@ function testDebugEcho_(daten) {
  * @status aktiv
  * @loeschung nein
  */
+function localizedTitleFromAny_(it, fallback) {
+  var item = it || {};
+  var lang = String((typeof LANG !== 'undefined' && LANG) ? LANG : 'de').toLowerCase();
+  var localized = (lang === 'en')
+    ? (item.titleEN || item.nameEN)
+    : (item.titleDE || item.nameDE);
+  return String(localized || item.titel || item.title || item.name || fallback || '').trim();
+}
+
 function buildTitle_(it, opt) {
   var o = opt || {};
   var fallback = String(o.fallback || '').trim();
   var includeSeason = (o.includeSeason !== false);
-  var base = String((it && (it.titel || it.title || it.name)) || fallback || '').trim();
+  var base = localizedTitleFromAny_(it, fallback);
   var year = String((it && (it.jahr || it.year)) || '').trim();
   var staffel = seasonLabelFromAny_(it && (it.staffelLabel || it.staffel || it.seasonLabel || it.season || it.seasonNumber || it.staffelNummer));
 
@@ -6570,7 +6579,7 @@ function fillDetailsFromPreview_(p) {
   const note   = document.getElementById('detailsNote');
   if (status) status.textContent = t('DETAILS_STATUS_PREVIEW');
 
-  const baseTitle = (pp && (pp.name || pp.titel || pp.title)) ? (pp.name || pp.titel || pp.title) : t('DETAILS_HINT_DASH');
+  const baseTitle = localizedTitleFromAny_(pp, t('DETAILS_HINT_DASH'));
   const yearVal = (pp && pp.year != null && String(pp.year).trim()) ? String(pp.year).trim() : '';
   const staff = seasonLabelFromAny_(pp && (pp.season || pp.staffelNummer || pp.staffelLabel || pp.seasonLabel || pp.seasonNumber));
   const title = (yearVal ? (baseTitle + ' (' + yearVal + ')') : baseTitle) + (staff ? (' [' + staff + ']') : '');
@@ -7349,6 +7358,9 @@ function nextResult() {
           cur.jahrOverride = getYearOverride_();
           cur.staffelOverride = getSeasonOverride_();
           cur.uiLang = String(LANG || 'de').toLowerCase();
+          cur.title = localizedTitleFromAny_(cur, cur.title || cur.name || '');
+          cur.name = cur.title;
+          cur.titel = cur.title;
         } catch(_e) {}
 
         // Unveränderliche Kopie für den späteren ICS-Export. Der UI-Reset darf

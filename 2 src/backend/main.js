@@ -16,6 +16,7 @@ const http = require("node:http");
 const crypto = require("node:crypto");
 const { app, BrowserWindow, ipcMain, shell } = require("electron");
 const backendI18n = require(path.join(__dirname, "../common/backend-i18n.js"));
+const tmdbTitle = require(path.join(__dirname, "../common/tmdb-title.js"));
 
 let activeLanguage_ = "de";
 function bt_(key, values, language) {
@@ -997,7 +998,10 @@ function todayInt_() {
 }
 
 async function tmdbTvDetails_(id, lang) {
-    return tmdbRequest_("/tv/" + encodeURIComponent(String(id)), { language:tmdbLang_(lang) });
+    return tmdbRequest_("/tv/" + encodeURIComponent(String(id)), {
+        language:tmdbLang_(lang),
+        append_to_response:"translations,alternative_titles"
+    });
 }
 
 async function tmdbSeasonDetails_(id, seasonNumber, lang) {
@@ -1132,14 +1136,20 @@ async function buildHit_(id, fallback, detDE, detEN, seasonOverride, searchLang)
     const seasons = detDE && Array.isArray(detDE.seasons) && detDE.seasons.length ? detDE.seasons : (detEN && Array.isArray(detEN.seasons) ? detEN.seasons : []);
     const pick = await pickSeasonWithDates_(id, seasons, seasonOverride, searchLang);
     const rank = rankForDates_(pick.seasonStart, pick.episodeDates);
+    const titles = tmdbTitle.resolve(detDE, detEN, fallback, searchLang);
+    const selectedTitle = searchLang === "en" ? titles.en : titles.de;
     return {
         _rankGroup:rank.group,
         _rankKey:rank.key,
         id,
         tmdbId:id,
-        name:(detDE && detDE.name) || (detEN && detEN.name) || (fallback && fallback.name) || "—",
-        title:(detDE && detDE.name) || (detEN && detEN.name) || (fallback && fallback.name) || "—",
-        originalName:(detEN && detEN.original_name) || (detDE && detDE.original_name) || (fallback && fallback.original_name) || "",
+        name:selectedTitle,
+        title:selectedTitle,
+        nameDE:titles.de,
+        titleDE:titles.de,
+        nameEN:titles.en,
+        titleEN:titles.en,
+        originalName:titles.original,
         year:yearFromDate_((detDE && detDE.first_air_date) || (detEN && detEN.first_air_date) || (fallback && fallback.first_air_date) || ""),
         posterPath:(detDE && detDE.poster_path) || (detEN && detEN.poster_path) || (fallback && fallback.poster_path) || "",
         poster_path:(detDE && detDE.poster_path) || (detEN && detEN.poster_path) || (fallback && fallback.poster_path) || "",
