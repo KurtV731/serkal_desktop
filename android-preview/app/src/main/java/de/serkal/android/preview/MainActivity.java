@@ -3,12 +3,16 @@ package de.serkal.android.preview;
 import android.app.Activity;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowInsets;
+import android.view.WindowInsetsController;
+import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -22,10 +26,51 @@ public class MainActivity extends Activity {
     private static final int BLUE = Color.rgb(80, 167, 238);
     private static final int RED = Color.rgb(215, 75, 75);
     private boolean english = false;
+    private ZoomPanLayout zoomSurface;
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
+        configureFullscreen_();
         buildScreen();
+    }
+
+    @Override public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus) hideSystemBars_();
+    }
+
+    private void configureFullscreen_() {
+        Window window = getWindow();
+        window.setStatusBarColor(BG);
+        window.setNavigationBarColor(BG);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            WindowManager.LayoutParams attributes = window.getAttributes();
+            attributes.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+            window.setAttributes(attributes);
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            window.setDecorFitsSystemWindows(false);
+        }
+        hideSystemBars_();
+    }
+
+    private void hideSystemBars_() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            WindowInsetsController controller = getWindow().getInsetsController();
+            if (controller != null) {
+                controller.hide(WindowInsets.Type.statusBars() | WindowInsets.Type.navigationBars());
+                controller.setSystemBarsBehavior(WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+            }
+        } else {
+            getWindow().getDecorView().setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY |
+                View.SYSTEM_UI_FLAG_FULLSCREEN |
+                View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
+                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
+                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+            );
+        }
     }
 
     private int dp(int value) {
@@ -92,15 +137,35 @@ public class MainActivity extends Activity {
         root.setOrientation(LinearLayout.VERTICAL);
         root.setBackgroundColor(BG);
         root.setPadding(dp(4), dp(3), dp(4), dp(4));
+        root.setOnApplyWindowInsetsListener((view, insets) -> {
+            int left = dp(4), topInset = dp(3), right = dp(4), bottom = dp(4);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && insets.getDisplayCutout() != null) {
+                left += insets.getDisplayCutout().getSafeInsetLeft();
+                topInset += insets.getDisplayCutout().getSafeInsetTop();
+                right += insets.getDisplayCutout().getSafeInsetRight();
+                bottom += insets.getDisplayCutout().getSafeInsetBottom();
+            }
+            view.setPadding(left, topInset, right, bottom);
+            return insets;
+        });
 
         LinearLayout top = new LinearLayout(this);
         top.setGravity(Gravity.CENTER_VERTICAL);
         TextView title = text("SerKal", 13, TEXT);
         title.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
         top.addView(title, new LinearLayout.LayoutParams(0, dp(31), 1));
-        TextView preview = text(english ? "0.0.3 · Android preview · landscape" : "0.0.3 · Android-Präversion · Querformat", 7.5f, MUTED);
+        TextView preview = text(english ? "0.0.4 · pinch to zoom · drag to move" : "0.0.4 · mit 2 Fingern zoomen · mit 1 Finger bewegen", 7.5f, MUTED);
         preview.setGravity(Gravity.CENTER_VERTICAL | Gravity.RIGHT);
         top.addView(preview, new LinearLayout.LayoutParams(-2, dp(31)));
+        Button resetZoom = new Button(this);
+        resetZoom.setText("100 %");
+        resetZoom.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 8);
+        resetZoom.setTextColor(TEXT);
+        resetZoom.setAllCaps(false);
+        resetZoom.setMinHeight(0);
+        resetZoom.setMinimumHeight(0);
+        resetZoom.setOnClickListener(v -> { if (zoomSurface != null) zoomSurface.reset(); });
+        top.addView(resetZoom, new LinearLayout.LayoutParams(dp(58), dp(28)));
         Button language = new Button(this);
         language.setText(english ? "DE" : "EN");
         language.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 8);
@@ -112,19 +177,30 @@ public class MainActivity extends Activity {
         top.addView(language, new LinearLayout.LayoutParams(dp(42), dp(28)));
         root.addView(top);
 
+        zoomSurface = new ZoomPanLayout(this);
+        zoomSurface.setBackgroundColor(BG);
+        zoomSurface.setOnScaleChangedListener(value -> resetZoom.setText(Math.round(value * 100) + " %"));
         LinearLayout columns = new LinearLayout(this);
         columns.setOrientation(LinearLayout.HORIZONTAL);
-        root.addView(columns, new LinearLayout.LayoutParams(-1, 0, 1));
+        zoomSurface.addView(columns, new ZoomPanLayout.LayoutParams(-1, -1));
+        root.addView(zoomSurface, new LinearLayout.LayoutParams(-1, 0, 1));
 
-        LinearLayout left = panel(28);
-        left.addView(heading(english ? "ARCHIVE · 77 series" : "ARCHIV · 77 Serien"));
-        String[] series = {"1923", "A Gentleman in Moscow", "Adolescence", "Alien: Earth", "Andor", "Black Snow", "Dark Winds", "Dexter: Resurrection", "Fallout", "High Potential", "Lucky", "Paradise", "Reacher", "The Last of Us"};
-        ScrollView listScroll = new ScrollView(this);
-        LinearLayout list = new LinearLayout(this);
-        list.setOrientation(LinearLayout.VERTICAL);
-        for (String s : series) list.addView(row(s, s.equals("Lucky")));
-        listScroll.addView(list);
-        left.addView(listScroll, new LinearLayout.LayoutParams(-1, 0, 1));
+        // Verbindliche Reihenfolge wie am Desktop: Suche – Anzeige/Bearbeitung – Archiv.
+        LinearLayout left = panel(29);
+        left.addView(heading(english ? "SEARCH / CALENDAR" : "SUCHE / KALENDER"));
+        left.addView(text(english ? "Search for a series" : "Serie suchen", 8.5f, MUTED));
+        left.addView(row("Lucky", true));
+        left.addView(row("Lucky Hank", false));
+        left.addView(row("The Luckiest Man", false));
+        left.addView(text(english ? "NEXT DATES" : "NÄCHSTE TERMINE", 8.5f, BLUE));
+        left.addView(row(english ? "24 Sep · Lucky · Episode 7" : "24. Sep · Lucky · Folge 7", false));
+        left.addView(row(english ? "01 Oct · Lucky · Episode 8" : "01. Okt · Lucky · Folge 8", false));
+        TextView note = text(english ? "Display test only — no archive or calendar is changed." : "Nur Darstellungstest – Archiv und Kalender werden nicht verändert.", 7.5f, Color.rgb(255, 202, 112));
+        left.addView(note, new LinearLayout.LayoutParams(-1, 0, 1));
+        LinearLayout leftButtons = new LinearLayout(this);
+        leftButtons.addView(button(english ? "Search" : "Suchen"));
+        leftButtons.addView(button(english ? "Add" : "Eintragen"));
+        left.addView(leftButtons);
         columns.addView(left);
 
         LinearLayout middle = panel(43);
@@ -152,21 +228,15 @@ public class MainActivity extends Activity {
         middle.addView(buttons);
         columns.addView(middle);
 
-        LinearLayout right = panel(29);
-        right.addView(heading(english ? "SEARCH / CALENDAR" : "SUCHE / KALENDER"));
-        right.addView(text(english ? "Search for a series" : "Serie suchen", 8.5f, MUTED));
-        right.addView(row("Lucky", true));
-        right.addView(row("Lucky Hank", false));
-        right.addView(row("The Luckiest Man", false));
-        right.addView(text(english ? "NEXT DATES" : "NÄCHSTE TERMINE", 8.5f, BLUE));
-        right.addView(row(english ? "24 Sep · Lucky · Episode 7" : "24. Sep · Lucky · Folge 7", false));
-        right.addView(row(english ? "01 Oct · Lucky · Episode 8" : "01. Okt · Lucky · Folge 8", false));
-        TextView note = text(english ? "Display test only — no archive or calendar is changed." : "Nur Darstellungstest – Archiv und Kalender werden nicht verändert.", 7.5f, Color.rgb(255, 202, 112));
-        right.addView(note, new LinearLayout.LayoutParams(-1, 0, 1));
-        LinearLayout rightButtons = new LinearLayout(this);
-        rightButtons.addView(button(english ? "Search" : "Suchen"));
-        rightButtons.addView(button(english ? "Add" : "Eintragen"));
-        right.addView(rightButtons);
+        LinearLayout right = panel(28);
+        right.addView(heading(english ? "ARCHIVE · 77 series" : "ARCHIV · 77 Serien"));
+        String[] series = {"1923", "A Gentleman in Moscow", "Adolescence", "Alien: Earth", "Andor", "Black Snow", "Dark Winds", "Dexter: Resurrection", "Fallout", "High Potential", "Lucky", "Paradise", "Reacher", "The Last of Us"};
+        ScrollView listScroll = new ScrollView(this);
+        LinearLayout list = new LinearLayout(this);
+        list.setOrientation(LinearLayout.VERTICAL);
+        for (String s : series) list.addView(row(s, s.equals("Lucky")));
+        listScroll.addView(list);
+        right.addView(listScroll, new LinearLayout.LayoutParams(-1, 0, 1));
         columns.addView(right);
 
         setContentView(root);
