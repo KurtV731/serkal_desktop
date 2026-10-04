@@ -9,8 +9,6 @@ import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
-import android.view.WindowInsets;
-import android.view.WindowInsetsController;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -30,8 +28,12 @@ public class MainActivity extends Activity {
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
-        configureFullscreen_();
-        buildScreen();
+        try {
+            configureFullscreen_();
+            buildScreen();
+        } catch (Throwable error) {
+            showStartupError_(error);
+        }
     }
 
     @Override public void onWindowFocusChanged(boolean hasFocus) {
@@ -43,34 +45,23 @@ public class MainActivity extends Activity {
         Window window = getWindow();
         window.setStatusBarColor(BG);
         window.setNavigationBarColor(BG);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            WindowManager.LayoutParams attributes = window.getAttributes();
-            attributes.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
-            window.setAttributes(attributes);
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            window.setDecorFitsSystemWindows(false);
-        }
         hideSystemBars_();
     }
 
     private void hideSystemBars_() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            WindowInsetsController controller = getWindow().getInsetsController();
-            if (controller != null) {
-                controller.hide(WindowInsets.Type.statusBars() | WindowInsets.Type.navigationBars());
-                controller.setSystemBarsBehavior(WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
-            }
-        } else {
-            getWindow().getDecorView().setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY |
-                View.SYSTEM_UI_FLAG_FULLSCREEN |
-                View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
-                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
-                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
-                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-            );
-        }
+        getWindow().getDecorView().setSystemUiVisibility(
+            View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY |
+            View.SYSTEM_UI_FLAG_FULLSCREEN |
+            View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+        );
+    }
+
+    private void showStartupError_(Throwable error) {
+        TextView message = text("SerKal 0.0.4f1\n\nStartfehler: " + error.getClass().getSimpleName() +
+            "\n" + String.valueOf(error.getMessage()), 15, Color.WHITE);
+        message.setBackgroundColor(Color.rgb(80, 0, 0));
+        message.setPadding(dp(24), dp(24), dp(24), dp(24));
+        setContentView(message);
     }
 
     private int dp(int value) {
@@ -137,24 +128,13 @@ public class MainActivity extends Activity {
         root.setOrientation(LinearLayout.VERTICAL);
         root.setBackgroundColor(BG);
         root.setPadding(dp(4), dp(3), dp(4), dp(4));
-        root.setOnApplyWindowInsetsListener((view, insets) -> {
-            int left = dp(4), topInset = dp(3), right = dp(4), bottom = dp(4);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && insets.getDisplayCutout() != null) {
-                left += insets.getDisplayCutout().getSafeInsetLeft();
-                topInset += insets.getDisplayCutout().getSafeInsetTop();
-                right += insets.getDisplayCutout().getSafeInsetRight();
-                bottom += insets.getDisplayCutout().getSafeInsetBottom();
-            }
-            view.setPadding(left, topInset, right, bottom);
-            return insets;
-        });
 
         LinearLayout top = new LinearLayout(this);
         top.setGravity(Gravity.CENTER_VERTICAL);
         TextView title = text("SerKal", 13, TEXT);
         title.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
         top.addView(title, new LinearLayout.LayoutParams(0, dp(31), 1));
-        TextView preview = text(english ? "0.0.4 · pinch to zoom · drag to move" : "0.0.4 · mit 2 Fingern zoomen · mit 1 Finger bewegen", 7.5f, MUTED);
+        TextView preview = text(english ? "0.0.4f1 · pinch to zoom · drag to move" : "0.0.4f1 · mit 2 Fingern zoomen · mit 1 Finger bewegen", 7.5f, MUTED);
         preview.setGravity(Gravity.CENTER_VERTICAL | Gravity.RIGHT);
         top.addView(preview, new LinearLayout.LayoutParams(-2, dp(31)));
         Button resetZoom = new Button(this);

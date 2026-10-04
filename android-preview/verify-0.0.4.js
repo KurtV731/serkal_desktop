@@ -8,13 +8,13 @@ const zoom = fs.readFileSync(path.join(root, 'app/src/main/java/de/serkal/androi
 const manifest = fs.readFileSync(path.join(root, 'app/src/main/AndroidManifest.xml'), 'utf8');
 const build = fs.readFileSync(path.join(root, 'app/build.gradle'), 'utf8');
 
-assert.match(build, /versionCode\s+4/);
-assert.match(build, /versionName\s+'0\.0\.4'/);
-assert.match(build, /applicationId\s+'de\.serkal\.android\.preview\.v004'/);
-assert.match(manifest, /0\.0\.4 - SerKal Android Präversion/);
+assert.match(build, /versionCode\s+5/);
+assert.match(build, /versionName\s+'0\.0\.4f1'/);
+assert.match(build, /applicationId\s+'de\.serkal\.android\.preview\.v004f1'/);
+assert.match(manifest, /0\.0\.4f1 - SerKal Android Präversion/);
 assert.match(manifest, /screenOrientation="sensorLandscape"/);
-assert.match(activity, /BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE/);
-assert.match(activity, /getSafeInsetLeft/);
+assert.match(manifest, /de\.serkal\.android\.preview\.MainActivity/);
+assert.match(activity, /showStartupError_/);
 assert.match(activity, /new ZoomPanLayout\(this\)/);
 assert.match(activity, /zoomSurface\.reset\(\)/);
 assert.match(zoom, /MAX_SCALE = 3\.0f/);

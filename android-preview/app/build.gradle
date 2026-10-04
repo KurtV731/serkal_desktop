@@ -7,10 +7,10 @@ android {
     defaultConfig {
         // Eigene Kennung je Teststufe: 0.0.4 kann neben den älteren
         // Präversionen installiert werden, auch wenn deren Debug-Signatur abweicht.
-        applicationId 'de.serkal.android.preview.v004'
-        minSdk 26
+        applicationId 'de.serkal.android.preview.v004f1'
+        minSdk 23
         targetSdk 35
-        versionCode 4
-        versionName '0.0.4'
+        versionCode 5
+        versionName '0.0.4f1'
     }
 }
