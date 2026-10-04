@@ -15,6 +15,7 @@ Diese Liste beschreibt den Entwicklungsstand, keine bereits veröffentlichte Ins
 - Sichtbare Texte zentral auf Deutsch und Englisch organisiert; Erweiterungen berücksichtigen beide Sprachen.
 - TMDB-Titel werden passend zur gewählten Sprache ausgewählt, statt grundsätzlich den Originaltitel zu verwenden.
 - Der tatsächlich gefundene Titel wird auch ins Eingabefeld zurückgeschrieben.
+- Serienvorschläge mit bloßem Originaltitel verwenden ebenfalls die Titelauswahl aus den TMDB-Detaildaten: etwa „Take Charge of My Heart“ statt ausschließlich koreanischer Schrift. Der Originaltitel bleibt als Zusatz sichtbar.
 - Vorschläge: exakte Titel zuerst, danach passende Titel- oder Wortanfänge, innerhalb dieser Gruppen neueste Erstausstrahlung zuerst. So zählt „City“ auch in „Star City“. Bei gleichem Datum entscheidet die TMDB-Popularität.
 - Bis zu drei TMDB-Ergebnisseiten werden vor der Begrenzung auf sechs Vorschläge berücksichtigt. Die Liste ist damit keine vollständige Durchsuchung aller Ergebnisse; laufende neue Staffeln älterer Serien ändern das verwendete Erstausstrahlungsdatum nicht.
 

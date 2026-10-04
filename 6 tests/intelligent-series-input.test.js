@@ -24,7 +24,7 @@ const vm = require('node:vm');
 const suggestionCode = backend.slice(backend.indexOf('async function tmdbSuggestTv_'), backend.indexOf('\nfunction calendarPad2_', backend.indexOf('async function tmdbSuggestTv_')));
 async function suggest(query, responses) {
   const calls = [];
-  const context = { tmdbLang_:lang => lang, yearFromDate_:date => String(date || '').slice(0, 4),
+  const context = { tmdbTitle:require('../2 src/common/tmdb-title.js'), tmdbLang_:lang => lang, yearFromDate_:date => String(date || '').slice(0, 4),
     tmdbRequest_:async (_path, params) => { calls.push(params); return responses(params); } };
   vm.createContext(context);
   vm.runInContext(suggestionCode, context);
@@ -43,6 +43,9 @@ async function suggest(query, responses) {
   assert.equal(exact.result.results[0].id, 1);
   const empty = await suggest('x', () => { throw Error('Keine Anfrage bei einem Buchstaben'); });
   assert.equal(empty.calls.length, 0);
+  const korean = await suggest('charge Heart', params => ({ok:true,data:params.query ? {results:[{id:289423,name:'나를 충전해줘',original_name:'나를 충전해줘',original_language:'ko',first_air_date:'2026-01-01'}]} : {name:'나를 충전해줘',original_name:'나를 충전해줘',original_language:'ko',translations:{translations:[{iso_639_1:'en',iso_3166_1:'US',data:{name:'Take Charge of My Heart'}}]}}}));
+  assert.equal(korean.result.results[0].name, 'Take Charge of My Heart');
+  assert.equal(korean.result.results[0].originalName, '나를 충전해줘');
   const chooseCode = html.slice(html.indexOf('function chooseTitleSuggestion_'), html.indexOf('\nfunction moveTitleSuggestion_', html.indexOf('function chooseTitleSuggestion_')));
   let searches = 0;
   const attrs = {};

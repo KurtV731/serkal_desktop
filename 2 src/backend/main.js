@@ -1357,6 +1357,19 @@ async function tmdbSuggestTv_(query, lang) {
         });
         if (results.length >= 6) break;
     }
+    // Suchantworten können trotz language=de/en nur den Originaltitel liefern.
+    // Für diese sichtbaren Vorschläge dieselbe Titelauswahl wie in den Details nutzen.
+    await Promise.all(results.map(async item => {
+        if (item.name !== item.originalName) return;
+        const row = rows.find(candidate => Number(candidate.id) === item.id);
+        if (row && ['de', 'en'].includes(String(row.original_language || ''))) return;
+        const details = await Promise.all(['de', 'en'].map(language => tmdbRequest_("/tv/" + item.id, {
+            language:tmdbLang_(language), append_to_response:"translations,alternative_titles"
+        })));
+        const titles = tmdbTitle.resolve(details[0].ok ? details[0].data : null,
+            details[1].ok ? details[1].data : null, row, lang);
+        item.name = String(lang || '').toLowerCase().startsWith('en') ? titles.en : titles.de;
+    }));
     return { ok:true, results };
 }
 
