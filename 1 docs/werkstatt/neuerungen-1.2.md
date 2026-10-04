@@ -27,11 +27,22 @@ Diese Liste beschreibt den Entwicklungsstand, keine bereits veröffentlichte Ins
 
 ## Noch offen / nicht als fertig ankündigen
 
-- Abschließender Praxistest der verbesserten Serieneingabe durch Kurt.
+- Intelligente Serieneingabe: am 04.10.2026 von Kurt nach Praxistest abgenommen.
 - Gesicherte Anpassung bestehender Serien: nächster eigener Arbeitspunkt.
 - Smarter TMDB-API-Key in der Startroutine: lokale Prüfung, anschließend Übernahme für denselben Google-Nutzer über die gemeinsame Konfiguration; Desktop 1.2 und Android 0.0.5. Noch nicht umgesetzt.
 - Strukturierte Prüfung über PC, Laptop, Pixel und Samsung; Archivsperre bei gleichzeitigem Zugriff separat behandeln.
 - Wartungslauf mit abschließender Liste neu entdeckter Staffeln/Serien: vorgemerkt.
+- Kurzfristig: TMDB-Abfrage um Streaming-Anbieter erweitern: Wo ist die Serie im gewählten Land verfügbar? Anbieter in der Anzeige und der Beschreibung des Kalendertermins nennen. Abo, Kauf und Leihe unterscheiden; fehlende Daten klar anzeigen. Serienverfügbarkeit nicht als garantierte Verfügbarkeit einer konkreten Staffel/Folge ausgeben.
+- Mittelfristig: großes Mittelfeld sinnvoll mit Serieninformationen und Anbieterhinweisen füllen; passende Trailer anbieten (Sprachwahl berücksichtigen). Layout und Umfang vor Umsetzung mit Kurt abstimmen.
+
+## Redaktionelle Hinweise zum Website-Artikel vom 04.10.2026
+
+Der Artikel wird außerhalb von GitHub weiterbearbeitet; hier stehen nur Hinweise für die Übergabe.
+- Stärke: Kalender als Alltagswerkzeug und persönliche Gedächtnisentlastung sind konkret erklärt. Der ehrliche Abschnitt „Braucht jeder SerKal?“ sollte erhalten bleiben.
+- „Ein Blick in den Kalender genügt“ auf bereits eingetragene, bekannte Termine beziehen. Verschiebungen werden nicht ohne erneuten Abgleich automatisch erkannt.
+- „Welche Serie geht als Nächstes weiter?“ noch nicht als fertige Archiv-Vorausschau versprechen; Wartungslauf/Endliste sind offen.
+- Streaming-Anbieter und Trailer erst nach Umsetzung als vorhandene Funktionen ankündigen.
+- Internationale Erstausstrahlung und lokale Streaming-Verfügbarkeit können voneinander abweichen; Termine nicht pauschal als lokale Verfügbarkeit darstellen.
 
 ## Abgrenzung
 
