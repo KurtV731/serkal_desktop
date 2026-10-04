@@ -7256,6 +7256,7 @@ function renderTitleSuggestions_() {
 }
 
 function chooseTitleSuggestion_(index) {
+  if (state.busy) return;
   var item = titleSuggestionItems_[index];
   if (!item || !inpTitle) return;
   inpTitle.value = String(item.name || '');
@@ -7266,6 +7267,7 @@ function chooseTitleSuggestion_(index) {
   closeTitleSuggestions_();
   setSearchMode_();
   inpTitle.focus();
+  doSearch();
 }
 
 function moveTitleSuggestion_(direction) {

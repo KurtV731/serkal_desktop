@@ -1318,7 +1318,29 @@ async function tmdbSuggestTv_(query, lang) {
         query:qRaw, language:tmdbLang_(lang), include_adult:"false", page:"1"
     });
     if (!searchRes.ok) return searchRes;
-    const rows = Array.isArray(searchRes.data && searchRes.data.results) ? searchRes.data.results : [];
+    const rows = Array.isArray(searchRes.data && searchRes.data.results) ? searchRes.data.results.slice() : [];
+    // Weitere Treffer berücksichtigen, bevor die sichtbare Liste gekürzt wird.
+    const pages = Math.min(3, Number(searchRes.data && searchRes.data.total_pages || 1));
+    const more = await Promise.all(Array.from({ length:Math.max(0, pages - 1) }, (_, i) =>
+        tmdbRequest_("/search/tv", { query:qRaw, language:tmdbLang_(lang), include_adult:"false", page:String(i + 2) })));
+    for (const res of more) if (res.ok && Array.isArray(res.data && res.data.results)) rows.push(...res.data.results);
+    if (/\s/.test(qRaw) && new Set(rows.filter(row => row && row.id).map(row => row.id)).size <= 1) {
+        const joined = await tmdbRequest_("/search/tv", {
+            query:qRaw.replace(/\s+/g, ""), language:tmdbLang_(lang), include_adult:"false", page:"1"
+        });
+        if (joined.ok && Array.isArray(joined.data && joined.data.results)) rows.push(...joined.data.results);
+    }
+    const normalize = value => String(value || "").normalize("NFKC").toLowerCase().replace(/\s+/g, "");
+    const needle = normalize(qRaw);
+    const rank = row => {
+        const titles = [normalize(row.name), normalize(row.original_name)];
+        const wordStarts = [row.name, row.original_name].some(title =>
+            String(title || "").split(/\s+/).some((_, i, words) => normalize(words.slice(i).join(" ")).startsWith(needle)));
+        return titles.includes(needle) ? 0 : wordStarts ? 1 : 2;
+    };
+    rows.sort((a, b) => rank(a) - rank(b) ||
+        String(b.first_air_date || "").localeCompare(String(a.first_air_date || "")) ||
+        Number(b.popularity || 0) - Number(a.popularity || 0));
     const seen = new Set();
     const results = [];
     for (const row of rows) {
