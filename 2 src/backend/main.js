@@ -900,7 +900,7 @@ function archiveSetField_(line, key, value) {
     return String(line).trim() + delimiter + String(key) + "=" + String(value);
 }
 
-function archiveSaveChanges_(dirtyMap) {
+async function archiveSaveChanges_(dirtyMap) {
     try {
         const changes = dirtyMap && typeof dirtyMap === "object" ? Object.values(dirtyMap) : [];
         if (!changes.length) return { ok:true, savedCount:0, daten:archiveLoad_().daten };
@@ -934,6 +934,7 @@ function archiveSaveChanges_(dirtyMap) {
                 if (lineIndex < 0) return { ok:false, message:bt_("SEASON_NOT_FOUND", { value:fileName + " / " + patch.staffelLabel }) };
 
                 let line = String(lines[lineIndex] || "").trim();
+                const previousEntry = archiveEntryFromLine_(fileName, fs.statSync(fullPath), line);
                 if (Object.prototype.hasOwnProperty.call(patch, "seen")) {
                     line = archiveSetField_(line, "seen", Number(patch.seen) === 1 ? "1" : "0");
                 }
@@ -971,10 +972,31 @@ function archiveSaveChanges_(dirtyMap) {
                             termineDE:noteRule.datesDE.length
                         });
                     } else {
+                        // Removing an offset restores the original dates; ordinary notes
+                        // must not retain an invisible, previously applied offset.
+                        if (archiveField_(line, "offsetDE") !== "") {
+                            line = archiveSetField_(line, "datesDE", "");
+                            line = archiveSetField_(line, "startDE", "");
+                            line = archiveSetField_(line, "offsetDE", "");
+                            manualFlags &= ~SERKAL_MANUAL_CALENDAR;
+                        }
                         line = archiveSetField_(line, "manualFlags", String(manualFlags));
                     }
                 }
                 if (line !== String(lines[lineIndex] || "").trim()) {
+                    const nextEntry = archiveEntryFromLine_(fileName, fs.statSync(fullPath), line);
+                    if (previousEntry && nextEntry &&
+                        JSON.stringify(previousEntry.termindaten) !== JSON.stringify(nextEntry.termindaten)) {
+                        const calendar = await maintenanceSyncCalendar_({ payload:{
+                            titel:nextEntry.titel, jahr:nextEntry.jahr,
+                            staffelNummer:Number(nextEntry.staffelLabel.replace(/\D/g, "")),
+                            tmdbId:nextEntry.tmdbId, episoden:nextEntry.episoden,
+                            termindaten:nextEntry.termindaten
+                        } });
+                        if (calendar && (calendar.protected || Number(calendar.protectedEvents || 0))) {
+                            throw new Error(bt_("MAINT_MANUAL_PROTECTED"));
+                        }
+                    }
                     lines[lineIndex] = line;
                     changed = true;
                     savedCount++;
