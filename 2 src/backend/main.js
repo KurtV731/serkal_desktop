@@ -1311,6 +1311,33 @@ async function serkalSearchComplete_(query, lang, options) {
     return { ok:true, anzahl:out.length, results:out, treffer:out, daten:out };
 }
 
+async function tmdbSuggestTv_(query, lang) {
+    const qRaw = String(query || "").trim();
+    if (qRaw.length < 2) return { ok:true, results:[] };
+    const searchRes = await tmdbRequest_("/search/tv", {
+        query:qRaw, language:tmdbLang_(lang), include_adult:"false", page:"1"
+    });
+    if (!searchRes.ok) return searchRes;
+    const rows = Array.isArray(searchRes.data && searchRes.data.results) ? searchRes.data.results : [];
+    const seen = new Set();
+    const results = [];
+    for (const row of rows) {
+        const id = Number(row && row.id || 0);
+        if (!id || seen.has(id)) continue;
+        seen.add(id);
+        const name = String(row && row.name || row && row.original_name || "").trim();
+        if (!name) continue;
+        results.push({
+            id, tmdbId:id, name,
+            originalName:String(row && row.original_name || "").trim(),
+            year:yearFromDate_(row && row.first_air_date),
+            posterPath:String(row && row.poster_path || "")
+        });
+        if (results.length >= 6) break;
+    }
+    return { ok:true, results };
+}
+
 
 function calendarPad2_(value) {
     return String(Number(value || 0)).padStart(2, "0");
@@ -3074,6 +3101,7 @@ function installIpc_() {
         return res.ok ? { ok:true, message:bt_("TMDB_CONNECTION_OK") } : res;
     });
     ipcMain.handle("serkal:tmdb:searchTv", async (_event, query, lang, options) => serkalSearchComplete_(query, lang, options));
+    ipcMain.handle("serkal:tmdb:suggestTv", async (_event, query, lang) => tmdbSuggestTv_(query, lang));
     ipcMain.handle("serkal:tmdb:poster", async (_event, id, lang) => {
         const tmdbId = Number(id || 0);
         logWrite_("TRACE", "TMDB", bt_("POSTER_STARTED"), { tmdbId, lang:String(lang || "de") });

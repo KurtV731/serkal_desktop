@@ -47,6 +47,7 @@ contextBridge.exposeInMainWorld("serkal", {
         testKey:(apiKey,lang)=>ipcRenderer.invoke("serkal:tmdb:testKey",apiKey,lang||"de"),
         saveKey:(apiKey)=>ipcRenderer.invoke("serkal:tmdb:saveKey",apiKey),
         test:()=>ipcRenderer.invoke("serkal:tmdb:test"),
+        suggestTv:(query,lang)=>ipcRenderer.invoke("serkal:tmdb:suggestTv",query,lang||"de"),
         searchTv:(query,lang,options)=>ipcRenderer.invoke("serkal:tmdb:searchTv",query,lang,options||{}),
         poster:(id,lang)=>ipcRenderer.invoke("serkal:tmdb:poster",id,lang||"de")
     },

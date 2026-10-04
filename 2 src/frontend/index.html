@@ -157,9 +157,38 @@
       font-weight: 800;
     }
 
-    .fieldTitle {
+    .titleSuggestWrap {
       flex: 0 0 50%;
+      min-width: 0;
+      position: relative;
     }
+
+    .fieldTitle {
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .titleSuggestions {
+      position: absolute;
+      z-index: 12000;
+      top: calc(100% + 4px);
+      left: 0;
+      right: 0;
+      display: none;
+      overflow: hidden;
+      border: 1px solid var(--border, #cbd5e1);
+      border-radius: 10px;
+      background: var(--panel, #fff);
+      box-shadow: 0 14px 34px rgba(15, 23, 42, .24);
+    }
+
+    .titleSuggestions.is-open { display: block; }
+    .titleSuggestion { display:block; width:100%; padding:8px 10px; border:0; border-bottom:1px solid rgba(148,163,184,.25); border-radius:0; background:transparent; color:var(--text,#172033); text-align:left; cursor:pointer; }
+    .titleSuggestion:last-child { border-bottom: 0; }
+    .titleSuggestion:hover, .titleSuggestion.is-active { background: rgba(14, 165, 233, .14); }
+    .titleSuggestionName { display:block; font-weight:800; }
+    .titleSuggestionMeta { display:block; margin-top:2px; font-size:11px; color:var(--muted,#64748b); }
+    body[data-theme="dark"] .titleSuggestions { background:#172033; border-color:#334155; }
 
     .fieldYear {
       flex: 0 0 20%;
@@ -1745,7 +1774,11 @@
 
           <div class="fieldRow">
             <label for="inpTitle" class="fieldLabel">Titel</label>
-            <input id="inpTitle" class="fieldTitle" type="text" autocomplete="off" placeholder="" />
+            <div class="titleSuggestWrap">
+              <input id="inpTitle" class="fieldTitle" type="text" autocomplete="off" placeholder=""
+                role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="titleSuggestions" />
+              <div id="titleSuggestions" class="titleSuggestions" role="listbox" aria-label=""></div>
+            </div>
             <input id="inpYear" class="fieldYear" type="number" inputmode="numeric" placeholder="" title="" />
             <input id="inpSeason" class="fieldSeason" type="number" inputmode="numeric" placeholder="S" title="" />
           </div>
@@ -2653,7 +2686,12 @@ function initInputWatcher_() {
   var inpSeason = document.getElementById('inpSeason');
 
   if (inpTitle) {
-    inpTitle.addEventListener('input', markInputDirty_);
+    inpTitle.addEventListener('input', function() {
+      inpTitle.removeAttribute('data-tmdb-id');
+      inpTitle.removeAttribute('data-selected-title');
+      markInputDirty_();
+      scheduleTitleSuggestions_();
+    });
   }
 
   if (inpYear) {
@@ -3808,7 +3846,7 @@ const I18N = {
     MAINT_FAILED: 'Wartung fehlgeschlagen',
     MAINT_PROGRESS: '{files} Dateien / {seasons} Staffeln geprüft, {changed} geändert',
     NO_PIC_AVAILABLE: 'Kein Bild verfügbar',
-    ARIA_ACTIONS: 'Aktionen', ARIA_RESULT_NAV: 'Treffersteuerung', TT_RESULT_NAV: 'Treffer wechseln', ARIA_PREVIEW: 'Vorschau', ARIA_RESULT_INFO: 'Trefferinfo',
+    ARIA_ACTIONS: 'Aktionen', ARIA_RESULT_NAV: 'Treffersteuerung', TT_RESULT_NAV: 'Treffer wechseln', ARIA_PREVIEW: 'Vorschau', ARIA_RESULT_INFO: 'Trefferinfo', ARIA_TITLE_SUGGESTIONS: 'Serienvorschläge',
     NOTE_HELP: 'Hilfe zu auswertbaren Notizzeilen', TT_SORT_SWITCH: 'Sortierung umschalten (Status / A–Z)', TT_ARCHIVE_COUNT: 'Anzahl Archiv-Einträge', TT_DELETE_FILE: 'Archivdatei löschen', ARIA_ARCHIVE_LIST: 'Archivliste',
     TT_GERMAN: 'Deutsch', TT_LANGUAGE_SWITCH: 'Sprache umschalten', TT_CALENDAR_OPEN: 'Google Kalender öffnen', TT_THEME_SWITCH: 'Farbschema umschalten', TT_LOG_OPEN: 'Log ansehen',
     ARIA_LOG: 'Loganzeige', ARIA_LOG_RESIZE: 'Logfensterhöhe ändern', TT_LOG_RESIZE: 'Ziehen: Höhe des Logfensters ändern', ARIA_LOG_DAY: 'Logtag wählen', PH_LOG_SEARCH: 'Im Log suchen …',
@@ -3937,7 +3975,7 @@ const I18N = {
     MAINT_FAILED: 'Maintenance failed',
     MAINT_PROGRESS: '{files} files / {seasons} seasons checked, {changed} changed',
     NO_PIC_AVAILABLE: 'No picture available',
-    ARIA_ACTIONS: 'Actions', ARIA_RESULT_NAV: 'Result navigation', TT_RESULT_NAV: 'Change result', ARIA_PREVIEW: 'Preview', ARIA_RESULT_INFO: 'Result information',
+    ARIA_ACTIONS: 'Actions', ARIA_RESULT_NAV: 'Result navigation', TT_RESULT_NAV: 'Change result', ARIA_PREVIEW: 'Preview', ARIA_RESULT_INFO: 'Result information', ARIA_TITLE_SUGGESTIONS: 'Series suggestions',
     NOTE_HELP: 'Help for evaluable note lines', TT_SORT_SWITCH: 'Change sorting (status / A–Z)', TT_ARCHIVE_COUNT: 'Number of archive entries', TT_DELETE_FILE: 'Delete archive file', ARIA_ARCHIVE_LIST: 'Archive list',
     TT_GERMAN: 'German', TT_LANGUAGE_SWITCH: 'Change language', TT_CALENDAR_OPEN: 'Open Google Calendar', TT_THEME_SWITCH: 'Change color scheme', TT_LOG_OPEN: 'View log',
     ARIA_LOG: 'Log display', ARIA_LOG_RESIZE: 'Resize log window', TT_LOG_RESIZE: 'Drag to resize the log window', ARIA_LOG_DAY: 'Choose log day', PH_LOG_SEARCH: 'Search log …',
@@ -4115,6 +4153,7 @@ function cleanUserErrorMessage_(err) {
  */
 function setLang_(lang, force) {
   const l = (String(lang || '').toLowerCase().indexOf('en') === 0) ? 'en' : 'de';
+  try { closeTitleSuggestions_(); } catch (_eSuggestions) {}
 
   // Guard: wenn Sprache schon aktiv ist, raus (außer force=true)
   if (!force && LANG === l) {
@@ -4908,6 +4947,7 @@ function isActiveSearchToken_(tok) {
 
     // --------- DOM ----------
     const inpTitle     = document.getElementById('inpTitle');
+    const titleSuggestions = document.getElementById('titleSuggestions');
     const previewText  = document.getElementById('previewText');
     const posterBox    = document.getElementById('posterBox');
 
@@ -4972,6 +5012,7 @@ const I18N_MAP = [
   // Labels / Placeholders / Tooltips
   { sel: 'label[for="inpTitle"]',              text: 'LABEL_TITLE' },
   { sel: '#inpTitle',                          attr: { placeholder: 'PH_TITLE' } },
+  { sel: '#titleSuggestions',                  attr: { 'aria-label': 'ARIA_TITLE_SUGGESTIONS' } },
   { sel: '#inpYear',                           attr: { placeholder: 'PH_YEAR',   title: 'TT_YEAR_OPT' } },
   { sel: '#inpSeason',                         attr: { placeholder: 'PH_SEASON', title: 'TT_SEASON_OPT' } },
   { sel: '.actionRow',                         attr: { 'aria-label': 'ARIA_ACTIONS' } },
@@ -5889,9 +5930,14 @@ function uiSetTaken_(txt, kind) {
       // Reset: Titel + Jahr + Staffel wirklich leeren (damit kein "versteckter Override" hängen bleibt)
       try {
         if (opts && opts.clearTitle) {
-          if (inpTitle) inpTitle.value = '';
+          if (inpTitle) {
+            inpTitle.value = '';
+            inpTitle.removeAttribute('data-tmdb-id');
+            inpTitle.removeAttribute('data-selected-title');
+          }
           if (inpYear) inpYear.value = '';
           if (inpSeason) inpSeason.value = '';
+          try { closeTitleSuggestions_(); } catch (_eSuggest) {}
         }
 
         // Immer auch aktive Inhalte in neuer Sprache rendern (Preview/Archiv/Details)
@@ -5911,7 +5957,12 @@ function uiSetTaken_(txt, kind) {
       const clearTitle = (opts.clearTitle !== false);
       const clearDetails = (opts.clearDetails !== false);
 
-      if (clearTitle) inpTitle.value = '';
+      if (clearTitle) {
+        inpTitle.value = '';
+        inpTitle.removeAttribute('data-tmdb-id');
+        inpTitle.removeAttribute('data-selected-title');
+        try { closeTitleSuggestions_(); } catch (_eSuggest2) {}
+      }
 
       state.tmdbResults = [];
       state.tmdbIndex = 0;
@@ -7081,9 +7132,14 @@ function doSearch() {
 
   const _tok = bumpSearchToken_();
 
-  const q = (inpTitle.value || '').trim();
+  closeTitleSuggestions_();
+  const qVisible = (inpTitle.value || '').trim();
+  const selectedTmdbId = Number(inpTitle.getAttribute('data-tmdb-id') || 0) || 0;
+  const q = selectedTmdbId ? ('#' + String(selectedTmdbId)) : qVisible;
+  // Folgeabfragen (z. B. nach einem Wartungslauf) behalten ebenfalls die
+  // eindeutige ID und fallen nicht wieder auf eine mehrdeutige Titelsuche zurück.
   state.lastQuery = q;
-  try { uiLogAction_(t('LOG_SEARCH_STARTED'), { titel: q, jahr: getYearOverride_(), staffel: getSeasonOverride_() }); } catch (_eAction) {}
+  try { uiLogAction_(t('LOG_SEARCH_STARTED'), { titel: qVisible, tmdbId: selectedTmdbId || '', jahr: getYearOverride_(), staffel: getSeasonOverride_() }); } catch (_eAction) {}
   if (!q) {
     state.phase = 'idle';
     updateMainUi_();
@@ -7151,7 +7207,96 @@ clearPreview();
     uiSetBusy_(false);
   }
 }
-    
+
+let titleSuggestionTimer_ = null;
+let titleSuggestionToken_ = 0;
+let titleSuggestionItems_ = [];
+let titleSuggestionIndex_ = -1;
+
+function closeTitleSuggestions_() {
+  titleSuggestionToken_++;
+  if (titleSuggestionTimer_) window.clearTimeout(titleSuggestionTimer_);
+  titleSuggestionTimer_ = null;
+  titleSuggestionItems_ = [];
+  titleSuggestionIndex_ = -1;
+  if (titleSuggestions) {
+    titleSuggestions.innerHTML = '';
+    titleSuggestions.classList.remove('is-open');
+  }
+  if (inpTitle) inpTitle.setAttribute('aria-expanded', 'false');
+}
+
+function renderTitleSuggestions_() {
+  if (!titleSuggestions || !inpTitle) return;
+  titleSuggestions.innerHTML = '';
+  titleSuggestionItems_.forEach(function(item, index) {
+    var button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'titleSuggestion' + (index === titleSuggestionIndex_ ? ' is-active' : '');
+    button.setAttribute('role', 'option');
+    button.setAttribute('aria-selected', index === titleSuggestionIndex_ ? 'true' : 'false');
+    var name = document.createElement('span');
+    name.className = 'titleSuggestionName';
+    name.textContent = String(item.name || '—');
+    var meta = document.createElement('span');
+    meta.className = 'titleSuggestionMeta';
+    var details = [];
+    if (item.year) details.push(String(item.year));
+    if (item.originalName && item.originalName !== item.name) details.push(String(item.originalName));
+    details.push('TMDB ' + String(item.tmdbId || item.id || ''));
+    meta.textContent = details.join(' · ');
+    button.appendChild(name);
+    button.appendChild(meta);
+    button.addEventListener('mousedown', function(ev) { ev.preventDefault(); });
+    button.addEventListener('click', function() { chooseTitleSuggestion_(index); });
+    titleSuggestions.appendChild(button);
+  });
+  titleSuggestions.classList.toggle('is-open', titleSuggestionItems_.length > 0);
+  inpTitle.setAttribute('aria-expanded', titleSuggestionItems_.length ? 'true' : 'false');
+}
+
+function chooseTitleSuggestion_(index) {
+  var item = titleSuggestionItems_[index];
+  if (!item || !inpTitle) return;
+  inpTitle.value = String(item.name || '');
+  inpTitle.setAttribute('data-tmdb-id', String(item.tmdbId || item.id || ''));
+  inpTitle.setAttribute('data-selected-title', String(item.name || ''));
+  var yearInput = document.getElementById('inpYear');
+  if (yearInput && !String(yearInput.value || '').trim() && item.year) yearInput.value = String(item.year);
+  closeTitleSuggestions_();
+  setSearchMode_();
+  inpTitle.focus();
+}
+
+function moveTitleSuggestion_(direction) {
+  if (!titleSuggestionItems_.length) return;
+  titleSuggestionIndex_ = (titleSuggestionIndex_ + direction + titleSuggestionItems_.length) % titleSuggestionItems_.length;
+  renderTitleSuggestions_();
+}
+
+function scheduleTitleSuggestions_() {
+  if (!inpTitle || !window.serkal || !window.serkal.tmdb || typeof window.serkal.tmdb.suggestTv !== 'function') return;
+  if (titleSuggestionTimer_) window.clearTimeout(titleSuggestionTimer_);
+  var query = String(inpTitle.value || '').trim();
+  var token = ++titleSuggestionToken_;
+  if (query.length < 2 || /^#?\d{5,8}(?:\s|$)/.test(query)) {
+    closeTitleSuggestions_();
+    return;
+  }
+  titleSuggestionTimer_ = window.setTimeout(async function() {
+    try {
+      var res = await window.serkal.tmdb.suggestTv(query, getLang_());
+      if (token !== titleSuggestionToken_ || String(inpTitle.value || '').trim() !== query) return;
+      if (!res || res.ok === false) { closeTitleSuggestions_(); return; }
+      titleSuggestionItems_ = Array.isArray(res.results) ? res.results.slice(0, 6) : [];
+      titleSuggestionIndex_ = -1;
+      renderTitleSuggestions_();
+    } catch (_eSuggest) {
+      if (token === titleSuggestionToken_) closeTitleSuggestions_();
+    }
+  }, 320);
+}
+
 // Lädt (bei Bedarf) Staffel-/Sendetermine zur Auswahl nach, damit beim Blättern sofort echte Daten sichtbar sind.
 //ist so gebaut, dass pro Ergebnis genau einmal gerendert wird, state.currentPreview zur maßgeblichen Quelle wird 
 // und die Info-Logik nicht mehr mit dem rohen Treffer arbeitet.
@@ -7185,7 +7330,11 @@ function enrichAndRender(d) {
     // verkürzte oder falsch geschriebene Anfrage stehen bleiben, sondern der
     // tatsächlich gefundene Titel in der aktuell gewählten Sprache.
     try {
-      if (inpTitle) inpTitle.value = localizedTitleFromAny_(state.currentPreview, inpTitle.value || '');
+      if (inpTitle) {
+        inpTitle.value = localizedTitleFromAny_(state.currentPreview, inpTitle.value || '');
+        var resolvedTmdbId = Number(state.currentPreview && (state.currentPreview.tmdbId || state.currentPreview.id) || 0) || 0;
+        if (resolvedTmdbId) inpTitle.setAttribute('data-tmdb-id', String(resolvedTmdbId));
+      }
     } catch (_eTitle) {}
 
     if (
@@ -7670,13 +7819,31 @@ function nextResult() {
     // --------- Enter-Logik (stabilisiert) ----------
     // Enter im Titelfeld: je nach Phase (idle→Suche, searched→Übernehmen, taken→Eintrag)
     inpTitle.addEventListener('keydown', function(ev) {
+      if (ev.key === 'ArrowDown' && titleSuggestionItems_.length) {
+        ev.preventDefault(); moveTitleSuggestion_(1); return;
+      }
+      if (ev.key === 'ArrowUp' && titleSuggestionItems_.length) {
+        ev.preventDefault(); moveTitleSuggestion_(-1); return;
+      }
+      if (ev.key === 'Escape' && titleSuggestionItems_.length) {
+        ev.preventDefault(); closeTitleSuggestions_(); return;
+      }
       if (ev.key !== 'Enter') return;
       if (state && state.busy) return;
       ev.preventDefault();
+      if (titleSuggestionItems_.length && titleSuggestionIndex_ >= 0) {
+        chooseTitleSuggestion_(titleSuggestionIndex_);
+        return;
+      }
       if (state.phase === 'error') return doReset(true);
       if (state.phase === 'idle') return doSearch();
       // Enter im Titelfeld löst NUR die Suche aus (idle). In allen anderen Phasen keine Aktion.
       return;
+    });
+    document.addEventListener('mousedown', function(ev) {
+      if (!titleSuggestions || !inpTitle) return;
+      if (ev.target === inpTitle || titleSuggestions.contains(ev.target)) return;
+      closeTitleSuggestions_();
     });
 // Enter außerhalb Titelfeld:
     // - in Eingabefeldern NICHT abfangen (damit „Enter“ nicht zufällig Aktionen auslöst)
