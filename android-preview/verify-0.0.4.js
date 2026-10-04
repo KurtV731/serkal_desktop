@@ -10,6 +10,7 @@ const build = fs.readFileSync(path.join(root, 'app/build.gradle'), 'utf8');
 
 assert.match(build, /versionCode\s+4/);
 assert.match(build, /versionName\s+'0\.0\.4'/);
+assert.match(build, /applicationId\s+'de\.serkal\.android\.preview\.v004'/);
 assert.match(manifest, /0\.0\.4 - SerKal Android Präversion/);
 assert.match(manifest, /screenOrientation="sensorLandscape"/);
 assert.match(activity, /BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE/);
