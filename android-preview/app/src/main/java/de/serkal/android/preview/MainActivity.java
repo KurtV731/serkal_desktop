@@ -57,7 +57,7 @@ public class MainActivity extends Activity {
     }
 
     private void showStartupError_(Throwable error) {
-        TextView message = text("SerKal 0.0.4f1\n\nStartfehler: " + error.getClass().getSimpleName() +
+        TextView message = text("SerKal 0.0.4f2\n\nStartfehler: " + error.getClass().getSimpleName() +
             "\n" + String.valueOf(error.getMessage()), 15, Color.WHITE);
         message.setBackgroundColor(Color.rgb(80, 0, 0));
         message.setPadding(dp(24), dp(24), dp(24), dp(24));
@@ -134,13 +134,14 @@ public class MainActivity extends Activity {
         TextView title = text("SerKal", 13, TEXT);
         title.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
         top.addView(title, new LinearLayout.LayoutParams(0, dp(31), 1));
-        TextView preview = text(english ? "0.0.4f1 · pinch to zoom · drag to move" : "0.0.4f1 · mit 2 Fingern zoomen · mit 1 Finger bewegen", 7.5f, MUTED);
+        TextView preview = text(english ? "0.0.4f2 · pinch to zoom · drag to move" : "0.0.4f2 · mit 2 Fingern zoomen · mit 1 Finger bewegen", 7.5f, MUTED);
         preview.setGravity(Gravity.CENTER_VERTICAL | Gravity.RIGHT);
         top.addView(preview, new LinearLayout.LayoutParams(-2, dp(31)));
         Button resetZoom = new Button(this);
         resetZoom.setText("100 %");
         resetZoom.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 8);
-        resetZoom.setTextColor(TEXT);
+        resetZoom.setTextColor(Color.BLACK);
+        resetZoom.setBackgroundColor(Color.WHITE);
         resetZoom.setAllCaps(false);
         resetZoom.setMinHeight(0);
         resetZoom.setMinimumHeight(0);
@@ -149,7 +150,8 @@ public class MainActivity extends Activity {
         Button language = new Button(this);
         language.setText(english ? "DE" : "EN");
         language.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 8);
-        language.setTextColor(TEXT);
+        language.setTextColor(Color.BLACK);
+        language.setBackgroundColor(Color.WHITE);
         language.setAllCaps(false);
         language.setOnClickListener(v -> { english = !english; buildScreen(); });
         language.setMinHeight(0);

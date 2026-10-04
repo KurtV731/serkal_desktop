@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
         android:allowBackup="true"
-        android:label="0.0.4f1 - SerKal Android Präversion"
+        android:label="0.0.4f2 - SerKal Android Präversion"
         android:theme="@style/AppTheme">
         <activity
             android:name="de.serkal.android.preview.MainActivity"
