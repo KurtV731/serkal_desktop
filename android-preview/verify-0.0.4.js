@@ -8,20 +8,23 @@ const zoom = fs.readFileSync(path.join(root, 'app/src/main/java/de/serkal/androi
 const manifest = fs.readFileSync(path.join(root, 'app/src/main/AndroidManifest.xml'), 'utf8');
 const build = fs.readFileSync(path.join(root, 'app/build.gradle'), 'utf8');
 
-assert.match(build, /versionCode\s+6/);
-assert.match(build, /versionName\s+'0\.0\.4f2'/);
-assert.match(build, /applicationId\s+'de\.serkal\.android\.preview\.v004f2'/);
-assert.match(manifest, /0\.0\.4f2 - SerKal Android Präversion/);
+assert.match(build, /versionCode\s+7/);
+assert.match(build, /versionName\s+'0\.0\.4f3'/);
+assert.match(build, /applicationId\s+'de\.serkal\.android\.preview\.v004f3'/);
+assert.match(manifest, /0\.0\.4f3 - SerKal Android Präversion/);
 assert.match(manifest, /screenOrientation="sensorLandscape"/);
 assert.match(manifest, /de\.serkal\.android\.preview\.MainActivity/);
 assert.match(activity, /showStartupError_/);
-assert.match(activity, /resetZoom\.setTextColor\(Color\.BLACK\)/);
-assert.match(activity, /language\.setBackgroundColor\(Color\.WHITE\)/);
+assert.match(activity, /styleTopButton_\(resetZoom\)/);
+assert.match(activity, /zoomSurface\.zoomBy\(1\.25f\)/);
+assert.match(activity, /button\.setBackgroundColor\(Color\.WHITE\)/);
 assert.match(activity, /new ZoomPanLayout\(this\)/);
 assert.match(activity, /zoomSurface\.reset\(\)/);
 assert.match(zoom, /MAX_SCALE = 3\.0f/);
 assert.match(zoom, /onDoubleTap/);
 assert.match(zoom, /translationX \+= x - lastX/);
+assert.match(zoom, /ACTION_POINTER_DOWN/);
+assert.match(zoom, /pinchStartScale \* span \/ pinchStartSpan/);
 
 const search = activity.indexOf('"SEARCH / CALENDAR"');
 const entry = activity.indexOf('"ENTRY"');

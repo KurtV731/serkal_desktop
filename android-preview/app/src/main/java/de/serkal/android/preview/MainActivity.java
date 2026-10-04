@@ -57,7 +57,7 @@ public class MainActivity extends Activity {
     }
 
     private void showStartupError_(Throwable error) {
-        TextView message = text("SerKal 0.0.4f2\n\nStartfehler: " + error.getClass().getSimpleName() +
+        TextView message = text("SerKal 0.0.4f3\n\nStartfehler: " + error.getClass().getSimpleName() +
             "\n" + String.valueOf(error.getMessage()), 15, Color.WHITE);
         message.setBackgroundColor(Color.rgb(80, 0, 0));
         message.setPadding(dp(24), dp(24), dp(24), dp(24));
@@ -134,25 +134,27 @@ public class MainActivity extends Activity {
         TextView title = text("SerKal", 13, TEXT);
         title.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
         top.addView(title, new LinearLayout.LayoutParams(0, dp(31), 1));
-        TextView preview = text(english ? "0.0.4f2 · pinch to zoom · drag to move" : "0.0.4f2 · mit 2 Fingern zoomen · mit 1 Finger bewegen", 7.5f, MUTED);
+        TextView preview = text(english ? "0.0.4f3 · pinch to zoom · drag to move" : "0.0.4f3 · mit 2 Fingern zoomen · mit 1 Finger bewegen", 7.5f, MUTED);
         preview.setGravity(Gravity.CENTER_VERTICAL | Gravity.RIGHT);
         top.addView(preview, new LinearLayout.LayoutParams(-2, dp(31)));
+        Button zoomOut = new Button(this);
+        zoomOut.setText("−");
+        styleTopButton_(zoomOut);
+        zoomOut.setOnClickListener(v -> { if (zoomSurface != null) zoomSurface.zoomBy(0.8f); });
+        top.addView(zoomOut, new LinearLayout.LayoutParams(dp(38), dp(28)));
         Button resetZoom = new Button(this);
         resetZoom.setText("100 %");
-        resetZoom.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 8);
-        resetZoom.setTextColor(Color.BLACK);
-        resetZoom.setBackgroundColor(Color.WHITE);
-        resetZoom.setAllCaps(false);
-        resetZoom.setMinHeight(0);
-        resetZoom.setMinimumHeight(0);
+        styleTopButton_(resetZoom);
         resetZoom.setOnClickListener(v -> { if (zoomSurface != null) zoomSurface.reset(); });
         top.addView(resetZoom, new LinearLayout.LayoutParams(dp(58), dp(28)));
+        Button zoomIn = new Button(this);
+        zoomIn.setText("+");
+        styleTopButton_(zoomIn);
+        zoomIn.setOnClickListener(v -> { if (zoomSurface != null) zoomSurface.zoomBy(1.25f); });
+        top.addView(zoomIn, new LinearLayout.LayoutParams(dp(38), dp(28)));
         Button language = new Button(this);
         language.setText(english ? "DE" : "EN");
-        language.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 8);
-        language.setTextColor(Color.BLACK);
-        language.setBackgroundColor(Color.WHITE);
-        language.setAllCaps(false);
+        styleTopButton_(language);
         language.setOnClickListener(v -> { english = !english; buildScreen(); });
         language.setMinHeight(0);
         language.setMinimumHeight(0);
@@ -222,5 +224,15 @@ public class MainActivity extends Activity {
         columns.addView(right);
 
         setContentView(root);
+    }
+
+    private void styleTopButton_(Button button) {
+        button.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 8);
+        button.setTextColor(Color.BLACK);
+        button.setBackgroundColor(Color.WHITE);
+        button.setAllCaps(false);
+        button.setMinHeight(0);
+        button.setMinimumHeight(0);
+        button.setPadding(dp(2), 0, dp(2), 0);
     }
 }

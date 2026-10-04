@@ -4,7 +4,6 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
-import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.widget.FrameLayout;
 
@@ -18,7 +17,6 @@ public class ZoomPanLayout extends FrameLayout {
 
     private static final float MIN_SCALE = 1.0f;
     private static final float MAX_SCALE = 3.0f;
-    private final ScaleGestureDetector scaleDetector;
     private final GestureDetector gestureDetector;
     private float scale = 1.0f;
     private float translationX = 0.0f;
@@ -26,6 +24,13 @@ public class ZoomPanLayout extends FrameLayout {
     private float lastX;
     private float lastY;
     private boolean childGestureCancelled;
+    private boolean pinching;
+    private float pinchStartSpan;
+    private float pinchStartScale;
+    private float pinchStartFocusX;
+    private float pinchStartFocusY;
+    private float pinchStartTranslationX;
+    private float pinchStartTranslationY;
     private OnScaleChangedListener scaleChangedListener;
 
     public ZoomPanLayout(Context context) { this(context, null); }
@@ -34,27 +39,6 @@ public class ZoomPanLayout extends FrameLayout {
         super(context, attrs);
         setClipChildren(true);
         setClipToPadding(true);
-
-        scaleDetector = new ScaleGestureDetector(context, new ScaleGestureDetector.SimpleOnScaleGestureListener() {
-            @Override public boolean onScaleBegin(ScaleGestureDetector detector) {
-                cancelChildGesture_();
-                return true;
-            }
-
-            @Override public boolean onScale(ScaleGestureDetector detector) {
-                float oldScale = scale;
-                float nextScale = clamp_(oldScale * detector.getScaleFactor(), MIN_SCALE, MAX_SCALE);
-                if (Math.abs(nextScale - oldScale) < 0.001f) return true;
-
-                float contentX = (detector.getFocusX() - translationX) / oldScale;
-                float contentY = (detector.getFocusY() - translationY) / oldScale;
-                scale = nextScale;
-                translationX = detector.getFocusX() - contentX * scale;
-                translationY = detector.getFocusY() - contentY * scale;
-                applyTransform_();
-                return true;
-            }
-        });
 
         gestureDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
             @Override public boolean onDoubleTap(MotionEvent event) {
@@ -78,10 +62,20 @@ public class ZoomPanLayout extends FrameLayout {
 
     public float getContentScale() { return scale; }
 
+    public void zoomBy(float factor) {
+        float nextScale = clamp_(scale * factor, MIN_SCALE, MAX_SCALE);
+        float focusX = getWidth() / 2.0f;
+        float focusY = getHeight() / 2.0f;
+        float contentX = (focusX - translationX) / scale;
+        float contentY = (focusY - translationY) / scale;
+        scale = nextScale;
+        translationX = focusX - contentX * scale;
+        translationY = focusY - contentY * scale;
+        applyTransform_();
+    }
+
     @Override public boolean dispatchTouchEvent(MotionEvent event) {
         boolean gestureHandled = gestureDetector.onTouchEvent(event);
-        scaleDetector.onTouchEvent(event);
-
         // Ein Doppeltipp setzt zurueck und darf nicht zusaetzlich die darunter
         // liegende Schaltflaeche ausloesen.
         if (gestureHandled) return true;
@@ -90,10 +84,40 @@ public class ZoomPanLayout extends FrameLayout {
             lastX = event.getX();
             lastY = event.getY();
             childGestureCancelled = false;
+            pinching = false;
         }
 
-        if (event.getPointerCount() > 1 || scaleDetector.isInProgress()) {
+        if (event.getActionMasked() == MotionEvent.ACTION_POINTER_DOWN && event.getPointerCount() >= 2) {
             cancelChildGesture_();
+            pinching = true;
+            pinchStartSpan = span_(event);
+            pinchStartScale = scale;
+            pinchStartFocusX = focusX_(event);
+            pinchStartFocusY = focusY_(event);
+            pinchStartTranslationX = translationX;
+            pinchStartTranslationY = translationY;
+            return true;
+        }
+
+        if (pinching && event.getPointerCount() >= 2 && event.getActionMasked() == MotionEvent.ACTION_MOVE) {
+            float span = span_(event);
+            if (pinchStartSpan > 0.0f) {
+                scale = clamp_(pinchStartScale * span / pinchStartSpan, MIN_SCALE, MAX_SCALE);
+                float contentX = (pinchStartFocusX - pinchStartTranslationX) / pinchStartScale;
+                float contentY = (pinchStartFocusY - pinchStartTranslationY) / pinchStartScale;
+                translationX = focusX_(event) - contentX * scale;
+                translationY = focusY_(event) - contentY * scale;
+                applyTransform_();
+            }
+            return true;
+        }
+
+        if (pinching && (event.getActionMasked() == MotionEvent.ACTION_POINTER_UP ||
+                event.getActionMasked() == MotionEvent.ACTION_UP ||
+                event.getActionMasked() == MotionEvent.ACTION_CANCEL)) {
+            pinching = false;
+            lastX = event.getX();
+            lastY = event.getY();
             return true;
         }
 
@@ -145,6 +169,20 @@ public class ZoomPanLayout extends FrameLayout {
 
     private void notifyScale_() {
         if (scaleChangedListener != null) scaleChangedListener.onScaleChanged(scale);
+    }
+
+    private static float span_(MotionEvent event) {
+        float dx = event.getX(0) - event.getX(1);
+        float dy = event.getY(0) - event.getY(1);
+        return (float) Math.sqrt(dx * dx + dy * dy);
+    }
+
+    private static float focusX_(MotionEvent event) {
+        return (event.getX(0) + event.getX(1)) / 2.0f;
+    }
+
+    private static float focusY_(MotionEvent event) {
+        return (event.getY(0) + event.getY(1)) / 2.0f;
     }
 
     private static float clamp_(float value, float minimum, float maximum) {
