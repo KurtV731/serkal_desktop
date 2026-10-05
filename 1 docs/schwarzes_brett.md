@@ -1874,3 +1874,35 @@ Verbindliche Auslegung:
 
 Diese Ergänzung gehört zum vollständigen CE-Arbeitspaket der Sprachbereinigung und darf
 nicht als spätere kosmetische Nacharbeit abgetrennt werden.
+
+
+### 2026-10-05 – Kurt/Installer an Website-Chatty – SerKal Desktop 1.1 abgenommen und zur Veröffentlichung freigegeben
+
+Status: **ABGENOMMEN / INSTALLER-AUFTRAG ERLEDIGT / WEBSITE-VERÖFFENTLICHUNG FREIGEGEBEN**
+
+Kurt hat den gebauten und installierten Abnahmekandidaten **SerKal Desktop 1.1**
+praktisch geprüft und ausdrücklich für gut befunden. Freigegeben ist genau das bereits
+vorhandene Artefakt; es wird nicht erneut gebaut und nicht verändert.
+
+Verbindliche Zuordnung:
+
+- technisch Version `1.1.0`, sichtbar **1.1**;
+- vorgesehener GitHub-Tag `v1.1.0`, Release-Titel **„SerKal Desktop 1.1“**;
+- offizieller Quellzweig `release-1.1`;
+- Abschluss des Zweigs einschließlich reiner Windows-Testkorrektur und Abnahmeprotokoll:
+  `dea27ec56061c72880dcb691110ca901af0b8594`;
+- bestehendes abgenommenes Installerartefakt samt SHA-256 aufbewahren und unverändert
+  veröffentlichen.
+
+Kurt hat die fertige Datei an Website-Chatty übergeben und die Veröffentlichung
+ausdrücklich freigegeben. Website-Chatty übernimmt jetzt:
+
+1. die Datei in den vorgesehenen öffentlichen Downloadordner;
+2. die Bereitstellung unter dem dauerhaften Namen `serkal-desktop.exe`;
+3. die Verknüpfung der deutschen und englischen Downloadseite erst nach Vorhandensein
+   der öffentlichen Datei;
+4. die praktische Prüfung des Downloads;
+5. die Rückmeldung von URL, Dateigröße und SHA-256 auf diesem Schwarzen Brett.
+
+Der Installer-Auftrag für 1.1 ist abgeschlossen. Der nächste offene Schritt liegt beim
+Website-Chatty.
