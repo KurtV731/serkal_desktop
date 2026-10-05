@@ -51,3 +51,23 @@ Kurt hat Website-Chatty die fertige Datei übergeben und die Veröffentlichung f
 5. Veröffentlichungs-URL, Dateigröße und SHA-256 anschließend auf dem Schwarzen Brett melden.
 
 Damit ist der Installer-Auftrag für SerKal Desktop 1.1 abgeschlossen. Die tatsächliche Website-Einbindung und Veröffentlichung liegt ab jetzt beim Website-Chatty.
+
+
+## 05.10.2026 – Website-Veröffentlichung abgeschlossen
+
+**Status: ABGESCHLOSSEN / ÖFFENTLICH VERFÜGBAR / DOWNLOAD GEPRÜFT**
+
+Der von Kurt abgenommene Installer wurde unverändert als dauerhaft benannte Datei
+`serkal-desktop.exe` auf serkal.de veröffentlicht. Die deutsche und englische
+Downloadseite verweisen auf diese tatsächlich vorhandene Datei.
+
+Veröffentlichungsnachweis:
+
+- URL: `https://serkal.de/download/serkal-desktop.exe`;
+- Dateigröße: `140822016` Bytes;
+- SHA-256: `fd21ab038b8fb746dffcedc1e2f7e44902bde2b6c9ce38d5b1eb9df7daebd90c`.
+
+Nach dem Upload wurde die öffentliche Datei vollständig erneut von serkal.de
+heruntergeladen. Dateigröße und SHA-256 stimmen mit dem freigegebenen Original überein.
+Damit sind Website-Einbindung, Veröffentlichung und praktische Downloadprüfung für
+SerKal Desktop 1.1 abgeschlossen.
