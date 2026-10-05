@@ -1,6 +1,11 @@
 package de.serkal.android.preview;
 
 import android.app.Activity;
+import com.google.android.gms.auth.api.identity.Identity;
+import com.google.android.gms.auth.api.identity.AuthorizationRequest;
+import com.google.android.gms.auth.api.identity.AuthorizationResult;
+import com.google.android.gms.common.api.Scope;
+import com.google.android.gms.common.api.ApiException;
 import android.app.AlertDialog;
 import android.widget.EditText;
 import android.text.TextWatcher;
@@ -27,6 +32,133 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 public class MainActivity extends Activity {
+
+    private static final int GOOGLE_REQUEST = 505;
+    private String googleAccessToken = "";
+    private SharedKeyClient.Result googleUser;
+    private boolean googleBusy;
+    private int googleGeneration;
+    private int pendingGoogleGeneration;
+
+    private void connectGoogle(boolean chooseAccount) {
+        if (googleBusy) return;
+        requestGeneration++;
+        credential = "";
+        googleAccessToken = "";
+        googleUser = null;
+        googleBusy = true;
+        final int generation = ++googleGeneration;
+        pendingGoogleGeneration = generation;
+        statusText.setText(english ? "Connecting to Google…" : "Google wird verbunden…");
+        AuthorizationRequest.Builder builder = AuthorizationRequest.builder().setRequestedScopes(java.util.Arrays.asList(
+            new Scope("https://www.googleapis.com/auth/drive.appdata"),
+            new Scope("openid"), new Scope("https://www.googleapis.com/auth/userinfo.email")));
+        if (chooseAccount) builder.setPrompt(AuthorizationRequest.Prompt.SELECT_ACCOUNT);
+        Identity.getAuthorizationClient(this).authorize(builder.build())
+            .addOnSuccessListener(result -> {
+                if (generation != googleGeneration || isFinishing()) return;
+                if (result.hasResolution()) {
+                    try { startIntentSenderForResult(result.getPendingIntent().getIntentSender(), GOOGLE_REQUEST, null, 0, 0, 0); }
+                    catch (Exception error) { googleFailure(error); }
+                } else useGoogleResult(result, generation);
+            })
+            .addOnFailureListener(error -> { if (generation == googleGeneration) googleFailure(error); });
+    }
+
+    @Override protected void onActivityResult(int requestCode, int resultCode, android.content.Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode != GOOGLE_REQUEST) return;
+        if (pendingGoogleGeneration != googleGeneration) return;
+        if (resultCode != RESULT_OK || data == null) {
+            googleBusy = false;
+            statusText.setText(english ? "Google connection cancelled." : "Google-Verbindung abgebrochen.");
+            return;
+        }
+        try { useGoogleResult(Identity.getAuthorizationClient(this).getAuthorizationResultFromIntent(data), pendingGoogleGeneration); }
+        catch (Exception error) { googleFailure(error); }
+    }
+
+    private void useGoogleResult(AuthorizationResult result, int generation) {
+        if (!result.getGrantedScopes().contains("https://www.googleapis.com/auth/drive.appdata")) {
+            googleFailure(new Exception("GOOGLE_HTTP_403")); return;
+        }
+        String accessToken = result.getAccessToken();
+        if (accessToken == null || accessToken.isEmpty()) { googleFailure(new Exception("GOOGLE_TOKEN_MISSING")); return; }
+        googleAccessToken = accessToken;
+        network.execute(() -> {
+            try {
+                SharedKeyClient client = new SharedKeyClient(accessToken);
+                SharedKeyClient.Result user = client.identify();
+                SharedKeyClient.Result loaded = client.load(user);
+                String cached = loaded.key.isEmpty() ? KeyCache.load(this, user.owner) : "";
+                if (!loaded.key.isEmpty()) {
+                    new TmdbClient(loaded.key).validate();
+                    KeyCache.save(this, user.owner, loaded.key);
+                }
+                handler.post(() -> {
+                    if (generation != googleGeneration || isFinishing()) return;
+                    googleBusy = false;
+                    googleUser = user;
+                    if (!loaded.key.isEmpty()) {
+                        credential = loaded.key;
+                        statusText.setText(user.email + (english ? "\nTMDB key adopted automatically." : "\nTMDB-Schlüssel automatisch übernommen."));
+                        if (queryField.getText().length() >= 2) searchNow();
+                    } else if (!cached.isEmpty()) {
+                        confirmPublish(cached);
+                    } else {
+                        statusText.setText(user.email + (english
+                            ? "\nNo shared key yet. On Desktop use “TMDB · Google”. Then tap Google again."
+                            : "\nNoch kein gemeinsamer Schlüssel. Am Desktop „TMDB · Google“ drücken. Danach hier erneut Google antippen."));
+                    }
+                });
+            } catch (Exception error) {
+                handler.post(() -> { if (generation == googleGeneration) googleFailure(error); });
+            }
+        });
+    }
+
+    private void confirmPublish(String key) {
+        if (googleUser == null || googleAccessToken.isEmpty()) return;
+        new AlertDialog.Builder(this).setTitle(english ? "Share TMDB key" : "TMDB-Schlüssel bereitstellen")
+            .setMessage(googleUser.email + (english ? "\nUse this key for your other SerKal installations?"
+                : "\nDiesen Schlüssel für deine weiteren SerKal-Installationen bereitstellen?"))
+            .setPositiveButton(english ? "Share" : "Bereitstellen", (dialog, which) -> publishKey(key))
+            .setNegativeButton(english ? "Cancel" : "Abbrechen", null).show();
+    }
+
+    private void publishKey(String key) {
+        if (googleBusy || googleUser == null) return;
+        googleBusy = true;
+        final int generation = googleGeneration;
+        final SharedKeyClient.Result user = googleUser;
+        final String accessToken = googleAccessToken;
+        network.execute(() -> {
+            try {
+                SharedKeyClient.Result result = new SharedKeyClient(accessToken).publish(user,key);
+                KeyCache.save(this,result.owner,result.key);
+                handler.post(() -> {
+                    if (generation != googleGeneration || isFinishing()) return;
+                    googleBusy = false; credential = result.key;
+                    statusText.setText(result.email + (english ? "\nKey ready for your other devices." : "\nSchlüssel für deine anderen Geräte bereit."));
+                });
+            } catch(Exception error) { handler.post(() -> { if(generation==googleGeneration) googleFailure(error); }); }
+        });
+    }
+
+    private void googleFailure(Exception error) {
+        googleBusy = false;
+        String code = error.getMessage() == null ? "" : error.getMessage();
+        String message;
+        if (code.contains("SHARED_KEY_CONFLICT")) message = english ? "Different shared keys found. Nothing overwritten."
+            : "Unterschiedliche gemeinsame Schlüssel gefunden. Nichts überschrieben.";
+        else if (code.contains("GOOGLE_HTTP_403")) message = english ? "Google denied access. Check Drive API and app-data permission."
+            : "Google verweigert Zugriff. Drive-API und App-Daten-Berechtigung prüfen.";
+        else if (error instanceof ApiException) message = (english ? "Google setup error " : "Google-Einrichtungsfehler ")
+            + ((ApiException)error).getStatusCode() + (english ? ". Check Android OAuth package and signing SHA-1." : ". Android-OAuth-Paket und Signatur-SHA-1 prüfen.");
+        else message = english ? "Google/key connection failed. Please retry." : "Google-/Schlüsselverbindung fehlgeschlagen. Bitte erneut versuchen.";
+        statusText.setText(message);
+    }
+
     private static final int BG = Color.rgb(8, 13, 18);
     private static final int PANEL = Color.rgb(18, 27, 36);
     private static final int CARD = Color.rgb(27, 39, 51);
@@ -47,6 +179,7 @@ public class MainActivity extends Activity {
 
     @Override protected void onDestroy() {
         requestGeneration++;
+        googleGeneration++;
         handler.removeCallbacksAndMessages(null);
         network.shutdownNow();
         super.onDestroy();
@@ -70,6 +203,7 @@ public class MainActivity extends Activity {
                         handler.post(() -> {
                             if (generation != requestGeneration) return;
                             credential = candidate;
+                            if (googleUser != null) confirmPublish(candidate);
                             statusText.setText(english ? "Key accepted. Enter a series." : "Schlüssel gültig. Serie eingeben.");
                             searchNow();
                         });
@@ -151,7 +285,7 @@ public class MainActivity extends Activity {
         try {
             configureFullscreen_();
             buildScreen();
-            handler.post(() -> { if (!isFinishing() && credential.isEmpty()) askForKey(); });
+            handler.post(() -> { if (!isFinishing()) connectGoogle(false); });
         } catch (Throwable error) {
             showStartupError_(error);
         }
@@ -178,7 +312,7 @@ public class MainActivity extends Activity {
     }
 
     private void showStartupError_(Throwable error) {
-        TextView message = text("SerKal 0.0.5-dev\n\nStartfehler: " + error.getClass().getSimpleName() +
+        TextView message = text("SerKal 0.0.5a1\n\nStartfehler: " + error.getClass().getSimpleName() +
             "\n" + String.valueOf(error.getMessage()), 15, Color.WHITE);
         message.setBackgroundColor(Color.rgb(80, 0, 0));
         message.setPadding(dp(24), dp(24), dp(24), dp(24));
@@ -257,7 +391,7 @@ public class MainActivity extends Activity {
         TextView title = text("SerKal", 13, TEXT);
         title.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
         top.addView(title, new LinearLayout.LayoutParams(0, dp(31), 1));
-        TextView preview = text(english ? "0.0.5-dev · pinch to zoom · drag to move" : "0.0.5-dev · mit 2 Fingern zoomen · mit 1 Finger bewegen", 7.5f, MUTED);
+        TextView preview = text(english ? "0.0.5a1 · pinch to zoom · drag to move" : "0.0.5a1 · mit 2 Fingern zoomen · mit 1 Finger bewegen", 7.5f, MUTED);
         preview.setGravity(Gravity.CENTER_VERTICAL | Gravity.RIGHT);
         top.addView(preview, new LinearLayout.LayoutParams(-2, dp(31)));
         Button zoomOut = new Button(this);
@@ -328,6 +462,9 @@ public class MainActivity extends Activity {
         Button keyButton = button(english ? "API key" : "API-Key");
         keyButton.setOnClickListener(v -> askForKey());
         leftButtons.addView(keyButton);
+        Button google = button("Google");
+        google.setOnClickListener(v -> connectGoogle(true));
+        leftButtons.addView(google);
         left.addView(leftButtons);
         columns.addView(left);
 

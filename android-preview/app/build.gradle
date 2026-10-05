@@ -7,15 +7,16 @@ android {
     defaultConfig {
         // Eigene Kennung je Teststufe: 0.0.4 kann neben den älteren
         // Präversionen installiert werden, auch wenn deren Debug-Signatur abweicht.
-        applicationId 'de.serkal.android.preview.v004f3'
+        applicationId 'de.serkal.android.preview.v005'
         minSdk 23
         targetSdk 35
-        versionCode 8
-        versionName '0.0.5-dev'
+        versionCode 9
+        versionName '0.0.5a1'
     }
 }
 
 dependencies {
+    implementation 'com.google.android.gms:play-services-auth:22.0.0'
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.json:json:20240303'
 }
