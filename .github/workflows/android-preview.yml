@@ -22,9 +22,10 @@ jobs:
       - name: Build debug APK
         working-directory: android-preview
         run: |
-          node verify-0.0.4.js
-          gradle assembleDebug
+          
+          gradle testDebugUnitTest assembleDebug
       - uses: actions/upload-artifact@v4
         with:
-          name: 0.0.4f3-SerKal-Android-Praeversion
+          name: 0.0.5-dev-SerKal-Android
           path: android-preview/app/build/outputs/apk/debug/app-debug.apk
+

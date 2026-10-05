@@ -1,6 +1,17 @@
 package de.serkal.android.preview;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.widget.EditText;
+import android.text.TextWatcher;
+import android.text.Editable;
+import android.text.InputType;
+import android.os.Handler;
+import android.os.Looper;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import org.json.JSONObject;
+import java.util.List;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Build;
@@ -24,6 +35,115 @@ public class MainActivity extends Activity {
     private static final int BLUE = Color.rgb(80, 167, 238);
     private static final int RED = Color.rgb(215, 75, 75);
     private boolean english = false;
+    private final Handler handler = new Handler(Looper.getMainLooper());
+    private final ExecutorService network = Executors.newSingleThreadExecutor();
+    private int requestGeneration = 0;
+    private String credential = "";
+    private EditText queryField;
+    private LinearLayout suggestions;
+    private TextView statusText, selectedName, selectedInfo;
+    private Runnable pendingSearch;
+    private int selectedTmdbId;
+
+    @Override protected void onDestroy() {
+        requestGeneration++;
+        handler.removeCallbacksAndMessages(null);
+        network.shutdownNow();
+        super.onDestroy();
+    }
+
+    private void askForKey() {
+        EditText input = new EditText(this);
+        input.setTextColor(Color.BLACK);
+        input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        new AlertDialog.Builder(this)
+            .setTitle(english ? "TMDB API key / read access token" : "TMDB API-Key / Lesezugriffstoken")
+            .setView(input)
+            .setPositiveButton(english ? "Check" : "Prüfen", (dialog, which) -> {
+                String candidate = input.getText().toString().trim();
+                if (candidate.isEmpty()) return;
+                final int generation = ++requestGeneration;
+                statusText.setText(english ? "Checking key…" : "Schlüssel wird geprüft…");
+                network.execute(() -> {
+                    try {
+                        new TmdbClient(candidate).validate();
+                        handler.post(() -> {
+                            if (generation != requestGeneration) return;
+                            credential = candidate;
+                            statusText.setText(english ? "Key accepted. Enter a series." : "Schlüssel gültig. Serie eingeben.");
+                            searchNow();
+                        });
+                    } catch (Exception error) { showNetworkError(generation, error); }
+                });
+            })
+            .setNegativeButton(english ? "Cancel" : "Abbrechen", null).show();
+    }
+
+    private void showNetworkError(int generation, Exception error) {
+        String code = error.getMessage();
+        handler.post(() -> {
+            if (generation != requestGeneration) return;
+            statusText.setText("KEY".equals(code)
+                ? (english ? "TMDB key rejected. Check the key." : "TMDB-Schlüssel abgelehnt. Bitte prüfen.")
+                : (english ? "TMDB unavailable. Please retry." : "TMDB nicht erreichbar. Bitte erneut versuchen."));
+        });
+    }
+
+    private void searchNow() {
+        if (pendingSearch != null) handler.removeCallbacks(pendingSearch);
+        final String query = queryField.getText().toString().trim();
+        final int generation = ++requestGeneration;
+        final boolean language = english;
+        suggestions.removeAllViews();
+        selectedTmdbId = 0;
+        selectedName.setText(english ? "Select a series" : "Serie auswählen");
+        selectedInfo.setText("");
+        if (query.length() < 2) return;
+        if (credential.isEmpty()) { askForKey(); return; }
+        final String key = credential;
+        statusText.setText(english ? "Searching…" : "Suche läuft…");
+        network.execute(() -> {
+            try {
+                List<JSONObject> results = new TmdbClient(key).search(query, language);
+                handler.post(() -> {
+                    if (generation != requestGeneration) return;
+                    statusText.setText(results.isEmpty()
+                        ? (english ? "No results found." : "Keine Ergebnisse gefunden.")
+                        : (english ? "Tap a series." : "Serie antippen."));
+                    for (JSONObject entry : results) {
+                        String date = entry.optString("first_air_date");
+                        TextView result = row(entry.optString("name") +
+                            (date.length() >= 4 ? " · " + date.substring(0, 4) : ""), false);
+                        result.setMinHeight(dp(40));
+                        result.setOnClickListener(v -> selectSeries(entry, key, language));
+                        suggestions.addView(result);
+                    }
+                });
+            } catch (Exception error) { showNetworkError(generation, error); }
+        });
+    }
+
+    private void selectSeries(JSONObject entry, String key, boolean language) {
+        final int generation = ++requestGeneration;
+        final int id = entry.optInt("id");
+        selectedName.setText(entry.optString("name"));
+        statusText.setText(english ? "Loading series…" : "Serie wird geladen…");
+        network.execute(() -> {
+            try {
+                JSONObject detail = new TmdbClient(key).details(id, language);
+                handler.post(() -> {
+                    if (generation != requestGeneration) return;
+                    selectedTmdbId = id;
+                    // Name is display text; the immutable TMDB ID is the identity.
+                    selectedName.setText(detail.optString("name", entry.optString("name")));
+                    selectedInfo.setText("TMDB " + id + " · " + detail.optInt("number_of_seasons") +
+                        (english ? " seasons" : " Staffeln") + "\n" + detail.optString("overview"));
+                    statusText.setText(english ? "Series loaded. Shared archive not connected yet."
+                        : "Serie geladen. Gemeinsames Archiv noch nicht verbunden.");
+                });
+            } catch (Exception error) { showNetworkError(generation, error); }
+        });
+    }
     private ZoomPanLayout zoomSurface;
 
     @Override public void onCreate(Bundle state) {
@@ -57,7 +177,7 @@ public class MainActivity extends Activity {
     }
 
     private void showStartupError_(Throwable error) {
-        TextView message = text("SerKal 0.0.4f3\n\nStartfehler: " + error.getClass().getSimpleName() +
+        TextView message = text("SerKal 0.0.5-dev\n\nStartfehler: " + error.getClass().getSimpleName() +
             "\n" + String.valueOf(error.getMessage()), 15, Color.WHITE);
         message.setBackgroundColor(Color.rgb(80, 0, 0));
         message.setPadding(dp(24), dp(24), dp(24), dp(24));
@@ -124,6 +244,8 @@ public class MainActivity extends Activity {
     }
 
     private void buildScreen() {
+        requestGeneration++;
+        if (pendingSearch != null) handler.removeCallbacks(pendingSearch);
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
         root.setBackgroundColor(BG);
@@ -134,7 +256,7 @@ public class MainActivity extends Activity {
         TextView title = text("SerKal", 13, TEXT);
         title.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
         top.addView(title, new LinearLayout.LayoutParams(0, dp(31), 1));
-        TextView preview = text(english ? "0.0.4f3 · pinch to zoom · drag to move" : "0.0.4f3 · mit 2 Fingern zoomen · mit 1 Finger bewegen", 7.5f, MUTED);
+        TextView preview = text(english ? "0.0.5-dev · pinch to zoom · drag to move" : "0.0.5-dev · mit 2 Fingern zoomen · mit 1 Finger bewegen", 7.5f, MUTED);
         preview.setGravity(Gravity.CENTER_VERTICAL | Gravity.RIGHT);
         top.addView(preview, new LinearLayout.LayoutParams(-2, dp(31)));
         Button zoomOut = new Button(this);
@@ -173,54 +295,59 @@ public class MainActivity extends Activity {
         LinearLayout left = panel(29);
         left.addView(heading(english ? "SEARCH / CALENDAR" : "SUCHE / KALENDER"));
         left.addView(text(english ? "Search for a series" : "Serie suchen", 8.5f, MUTED));
-        left.addView(row("Lucky", true));
-        left.addView(row("Lucky Hank", false));
-        left.addView(row("The Luckiest Man", false));
-        left.addView(text(english ? "NEXT DATES" : "NÄCHSTE TERMINE", 8.5f, BLUE));
-        left.addView(row(english ? "24 Sep · Lucky · Episode 7" : "24. Sep · Lucky · Folge 7", false));
-        left.addView(row(english ? "01 Oct · Lucky · Episode 8" : "01. Okt · Lucky · Folge 8", false));
-        TextView note = text(english ? "Display test only — no archive or calendar is changed." : "Nur Darstellungstest – Archiv und Kalender werden nicht verändert.", 7.5f, Color.rgb(255, 202, 112));
-        left.addView(note, new LinearLayout.LayoutParams(-1, 0, 1));
+        queryField = new EditText(this);
+        queryField.setSingleLine(true);
+        queryField.setTextColor(TEXT);
+        queryField.setHintTextColor(MUTED);
+        queryField.setHint(english ? "Series title" : "Serientitel");
+        left.addView(queryField);
+        suggestions = new LinearLayout(this);
+        suggestions.setOrientation(LinearLayout.VERTICAL);
+        ScrollView resultsScroll = new ScrollView(this);
+        resultsScroll.addView(suggestions);
+        left.addView(resultsScroll, new LinearLayout.LayoutParams(-1, 0, 1));
+        statusText = text(english ? "TMDB key required." : "TMDB-Schlüssel erforderlich.", 9, MUTED);
+        left.addView(statusText);
+        queryField.addTextChangedListener(new TextWatcher() {
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                requestGeneration++;
+                if (pendingSearch != null) handler.removeCallbacks(pendingSearch);
+                if (!credential.isEmpty()) {
+                    pendingSearch = () -> searchNow();
+                    handler.postDelayed(pendingSearch, 450);
+                }
+            }
+            public void afterTextChanged(Editable value) {}
+        });
         LinearLayout leftButtons = new LinearLayout(this);
-        leftButtons.addView(button(english ? "Search" : "Suchen"));
-        leftButtons.addView(button(english ? "Add" : "Eintragen"));
+        Button search = button(english ? "Search" : "Suchen");
+        search.setOnClickListener(v -> searchNow());
+        leftButtons.addView(search);
+        Button keyButton = button(english ? "API key" : "API-Key");
+        keyButton.setOnClickListener(v -> askForKey());
+        leftButtons.addView(keyButton);
         left.addView(leftButtons);
         columns.addView(left);
 
         LinearLayout middle = panel(43);
         middle.addView(heading(english ? "ENTRY" : "EINTRAG"));
-        TextView name = text("Lucky", 14, TEXT);
-        name.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
-        middle.addView(name);
-        middle.addView(text(english ? "Drama · United Kingdom · 2024" : "Drama · Großbritannien · 2024", 8, MUTED));
-        TextView poster = text(english ? "POSTER\npreview area" : "POSTER\nVorschaubereich", 10, MUTED);
-        poster.setGravity(Gravity.CENTER);
-        poster.setBackgroundColor(Color.rgb(31, 45, 58));
-        middle.addView(poster, new LinearLayout.LayoutParams(-1, 0, 1));
-        LinearLayout facts = new LinearLayout(this);
-        facts.setOrientation(LinearLayout.HORIZONTAL);
-        facts.addView(text(english ? "Season 1" : "Staffel 1", 8.5f, TEXT), new LinearLayout.LayoutParams(0, -2, 1));
-        facts.addView(text(english ? "8 episodes" : "8 Folgen", 8.5f, TEXT), new LinearLayout.LayoutParams(0, -2, 1));
-        facts.addView(text(english ? "Status: running" : "Status: läuft", 8.5f, TEXT), new LinearLayout.LayoutParams(0, -2, 1));
-        middle.addView(facts);
-        LinearLayout buttons = new LinearLayout(this);
-        buttons.addView(button(english ? "Refresh" : "Aktualisieren"));
-        buttons.addView(button(english ? "Correct" : "Korrigieren"));
-        Button delete = button(english ? "Delete" : "Löschen");
-        delete.setTextColor(Color.rgb(255, 215, 215));
-        buttons.addView(delete);
-        middle.addView(buttons);
+        selectedName = text(english ? "Select a series" : "Serie auswählen", 14, TEXT);
+        selectedName.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+        middle.addView(selectedName);
+        selectedInfo = text("", 11, TEXT);
+        ScrollView detailScroll = new ScrollView(this);
+        detailScroll.addView(selectedInfo);
+        middle.addView(detailScroll, new LinearLayout.LayoutParams(-1, 0, 1));
+        Button add = button(english ? "Shared archive pending" : "Archivverbindung folgt");
+        add.setEnabled(false);
+        middle.addView(add);
         columns.addView(middle);
 
         LinearLayout right = panel(28);
-        right.addView(heading(english ? "ARCHIVE · 77 series" : "ARCHIV · 77 Serien"));
-        String[] series = {"1923", "A Gentleman in Moscow", "Adolescence", "Alien: Earth", "Andor", "Black Snow", "Dark Winds", "Dexter: Resurrection", "Fallout", "High Potential", "Lucky", "Paradise", "Reacher", "The Last of Us"};
-        ScrollView listScroll = new ScrollView(this);
-        LinearLayout list = new LinearLayout(this);
-        list.setOrientation(LinearLayout.VERTICAL);
-        for (String s : series) list.addView(row(s, s.equals("Lucky")));
-        listScroll.addView(list);
-        right.addView(listScroll, new LinearLayout.LayoutParams(-1, 0, 1));
+        right.addView(heading(english ? "SHARED ARCHIVE" : "GEMEINSAMES ARCHIV"));
+        right.addView(text(english ? "Google Drive connection is being implemented. No example entries are shown."
+            : "Die Google-Drive-Anbindung wird vorbereitet. Hier werden keine Beispieldaten angezeigt.", 11, MUTED));
         columns.addView(right);
 
         setContentView(root);
@@ -236,3 +363,4 @@ public class MainActivity extends Activity {
         button.setPadding(dp(2), 0, dp(2), 0);
     }
 }
+
