@@ -1,0 +1,44 @@
+SerKal Android 0.0.5a1 – Google-Einrichtung
+=========================================
+APK-Build und automatisierte Tests: erfolgreich.
+Live-Anmeldung und Übernahme zwischen PC/Handy: erst nach Google-Registrierung prüfbar.
+
+Im bestehenden Google-Cloud-Projekt von SerKal Desktop:
+1. Google Drive API aktivieren.
+2. Unter Google Auth Platform / Clients einen OAuth-Client vom Typ Android anlegen.
+   Name: SerKal Android 0.0.5
+   Paketname:
+   de.serkal.android.preview.v005
+   SHA-1:
+   CC:0F:36:05:1E:73:55:C7:E5:76:71:04:32:00:8A:30:10:02:78:DC
+3. Zusätzliche Berechtigungen für die neue Funktion in der OAuth-Konfiguration zulassen:
+   https://www.googleapis.com/auth/drive.appdata
+   openid
+   https://www.googleapis.com/auth/userinfo.email
+   Die bestehende Kalenderprüfung nicht unnötig neu einreichen.
+
+Es wird kein persönlicher TMDB-Schlüssel und kein Client-Secret für mich benötigt.
+Nach Einrichtung reicht die Bestätigung, dass der Android-Client registriert und Drive API aktiviert ist.
+Der Fingerabdruck gilt für genau diese 0.0.5a1-APK.
+
+Danach am PC im SerKal-Entwicklungsordner:
+git pull
+npm start
+
+Erwartet: SERKAL Desktop 1.2 Alpha 02 – ENTWICKLUNG
+„TMDB · Google“ drücken, das eigene Konto auswählen, Zugriff erlauben
+und das Bereitstellen des bestehenden Schlüssels für dieses Konto bestätigen.
+
+Danach auf dem Handy die 0.0.5a1-APK öffnen und dasselbe Google-Konto wählen.
+Der geprüfte Schlüssel wird automatisch übernommen.
+Falls die App schon geöffnet ist: die Schaltfläche „Google“ erneut antippen.
+Anschließend Serie suchen. Gemeinsames Archiv/Kalender auf Android folgt später.
+
+SHA256 APK:
+8d17dc717ecfb96313debcd8763f61105dc2d063da129217ca0a44a0c2b18f55
+Dateigröße: 2807926 Bytes
+Mindestversion: Android 7
+Eigene App-Kennung: kann neben den bisherigen Vorschauen installiert werden.
+
+Testfolge: PC → Pixel → Samsung → zweiter PC; danach Neustart.
+Für die umgekehrte Reihenfolge ein separates Testkonto verwenden.
