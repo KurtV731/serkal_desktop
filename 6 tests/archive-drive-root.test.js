@@ -14,11 +14,12 @@ const de = 'G:\\Meine Ablage\\Serkal_Haupt\\Serkal-Archivdaten';
 const en = 'G:\\My Drive\\Serkal_Haupt\\Serkal-Archivdaten';
 const oldExists = fs.existsSync;
 const oldStat = fs.statSync;
+const isDriveFixturePath = p => /^g:[\\/]/i.test(String(p));
 try {
     let directories = new Set([en]);
-    fs.existsSync = p => /^[a-z]:[\\/]/i.test(p) ? directories.has(p) : oldExists(p);
+    fs.existsSync = p => isDriveFixturePath(p) ? directories.has(p) : oldExists(p);
     fs.statSync = p => {
-        if (!/^[a-z]:[\\/]/i.test(p)) return oldStat(p);
+        if (!isDriveFixturePath(p)) return oldStat(p);
         if (!directories.has(p)) throw new Error('missing');
         return {isDirectory:() => true};
     };
