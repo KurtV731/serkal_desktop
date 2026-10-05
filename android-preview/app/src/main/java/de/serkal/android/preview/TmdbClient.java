@@ -10,7 +10,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Collections;
 import java.text.Normalizer;
 import java.util.Locale;
 
@@ -52,7 +51,7 @@ class TmdbClient {
             collect(query.replaceAll("\\s+", ""), english, unique);
         List<JSONObject> results = new ArrayList<>(unique.values());
         final String normalized = normalize(query);
-        Collections.sort(results, (a, b) -> {
+        results.sort((a, b) -> {
             int relevance = Integer.compare(rank(a, normalized), rank(b, normalized));
             if (relevance != 0) return relevance;
             int date = b.optString("first_air_date").compareTo(a.optString("first_air_date"));
@@ -85,4 +84,3 @@ class TmdbClient {
         return name.startsWith(query) || original.startsWith(query) ? 1 : 2;
     }
 }
-

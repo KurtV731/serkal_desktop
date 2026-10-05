@@ -151,6 +151,7 @@ public class MainActivity extends Activity {
         try {
             configureFullscreen_();
             buildScreen();
+            handler.post(() -> { if (!isFinishing() && credential.isEmpty()) askForKey(); });
         } catch (Throwable error) {
             showStartupError_(error);
         }
