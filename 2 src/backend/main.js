@@ -368,7 +368,22 @@ function logClear_(day) {
 }
 
 function archiveFolderPath_() {
-    return String(readSettings_().archive.folderPath || "").trim();
+    return archiveResolveDriveFolder_(readSettings_().archive.folderPath);
+}
+
+function archiveResolveDriveFolder_(folderPath) {
+    const configured = String(folderPath || "").trim();
+    // Keep an existing configured path authoritative. Only the Drive root
+    // label may change; never search for or create another archive.
+    if (!configured || fs.existsSync(configured)) return configured;
+    const match = /^([a-z]:[\\/])(Meine Ablage|My Drive)([\\/].+)$/i.exec(configured);
+    if (!match) return configured;
+    const otherRoot = match[2].toLowerCase() === "my drive" ? "Meine Ablage" : "My Drive";
+    const candidate = match[1] + otherRoot + match[3];
+    try {
+        if (fs.statSync(candidate).isDirectory()) return candidate;
+    } catch (_err) {}
+    return configured;
 }
 
 function archiveEnsureFolder_(folder) {
