@@ -21,7 +21,7 @@ module.exports = {
     // damit eine Installation auf einem fremden Rechner Google einrichten kann.
     extraResource: [googleOauthSource],
 
-    // SERKAL Desktop 1.007f2:
+    // SERKAL Desktop 1.1:
     // Nur Laufzeit-Abhaengigkeiten ins Paket nehmen. Forge/Electron-
     // Entwicklungswerkzeuge gehoeren nicht in app.asar.
     prune: true,
@@ -52,7 +52,7 @@ module.exports = {
         name: 'SerKalDesktop',
         authors: 'Kurt Vogelsaenger',
         description: 'SERKAL Desktop – Serienkalender',
-        setupExe: 'SerKal_1.007f2_Setup.exe',
+        setupExe: 'SerKal_1.1_Setup.exe',
         setupIcon: '4 assets/icon/serkal.ico',
 
         // Squirrel versucht sonst zusaetzlich, Update.exe mit demselben Icon
