@@ -1911,6 +1911,7 @@
       </div>
 
       <button id="btnWartung" class="btnSmall" type="button" title=""></button>
+      <button id="btnSharedKeyDock" class="btnSmall" type="button">TMDB · Google</button>
       <button id="btnCalendarDock" class="btnSmall" type="button" title=""></button>
       <button id="btnThemeDock" class="btnSmall" type="button" title="">🌙 Dark</button>
       <!-- <button id="btnAnalyseDock" class="btnSmall" type="button" title="fanal / Analyse">🧠 Analyse</button> -->
@@ -2023,6 +2024,7 @@
         <p id="skSetupTmdbIntro" class="skCalendarSetupIntro"></p>
         <label id="skSetupTmdbLabel" class="skSetupFieldLabel" for="skSetupTmdbKey"></label>
         <input id="skSetupTmdbKey" class="skSetupKeyInput" type="text" autocomplete="off" spellcheck="false" placeholder="">
+        <button id="skSetupSharedKey" type="button">TMDB · Google</button>
         <div id="skSetupTmdbError" class="skSetupError"></div>
         <div class="skCalendarSetupActions"><button id="skSetupTmdbCreate" type="button"></button><button id="skSetupTmdbHelp" type="button"></button><button id="skSetupTmdbNext" type="button" disabled></button></div>
       </div>
@@ -2120,7 +2122,7 @@
       s=s||{};var c=s.calendar||{};
       firstRun=asFirstRun===true;
       testedTmdbKey='';
-      if(tmdbInput)tmdbInput.value='';
+      if(tmdbInput){tmdbInput.value='';delete tmdbInput.dataset.sharedKey;}
       document.getElementById('skSetupTmdbNext').disabled=true;
       setMode(c.mode||'');
       tmdbError.style.display='none';calendarError.style.display='none';commitError.style.display='none';
@@ -2180,7 +2182,7 @@
       if(!key){tmdbError.textContent=setupT_('TMDB_REQUIRED');tmdbError.style.display='block';tmdbInput.focus();this.disabled=true;return}
       this.disabled=true;this.textContent=setupT_('CHECKING');
       try{
-        var result=await window.serkal.tmdb.testKey(key,setupLang_());
+        var result=tmdbInput.dataset.sharedKey==='true' ? await window.serkal.tmdb.test() : await window.serkal.tmdb.testKey(key,setupLang_());
         if(!result||result.ok!==true){testedTmdbKey='';tmdbError.textContent=(result&&result.message)||setupT_('TMDB_INVALID');tmdbError.style.display='block';tmdbInput.focus();tmdbInput.select();return}
         testedTmdbKey=key;
         setStep('calendar');
@@ -2214,13 +2216,18 @@
       setStep('review');
     });
 
+    window.addEventListener('serkal-shared-key-ready',function(){
+      testedTmdbKey='Google';
+      document.getElementById('skSetupTmdbNext').disabled=false;
+    });
+    tmdbInput.addEventListener('input',function(){delete tmdbInput.dataset.sharedKey;});
     document.getElementById('skSetupCommit').addEventListener('click',async function(){
       var m=mode(),key=String(tmdbInput.value||'').trim();
       commitError.style.display='none';
       if(!key||testedTmdbKey!==key){commitError.textContent=setupT_(!key?'KEY_REQUIRED':'KEY_CHANGED');commitError.style.display='block';return}
       this.disabled=true;this.textContent=setupT_('SAVING');
       try{
-        var result=await window.serkal.setup.commit({tmdbKey:key,settings:{setupDone:true,language:setupLang_(),calendar:{mode:m,googleCalendarId:''}}});
+        var result=await window.serkal.setup.commit({tmdbKey:key,useStoredKey:tmdbInput.dataset.sharedKey==='true',settings:{setupDone:true,language:setupLang_(),calendar:{mode:m,googleCalendarId:''}}});
         if(!result||result.ok!==true){commitError.textContent=(result&&result.message)||setupT_('SETUP_SAVE_FAILED',{error:''});commitError.style.display='block';return}
         hide();
         if(typeof loadArchiv==='function')loadArchiv();
@@ -3745,6 +3752,16 @@ function setDetailsdesc_(it, originTag) {
 // --------- I18N (DE/EN) ----------
 const I18N = {
   de: {
+    SHAREDKEY_MISSING:"Noch kein gemeinsamer TMDB-Schlüssel. Zuerst ein Gerät mit vorhandenem Schlüssel verbinden.",
+    SHAREDKEY_CONNECTED:"TMDB-Schlüssel mit deinem Google-Konto verbunden.",
+    SHAREDKEY_CONFLICT:"Unterschiedliche Schlüssel gefunden. Nichts überschrieben.",
+    SHAREDKEY_CANCELLED:"Bereitstellen abgebrochen.",
+    SHAREDKEY_PERMISSION:"Bitte prüfen: Google-Drive-API aktiviert und Zugriff auf App-Daten erlaubt?",
+    SHAREDKEY_FAILED:"Schlüsselverbindung fehlgeschlagen. Bitte erneut versuchen.",
+    SHAREDKEY_SHARE_TITLE:"TMDB-Schlüssel bereitstellen",
+    SHAREDKEY_SHARE_DETAIL:"Deinen vorhandenen TMDB-Schlüssel für weitere SerKal-Installationen in diesem Google-Konto bereitstellen?",
+    SHAREDKEY_SHARE:"Bereitstellen",
+    SHAREDKEY_CANCEL:"Abbrechen",
     PANEL_SEARCH: 'SUCHE & EINTRAG',
     PANEL_DETAILS: 'STAFFELDETAILS',
     PANEL_ARCHIV: 'ARCHIV',
@@ -3874,6 +3891,16 @@ const I18N = {
 
 },
   en: {
+    SHAREDKEY_MISSING:"No shared TMDB key yet. Connect a device with an existing key first.",
+    SHAREDKEY_CONNECTED:"TMDB key connected to your Google account.",
+    SHAREDKEY_CONFLICT:"Different keys found. Nothing overwritten.",
+    SHAREDKEY_CANCELLED:"Sharing cancelled.",
+    SHAREDKEY_PERMISSION:"Check that Google Drive API is enabled and app-data access is permitted.",
+    SHAREDKEY_FAILED:"Key connection failed. Please retry.",
+    SHAREDKEY_SHARE_TITLE:"Share TMDB key",
+    SHAREDKEY_SHARE_DETAIL:"Make your existing TMDB key available to your other SerKal installations in this Google account?",
+    SHAREDKEY_SHARE:"Share",
+    SHAREDKEY_CANCEL:"Cancel",
     PANEL_SEARCH: 'SEARCH & ENTRY',
     PANEL_DETAILS: 'SEASON DETAILS',
     PANEL_ARCHIV: 'ARCHIVE',
@@ -9101,6 +9128,47 @@ try {
     </div>
     <div id="skDbgBody" class="skDbgBody"></div>
   </div>
+<script>
+(function(){
+  function message(result){
+    
+    if(result && result.ok){
+      if(result.status==='missing') return t('SHAREDKEY_MISSING');
+      return (result.email||'')+'\n'+(t('SHAREDKEY_CONNECTED'));
+    }
+    var code=String(result && result.code || '');
+    if(code==='SHARED_KEY_CONFLICT') return t('SHAREDKEY_CONFLICT');
+    if(code==='SHARED_KEY_CANCELLED') return t('SHAREDKEY_CANCELLED');
+    if(code==='GOOGLE_HTTP_403') return t('SHAREDKEY_PERMISSION');
+    return t('SHAREDKEY_FAILED');
+  }
+  async function connect(button){
+    if(!window.serkal || !window.serkal.tmdb.sharedKey) return;
+    button.disabled=true;
+    try {
+      var result=await window.serkal.tmdb.sharedKey(true);
+      if(result && result.ok && result.configured){
+        var field=document.getElementById('skSetupTmdbKey');
+        if(button.id==='skSetupSharedKey' && field){
+          field.value='Google';
+          field.dataset.sharedKey='true';
+          window.dispatchEvent(new CustomEvent('serkal-shared-key-ready'));
+        }
+      }
+      alert(message(result));
+    } catch(e) { alert(message(null)); }
+    finally { button.disabled=false; }
+  }
+  window.addEventListener('DOMContentLoaded',function(){
+    ['btnSharedKeyDock','skSetupSharedKey'].forEach(function(id){
+      var button=document.getElementById(id);
+      if(button)button.addEventListener('click',function(){connect(button)});
+    });
+    if(window.serkal && window.serkal.tmdb.sharedKey)
+      window.serkal.tmdb.sharedKey(false).catch(function(){});
+  });
+})();
+</script>
 </body>
 
 </html>

@@ -7,7 +7,8 @@ const { contextBridge, ipcRenderer } = require("electron");
 const SERKAL_VERSION_ARG = process.argv.find(value => value.startsWith("--serkal-version="));
 const SERKAL_VERSION_RAW = SERKAL_VERSION_ARG ? SERKAL_VERSION_ARG.slice("--serkal-version=".length) : "1.0.2";
 const SERKAL_RC_VERSION = /^(\d+)\.0\.(\d+)(?:-f(\d+))?$/.exec(SERKAL_VERSION_RAW);
-const SERKAL_VERSION = SERKAL_RC_VERSION && Number(SERKAL_RC_VERSION[2]) > 0
+const SERKAL_ALPHA_VERSION = /^(\d+)\.(\d+)\.0-alpha\.(\d+)$/.exec(SERKAL_VERSION_RAW);
+const SERKAL_VERSION = SERKAL_ALPHA_VERSION ? SERKAL_ALPHA_VERSION[1] + "." + SERKAL_ALPHA_VERSION[2] + " Alpha " + SERKAL_ALPHA_VERSION[3].padStart(2,"0") : SERKAL_RC_VERSION && Number(SERKAL_RC_VERSION[2]) > 0
     ? SERKAL_RC_VERSION[1] + "." + SERKAL_RC_VERSION[2].padStart(4, "0") +
         (SERKAL_RC_VERSION[3] ? ("f" + SERKAL_RC_VERSION[3]) : "")
     : SERKAL_VERSION_RAW.replace(/\.0$/, "");
@@ -43,6 +44,7 @@ contextBridge.exposeInMainWorld("serkal", {
         commit:(payload)=>ipcRenderer.invoke("serkal:setup:commit",payload)
     },
     tmdb:{
+        sharedKey:(interactive)=>ipcRenderer.invoke("serkal:tmdb:sharedKey",interactive===true),
         status:()=>ipcRenderer.invoke("serkal:tmdb:status"),
         testKey:(apiKey,lang)=>ipcRenderer.invoke("serkal:tmdb:testKey",apiKey,lang||"de"),
         saveKey:(apiKey)=>ipcRenderer.invoke("serkal:tmdb:saveKey",apiKey),

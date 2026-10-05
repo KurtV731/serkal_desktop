@@ -14,9 +14,11 @@ const path = require("node:path");
 const fs = require("node:fs");
 const http = require("node:http");
 const crypto = require("node:crypto");
-const { app, BrowserWindow, ipcMain, shell } = require("electron");
+const { app, BrowserWindow, ipcMain, shell, dialog } = require("electron");
 const backendI18n = require(path.join(__dirname, "../common/backend-i18n.js"));
 const tmdbTitle = require(path.join(__dirname, "../common/tmdb-title.js"));
+
+const sharedKey = require(path.join(__dirname, "../common/shared-key.js"));
 
 let activeLanguage_ = "de";
 function bt_(key, values, language) {
@@ -245,7 +247,7 @@ function restoreLocalFile_(file, snapshot) {
 
 async function commitFirstSetup_(payload) {
     const input = payload && typeof payload === "object" ? payload : {};
-    const tmdbKey = String(input.tmdbKey || "").trim();
+    const tmdbKey = input.useStoredKey === true ? readTmdbKey_() : String(input.tmdbKey || "").trim();
     const settings = mergeSettingsPatch_(Object.assign({}, input.settings || {}, { setupDone:true }));
 
     if (!tmdbKey) {
@@ -1041,13 +1043,15 @@ async function tmdbRequest_(pathname, params, apiKeyOverride) {
     if (!apiKey) return { ok:false, code:"TMDB_KEY_MISSING", message:bt_("TMDB_NOT_CONFIGURED") };
 
     const url = new URL("https://api.themoviedb.org/3" + pathname);
-    url.searchParams.set("api_key", apiKey);
+    const tmdbHeaders = { accept:"application/json" };
+    if (/^[a-fA-F0-9]{32}$/.test(apiKey)) url.searchParams.set("api_key", apiKey);
+    else tmdbHeaders.Authorization = "Bearer " + apiKey;
     for (const [key, value] of Object.entries(params || {})) {
         if (value !== undefined && value !== null && String(value) !== "") url.searchParams.set(key, String(value));
     }
 
     try {
-        const response = await fetch(url, { headers:{ accept:"application/json" } });
+        const response = await fetch(url, { headers:tmdbHeaders, signal:AbortSignal.timeout(20000) });
         const data = await response.json().catch(() => null);
         if (!response.ok) {
             const code = (response.status === 401) ? "TMDB_KEY_INVALID" : "TMDB_HTTP";
@@ -1645,7 +1649,7 @@ async function googleOauthTokenRequest_(params) {
     return data;
 }
 
-async function googleOauthRefresh_(cfg, token) {
+async function googleOauthRefresh_(cfg, token, writeToken = googleOauthWriteToken_) {
     if (!token || !token.refresh_token) return null;
     const data = await googleOauthTokenRequest_({
         client_id:cfg.clientId,
@@ -1656,11 +1660,13 @@ async function googleOauthRefresh_(cfg, token) {
     const merged = Object.assign({}, token, data, {
         expiry_date:Date.now() + (Number(data.expires_in || 3600) * 1000)
     });
-    googleOauthWriteToken_(merged);
+    writeToken(merged);
     return merged;
 }
 
-function googleOauthBrowserLogin_(cfg) {
+function googleOauthBrowserLogin_(cfg, options = {}) {
+    const writeToken = options.writeToken || googleOauthWriteToken_;
+    const requestedScopes = options.scopes || GOOGLE_CALENDAR_SCOPES;
     return new Promise((resolve, reject) => {
         const state = crypto.randomBytes(24).toString("hex");
         const verifier = crypto.randomBytes(48).toString("base64url");
@@ -1706,7 +1712,7 @@ function googleOauthBrowserLogin_(cfg) {
                 const token = Object.assign({}, data, {
                     expiry_date:Date.now() + (Number(data.expires_in || 3600) * 1000)
                 });
-                googleOauthWriteToken_(token);
+                writeToken(token);
                 res.writeHead(200, { "content-type":"text/html; charset=utf-8" });
                 res.end("<!doctype html><meta charset='utf-8'><title>SerKal</title><body style='font:20px Arial;padding:40px;background:#f6f3ff;color:#172033'><p>" + bt_("GOOGLE_SUCCESS_PAGE") + "</p></body>");
                 finish(null, token, server);
@@ -1726,7 +1732,7 @@ function googleOauthBrowserLogin_(cfg) {
             authUrl.searchParams.set("client_id", cfg.clientId);
             authUrl.searchParams.set("redirect_uri", redirectUri);
             authUrl.searchParams.set("response_type", "code");
-            authUrl.searchParams.set("scope", GOOGLE_CALENDAR_SCOPES.join(" "));
+            authUrl.searchParams.set("scope", requestedScopes.join(" "));
             authUrl.searchParams.set("access_type", "offline");
             // Nach einem echten Nullstart muss Google die Kontoauswahl wieder sichtbar zeigen.
             authUrl.searchParams.set("prompt", "select_account consent");
@@ -1741,6 +1747,54 @@ function googleOauthBrowserLogin_(cfg) {
             finish(new Error(bt_("GOOGLE_LOGIN_TIMEOUT")), null, server);
         }, 5 * 60 * 1000);
     });
+}
+
+
+function googleSharedKeyTokenFile_() {
+    return path.join(app.getPath("userData"), "google_shared_key_token.json");
+}
+function googleSharedKeyWriteToken_(token) {
+    fs.mkdirSync(app.getPath("userData"), {recursive:true});
+    fs.writeFileSync(googleSharedKeyTokenFile_(), JSON.stringify(token, null, 2) + "\n", "utf8");
+}
+let sharedKeySyncRunning_ = false;
+async function googleSharedKeySync_(interactive) {
+    if(sharedKeySyncRunning_) return {ok:false,code:"SHARED_KEY_BUSY"};
+    sharedKeySyncRunning_=true;
+    try {
+        const cfg=googleOauthClientConfig_();
+        let token=null;
+        try { token=JSON.parse(fs.readFileSync(googleSharedKeyTokenFile_(),"utf8")); } catch(_e) {}
+        const scopes=new Set(String(token && token.scope || "").split(/\s+/));
+        if(!sharedKey.SCOPES.every(scope=>scopes.has(scope))) token=null;
+        if(interactive) token=await googleOauthBrowserLogin_(cfg,{scopes:sharedKey.SCOPES,writeToken:googleSharedKeyWriteToken_});
+        else if(token && Number(token.expiry_date || 0)<=Date.now()+60000 && token.refresh_token)
+            token=await googleOauthRefresh_(cfg,token,googleSharedKeyWriteToken_);
+        if(!token || !token.access_token || Number(token.expiry_date || 0)<=Date.now()+60000)
+            return {ok:false,code:"SHARED_KEY_CONNECT"};
+        const result=await sharedKey.syncKey({
+            accessToken:token.access_token, localKey:readTmdbKey_(),
+            validate:async key => (await tmdbRequest_("/configuration",{},key)).ok === true,
+            confirmPublish:async user => {
+                if(!interactive) return false;
+                
+                const answer=await dialog.showMessageBox({
+                    type:"question", title:bt_("SHAREDKEY_SHARE_TITLE"),
+                    message:user.email,
+                    detail:bt_("SHAREDKEY_SHARE_DETAIL"),
+                    buttons:[bt_("SHAREDKEY_SHARE"),bt_("SHAREDKEY_CANCEL")], defaultId:0,cancelId:1
+                });
+                return answer.response===0;
+            }
+        });
+        if(result.apiKey) writeTmdbKey_(result.apiKey);
+        // Never send credentials to the renderer or log.
+        return {ok:true,status:result.status,email:result.email,configured:!!result.apiKey};
+    } catch(error) {
+        const code=String(error.code || error.message || "");
+        const known=/^(SHARED_KEY_|TMDB_KEY_|GOOGLE_HTTP_|GOOGLE_IDENTITY_)[A-Z0-9_]+$/.test(code);
+        return {ok:false,code:known ? code : "SHARED_KEY_FAILED"};
+    } finally { sharedKeySyncRunning_=false; }
 }
 
 async function googleOauthAccessToken_() {
@@ -3162,6 +3216,7 @@ function installIpc_() {
         return { ok:true, language:normalized };
     });
     ipcMain.handle("serkal:setup:commit", (_event, payload) => commitFirstSetup_(payload));
+    ipcMain.handle("serkal:tmdb:sharedKey", (_event, interactive) => googleSharedKeySync_(interactive === true));
     ipcMain.handle("serkal:tmdb:status", () => ({ configured:!!readTmdbKey_() }));
     ipcMain.handle("serkal:tmdb:testKey", async (_event, apiKey, lang) => {
         const key = String(apiKey || "").trim();

@@ -3,6 +3,16 @@
 // Central language catalogue for every text created by the Electron backend.
 // No user-visible backend message may be written directly at its call site.
 const PAIRS = {
+  SHAREDKEY_MISSING:["Noch kein gemeinsamer TMDB-Schlüssel. Zuerst ein Gerät mit vorhandenem Schlüssel verbinden.","No shared TMDB key yet. Connect a device with an existing key first."],
+  SHAREDKEY_CONNECTED:["TMDB-Schlüssel mit deinem Google-Konto verbunden.","TMDB key connected to your Google account."],
+  SHAREDKEY_CONFLICT:["Unterschiedliche Schlüssel gefunden. Nichts überschrieben.","Different keys found. Nothing overwritten."],
+  SHAREDKEY_CANCELLED:["Bereitstellen abgebrochen.","Sharing cancelled."],
+  SHAREDKEY_PERMISSION:["Bitte prüfen: Google-Drive-API aktiviert und Zugriff auf App-Daten erlaubt?","Check that Google Drive API is enabled and app-data access is permitted."],
+  SHAREDKEY_FAILED:["Schlüsselverbindung fehlgeschlagen. Bitte erneut versuchen.","Key connection failed. Please retry."],
+  SHAREDKEY_SHARE_TITLE:["TMDB-Schlüssel bereitstellen","Share TMDB key"],
+  SHAREDKEY_SHARE_DETAIL:["Deinen vorhandenen TMDB-Schlüssel für weitere SerKal-Installationen in diesem Google-Konto bereitstellen?","Make your existing TMDB key available to your other SerKal installations in this Google account?"],
+  SHAREDKEY_SHARE:["Bereitstellen","Share"],
+  SHAREDKEY_CANCEL:["Abbrechen","Cancel"],
   GOOGLE_UNAVAILABLE:['SerKal konnte keine Verbindung zum Google Kalender herstellen. Bitte prüfen Sie die Anmeldung oder öffnen Sie die SerKal-Hilfe.','SerKal could not connect to Google Calendar. Please check the sign-in or open SerKal Help.'],
   TMDB_KEY_MISSING:['TMDB-API-Key fehlt.','TMDB API key is missing.'],
   TMDB_KEY_REQUIRED:['SerKal benötigt einen gültigen persönlichen TMDB-API-Key. Ohne diesen Key kann die Ersteinrichtung nicht abgeschlossen werden.','SerKal needs a valid personal TMDB API key. Setup cannot be completed without it.'],
