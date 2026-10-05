@@ -107,6 +107,8 @@ configureSharedUserData_();
 
 function serkalDisplayVersion_() {
     const raw = app.getVersion();
+    const alpha = /^(\d+)\.(\d+)\.0-alpha\.(\d+)$/.exec(raw);
+    if (alpha) return alpha[1] + "." + alpha[2] + " Alpha " + alpha[3].padStart(2, "0");
     const rc = /^(\d+)\.0\.(\d+)$/.exec(raw);
     if (rc && Number(rc[2]) > 0) return rc[1] + "." + rc[2].padStart(4, "0");
     return raw.replace(/\.0$/, "");
