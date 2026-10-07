@@ -1973,3 +1973,26 @@ und Poster. Der aktuelle Schritt ist ein lesbarer Desktop-Snapshot mit den vorha
 OAuth-Rechten. Praktische Vier-Geräte-Testreihe steht noch aus; Anleitung und technische
 Details liegen auf dem CE-Zweig in `1 docs/android-shared-archive-2026-10-07.md`.
 Die öffentliche Desktop-1.1-Veröffentlichung wurde nicht verändert.
+
+
+### 2026-10-07 – CE – Android 0.0.5a5: Archiv-laden-Knopf sichtbar repariert
+
+Status: **APK GEBAUT, SIGNIERT UND KURT BEREITGESTELLT / GERÄTETEST OFFEN**
+
+Kurt fand „Archiv laden“ weder am Pixel noch am Samsung in a4. Ursache: Die
+horizontale Button-Hilfsfunktion vergab Breite null plus Gewicht; in der vertikalen
+Archivspalte blieb der Knopf damit unsichtbar. Vertikale Einzelknöpfe erhalten jetzt
+volle Spaltenbreite, feste Höhe und größere Schrift. Auch der inaktive Hinweis in
+der mittleren Spalte verwendet die passende vertikale Anordnung.
+
+Android-Quellcommit: `9d4a976dd050f8ca5da82fbb7dd746cab7e3ff91`.
+CI-Lauf `37680736289` erfolgreich, zwölf Android-Tests ohne Fehler.
+APK `0.0.5a5-SerKal-Android.apk`, versionCode 13, 2.825.991 Bytes.
+SHA-256: `b7fbef2a80740e69ac71fcac83baebc693abade663e96cf02e58a07056b20eee`.
+Paket und Version aus der APK geprüft; Signatur v2/v3 durch apksigner verifiziert.
+Derselbe dauerhaft gesicherte Schlüssel wie a4:
+`0D:63:F5:08:DC:1F:E1:4E:97:6C:22:1A:0C:27:98:D3:A1:51:59:86`.
+Daher über a4 installieren: keine Deinstallation und keine weitere Google-Einrichtung.
+Kurt hat die neue Google-Client-Erstellung sowie die TMDB-Verbindung bereits gemeldet.
+Nächster Gerätetest: Update auf beiden Geräten, rechts „Archiv laden“ antippen.
+Desktop Alpha 03 und der bisher beschriebene Nur-Lese-Archivumfang bleiben unverändert.
