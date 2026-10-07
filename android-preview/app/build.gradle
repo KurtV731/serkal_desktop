@@ -5,14 +5,15 @@ android {
     compileSdk 35
 
     defaultConfig {
-        // Eigene Kennung je Teststufe: 0.0.4 kann neben den älteren
-        // Präversionen installiert werden, auch wenn deren Debug-Signatur abweicht.
+        // Stable application identity throughout the 0.0.5 previews.
         applicationId 'de.serkal.android.preview.v005'
         minSdk 24
         targetSdk 35
-        versionCode 11
-        versionName '0.0.5a3'
+        versionCode 12
+        versionName '0.0.5a4'
     }
+    // CI produces an unsigned APK. CE signs it with the privately retained key.
+    buildTypes { debug { signingConfig null } }
 }
 
 dependencies {

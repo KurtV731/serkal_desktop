@@ -19,21 +19,15 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
-      - name: Reuse preview signing key
-        uses: actions/cache@v4
-        with:
-          path: ~/.android/debug.keystore
-          key: serkal-android-v005-preview-signing-v1
-      - name: Build debug APK
+      - name: Test and build unsigned APK
         working-directory: android-preview
         run: |
-          
           gradle testDebugUnitTest assembleDebug
-          gradle signingReport > signing-report.txt
+          cp "$ANDROID_HOME/build-tools/35.0.0/lib/apksigner.jar" apksigner.jar
       - uses: actions/upload-artifact@v4
         with:
-          name: 0.0.5a3-SerKal-Android
+          name: 0.0.5a4-SerKal-Android-unsigned
           path: |
-            android-preview/app/build/outputs/apk/debug/app-debug.apk
-            android-preview/signing-report.txt
-
+            android-preview/app/build/outputs/apk/debug/app-debug-unsigned.apk
+            android-preview/apksigner.jar
+            android-preview/app/build/test-results/testDebugUnitTest/*.xml

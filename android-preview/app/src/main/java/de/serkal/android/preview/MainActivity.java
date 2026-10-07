@@ -385,7 +385,7 @@ public class MainActivity extends Activity {
     }
 
     private void showStartupError_(Throwable error) {
-        TextView message = text("SerKal 0.0.5a3\n\nStartfehler: " + error.getClass().getSimpleName() +
+        TextView message = text("SerKal 0.0.5a4\n\nStartfehler: " + error.getClass().getSimpleName() +
             "\n" + String.valueOf(error.getMessage()), 15, Color.WHITE);
         message.setBackgroundColor(Color.rgb(80, 0, 0));
         message.setPadding(dp(24), dp(24), dp(24), dp(24));
@@ -464,7 +464,7 @@ public class MainActivity extends Activity {
         TextView title = text("SerKal", 13, TEXT);
         title.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
         top.addView(title, new LinearLayout.LayoutParams(0, dp(31), 1));
-        TextView preview = text(english ? "0.0.5a3 · pinch to zoom · drag to move" : "0.0.5a3 · mit 2 Fingern zoomen · mit 1 Finger bewegen", 7.5f, MUTED);
+        TextView preview = text(english ? "0.0.5a4 · pinch to zoom · drag to move" : "0.0.5a4 · mit 2 Fingern zoomen · mit 1 Finger bewegen", 7.5f, MUTED);
         preview.setGravity(Gravity.CENTER_VERTICAL | Gravity.RIGHT);
         top.addView(preview, new LinearLayout.LayoutParams(-2, dp(31)));
         Button zoomOut = new Button(this);
