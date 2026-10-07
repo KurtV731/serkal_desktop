@@ -18,6 +18,7 @@ const { app, BrowserWindow, ipcMain, shell, dialog } = require("electron");
 const backendI18n = require(path.join(__dirname, "../common/backend-i18n.js"));
 const tmdbTitle = require(path.join(__dirname, "../common/tmdb-title.js"));
 
+const sharedArchive = require(path.join(__dirname, "../common/shared-archive.js"));
 const sharedKey = require(path.join(__dirname, "../common/shared-key.js"));
 
 let activeLanguage_ = "de";
@@ -1789,12 +1790,38 @@ async function googleSharedKeySync_(interactive) {
         });
         if(result.apiKey) writeTmdbKey_(result.apiKey);
         // Never send credentials to the renderer or log.
-        return {ok:true,status:result.status,email:result.email,configured:!!result.apiKey};
+        const archive = await googleSharedArchiveSync_();
+        return {ok:true,status:result.status,email:result.email,configured:!!result.apiKey,archive};
     } catch(error) {
         const code=String(error.code || error.message || "");
         const known=/^(SHARED_KEY_|TMDB_KEY_|GOOGLE_HTTP_|GOOGLE_IDENTITY_)[A-Z0-9_]+$/.test(code);
         return {ok:false,code:known ? code : "SHARED_KEY_FAILED"};
     } finally { sharedKeySyncRunning_=false; }
+}
+
+let sharedArchiveRunning_ = false;
+let sharedArchiveTimer_;
+function scheduleSharedArchive_() {
+    clearTimeout(sharedArchiveTimer_);
+    sharedArchiveTimer_=setTimeout(() => { googleSharedArchiveSync_().catch(()=>{}); }, 1500);
+}
+async function googleSharedArchiveSync_() {
+    if(sharedArchiveRunning_) { scheduleSharedArchive_(); return {status:"busy"}; }
+    sharedArchiveRunning_=true;
+    try {
+        let token; try { token=JSON.parse(fs.readFileSync(googleSharedKeyTokenFile_(),"utf8")); } catch(_e) {}
+        if(!token || !token.access_token) return {status:"connect"};
+        if(Number(token.expiry_date || 0)<=Date.now()+60000 && token.refresh_token)
+            token=await googleOauthRefresh_(googleOauthClientConfig_(),token,googleSharedKeyWriteToken_);
+        if(Number(token.expiry_date || 0)<=Date.now()+60000) return {status:"connect"};
+        const identityFile=path.join(app.getPath("userData"),"shared_archive_publishers.json");
+        const folderKey=crypto.createHash("sha256").update(path.resolve(archiveFolderPath_() || ".")).digest("hex");
+        let publishers={}; try { publishers=JSON.parse(fs.readFileSync(identityFile,"utf8")); } catch(_e) {}
+        let publisher=publishers[folderKey];
+        if(!publisher) { publisher=crypto.randomUUID(); publishers[folderKey]=publisher; fs.mkdirSync(app.getPath("userData"),{recursive:true}); fs.writeFileSync(identityFile,JSON.stringify(publishers),"utf8"); }
+        return await sharedArchive.sync({accessToken:token.access_token,publisher,archive:archiveLoad_()});
+    } catch(error) { return {status:"failed",code:String(error.code || "SHARED_ARCHIVE_FAILED")}; }
+    finally { sharedArchiveRunning_=false; }
 }
 
 async function googleOauthAccessToken_() {
@@ -3252,7 +3279,7 @@ function installIpc_() {
             throw err;
         }
     });
-    ipcMain.handle("serkal:archive:load", () => archiveLoad_());
+    ipcMain.handle("serkal:archive:load", () => { scheduleSharedArchive_(); return archiveLoad_(); });
     ipcMain.handle("serkal:archive:insert", (_event, payload) => {
         logWrite_("TRACE", "PIPELINE", bt_("IPC_ARCHIVE_RECEIVED"), {
             titel:String(payload && (payload.titel || payload.title || payload.name) || ""),
@@ -3262,6 +3289,7 @@ function installIpc_() {
                 (payload.termindaten || payload.episodeDates).length : 0
         });
         const result = archiveInsert_(payload);
+        if(result && result.ok) scheduleSharedArchive_();
         logWrite_(result && result.ok ? "TRACE" : "ERROR", "PIPELINE", bt_("IPC_ARCHIVE_FINISHED"), {
             ok:Boolean(result && result.ok),
             fileName:String(result && result.fileName || ""),
@@ -3269,8 +3297,8 @@ function installIpc_() {
         });
         return result;
     });
-    ipcMain.handle("serkal:archive:saveChanges", (_event, dirtyMap) => archiveSaveChanges_(dirtyMap));
-    ipcMain.handle("serkal:archive:deleteSeries", (_event, payload) => archiveDeleteSeries_(payload));
+    ipcMain.handle("serkal:archive:saveChanges", (_event, dirtyMap) => { const result=archiveSaveChanges_(dirtyMap); if(result && result.ok) scheduleSharedArchive_(); return result; });
+    ipcMain.handle("serkal:archive:deleteSeries", (_event, payload) => { const result=archiveDeleteSeries_(payload); if(result && result.ok) scheduleSharedArchive_(); return result; });
     ipcMain.handle("serkal:log:write", (_event, level, tag, text, object) => logWrite_(level, tag, text, object));
     ipcMain.handle("serkal:log:read", (_event, maxLines, day) => logRead_(maxLines, day));
     ipcMain.handle("serkal:log:saveText", (_event, day, text) => logSaveText_(day, text));

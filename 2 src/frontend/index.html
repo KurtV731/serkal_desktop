@@ -3752,6 +3752,9 @@ function setDetailsdesc_(it, originTag) {
 // --------- I18N (DE/EN) ----------
 const I18N = {
   de: {
+    SHAREDARCHIVE_READY:"Archivstand für Android bereit: {count} Einträge.",
+    SHAREDARCHIVE_OTHER:"Der Archivstand wird von deinem anderen Desktop bereitgestellt.",
+    SHAREDARCHIVE_FAILED:"Archivübertragung fehlgeschlagen. TMDB-Verbindung bleibt bestehen.",
     SHAREDKEY_MISSING:"Noch kein gemeinsamer TMDB-Schlüssel. Zuerst ein Gerät mit vorhandenem Schlüssel verbinden.",
     SHAREDKEY_CONNECTED:"TMDB-Schlüssel mit deinem Google-Konto verbunden.",
     SHAREDKEY_CONFLICT:"Unterschiedliche Schlüssel gefunden. Nichts überschrieben.",
@@ -3891,6 +3894,9 @@ const I18N = {
 
 },
   en: {
+    SHAREDARCHIVE_READY:"Archive snapshot ready for Android: {count} entries.",
+    SHAREDARCHIVE_OTHER:"Your other Desktop provides the archive snapshot.",
+    SHAREDARCHIVE_FAILED:"Archive upload failed. TMDB connection remains available.",
     SHAREDKEY_MISSING:"No shared TMDB key yet. Connect a device with an existing key first.",
     SHAREDKEY_CONNECTED:"TMDB key connected to your Google account.",
     SHAREDKEY_CONFLICT:"Different keys found. Nothing overwritten.",
@@ -9134,7 +9140,14 @@ try {
     
     if(result && result.ok){
       if(result.status==='missing') return t('SHAREDKEY_MISSING');
-      return (result.email||'')+'\n'+(t('SHAREDKEY_CONNECTED'));
+      var archiveText='';
+      if(result.archive) {
+        var status=result.archive.status;
+        if(status==='ready'||status==='published') archiveText=t('SHAREDARCHIVE_READY').replace('{count}',String(result.archive.count));
+        else if(status==='other-desktop') archiveText=t('SHAREDARCHIVE_OTHER');
+        else if(status==='failed') archiveText=t('SHAREDARCHIVE_FAILED');
+      }
+      return (result.email||'')+'\n'+t('SHAREDKEY_CONNECTED')+(archiveText?'\n'+archiveText:'');
     }
     var code=String(result && result.code || '');
     if(code==='SHARED_KEY_CONFLICT') return t('SHAREDKEY_CONFLICT');

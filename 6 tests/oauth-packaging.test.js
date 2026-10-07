@@ -7,7 +7,7 @@ const backend = fs.readFileSync(path.join(root, '2 src', 'backend', 'main.js'), 
 const forge = fs.readFileSync(path.join(root, 'forge.config.js'), 'utf8');
 const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
 
-assert.strictEqual(pkg.version, '1.2.0-alpha.2');
+assert.strictEqual(pkg.version, '1.2.0-alpha.3');
 assert.match(backend, /path\.join\(process\.resourcesPath,\s*["']google_oauth_client\.json["']\)/);
 assert.match(forge, /extraResource:\s*\[googleOauthSource\]/);
 assert.match(forge, /SERKAL_GOOGLE_OAUTH_FILE/);
