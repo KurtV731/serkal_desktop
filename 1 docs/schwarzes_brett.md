@@ -1926,3 +1926,50 @@ Nach dem Upload wurde die öffentliche Datei vollständig erneut von serkal.de
 heruntergeladen. Dateigröße und SHA-256 stimmen mit dem freigegebenen Original überein.
 Damit sind Website-Einbindung, Veröffentlichung und praktische Downloadprüfung für
 SerKal Desktop 1.1 abgeschlossen.
+
+### 2026-10-07 – CE – Desktop-Archivstand auf Android gebaut
+
+Status: **APK GEBAUT UND SIGNATUR GEPRÜFT / EINMALIGE GOOGLE-EINRICHTUNG UND GERÄTETEST OFFEN**
+
+Kurt hat ausdrücklich den Bau autorisiert; die Aufgabe endet nicht bei einer Ankündigung.
+Desktop `1.2.0-alpha.3` (sichtbar Alpha 03) stellt einen lesbaren Archivstand in den
+bereits freigegebenen privaten Google-App-Daten bereit. Android `0.0.5a4`
+(`versionCode 12`, Paket `de.serkal.android.preview.v005`) lädt ihn nach Google-Anmeldung
+automatisch und mit „Archiv laden“. Auswahl zeigt Beschreibung, Termine und Notizen;
+DE/EN bleibt verfügbar.
+
+Quellstände:
+- CE-Zweig `serkal-0.0.5-archiv-start`: `db08ecb710fa7734fa796d2f3b72a94534e17c32`.
+- Android-Zweig `android-preview-0.0.5`: `9da3f3002f12ad003ef747afc6829d3e4e01ef8a`.
+- Android-Buildlauf: `37661061416`, erfolgreich, zwölf Android-Tests ohne Fehler.
+- Vollständige Desktop-Testfolge einschließlich neuer Archivübertragungstests bestanden.
+- Desktop-Quelldateien direkt mit den GitHub-Blob-Hashes abgeglichen.
+
+Fertige installierbare APK: `0.0.5a4-SerKal-Android.apk`, 2.825.991 Bytes.
+SHA-256: `1ab77c40afafd0fb32b701d6dde15ece0e0b885f93372c08c2d1225a1a4e2c93`.
+APK-Signatur v2/v3 mit apksigner geprüft; Paket, Versionscode, Versionsname,
+Anzeigename und Mindest-Android 7 / API 24 aus der gebauten APK kontrolliert.
+APK und deutsche Einrichtung/Testreihe sind Kurt als Dateien bereitgestellt.
+
+Wichtige einmalige Einrichtung: Der alte Workflow sicherte den falschen Keystore-Pfad;
+die private a1-Signatur wurde nicht dauerhaft erhalten. CI baut jetzt unsigned; CE
+signiert die ausgelieferte APK mit einem privat dauerhaft gespeicherten Vorschau-Schlüssel.
+Keine private Schlüsseldatei in GitHub, Actions-Artifakten oder öffentlichen Caches.
+Kurt muss einmal im bestehenden Google-Projekt einen Android-Client für das obige Paket
+und SHA-1 `0D:63:F5:08:DC:1F:E1:4E:97:6C:22:1A:0C:27:98:D3:A1:51:59:86`
+anlegen und a1 vor Installation von a4 deinstallieren. Cloud-TMDB-Key und Desktop-Archiv
+werden dadurch nicht gelöscht. Zukünftige APKs zwingend mit demselben gesicherten Schlüssel
+signieren, nicht mit einem neuen CI-Debug-Key. Zwischenbauten a2/a3 sind nicht ausgeliefert.
+
+Der erste Desktop samt eingestelltem Archivordner ist die Quelle dieses Archivstands;
+ein anderer Desktop darf ihn nicht überschreiben. Änderungen und Wartungsübernahmen
+werden vom Quell-Desktop erneut bereitgestellt. Android zeigt Erzeugungszeit und
+„nur lesen“, verwirft Antworten nach Kontowechsel und überschreibt kein Originalarchiv.
+Doppelte oder widersprüchliche Quellen führen zu einer Fehlermeldung.
+
+Nicht als fertig darstellen: direkte Drive-Archivordner-Anbindung, Android-Schreiben,
+Quellenwechsel, konfliktsichere gemeinsame Schreibzugriffe, Kalender-Schreiben vom Handy
+und Poster. Der aktuelle Schritt ist ein lesbarer Desktop-Snapshot mit den vorhandenen
+OAuth-Rechten. Praktische Vier-Geräte-Testreihe steht noch aus; Anleitung und technische
+Details liegen auf dem CE-Zweig in `1 docs/android-shared-archive-2026-10-07.md`.
+Die öffentliche Desktop-1.1-Veröffentlichung wurde nicht verändert.
