@@ -46,6 +46,8 @@ public class MainActivity extends Activity {
         credential = "";
         googleAccessToken = "";
         googleUser = null;
+        archiveSnapshot=null; archiveGeneration++; archiveBusy=false; archiveError=""; renderArchive();
+        selectedTmdbId=0; selectedInfo.setText(""); selectedName.setText(english ? "Select a series" : "Serie auswählen"); suggestions.removeAllViews();
         googleBusy = true;
         final int generation = ++googleGeneration;
         pendingGoogleGeneration = generation;
@@ -99,6 +101,7 @@ public class MainActivity extends Activity {
                     if (generation != googleGeneration || isFinishing()) return;
                     googleBusy = false;
                     googleUser = user;
+                    loadArchive();
                     if (!loaded.key.isEmpty()) {
                         credential = loaded.key;
                         statusText.setText(user.email + (english ? "\nTMDB key adopted automatically." : "\nTMDB-Schlüssel automatisch übernommen."));
@@ -176,10 +179,80 @@ public class MainActivity extends Activity {
     private TextView statusText, selectedName, selectedInfo;
     private Runnable pendingSearch;
     private int selectedTmdbId;
+    private JSONObject archiveSnapshot;
+    private String archiveError="";
+    private int archiveGeneration;
+    private boolean archiveBusy;
+    private LinearLayout archiveRows;
+    private TextView archiveStatus;
+
+    private String archiveText(String key) { return ArchiveTexts.text(english,key); }
+    private void loadArchive() {
+        if(googleUser==null || googleAccessToken.isEmpty()) {
+            archiveError="connect"; renderArchive(); return;
+        }
+        final int generation=++archiveGeneration;
+        final int accountGeneration=googleGeneration;
+        final String token=googleAccessToken,owner=googleUser.owner;
+        archiveBusy=true; archiveError=""; renderArchive();
+        network.execute(() -> {
+            try {
+                JSONObject snapshot=new SharedArchiveClient(token).load(owner);
+                handler.post(() -> {
+                    if(generation!=archiveGeneration || accountGeneration!=googleGeneration || isFinishing()) return;
+                    archiveSnapshot=snapshot; archiveBusy=false; archiveError=""; renderArchive();
+                });
+            } catch(Exception error) {
+                handler.post(() -> {
+                    if(generation!=archiveGeneration || accountGeneration!=googleGeneration || isFinishing()) return;
+                    archiveSnapshot=null; archiveBusy=false;
+                    archiveError=String.valueOf(error.getMessage()); renderArchive();
+                });
+            }
+        });
+    }
+    private void renderArchive() {
+        if(archiveRows==null || archiveStatus==null) return;
+        archiveRows.removeAllViews();
+        if(archiveBusy) { archiveStatus.setText(archiveText("LOADING")); return; }
+        if(!archiveError.isEmpty()) {
+            String message;
+            if(archiveError.contains("MISSING")) message=archiveText("MISSING");
+            else if(archiveError.contains("CONFLICT")) message=archiveText("CONFLICT");
+            else if(archiveError.contains("401") || archiveError.equals("connect")) message=archiveText("CONNECT");
+            else message=archiveText("FAILED");
+            archiveStatus.setText(message); return;
+        }
+        if(archiveSnapshot==null) { archiveStatus.setText(archiveText("INITIAL")); return; }
+        org.json.JSONArray entries=archiveSnapshot.optJSONArray("entries");
+        archiveStatus.setText((archiveText("SNAPSHOT"))+entries.length()+
+            (archiveText("COUNT"))+archiveSnapshot.optString("generatedAt"));
+        if(entries.length()==0) archiveRows.addView(text(archiveText("EMPTY_ARCHIVE"),10,MUTED));
+        for(int i=0;i<entries.length();i++) {
+            JSONObject e=entries.optJSONObject(i);
+            TextView item=row(e.optString("title")+" · "+e.optString("seasonLabel"),false);
+            item.setOnClickListener(v -> {
+                requestGeneration++; if(pendingSearch!=null) handler.removeCallbacks(pendingSearch);
+                selectedTmdbId=e.optInt("tmdbId"); selectedName.setText(e.optString("title"));
+                String description=e.optString((english ? "descEN" : "descDE"));
+                org.json.JSONArray dates=e.optJSONArray("dates");
+                StringBuilder detail=new StringBuilder(e.optString("seasonLabel"));
+                detail.append(archiveText("EPISODES")).append(e.optInt("eps"));
+                if(!description.isEmpty()) detail.append("\n\n").append(description);
+                detail.append(archiveText("DATES"));
+                for(int j=0;j<dates.length();j++) detail.append(dates.optString(j)).append("\n");
+                if(!e.optString("note").isEmpty()) detail.append(archiveText("NOTES")).append(e.optString("note"));
+                selectedInfo.setText(detail.toString());
+            });
+            archiveRows.addView(item);
+        }
+    }
+
 
     @Override protected void onDestroy() {
         requestGeneration++;
         googleGeneration++;
+        archiveGeneration++;
         handler.removeCallbacksAndMessages(null);
         network.shutdownNow();
         super.onDestroy();
@@ -312,7 +385,7 @@ public class MainActivity extends Activity {
     }
 
     private void showStartupError_(Throwable error) {
-        TextView message = text("SerKal 0.0.5a1\n\nStartfehler: " + error.getClass().getSimpleName() +
+        TextView message = text("SerKal 0.0.5a2\n\nStartfehler: " + error.getClass().getSimpleName() +
             "\n" + String.valueOf(error.getMessage()), 15, Color.WHITE);
         message.setBackgroundColor(Color.rgb(80, 0, 0));
         message.setPadding(dp(24), dp(24), dp(24), dp(24));
@@ -391,7 +464,7 @@ public class MainActivity extends Activity {
         TextView title = text("SerKal", 13, TEXT);
         title.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
         top.addView(title, new LinearLayout.LayoutParams(0, dp(31), 1));
-        TextView preview = text(english ? "0.0.5a1 · pinch to zoom · drag to move" : "0.0.5a1 · mit 2 Fingern zoomen · mit 1 Finger bewegen", 7.5f, MUTED);
+        TextView preview = text(english ? "0.0.5a2 · pinch to zoom · drag to move" : "0.0.5a2 · mit 2 Fingern zoomen · mit 1 Finger bewegen", 7.5f, MUTED);
         preview.setGravity(Gravity.CENTER_VERTICAL | Gravity.RIGHT);
         top.addView(preview, new LinearLayout.LayoutParams(-2, dp(31)));
         Button zoomOut = new Button(this);
@@ -477,15 +550,21 @@ public class MainActivity extends Activity {
         ScrollView detailScroll = new ScrollView(this);
         detailScroll.addView(selectedInfo);
         middle.addView(detailScroll, new LinearLayout.LayoutParams(-1, 0, 1));
-        Button add = button(english ? "Shared archive pending" : "Archivverbindung folgt");
+        Button add = button(archiveText("READ_ONLY"));
         add.setEnabled(false);
         middle.addView(add);
         columns.addView(middle);
 
         LinearLayout right = panel(28);
         right.addView(heading(english ? "SHARED ARCHIVE" : "GEMEINSAMES ARCHIV"));
-        right.addView(text(english ? "Google Drive connection is being implemented. No example entries are shown."
-            : "Die Google-Drive-Anbindung wird vorbereitet. Hier werden keine Beispieldaten angezeigt.", 11, MUTED));
+        archiveStatus=text("",9,MUTED);
+        right.addView(archiveStatus);
+        archiveRows=new LinearLayout(this); archiveRows.setOrientation(LinearLayout.VERTICAL);
+        ScrollView archiveScroll=new ScrollView(this); archiveScroll.addView(archiveRows);
+        right.addView(archiveScroll,new LinearLayout.LayoutParams(-1,0,1));
+        Button reload=button(archiveText("RELOAD"));
+        reload.setOnClickListener(v -> loadArchive()); right.addView(reload);
+        renderArchive();
         columns.addView(right);
 
         setContentView(root);
