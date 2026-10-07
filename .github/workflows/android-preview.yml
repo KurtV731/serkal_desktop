@@ -26,7 +26,7 @@ jobs:
           cp "$ANDROID_HOME/build-tools/35.0.0/lib/apksigner.jar" apksigner.jar
       - uses: actions/upload-artifact@v4
         with:
-          name: 0.0.5a4-SerKal-Android-unsigned
+          name: 0.0.5a5-SerKal-Android-unsigned
           path: |
             android-preview/app/build/outputs/apk/debug/app-debug-unsigned.apk
             android-preview/apksigner.jar

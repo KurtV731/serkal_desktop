@@ -9,8 +9,8 @@ android {
         applicationId 'de.serkal.android.preview.v005'
         minSdk 24
         targetSdk 35
-        versionCode 12
-        versionName '0.0.5a4'
+        versionCode 13
+        versionName '0.0.5a5'
     }
     // CI produces an unsigned APK. CE signs it with the privately retained key.
     buildTypes { debug { signingConfig null } }
