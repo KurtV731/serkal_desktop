@@ -3320,7 +3320,7 @@ function installIpc_() {
         return result;
     });
     ipcMain.handle("serkal:maintenance:status", () => maintenanceGetStatus_());
-    ipcMain.handle("serkal:maintenance:run", async () => maintenanceRun_());
+    ipcMain.handle("serkal:maintenance:run", async () => { const result=await maintenanceRun_(); if(result && result.ok) scheduleSharedArchive_(); return result; });
     ipcMain.handle("serkal:calendar:createIcs", async (_event, payload) => {
         const result = calendarCreateIcs_(payload);
         if (result.ok) {
