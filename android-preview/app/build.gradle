@@ -10,8 +10,8 @@ android {
         applicationId 'de.serkal.android.preview.v005'
         minSdk 24
         targetSdk 35
-        versionCode 10
-        versionName '0.0.5a2'
+        versionCode 11
+        versionName '0.0.5a3'
     }
 }
 

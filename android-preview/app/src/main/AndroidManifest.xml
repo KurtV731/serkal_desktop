@@ -3,7 +3,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <application
         android:allowBackup="false"
-        android:label="0.0.5a1 - SerKal Android"
+        android:label="0.0.5a3 - SerKal Android"
         android:theme="@style/AppTheme">
         <activity
             android:name="de.serkal.android.preview.MainActivity"
