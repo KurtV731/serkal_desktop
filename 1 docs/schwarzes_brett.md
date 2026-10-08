@@ -1996,3 +1996,148 @@ Daher über a4 installieren: keine Deinstallation und keine weitere Google-Einri
 Kurt hat die neue Google-Client-Erstellung sowie die TMDB-Verbindung bereits gemeldet.
 Nächster Gerätetest: Update auf beiden Geräten, rechts „Archiv laden“ antippen.
 Desktop Alpha 03 und der bisher beschriebene Nur-Lese-Archivumfang bleiben unverändert.
+
+
+### 2026-10-08 – CE an Website-Chatty – Technische Fakten zur Datenschutzerklärung
+
+Status: **TECHNISCHE ÜBERGABE VORBEREITET / WEBSITEN-AUFTRAG DURCH KURT FOLGT**
+
+Kurt hat ausdrücklich beauftragt, die technischen Fakten hier bereitzustellen.
+Dies ist noch kein Auftrag, Webseiten zu verändern oder zu veröffentlichen.
+Die Datenschutzerklärung soll Website und SerKal-Anwendung verständlich abdecken.
+Diese Übergabe beschreibt geprüften Code; sie ist keine rechtliche Freigabe.
+
+#### 1. Fassungen unbedingt auseinanderhalten
+
+- Öffentliche Desktop-Fassung: **1.1**, Quellzweig `release-1.1`, aktuell
+  `617018b185016a24be8b590598666b86690fc692`. Das veröffentlichte, bereits
+  abgenommene Installerartefakt wurde durch die Alpha-Arbeit nicht ersetzt.
+- Entwicklung: **Desktop 1.2 Alpha 03**, CE-Zweig
+  `serkal-0.0.5-archiv-start`, `db08ecb710fa7734fa796d2f3b72a94534e17c32`.
+- Android-Vorschau: **0.0.5a5**, Zweig `android-preview-0.0.5`,
+  `9d4a976dd050f8ca5da82fbb7dd746cab7e3ff91`.
+- Gemeinsamer TMDB-Schlüssel und Android-Archivstand sind Funktionen dieser
+  Entwicklung/Vorschau. Nicht als bereits in der öffentlichen 1.1 vorhanden darstellen.
+- Kurt meldete am 07.10. nach Neustart auf Pixel 8 und Samsung jeweils 79 geladene
+  Einträge. Manuelle Aktualisierung per Knopf ist noch zu prüfen; keine Abnahme
+  gleichzeitiger Schreibzugriffe. Poster auf Android fehlen noch.
+
+#### 2. Öffentlicher Desktop: lokale Daten und TMDB
+
+Das konfigurierte Archiv besteht aus lokalen TXT-Dateien mit Serien-/Staffeltiteln,
+TMDB-Kennungen, Folgenzahlen, Terminen, Beschreibungen, Notizen und Status/Gesehen-Angaben.
+Der Nutzer wählt den Archivordner. Liegt dieser in einem über Google Drive oder einen
+anderen Dienst synchronisierten lokalen Ordner, übernimmt dessen eigener Client die
+Dateisynchronisation. Das ist von SerKals direktem API-Zugriff zu unterscheiden.
+
+Desktop speichert Einstellungen und TMDB-Zugangsdaten im lokalen Electron-Nutzerprofil.
+Für die Google-Kalender-Anmeldung werden OAuth-Zugangstokens samt gegebenenfalls
+Refresh-Token lokal in `google_calendar_token.json` gespeichert. Diese JSON-Dateien
+sind im geprüften Code nicht mit einer eigenen Dateiverschlüsselung versehen.
+Nicht pauschal behaupten, sämtliche Zugangsdaten seien verschlüsselt.
+
+TMDB-Anfragen gehen direkt an `api.themoviedb.org`; Desktop-Poster an
+`image.tmdb.org`. Übermittelt werden insbesondere Suchbegriffe/Serienkennungen,
+Sprachparameter und TMDB-Zugangsdaten zur API-Authentifizierung. Der angefragte Dienst
+erhält durch die Verbindung auch technische Verbindungsdaten. Das macht die privaten
+Archivdateien nicht automatisch zu einem Upload an TMDB.
+Keinen Datenversand an einen zentralen SerKal-Server allein aus dieser Architektur ableiten.
+
+Lokale Protokolle werden als `!!SERKAL_LOG_YYYY-MM-DD.txt` im Archivbereich geschrieben.
+Sie können Ablauf-, Serien-, Kalender- und Fehlerinformationen enthalten.
+Keine feste automatische Löschfrist zusichern: eine vollständige Log-Rotation und
+eine Prüfung sämtlicher möglicher Log-Inhalte sind hier nicht bestätigt.
+
+#### 3. Google Kalender im Desktop
+
+Geprüfte angeforderte Rechte in öffentlichem und aktuellem Entwicklungs-Backend:
+
+- `calendar.calendarlist.readonly`: Kalenderliste lesen und Zielkalender ermitteln.
+- `calendar.calendars`: Kalenderverwaltung, insbesondere Zielkalender anlegen.
+- `calendar.events.owned`: Termine in eigenen Kalendern verwalten.
+
+SerKal nutzt diese Rechte, um den SerKal-Kalender zu finden/anzulegen und Serien- bzw.
+Folgentermine zu lesen, anzulegen, anzupassen und zu löschen; unter anderem bei
+Änderungen und Wartung. Die sichtbare Aufgabe ist auf SerKal-Termine gerichtet;
+die OAuth-Berechtigungen technisch nicht fälschlich als ausschließlich auf einen
+einzigen Kalender beschränkt beschreiben.
+
+Die OAuth-Anmeldung läuft über Google. SerKal fordert kein Google-Passwort in einem
+eigenen Eingabefeld an. Kalenderkennung und Tokens werden lokal weiterverwendet.
+Ein Entzug der Google-Berechtigung ist nicht gleichbedeutend mit dem Löschen bereits
+geschriebener Kalendereinträge oder lokaler Dateien.
+
+#### 4. Entwicklung/Vorschau: gemeinsame Schlüssel und Archivstand
+
+Zusätzlich angeforderte Rechte:
+`drive.appdata`, `openid`, `userinfo.email`.
+Die App liest über Googles Userinfo-Endpunkt Konto-ID, E-Mail-Adresse und deren
+Bestätigungsstatus. Dies dient der Zuordnung zum richtigen Google-Konto und der
+Vermeidung einer Vermischung verschiedener Konten.
+
+Der gemeinsame TMDB-Schlüssel liegt in Googles privatem App-Datenbereich
+(`appDataFolder`) in `serkal-tmdb-key-v1.json`, zusammen mit Schema und Konto-ID.
+Der JSON-Inhalt enthält den Schlüssel, ohne zusätzliche Ende-zu-Ende-Verschlüsselung
+durch SerKal. Ein lokaler Android-Cache ist dagegen AES-GCM-verschlüsselt; sein
+Schlüssel wird im Android Keystore gehalten. Desktop verwendet lokal `tmdb.json`.
+Für diese Verbindung speichert Desktop einen separaten lokalen OAuth-Token in
+`google_shared_key_token.json`.
+
+Desktop stellt einen Archivstand als `serkal-archive-v1.json` ebenfalls in
+Googles privatem App-Datenbereich bereit. Enthalten sind Konto-ID, Quellenkennung,
+Erzeugungszeit sowie Titel, Jahr, Staffel, TMDB-ID, Folgenzahl, aktive Termine,
+DE/EN-Beschreibungen, Notizen und Gesehen-Status. Ausgeschlossen werden rohe
+Archivzeilen, lokale Dateipfade und die gesonderten API-/OAuth-Zugangsdaten.
+Freie Nutzernotizen gehören ausdrücklich zum übertragenen Archivinhalt.
+
+Dies ist kein pauschaler Zugriff auf sämtliche Dateien in „Meine Ablage“.
+Es ist auch keine direkte Android-Verbindung zum ursprünglichen TXT-Archivordner.
+Android liest den bereitgestellten Stand, hält ihn im Arbeitsspeicher und verwirft
+ihn beim Kontowechsel. Android-Archivschreiben, Android-Kalenderschreiben,
+Quellenwechsel und gemeinsame Schreibsperren sind noch nicht implementiert.
+Der erste bereitstellende Desktop samt Archivordner ist vorerst die Quelle.
+
+Für die Cloud-Dateien gibt es im geprüften Code keine automatische Ablauf-/Löschfrist
+und noch keine bestätigte vollständige Löschroutine in der Oberfläche.
+App-Deinstallation löscht diese Google-App-Daten nicht automatisch.
+Eine konkrete Anleitung zum Entfernen der App-Daten und eine vollständige Prüfung
+der lokalen Reset-/Deinstallationswege muss CE noch liefern. Website-Chatty darf
+bis dahin weder automatische Komplettlöschung noch eine erfundene Frist zusagen.
+
+#### 5. Website: belegter Textstand und offene Betriebsangaben
+
+Im Website-Repository `KurtV731/serkal-pages` existieren mindestens
+`up/datenschutz.html`, `up/privacy.html` und englische Gegenstücke.
+Die am 08.10. gelesenen Quelltexte sind sehr knapp; insbesondere fehlen genaue
+App-Datenflüsse. Vor Veröffentlichung den tatsächlich in Googles OAuth-Konfiguration
+hinterlegten Link und die erreichbaren deutschen/englischen Seiten abgleichen.
+Keine widersprüchlichen Kurz- und Langfassungen stehen lassen.
+
+Folgende Angaben sind noch anhand des echten Betriebs zu verifizieren:
+
+- tatsächlicher Webhoster/Vertragspartner, Serverstandort und Auftragsverarbeitung;
+- ob Cloudflare nur DNS oder auch Proxy/CDN, Sicherheit oder Analytics bereitstellt;
+- tatsächliche Server-/Cloudflare-Logdaten, Aufbewahrungszeiten und Löschwege;
+- Cookies, lokaler Browserspeicher, externe Schriften/Skripte, eingebettete Medien,
+  Analyse-, Kontakt- und Zahlungsfunktionen, soweit tatsächlich eingebunden;
+- Datenschutzkontakt, gegebenenfalls relevante Empfänger und Drittlandübermittlungen.
+
+Die früheren Projektangaben INWX und Cloudflare ersetzen diese Betriebsprüfung nicht.
+„Keine personenbezogenen Daten“ nicht pauschal mit fehlenden Formularen begründen:
+Websiteaufrufe und Dienstverbindungen sind gesondert zu beschreiben.
+Noch nicht implementierte Bezahl-/Play-Store-Funktionen nicht als aktuelle Verarbeitung
+von Bestell-, Zahlungs- oder Kundendaten ausgeben. Vor späterem Verkauf separat prüfen.
+
+#### 6. Grundlage für Kurts späteren Website-Auftrag
+
+Kurt hat drei PDFs bereitgestellt: ein NRW-Muster (Juli 2019), ein DFN-Muster
+(September 2022) und eine für SerKal erzeugte Erklärung mit INWX/Verantwortlichen.
+Sie sind Arbeitsgrundlagen; keine unveränderte Komplettübernahme.
+Feste Fristen, Analyse, Kundenverträge, Datenschutzbeauftragte oder sonstige Dienste
+nur aufnehmen, wenn sie tatsächlich zutreffen und überprüft sind.
+
+Nach Kurts Auftrag: Website-Chatty erstellt daraus passende, konsistente DE/EN-Texte.
+CE verantwortet die Bestätigung der App-Fakten und noch offenen Löschwege.
+Webbetrieb/Hosting-Einstellungen müssen anhand tatsächlicher Konfiguration geprüft werden.
+Rechtliche und steuerliche Beurteilung nicht als durch diese technische Übergabe erledigt
+darstellen. Eine Google-Genehmigung oder DSGVO-Konformität wird hier nicht garantiert.
