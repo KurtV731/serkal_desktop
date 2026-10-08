@@ -2141,3 +2141,28 @@ CE verantwortet die Bestätigung der App-Fakten und noch offenen Löschwege.
 Webbetrieb/Hosting-Einstellungen müssen anhand tatsächlicher Konfiguration geprüft werden.
 Rechtliche und steuerliche Beurteilung nicht als durch diese technische Übergabe erledigt
 darstellen. Eine Google-Genehmigung oder DSGVO-Konformität wird hier nicht garantiert.
+
+
+### 2026-10-08 – Website-Chatty an CE / Projekt – Datenschutzerklärung DE/EN überarbeitet und veröffentlicht
+
+**Erledigt im Website-Repository `KurtV731/serkal-pages` auf `main`:**
+
+- `up/privacy.html`: deutsche Datenschutzerklärung vollständig neu gefasst.
+- `up/privacy-en.html`: gleichwertige englische Privacy Policy vollständig neu gefasst.
+- `up/datenschutz.html`: alte Paralleladresse verweist auf die aktuelle deutsche Erklärung, damit keine widersprüchliche Altfassung bestehen bleibt.
+- `up/start.html` und `up/start-en.html`: Datenschutz/Privacy direkt im Footer der Startseiten verlinkt.
+- `up/legal.html` und `up/legal-en.html`: direkte Verweise auf die ausführlichen Erklärungen ergänzt.
+
+**Inhaltlich aufgenommen:** Website-Hosting und Protokolle, Cloudflare, keine Website-Tracker/Cookies nach aktuellem Stand, Kontakt, lokale Daten der öffentlichen Desktop-Version 1.1, Google-Kalender-OAuth und die drei aktuellen Kalender-Scopes, TMDB, lokale Token/Logs und fehlende SerKal-Dateiverschlüsselung, synchronisierte Benutzerordner sowie getrennt gekennzeichnete Entwicklungs-/Android-Funktionen mit `drive.appdata`, Kontozuordnung, geteiltem TMDB-Schlüssel und Archiv-Schnappschuss. Die Grenzen von Widerruf, Deinstallation und Löschung werden ausdrücklich benannt; es gibt kein Versprechen einer automatischen Cloud-Löschung.
+
+**Verbindliche URL für Google/OAuth:**
+
+- Deutsch: https://serkal.de/privacy.html
+- Englisch: https://serkal.de/privacy-en.html
+
+**Noch beim CE umzusetzen bzw. zu bestätigen:**
+
+1. In Desktop- und Android-Oberfläche an gut erreichbarer Stelle auf die jeweilige Datenschutzerklärung verlinken; Google verlangt eine Verlinkung auch aus der App-Oberfläche.
+2. Für die Vorschaufassungen eine geprüfte Löschfunktion oder eine exakt getestete Benutzeranleitung für Daten in Googles `appDataFolder` bereitstellen. Bis dahin nicht mit automatischer Löschung werben.
+3. Bei jeder Änderung an Scopes, Speicherorten, Datenfeldern, Verschlüsselung oder Löschverhalten Website-Chatty vor Veröffentlichung informieren.
+4. Die Texte sind eine sachlich und technisch geprüfte Arbeitsfassung, jedoch keine anwaltliche Rechtsberatung und keine Garantie für die Google-Freigabe.
