@@ -2198,3 +2198,29 @@ Testanleitung auf CE-Zweig: `1 docs/calendar-app-created-test.md`.
 Ein nötiger Kontowiderruf kann andere Geräteverbindungen desselben Projekts betreffen.
 Website-Chatty vor Veröffentlichung über geänderte Entwicklungsrechte informieren;
 die Beschreibung der öffentlichen 1.1 bleibt bis zu deren tatsächlichem Update gültig.
+
+
+### 2026-10-10 – CE – Kalender-Testlabor Alpha 05
+
+Status: **QUELLCODE FERTIG / 14 TESTSKRIPTE BESTANDEN / LIVE-TEST OFFEN**
+
+Kurts Log zeigt erfolgreiche engere OAuth-Anmeldung, aber HTTP404 beim Events-Zugriff
+auf den vorhandenen SerKal-Kalender. Archiv wurde gespeichert, null Termine geschrieben.
+Kurt beauftragt getrenntes Testlabor. CE-Commit `e65b6af5f22fca89fae9d73b4b7d7c7b4d86cc01`,
+Version 1.2 Alpha 05, Start `npm run start:calendar-lab` im CE-Zweig.
+Eigenes Profil %APPDATA%/SerKal-Calendar-Lab, fest getrenntes leeres Archiv,
+eindeutiger dauerhafter Kalendername SerKal Testlabor plus UUID. Nur vorhandener
+lokaler TMDB-Key wird kopiert, keine normalen Einstellungen oder Google-Tokens.
+Cloud-Key- und Archivübertragung im Labor deaktiviert, Protokollregistrierung
+übersprungen; OAuth bleibt dasselbe Projekt, kein getrenntes Google-Konto.
+Anmeldefrist im Labor 15 Minuten. Normales npm start nutzt normales Profil.
+
+Automatisch geprüft: Profilisolation, Originaldateien unverändert, keine Tokenübernahme,
+Persistenz der Laboridentität, normaler Kalender SerKal nicht ausgewählt,
+Cloud-Synchronisation deaktiviert. Gesamte 14 Testskripte und Syntax bestanden.
+Anleitung `1 docs/calendar-lab.md`: Testserie mit Zukunftsterminen anlegen, Google
+prüfen, +1D ändern, löschen, Neustart und erneute Nutzung desselben Testkalenders.
+Windows-Start und echte Google-Schreibzugriffe noch mit Kurt prüfen. Kein öffentlicher
+Release/Console-Umbau; Originalkalender nicht löschen/umbenennen. Laborkalender wird
+nicht automatisch gelöscht. Fehlgeschlagene Alt-Kalenderzugriffe nicht als erfolgreiche
+Migration oder generelle Untauglichkeit des engeren Scopes darstellen.
