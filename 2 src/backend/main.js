@@ -26,11 +26,14 @@ function bt_(key, values, language) {
     return backendI18n.text(language || activeLanguage_, key, values);
 }
 
+const calendarLab_ = String(process.env.SERKAL_CALENDAR_LAB || "") === "1"
+    ? require("../common/calendar-lab.js").prepare(app.getPath("appData")) : null;
+const GOOGLE_CALENDAR_NAME = calendarLab_ ? calendarLab_.calendarName : "SerKal";
 const SERKAL_PROTOCOL = "serkal";
 const serkalSquirrelUninstall_ = process.argv.includes("--squirrel-uninstall");
 
 function maintainSerkalProtocol_() {
-    if (process.platform !== "win32" || !app.isPackaged) return false;
+    if (calendarLab_ || process.platform !== "win32" || !app.isPackaged) return false;
     try {
         if (serkalSquirrelUninstall_) {
             return app.removeAsDefaultProtocolClient(SERKAL_PROTOCOL);
@@ -51,6 +54,7 @@ maintainSerkalProtocol_();
 if (require("electron-squirrel-startup")) return;
 
 function configureSharedUserData_() {
+    if (calendarLab_) { app.setPath("userData", calendarLab_.root); return; }
     try {
         const appData = app.getPath("appData");
         const previousUserData = app.getPath("userData");
@@ -118,12 +122,13 @@ function serkalDisplayVersion_() {
 }
 
 function serkalWindowTitle_() {
-    const title = "SERKAL Desktop " + serkalDisplayVersion_();
+    const title = "SERKAL Desktop " + serkalDisplayVersion_() + (calendarLab_ ? " – " + bt_("CALENDAR_LAB") : "");
     return app.isPackaged ? title : title + " – ENTWICKLUNG";
 }
 
 
 function defaultArchiveFolder_() {
+    if (calendarLab_) return calendarLab_.archive;
     return path.join(app.getPath("documents"), "SerKal", "Archiv");
 }
 
@@ -373,6 +378,7 @@ function logClear_(day) {
 }
 
 function archiveFolderPath_() {
+    if (calendarLab_) return calendarLab_.archive;
     return archiveResolveDriveFolder_(readSettings_().archive.folderPath);
 }
 
@@ -1749,8 +1755,8 @@ function googleOauthBrowserLogin_(cfg, options = {}) {
         });
 
         timeout = setTimeout(() => {
-            finish(new Error(bt_("GOOGLE_LOGIN_TIMEOUT")), null, server);
-        }, 5 * 60 * 1000);
+            finish(new Error(bt_(calendarLab_ ? "GOOGLE_LAB_LOGIN_TIMEOUT" : "GOOGLE_LOGIN_TIMEOUT")), null, server);
+        }, (calendarLab_ ? 15 : 5) * 60 * 1000);
     });
 }
 
@@ -1764,6 +1770,7 @@ function googleSharedKeyWriteToken_(token) {
 }
 let sharedKeySyncRunning_ = false;
 async function googleSharedKeySync_(interactive) {
+    if (calendarLab_) return {ok:false,code:"CALENDAR_LAB",message:bt_("CALENDAR_LAB_CLOUD_DISABLED")};
     if(sharedKeySyncRunning_) return {ok:false,code:"SHARED_KEY_BUSY"};
     sharedKeySyncRunning_=true;
     try {
@@ -1810,6 +1817,7 @@ function scheduleSharedArchive_() {
     sharedArchiveTimer_=setTimeout(() => { googleSharedArchiveSync_().catch(()=>{}); }, 1500);
 }
 async function googleSharedArchiveSync_() {
+    if (calendarLab_) return {status:"disabled"};
     if(sharedArchiveRunning_) { scheduleSharedArchive_(); return {status:"busy"}; }
     sharedArchiveRunning_=true;
     try {
@@ -1899,7 +1907,7 @@ async function googleResolveSerkalCalendar_() {
             listResult.data.items : [];
         for (const item of items) {
             const visibleName = String(item && (item.summaryOverride || item.summary) || "").trim();
-            if (visibleName.toLocaleLowerCase("de-DE") === "serkal") matches.push(item);
+            if (visibleName.toLocaleLowerCase("de-DE") === GOOGLE_CALENDAR_NAME.toLocaleLowerCase("de-DE")) matches.push(item);
         }
         pageToken = String(listResult.data && listResult.data.nextPageToken || "");
     } while (pageToken);
@@ -1949,7 +1957,7 @@ async function googleResolveSerkalCalendar_() {
         "POST",
         "https://www.googleapis.com/calendar/v3/calendars",
         {
-            summary:"SerKal",
+            summary:GOOGLE_CALENDAR_NAME,
             description:"SerKal – Serienkalender",
             timeZone:Intl.DateTimeFormat().resolvedOptions().timeZone || "Europe/Berlin"
         }
@@ -1994,6 +2002,9 @@ function googleCalendarIdForLog_(calendarId) {
 }
 
 async function googleCalendarApi_(method, calendarId, eventId, event) {
+    if (calendarLab_ && String(calendarId) !== String(readSettings_().calendar.googleCalendarId || "")) {
+        throw new Error(bt_("CALENDAR_LAB_TARGET_REJECTED"));
+    }
     const trace = {
         method:String(method || ""),
         kalender:googleCalendarIdForLog_(calendarId),

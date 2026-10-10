@@ -8,7 +8,7 @@ const resolver = source.slice(source.indexOf('async function googleResolveSerkal
 const prefix = 'https://www.googleapis.com/auth/';
 async function run(items, status, saved='') {
  const requests=[]; let settings={calendar:{googleCalendarId:saved}}; let writes=0;
- const context={URL,Intl,Set,Error,logWrite_(){},bt_(key){return key;},googleCalendarIdForLog_(id){return id;},readSettings_(){return settings;},writeSettings_(){writes++;},
+ const context={GOOGLE_CALENDAR_NAME:"SerKal",URL,Intl,Set,Error,logWrite_(){},bt_(key){return key;},googleCalendarIdForLog_(id){return id;},readSettings_(){return settings;},writeSettings_(){writes++;},
  async googleCalendarJsonRequest_(method,url){requests.push({method,url}); if(url.includes('/calendarList'))return {ok:true,data:{items}}; if(method==='POST')return {ok:true,data:{id:'new'}}; return {ok:status===200,status,data:{items:[]}};}};
  vm.createContext(context);vm.runInContext(scopes+resolver,context);
  assert.equal(context.googleOauthTokenHasRequiredScope_({scope:prefix+'calendar.app.created '+prefix+'calendar.calendarlist.readonly'}),true);

@@ -3,6 +3,10 @@
 // Central language catalogue for every text created by the Electron backend.
 // No user-visible backend message may be written directly at its call site.
 const PAIRS = {
+  GOOGLE_LAB_LOGIN_TIMEOUT:['Google-Anmeldung im Testlabor wurde nach 15 Minuten abgebrochen. Bitte erneut starten.','Google sign-in in the test lab timed out after 15 minutes. Please restart it.'],
+  CALENDAR_LAB:['TESTLABOR','TEST LAB'],
+  CALENDAR_LAB_CLOUD_DISABLED:['Im Kalender-Testlabor ist die gemeinsame Cloud-Übertragung ausgeschaltet. Der vorhandene lokale TMDB-Schlüssel wird verwendet.','Shared cloud transfer is disabled in the calendar test lab. The existing local TMDB key is used.'],
+  CALENDAR_LAB_TARGET_REJECTED:['Kalender-Testlabor: Zugriff auf ein anderes Kalenderziel verweigert.','Calendar test lab: access to a different calendar target refused.'],
   GOOGLE_NARROW_SCOPE_REQUIRED:['Google hat nicht ausschließlich die benötigten engeren Kalenderrechte erteilt. Für den Test bitte die bisherige SerKal-Freigabe im Google-Konto widerrufen und erneut verbinden.','Google did not grant only the required narrower calendar permissions. For this test, revoke the previous SerKal authorization in your Google account and reconnect.'],
   GOOGLE_APP_CALENDAR_ACCESS_FAILED:['Der vorhandene SerKal-Kalender ist mit den engeren App-Rechten nicht erreichbar (HTTP {status}). Kein Ersatzkalender wurde angelegt. Bitte die Verbindung und die Kalenderherkunft prüfen.','The existing SerKal calendar cannot be accessed with the narrower app permissions (HTTP {status}). No replacement calendar was created. Please check the connection and calendar origin.'],
   SHAREDKEY_MISSING:["Noch kein gemeinsamer TMDB-Schlüssel. Zuerst ein Gerät mit vorhandenem Schlüssel verbinden.","No shared TMDB key yet. Connect a device with an existing key first."],
