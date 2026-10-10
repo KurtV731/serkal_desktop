@@ -1574,15 +1574,15 @@ function calendarCreateIcs_(payload) {
 const GOOGLE_CALENDAR_SCOPES = [
     // Nur die vorhandene Kalenderliste lesen, damit SerKal seinen Kalender wiederfindet.
     "https://www.googleapis.com/auth/calendar.calendarlist.readonly",
-    // Den eigenen SerKal-Kalender bei Bedarf anlegen.
-    "https://www.googleapis.com/auth/calendar.calendars",
-    // Ausschließlich Termine in Kalendern verwalten, deren Eigentümer der Nutzer ist.
-    "https://www.googleapis.com/auth/calendar.events.owned"
+    // Nur von dieser App angelegte Kalender und deren Termine verwalten.
+    "https://www.googleapis.com/auth/calendar.app.created"
 ];
 
 function googleOauthTokenHasRequiredScope_(token) {
     const scopes = new Set(String(token && token.scope || "").split(/\s+/).filter(Boolean));
-    return GOOGLE_CALENDAR_SCOPES.every(scope => scopes.has(scope));
+    const broad = ["calendar", "calendar.events", "calendar.events.owned", "calendar.calendars"];
+    return GOOGLE_CALENDAR_SCOPES.every(scope => scopes.has(scope)) &&
+        !broad.some(scope => scopes.has("https://www.googleapis.com/auth/" + scope));
 }
 
 function googleOauthTokenPath_() {
@@ -1713,6 +1713,9 @@ function googleOauthBrowserLogin_(cfg, options = {}) {
                 const token = Object.assign({}, data, {
                     expiry_date:Date.now() + (Number(data.expires_in || 3600) * 1000)
                 });
+                if (requestedScopes === GOOGLE_CALENDAR_SCOPES && !googleOauthTokenHasRequiredScope_(token)) {
+                    throw new Error(bt_("GOOGLE_NARROW_SCOPE_REQUIRED"));
+                }
                 writeToken(token);
                 res.writeHead(200, { "content-type":"text/html; charset=utf-8" });
                 res.end("<!doctype html><meta charset='utf-8'><title>SerKal</title><body style='font:20px Arial;padding:40px;background:#f6f3ff;color:#172033'><p>" + bt_("GOOGLE_SUCCESS_PAGE") + "</p></body>");
@@ -1735,6 +1738,7 @@ function googleOauthBrowserLogin_(cfg, options = {}) {
             authUrl.searchParams.set("response_type", "code");
             authUrl.searchParams.set("scope", requestedScopes.join(" "));
             authUrl.searchParams.set("access_type", "offline");
+            authUrl.searchParams.set("include_granted_scopes", "false");
             // Nach einem echten Nullstart muss Google die Kontoauswahl wieder sichtbar zeigen.
             authUrl.searchParams.set("prompt", "select_account consent");
             authUrl.searchParams.set("state", state);
@@ -1828,10 +1832,7 @@ async function googleOauthAccessToken_() {
     const cfg = googleOauthClientConfig_();
     let token = googleOauthReadToken_();
 
-    /* Ein alter 0.0.5-Token besitzt nur calendar.events.
-       Damit kann Google zwar Termine bearbeiten, aber SerKal kann seinen
-       Zielkalender nicht wie das Original selbst suchen oder anlegen.
-       In diesem Fall einmalig eine neue Zustimmung anfordern. */
+    // Alte breite Berechtigungen dürfen den Test der engeren Rechte nicht verdecken.
     if (token && !googleOauthTokenHasRequiredScope_(token)) {
         logWrite_("INFO", "GOOGLE",
             bt_("GOOGLE_SCOPE_RELOGIN"),
@@ -1845,6 +1846,7 @@ async function googleOauthAccessToken_() {
     if (token && token.refresh_token) {
         try {
             token = await googleOauthRefresh_(cfg, token);
+            if (!googleOauthTokenHasRequiredScope_(token)) throw new Error(bt_("GOOGLE_NARROW_SCOPE_REQUIRED"));
             return String(token.access_token);
         } catch (err) {
             console.warn("SERKAL Google-Token erneuern:", err);
@@ -1924,6 +1926,7 @@ async function googleResolveSerkalCalendar_() {
             davonAusgeblendet:matches.filter(item => item && item.hidden === true).length
         });
 
+        await googleCalendarCheckAppAccess_(calendarId);
         const settings = readSettings_();
         if (String(settings.calendar.googleCalendarId || "") !== calendarId) {
             settings.calendar.googleCalendarId = calendarId;
@@ -1935,6 +1938,12 @@ async function googleResolveSerkalCalendar_() {
         return { id:calendarId, created:false, matches:matches.length };
     }
 
+    // Ein gespeichertes Ziel niemals stillschweigend durch einen neuen Kalender ersetzen.
+    const existingId = String(readSettings_().calendar.googleCalendarId || "").trim();
+    if (existingId) {
+        await googleCalendarCheckAppAccess_(existingId);
+        return { id:existingId, created:false, matches:0 };
+    }
     logWrite_("INFO", "GOOGLE", bt_("GOOGLE_CALENDAR_CREATE_START"), {});
     const createResult = await googleCalendarJsonRequest_(
         "POST",
@@ -1964,6 +1973,17 @@ async function googleResolveSerkalCalendar_() {
         kalender:googleCalendarIdForLog_(calendarId)
     });
     return { id:calendarId, created:true, matches:0 };
+}
+
+async function googleCalendarCheckAppAccess_(calendarId) {
+    const url = new URL("https://www.googleapis.com/calendar/v3/calendars/" + encodeURIComponent(calendarId) + "/events");
+    url.searchParams.set("maxResults", "1");
+    const result = await googleCalendarJsonRequest_("GET", url.toString());
+    if (!result.ok) {
+        const error = new Error(bt_("GOOGLE_APP_CALENDAR_ACCESS_FAILED", { status:result.status }));
+        error.code = "GOOGLE_APP_CALENDAR_ACCESS_FAILED";
+        throw error;
+    }
 }
 
 function googleCalendarIdForLog_(calendarId) {
