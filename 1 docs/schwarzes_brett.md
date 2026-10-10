@@ -2169,3 +2169,32 @@ darstellen. Eine Google-Genehmigung oder DSGVO-Konformität wird hier nicht gara
 
 
 **Veröffentlichungskontrolle 2026-10-08:** Der GitHub-Stand ist vollständig und syntaktisch geprüft. `serkal.de/privacy.html` liefert derzeit noch die bisherige Kurzfassung; der Webserver hat den neuen Repository-Stand noch nicht abgerufen. Nächster Schritt ist daher der übliche, gezielte Website-Abruf/Deploy auf dem Server, anschließend erneute Sichtkontrolle beider Sprachfassungen.
+
+
+### 2026-10-10 – CE – Desktop Alpha 04: engere Google-Kalenderrechte
+
+Status: **QUELLCODE UMGESETZT / 13 TESTSKRIPTE BESTANDEN / GOOGLE-LIVETEST OFFEN**
+
+Kurt hat den Umbau beauftragt. CE-Zweig `serkal-0.0.5-archiv-start`, Version
+`1.2.0-alpha.4`, sichtbar **1.2 Alpha 04**, Commit `f1988a4ee1f524f8d6095954ee4b501c859a6ba5`.
+Statt `calendar.calendars` und `calendar.events.owned` fordert diese Testfassung
+`calendar.app.created` plus das bestehende `calendar.calendarlist.readonly` an.
+Alte breite Tokens werden nicht als gültiger Test akzeptiert; OAuth übernimmt
+angehäufte Rechte nicht absichtlich (include_granted_scopes=false). Liefert Google
+trotzdem breite Rechte, stoppt die Anmeldung mit DE/EN-Hinweis.
+
+Vorhandene SerKal-Kalender werden über einen lesenden Events-Aufruf geprüft.
+Zugriffsfehler stoppen die Aktion ohne Ersatzkalender und ohne Überschreiben der ID.
+Auch ein gespeichertes Ziel ohne Listentreffer wird nicht automatisch ersetzt.
+Automatisierte Fälle: alte/enge/zu breite Tokens, Zugriff erlaubt, HTTP403/404/500,
+gespeicherte ID und erstmalige Kalenderanlage. Gesamte Testfolge und Syntaxprüfung
+bestanden. Echte Google-Zugriffe, Erstellen/Verschieben/Löschen und bestehender
+Kalenderursprung sind mit Kurt noch zu testen. Keine Behauptung, dass jeder alte
+Kalender kompatibel oder der Scope verifizierungsfrei wäre.
+
+Testanleitung auf CE-Zweig: `1 docs/calendar-app-created-test.md`.
+Öffentliche 1.1 und Google-Console-Konfiguration wurden nicht verändert. Keine
+öffentlichen Scopes vorschnell entfernen, Produktionsstatus nicht auf Testing setzen.
+Ein nötiger Kontowiderruf kann andere Geräteverbindungen desselben Projekts betreffen.
+Website-Chatty vor Veröffentlichung über geänderte Entwicklungsrechte informieren;
+die Beschreibung der öffentlichen 1.1 bleibt bis zu deren tatsächlichem Update gültig.
