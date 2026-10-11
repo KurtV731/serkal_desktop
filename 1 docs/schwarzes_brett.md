@@ -2224,3 +2224,32 @@ Windows-Start und echte Google-Schreibzugriffe noch mit Kurt prüfen. Kein öffe
 Release/Console-Umbau; Originalkalender nicht löschen/umbenennen. Laborkalender wird
 nicht automatisch gelöscht. Fehlgeschlagene Alt-Kalenderzugriffe nicht als erfolgreiche
 Migration oder generelle Untauglichkeit des engeren Scopes darstellen.
+
+
+### 2026-10-11 – CE – Kalender-Livetest und Desktop Alpha 06
+
+Status: **ALPHA 05 LABORTEST POSITIV / ALPHA 06 CODE GEPRÜFT / NEUAUFBAU-LIVETEST OFFEN**
+
+Kurt meldete erfolgreiches Anlegen, Offsetänderung, Löschen und erneutes Eintragen im
+selben Alpha-05-Testkalender. Letztes Bild zeigt drei Termine 11.–13.10.; Neustart wurde
+im anschließenden Austausch als bestätigt verstanden, im Bild selbst nicht nachweisbar.
+Der alte Kalender bleibt mit engen Rechten HTTP404; keine erfolgreiche Altübernahme behaupten.
+
+CE-Zweig `serkal-0.0.5-archiv-start`, **1.2 Alpha 06**, Commit
+`9e033e716681f8554489ae830e2cdfb14a1e8ec4`. Neuer expliziter Start `npm run start:calendar-rebuild`:
+Bestätigungsdialog nennt archivierte Staffeln ab aktuellem Jahr. Erst danach wird ein neuer
+Kalender „SerKal App“ angelegt und aus aktiven Archivterminen inklusive Offset befüllt.
+Alter Kalender und Archivdateien werden nicht geändert. Keine Kopie von Handänderungen
+oder fremden Terminen, die nur im unzugänglichen alten Kalender existieren.
+
+Lokales Journal hält altes/neues Ziel und Zustand fest; Einstellungen vorab gesichert.
+Unterbrochene Schreibläufe wiederholen idempotent im selben neuen Ziel, abgeschlossene
+Läufe erzeugen bei Wiederholung keinen weiteren Kalender. Unklarer Anlageausgang blockiert
+weitere Anlage bis zur Prüfung. Normale Kalenderzugriffe verwenden anschließend die feste
+neue ID; unvollständiger Lauf verlangt Fortsetzung. Keine automatische ID-Verteilung auf
+weitere Rechner implementiert. Anleitung: `1 docs/calendar-rebuild.md` auf CE-Zweig.
+
+15 Testskripte und Syntaxprüfung bestanden; elf Quell-/Test-/Dokudateien nach GitHub-Commit
+inhaltlich verifiziert. Echter Google-Neuaufbau Alpha 06 sowie Vier-Rechnerbetrieb noch offen.
+Öffentliche 1.1 und Google-Console unverändert. Website-Chatty: Entwicklungsstand verwendet
+weiter app.created plus calendarlist.readonly; öffentliche 1.1-Beschreibung noch nicht umstellen.
