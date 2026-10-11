@@ -2289,3 +2289,24 @@ Automatisches kontrolliertes Beenden/Neustarten noch NICHT umgesetzt: offene Arc
 und laufende Google-/Wartungsvorgänge müssen zuvor zuverlässig erkannt werden. Kein taskkill
 oder Töten fremder Electron-Prozesse. Installerprüfung bleibt gesonderte Installer-Aufgabe;
 öffentliche 1.1 unverändert. Der neue Warnpfad greift bereits gegen ältere profilgleiche Instanzen.
+
+
+### 2026-10-11 – CE – Alpha 09: Desktop-Archivschreibschutz; Cloud-Sperre offen
+
+Kurt beauftragt verbindliche Archiv-Sperre für 1.2 als Vorbereitung auf Android.
+Umgesetzt CE-Zweig **1.2 Alpha 09**, `95f7b1189c2b91d6896d12fc9caa1ff2e2918fe7`:
+exklusive Sperre für tatsächliches Archivdateisystem an IPC-Einstiegen Eintragen,
+Änderungen, Löschen, Kalender-Eintragen, Wartung und explizitem Kalender-Neuaufbau.
+Freigabe auch bei Fehler; Besitzerprüfung, atomare Vergabe, verwaiste lokale Prozesse
+nachweisbar erkennen, fremde Besitzer nicht nach Zeitablauf übergehen.
+IPC-Änderungen/Löschen warten nun auf das asynchrone Ergebnis vor Cloud-Publikation.
+16 Testskripte und Syntax bestanden; echter konkurrierender Node-Prozess geprüft.
+Acht geänderte Dateien remote verifiziert; Windows-Livetest offen.
+Anleitung/Grenzen `1 docs/archive-lock.md` auf CE-Zweig.
+
+**Kein fertig behaupteter Vier-Geräte-Schutz:** replizierte Drive-Verzeichnisse sind
+kein atomar gemeinsames Dateisystem. Android liest weiterhin nur den vorhandenen
+Snapshot; der Quell-Desktop-Vorbehalt bleibt. Zentrale atomare Cloud-Vergabe und
+konfliktsicherer gemeinsamer Archiv-Schreibstand sind noch nicht implementiert/angebunden.
+Vor Veröffentlichung 1.2 und Android-Schreiben zwingend erledigen. Keine neue Server-
+Datenübertragung oder Google-Rechte eingeführt; öffentliche 1.1 unverändert.
