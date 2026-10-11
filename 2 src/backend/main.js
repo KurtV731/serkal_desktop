@@ -1878,10 +1878,69 @@ async function googleCalendarJsonRequest_(method, url, body) {
     return { ok:response.ok, status:response.status, data };
 }
 
+let calendarRebuildRunning_ = false;
+function calendarRebuildPath_() { return path.join(app.getPath("userData"), "calendar-rebuild.json"); }
+function calendarRebuildRead_() {
+    const file = calendarRebuildPath_();
+    return fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, "utf8")) : null;
+}
+function calendarRebuildSave_(state) {
+    const file = calendarRebuildPath_();
+    fs.writeFileSync(file + ".tmp", JSON.stringify(state, null, 2), "utf8");
+    fs.renameSync(file + ".tmp", file);
+}
+async function calendarRebuildRun_() {
+    const settings = readSettings_();
+    if (calendarLab_ || settings.calendar.mode !== "google") throw new Error(bt_("CALENDAR_REBUILD_MODE"));
+    const loaded = archiveLoad_();
+    if (!loaded.ok || !loaded.daten.entries.length) throw new Error(loaded.message || bt_("CALENDAR_REBUILD_EMPTY"));
+    const payloads = loaded.daten.entries.filter(entry => {
+        const dates = entry.termindaten || [];
+        return dates.some(date => Number(String(date).slice(0, 4)) >= new Date().getFullYear());
+    }).map(entry => ({titel:entry.titel, jahr:entry.jahr, tmdbId:entry.tmdbId,
+        staffelNummer:Number(String(entry.staffelLabel).replace(/\D/g, "")),
+        episoden:entry.episoden, termindaten:entry.termindaten}));
+    if (!payloads.length) throw new Error(bt_("CALENDAR_REBUILD_EMPTY"));
+    if (payloads.some(p => !p.titel || !/^\d{4}$/.test(String(p.jahr)) || !p.tmdbId || !p.staffelNummer)) {
+        throw new Error(bt_("CALENDAR_ENTRY_INCOMPLETE"));
+    }
+    const answer = await dialog.showMessageBox({type:"question", title:bt_("CALENDAR_REBUILD_TITLE"),
+        message:bt_("CALENDAR_REBUILD_CONFIRM", {count:payloads.length}),
+        buttons:[bt_("SHAREDKEY_CANCEL"), bt_("CALENDAR_REBUILD_START")], defaultId:0, cancelId:0});
+    if (answer.response !== 1) return;
+    await googleOauthAccessToken_(); // Complete sign-in before persisting a creation attempt.
+    const backup = settingsPath_() + ".before-calendar-rebuild.json";
+    if (!fs.existsSync(backup)) fs.copyFileSync(settingsPath_(), backup);
+    calendarRebuildRunning_ = true;
+    try {
+        const state = await require("../common/calendar-rebuild.js").rebuild({
+            oldId:String(settings.calendar.googleCalendarId || ""), read:calendarRebuildRead_, save:calendarRebuildSave_,
+            create:async () => {
+                const result = await googleCalendarJsonRequest_("POST", "https://www.googleapis.com/calendar/v3/calendars", {
+                    summary:"SerKal App", description:"SerKal", timeZone:Intl.DateTimeFormat().resolvedOptions().timeZone || "Europe/Berlin"});
+                if (!result.ok) throw new Error(bt_("GOOGLE_CALENDAR_CREATE_HTTP", {status:result.status}));
+                return String(result.data && result.data.id || "");
+            }, check:googleCalendarCheckAppAccess_,
+            select:id => {const current=readSettings_(); current.calendar.googleCalendarId=id; writeSettings_(current);},
+            insert:googleCalendarInsertSeason_
+        }, payloads);
+        logWrite_("INFO", "GOOGLE", bt_("CALENDAR_REBUILD_DONE", {count:state.completed}), {});
+        await dialog.showMessageBox({type:"info", title:bt_("CALENDAR_REBUILD_TITLE"), message:bt_("CALENDAR_REBUILD_DONE", {count:state.completed})});
+    } finally { calendarRebuildRunning_ = false; }
+}
+
 /* Desktop-Entsprechung zu holeSerkalKalender_() aus modul5-kalender.gs.
    Der sichtbare Kalendername ist die fachliche Wahrheit; die technische
    Google-ID wird automatisch ermittelt und nur lokal zwischengespeichert. */
 async function googleResolveSerkalCalendar_() {
+    const rebuildState = calendarRebuildRead_();
+    if (rebuildState) {
+        if (!rebuildState.newId || (rebuildState.phase !== "complete" && !calendarRebuildRunning_)) {
+            throw new Error(bt_("CALENDAR_REBUILD_RESUME"));
+        }
+        await googleCalendarCheckAppAccess_(rebuildState.newId);
+        return { id:rebuildState.newId, created:false, matches:1 };
+    }
     logWrite_("TRACE", "GOOGLE", bt_("GOOGLE_CALENDAR_SEARCH"), {});
 
     let pageToken = "";
@@ -3714,7 +3773,16 @@ if (!serkalHasSingleInstanceLock_) {
         bringSerkalToFront_();
     });
 
-    app.whenReady().then(()=>{
+    app.whenReady().then(async ()=>{
+        if (String(process.env.SERKAL_CALENDAR_REBUILD || "") === "1") {
+            try { await calendarRebuildRun_(); } catch (error) {
+                const message = String(error.message || error);
+                await dialog.showMessageBox({type:"error", title:bt_("CALENDAR_REBUILD_TITLE"),
+                    message:bt_("CALENDAR_REBUILD_FAILED", {error:message.startsWith("CALENDAR_REBUILD_") ? bt_(message) : message})});
+            }
+            app.quit();
+            return;
+        }
         maintainSerkalProtocol_();
         installIpc_();
         erstelleHauptfenster();

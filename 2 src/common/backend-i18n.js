@@ -3,6 +3,18 @@
 // Central language catalogue for every text created by the Electron backend.
 // No user-visible backend message may be written directly at its call site.
 const PAIRS = {
+  CALENDAR_REBUILD_TITLE:["SerKal-Kalender aus Archiv aufbauen", "Rebuild SerKal calendar from archive"],
+  CALENDAR_REBUILD_START:["Neuaufbau starten", "Start rebuild"],
+  CALENDAR_REBUILD_CONFIRM:["{count} archivierte Staffeln ab dem aktuellen Jahr in einen neuen Kalender „SerKal App“ eintragen? Der alte Kalender bleibt unverändert. Nur dort vorhandene Handänderungen werden nicht übernommen. Ein unterbrochener Lauf wird im selben neuen Kalender fortgesetzt.", "Write {count} archived seasons from the current year onwards into a new “SerKal App” calendar? The old calendar stays unchanged. Manual changes present only there cannot be copied. An interrupted run resumes in the same new calendar."],
+  CALENDAR_REBUILD_MODE:["Neuaufbau benötigt das normale Profil mit Google-Kalender; nicht das Testlabor.", "Rebuild requires the normal profile with Google Calendar, not the test lab."],
+  CALENDAR_REBUILD_EMPTY:["Keine archivierten Staffeln mit Terminen ab dem aktuellen Jahr vorhanden.", "No archived seasons with dates from the current year onwards."],
+  CALENDAR_REBUILD_RESUME:["Kalender-Neuaufbau ist unvollständig. Bitte mit npm run start:calendar-rebuild fortsetzen.", "Calendar rebuild is incomplete. Resume with npm run start:calendar-rebuild."],
+  CALENDAR_REBUILD_UNCERTAIN:["Die Kalenderanlage wurde unterbrochen. Ob Google den Kalender angelegt hat, ist unklar. Keine weitere Anlage erfolgt; bitte Log und Google-Kalender prüfen lassen.", "Calendar creation was interrupted. It is unclear whether Google created it. No further calendar is created; have the log and Google Calendar checked."],
+  CALENDAR_REBUILD_INVALID_TARGET:["Ungültiges Ziel beim Kalender-Neuaufbau.", "Invalid calendar rebuild target."],
+  CALENDAR_REBUILD_WRITE_FAILED:["Eintrag im neuen Kalender fehlgeschlagen.", "Writing to the new calendar failed."],
+  CALENDAR_REBUILD_DONE:["Neuaufbau abgeschlossen: {count} Staffeln im Kalender „SerKal App“ verarbeitet. Der alte Kalender bleibt erhalten.", "Rebuild completed: {count} seasons processed in “SerKal App”. The old calendar is retained."],
+  CALENDAR_REBUILD_FAILED:["Neuaufbau nicht abgeschlossen: {error}", "Rebuild not completed: {error}"],
+
   GOOGLE_LAB_LOGIN_TIMEOUT:['Google-Anmeldung im Testlabor wurde nach 15 Minuten abgebrochen. Bitte erneut starten.','Google sign-in in the test lab timed out after 15 minutes. Please restart it.'],
   CALENDAR_LAB:['TESTLABOR','TEST LAB'],
   CALENDAR_LAB_CLOUD_DISABLED:['Im Kalender-Testlabor ist die gemeinsame Cloud-Übertragung ausgeschaltet. Der vorhandene lokale TMDB-Schlüssel wird verwendet.','Shared cloud transfer is disabled in the calendar test lab. The existing local TMDB key is used.'],
