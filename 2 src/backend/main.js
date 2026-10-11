@@ -3323,6 +3323,20 @@ function tmdbTestResult_(result, lang) {
     return Object.assign({}, result || {}, { ok:false, code, message:bt_(keys[code] || "TMDB_REQUEST_FAILED", null, lang) });
 }
 
+async function archiveWithWriteLock_(operation) {
+    const folder = archiveFolderPath_();
+    if (!folder || !fs.existsSync(folder)) return {ok:false, message:bt_("ARCHIVE_FOLDER_UNSET")};
+    try { return await require("../common/archive-lock.js").withWriteLock(folder, operation); }
+    catch (error) {
+        const code = String(error.code || "");
+        if (!code.startsWith("ARCHIVE_LOCK_")) throw error;
+        return {ok:false, code, message:bt_(code)};
+    }
+}
+function archiveWriteHandler_(channel, handler) {
+    ipcMain.handle(channel, (...args) => archiveWithWriteLock_(() => handler(...args)));
+}
+
 function installIpc_() {
     ipcMain.handle("serkal:settings:get", () => readSettings_());
     ipcMain.handle("serkal:settings:save", (_event, settings) => saveSettingsPatch_(settings));
@@ -3370,7 +3384,7 @@ function installIpc_() {
         }
     });
     ipcMain.handle("serkal:archive:load", () => { scheduleSharedArchive_(); return archiveLoad_(); });
-    ipcMain.handle("serkal:archive:insert", (_event, payload) => {
+    archiveWriteHandler_("serkal:archive:insert", (_event, payload) => {
         logWrite_("TRACE", "PIPELINE", bt_("IPC_ARCHIVE_RECEIVED"), {
             titel:String(payload && (payload.titel || payload.title || payload.name) || ""),
             jahr:String(payload && (payload.jahr || payload.year) || ""),
@@ -3387,13 +3401,13 @@ function installIpc_() {
         });
         return result;
     });
-    ipcMain.handle("serkal:archive:saveChanges", (_event, dirtyMap) => { const result=archiveSaveChanges_(dirtyMap); if(result && result.ok) scheduleSharedArchive_(); return result; });
-    ipcMain.handle("serkal:archive:deleteSeries", (_event, payload) => { const result=archiveDeleteSeries_(payload); if(result && result.ok) scheduleSharedArchive_(); return result; });
+    archiveWriteHandler_("serkal:archive:saveChanges", async (_event, dirtyMap) => { const result=await archiveSaveChanges_(dirtyMap); if(result && result.ok) scheduleSharedArchive_(); return result; });
+    archiveWriteHandler_("serkal:archive:deleteSeries", async (_event, payload) => { const result=await archiveDeleteSeries_(payload); if(result && result.ok) scheduleSharedArchive_(); return result; });
     ipcMain.handle("serkal:log:write", (_event, level, tag, text, object) => logWrite_(level, tag, text, object));
     ipcMain.handle("serkal:log:read", (_event, maxLines, day) => logRead_(maxLines, day));
     ipcMain.handle("serkal:log:saveText", (_event, day, text) => logSaveText_(day, text));
     ipcMain.handle("serkal:log:clear", (_event, day) => logClear_(day));
-    ipcMain.handle("serkal:calendar:insertSeason", async (_event, payload) => {
+    archiveWriteHandler_("serkal:calendar:insertSeason", async (_event, payload) => {
         logWrite_("TRACE", "PIPELINE", bt_("IPC_CALENDAR_RECEIVED"), {
             titel:String(payload && (payload.titel || payload.title || payload.name) || ""),
             tmdbId:Number(payload && (payload.tmdbId || payload.id) || 0) || null
@@ -3410,7 +3424,7 @@ function installIpc_() {
         return result;
     });
     ipcMain.handle("serkal:maintenance:status", () => maintenanceGetStatus_());
-    ipcMain.handle("serkal:maintenance:run", async () => { const result=await maintenanceRun_(); if(result && result.ok) scheduleSharedArchive_(); return result; });
+    archiveWriteHandler_("serkal:maintenance:run", async () => { const result=await maintenanceRun_(); if(result && result.ok) scheduleSharedArchive_(); return result; });
     ipcMain.handle("serkal:calendar:createIcs", async (_event, payload) => {
         const result = calendarCreateIcs_(payload);
         if (result.ok) {
@@ -3782,7 +3796,7 @@ if (!serkalHasSingleInstanceLock_) {
 
     app.whenReady().then(async ()=>{
         if (String(process.env.SERKAL_CALENDAR_REBUILD || "") === "1") {
-            try { await calendarRebuildRun_(); } catch (error) {
+            try { const result=await archiveWithWriteLock_(calendarRebuildRun_); if(result && result.ok===false) throw new Error(result.message); } catch (error) {
                 const message = String(error.message || error);
                 await dialog.showMessageBox({type:"error", title:bt_("CALENDAR_REBUILD_TITLE"),
                     message:bt_("CALENDAR_REBUILD_FAILED", {error:message.startsWith("CALENDAR_REBUILD_") ? bt_(message) : message})});

@@ -3,6 +3,10 @@
 // Central language catalogue for every text created by the Electron backend.
 // No user-visible backend message may be written directly at its call site.
 const PAIRS = {
+  ARCHIVE_LOCK_BUSY:["Das Archiv wird gerade von einem anderen SerKal-Vorgang verwendet. Lesen ist weiterhin möglich; bitte den Schreibvorgang später erneut versuchen.", "The archive is currently in use by another SerKal operation. Reading remains available; retry writing later."],
+  ARCHIVE_LOCK_UNKNOWN:["Die Archiv-Sperre ist nicht eindeutig lesbar. Schreiben wurde angehalten; bitte die Sperre prüfen lassen.", "The archive lock cannot be read reliably. Writing was stopped; have the lock checked."],
+  ARCHIVE_LOCK_LOST:["Die Archiv-Sperre gehört nicht mehr diesem Vorgang. Bitte den Archivstand prüfen lassen.", "This operation no longer owns the archive lock. Have the archive state checked."],
+
   START_ALREADY_RUNNING_TITLE:["SerKal läuft bereits", "SerKal is already running"],
   START_ALREADY_RUNNING:["SerKal {version} wurde nicht neu gestartet: In diesem Profil läuft bereits eine Instanz. Bitte dort offene Änderungen speichern, SerKal vollständig schließen und anschließend erneut starten. Das vorhandene Fenster wurde nach vorne geholt.", "SerKal {version} did not start: an instance is already running in this profile. Save pending changes there, fully close SerKal, then start again. The existing window was brought to the front."],
   START_UNDERSTOOD:["Verstanden", "Understood"],
