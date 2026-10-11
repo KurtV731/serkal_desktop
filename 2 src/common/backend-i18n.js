@@ -3,6 +3,10 @@
 // Central language catalogue for every text created by the Electron backend.
 // No user-visible backend message may be written directly at its call site.
 const PAIRS = {
+  START_ALREADY_RUNNING_TITLE:["SerKal läuft bereits", "SerKal is already running"],
+  START_ALREADY_RUNNING:["SerKal {version} wurde nicht neu gestartet: In diesem Profil läuft bereits eine Instanz. Bitte dort offene Änderungen speichern, SerKal vollständig schließen und anschließend erneut starten. Das vorhandene Fenster wurde nach vorne geholt.", "SerKal {version} did not start: an instance is already running in this profile. Save pending changes there, fully close SerKal, then start again. The existing window was brought to the front."],
+  START_UNDERSTOOD:["Verstanden", "Understood"],
+
   CALENDAR_REBUILD_TITLE:["SerKal-Kalender aus Archiv aufbauen", "Rebuild SerKal calendar from archive"],
   CALENDAR_REBUILD_START:["Neuaufbau starten", "Start rebuild"],
   CALENDAR_REBUILD_CONFIRM:["{count} archivierte Staffeln ab dem aktuellen Jahr in einen neuen Kalender „SerKal App“ eintragen? Der alte Kalender bleibt unverändert. Nur dort vorhandene Handänderungen werden nicht übernommen. Ein unterbrochener Lauf wird im selben neuen Kalender fortgesetzt.", "Write {count} archived seasons from the current year onwards into a new “SerKal App” calendar? The old calendar stays unchanged. Manual changes present only there cannot be copied. An interrupted run resumes in the same new calendar."],

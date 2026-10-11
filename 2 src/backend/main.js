@@ -3767,7 +3767,14 @@ function erstelleHauptfenster() {
 const serkalHasSingleInstanceLock_ = app.requestSingleInstanceLock();
 
 if (!serkalHasSingleInstanceLock_) {
-    app.quit();
+    app.whenReady().then(async () => {
+        readSettings_();
+        try {
+            await dialog.showMessageBox({type:"warning", title:bt_("START_ALREADY_RUNNING_TITLE"),
+                message:bt_("START_ALREADY_RUNNING", {version:app.getVersion()}),
+                buttons:[bt_("START_UNDERSTOOD")], defaultId:0, cancelId:0});
+        } finally { app.quit(); }
+    });
 } else {
     app.on("second-instance", () => {
         bringSerkalToFront_();
