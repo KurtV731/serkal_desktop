@@ -2253,3 +2253,21 @@ weitere Rechner implementiert. Anleitung: `1 docs/calendar-rebuild.md` auf CE-Zw
 inhaltlich verifiziert. Echter Google-Neuaufbau Alpha 06 sowie Vier-Rechnerbetrieb noch offen.
 Öffentliche 1.1 und Google-Console unverändert. Website-Chatty: Entwicklungsstand verwendet
 weiter app.created plus calendarlist.readonly; öffentliche 1.1-Beschreibung noch nicht umstellen.
+
+
+### 2026-10-11 – CE – Alpha 06 Live-Log positiv; Alpha 07 Sprachflaggen
+
+Kurt meldet erfolgreichen Neuaufbau und drei Kalender (Altbestand, Labor, SerKal App).
+Anhang alpha6 log1.txt enthält 500 Zeilen, beginnt mitten im Lauf. Um 16:06:37 wird
+Abschluss für 51 Staffeln protokolliert. Im Ausschnitt 86 POST-Antworten HTTP200,
+später 11 DELETE-Antworten HTTP204 für Wool S03/S04 im selben neuen Kalenderziel;
+Archiv danach 78 Einträge. Keine WARN-/ERROR-Zeilen im Ausschnitt. Nicht daraus die
+Gesamtzahl aller angelegten Termine oder Prüfung aller 51 Staffeln ableiten.
+Mehrrechnerbetrieb, vollständiger Kalendervergleich und Google-Freigabe bleiben offen.
+
+Kurt autorisiert optische Korrektur: beide DE/EN-Flaggen vertikal/horizontal mittig
+in ihren Knöpfen statt unten anliegend. .langBtn verwendet jetzt inline-flex mit
+align-items/justify-content center. Größe, Schalterfunktion und übriges Layout erhalten.
+CE-Zweig Desktop **1.2 Alpha 07**, Commit `a9dcdb2564dc9badb14614c0af05b4a82e989289`.
+Versions-/Packagingprüfung bestanden; vier geänderte Dateien nach Commit exakt verifiziert.
+Visuelle Kontrolle auf Kurts Windows folgt nach git pull und npm start. Öffentliche 1.1 unverändert.
