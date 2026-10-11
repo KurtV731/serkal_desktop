@@ -2271,3 +2271,21 @@ align-items/justify-content center. Größe, Schalterfunktion und übriges Layou
 CE-Zweig Desktop **1.2 Alpha 07**, Commit `a9dcdb2564dc9badb14614c0af05b4a82e989289`.
 Versions-/Packagingprüfung bestanden; vier geänderte Dateien nach Commit exakt verifiziert.
 Visuelle Kontrolle auf Kurts Windows folgt nach git pull und npm start. Öffentliche 1.1 unverändert.
+
+
+### 2026-10-11 – CE – Alpha 08: laufende Instanz ausdrücklich melden
+
+Kurt fordert smarten Umgang mit noch laufendem SerKal beim Aktualisieren/Starten.
+CE-Zweig **1.2 Alpha 08**, Commit `68e840c99ab3e890caa66eed55070022757b7060`.
+Kann der neue Prozess die profilspezifische Instanzsperre nicht erhalten, zeigt er nun
+einen zentral übersetzten DE/EN-Warndialog mit angeforderter Versionsnummer: neuer Start
+nicht erfolgt, offene Änderungen speichern, vorhandene Instanz schließen und erneut starten.
+Kein stiller Wechsel zur alten Fassung. Die bisherige Instanz wird weiterhin nach vorne geholt.
+Der neue Prozess beendet sich nach Bestätigung, auch bei Dialogfehler; keine Parallelfenster.
+
+Syntax, Packaging, Katalog/Volltextprüfung und simulierter Doppelstart samt Dialogfehler
+geprüft; fünf geänderte Dateien remote verifiziert. Windows-Livetest folgt.
+Automatisches kontrolliertes Beenden/Neustarten noch NICHT umgesetzt: offene Archivänderungen
+und laufende Google-/Wartungsvorgänge müssen zuvor zuverlässig erkannt werden. Kein taskkill
+oder Töten fremder Electron-Prozesse. Installerprüfung bleibt gesonderte Installer-Aufgabe;
+öffentliche 1.1 unverändert. Der neue Warnpfad greift bereits gegen ältere profilgleiche Instanzen.
