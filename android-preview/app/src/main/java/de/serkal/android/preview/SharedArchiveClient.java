@@ -11,6 +11,7 @@ import java.io.ByteArrayOutputStream;
 final class SharedArchiveClient {
     static final String NAME = "serkal-archive-v1.json";
     private final String token;
+    private String archiveFileId="",archiveVersion="",archiveOwner="";
     SharedArchiveClient(String token) { this.token=token; }
     private JSONObject request(String url) throws Exception { return request(url,"GET",null,null); }
     private JSONObject request(String url,String method,String body,String contentType) throws Exception {
@@ -57,7 +58,16 @@ final class SharedArchiveClient {
             page=list.optString("nextPageToken");
         } while(!page.isEmpty());
         if(id.isEmpty()) throw new Exception("SHARED_ARCHIVE_MISSING");
-        return validate(request("https://www.googleapis.com/drive/v3/files/"+URLEncoder.encode(id,"UTF-8")+"?alt=media"),owner);
+        String version=request("https://www.googleapis.com/drive/v3/files/"+URLEncoder.encode(id,"UTF-8")+"?fields=version").getString("version");
+        JSONObject loaded=validate(request("https://www.googleapis.com/drive/v3/files/"+URLEncoder.encode(id,"UTF-8")+"?alt=media"),owner);
+        archiveFileId=id;archiveVersion=version;archiveOwner=owner;return loaded;
+    }
+    void invalidateRevision(){archiveVersion="";}
+    JSONObject refreshIfChanged(String owner) throws Exception {
+        if(archiveFileId.isEmpty() || !owner.equals(archiveOwner))return load(owner);
+        String version=request("https://www.googleapis.com/drive/v3/files/"+URLEncoder.encode(archiveFileId,"UTF-8")+"?fields=version").getString("version");
+        if(version.equals(archiveVersion))return null;
+        return load(owner);
     }
     String submit(JSONObject snapshot,String action,JSONObject payload,String id) throws Exception {
         if(!id.matches("[a-f0-9-]{36}"))throw new Exception("REQUEST_INVALID");
