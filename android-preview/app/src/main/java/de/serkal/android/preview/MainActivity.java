@@ -48,7 +48,7 @@ public class MainActivity extends Activity {
         googleUser = null;
         archiveSnapshot=null; archiveGeneration++; archiveBusy=false; archiveError=""; renderArchive();
         selectedTmdbId=0; selectedInfo.setText(""); selectedName.setText(english ? "Select a series" : "Serie auswählen"); suggestions.removeAllViews();
-        googleBusy = true;
+        googleBusy = true; writeBusy=false;
         final int generation = ++googleGeneration;
         pendingGoogleGeneration = generation;
         statusText.setText(english ? "Connecting to Google…" : "Google wird verbunden…");
@@ -270,7 +270,7 @@ public class MainActivity extends Activity {
         try {
             JSONObject saved=new JSONObject().put("snapshot",new JSONObject().put("owner",owner).put("publisher",snapshot.getString("publisher")).put("generatedAt",snapshot.getString("generatedAt")))
                 .put("action",action).put("payload",payload);
-            getPreferences(0).edit().putString("request-"+owner,requestId).putString("requestData-"+owner,saved.toString()).commit();
+            if(!getPreferences(0).edit().putString("request-"+owner,requestId).putString("requestData-"+owner,saved.toString()).commit())throw new Exception("REQUEST_LOCAL_SAVE_FAILED");
         } catch(Exception error){writeBusy=false;return;}
         statusText.setText(english ? "Sending request…" : "Auftrag wird gesendet…");
         network.execute(() -> {
