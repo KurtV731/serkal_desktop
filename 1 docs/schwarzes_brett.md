@@ -2355,3 +2355,16 @@ Archivzeitstempel, Serien-/Staffeldaten bzw. Notizen; Quittungen Status und Kont
 Keine API-/OAuth-Schlüssel in diesen Dateien, keine neuen Server-Datenflüsse. Datenschutzerklärung
 entsprechend um die Entwicklungsfunktion ergänzen. Öffentliche 1.1 unverändert.
 Google-Antwort/neues Video und Abgleich des Veröffentlichungsstands weiterhin offen; keine Mail gesendet.
+
+
+### 2026-10-12 – CE – Alpha 11: Archiv ausdrücklich neu laden
+
+Kurt fordert vollständiges erneutes Einlesen am Desktop. CE-Zweig **1.2 Alpha 11**,
+Commit `e4e1afb6b7673f545ee1a17ceceecaaf06d35180`. In der Archiv-Kopfzeile neuer Knopf „Neu laden“/„Reload“:
+liest alle TXT-Dateien erneut aus dem aktuell eingestellten Archivordner, kein UI-Cache.
+Ungespeicherte Änderungen blockieren und fordern zum Speichern auf; während laufender
+UI-/Speicheraktionen kein weiterer Reload. Alte Auswahl/Details zurückgesetzt.
+Fehler im Ladevorgang geben den UI-Busy-Zustand wieder frei. DE/EN-Katalog, globale Sprache,
+Packaging und vier Inline-Skriptblöcke syntaktisch geprüft; vier Dateien remote verifiziert.
+Windows-Sichttest offen. Dies verbindet keine bisher getrennten Desktop-Archive automatisch
+mit dem Google-Snapshot. Quell-Desktop-/Android-Auftragsarchitektur bleibt wie Alpha 10.
