@@ -2368,3 +2368,17 @@ Fehler im Ladevorgang geben den UI-Busy-Zustand wieder frei. DE/EN-Katalog, glob
 Packaging und vier Inline-Skriptblöcke syntaktisch geprüft; vier Dateien remote verifiziert.
 Windows-Sichttest offen. Dies verbindet keine bisher getrennten Desktop-Archive automatisch
 mit dem Google-Snapshot. Quell-Desktop-/Android-Auftragsarchitektur bleibt wie Alpha 10.
+
+
+### 2026-10-12 – CE – Alpha 12: Alpha-11-Oberflächenstillstand repariert
+
+Kurt meldet leere, nicht bedienbare Alpha 11. Ausgelieferte UI-Datei war beim großen
+Dateitransfer beschädigt (370.503 JS-Zeichen statt 336.071 der beabsichtigten Fassung).
+CE hatte zuvor die lokale statt der tatsächlich ausgelieferten Datei syntaktisch geprüft.
+Fehler liegt bei CE-Auslieferung, nicht bei Kurts Archiv. Vollständige intakte UI samt
+Neu-laden-Knopf erneut in kleineren Datenabschnitten übertragen. **Alpha 12**, CE-Zweig,
+Commit `9ebe8e1f5b90d2746f02a091a9ea94eca2c1f459`. Originaldaten nicht verändert.
+Vier Dateien nach GitHub-Commit exakt verifiziert; ausgelieferte UI anschließend gelesen
+und vier Inline-Skriptblöcke sowie gemeinsamer globaler Gültigkeitsbereich syntaktisch
+geprüft. Packaging, DE/EN-Katalog und globale Sprachtests bestanden. Windows-Neustart
+mit Kurt noch prüfen. Kein neuer Android-Build nötig. Alpha 11 nicht weiter testen.
