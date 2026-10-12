@@ -3,6 +3,7 @@
 // Central language catalogue for every text created by the Electron backend.
 // No user-visible backend message may be written directly at its call site.
 const PAIRS = {
+  ARCHIVE_SHARED_READER:["Dieser Desktop zeigt das gemeinsame Archiv. Änderungen bitte am Quell-Desktop oder über Android ausführen.","This desktop displays the shared archive. Make changes on the source desktop or through Android."],
   REQUEST_PROCESS_FAILED:["Android-Archivauftrag konnte noch nicht verarbeitet werden.","An Android archive request could not yet be processed."],
   ARCHIVE_LOCK_BUSY:["Das Archiv wird gerade von einem anderen SerKal-Vorgang verwendet. Lesen ist weiterhin möglich; bitte den Schreibvorgang später erneut versuchen.", "The archive is currently in use by another SerKal operation. Reading remains available; retry writing later."],
   ARCHIVE_LOCK_UNKNOWN:["Die Archiv-Sperre ist nicht eindeutig lesbar. Schreiben wurde angehalten; bitte die Sperre prüfen lassen.", "The archive lock cannot be read reliably. Writing was stopped; have the lock checked."],

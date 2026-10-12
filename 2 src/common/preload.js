@@ -54,6 +54,7 @@ contextBridge.exposeInMainWorld("serkal", {
         poster:(id,lang)=>ipcRenderer.invoke("serkal:tmdb:poster",id,lang||"de")
     },
     archive:{
+        revision:()=>ipcRenderer.invoke("serkal:archive:revision"),
         load:()=>ipcRenderer.invoke("serkal:archive:load"),
         insert:(payload)=>ipcRenderer.invoke("serkal:archive:insert",payload||{}),
         saveChanges:(dirtyMap)=>ipcRenderer.invoke("serkal:archive:saveChanges",dirtyMap||{}),

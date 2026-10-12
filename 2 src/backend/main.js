@@ -1810,6 +1810,42 @@ async function googleSharedKeySync_(interactive) {
     } finally { sharedKeySyncRunning_=false; }
 }
 
+let sharedArchiveCursor_ = null;
+let sharedArchiveView_ = null;
+let sharedArchiveObserveBusy_ = false;
+let sharedArchiveRevision_ = 0;
+async function sharedArchiveObserve_() {
+    if(calendarLab_ || sharedArchiveObserveBusy_)return;
+    sharedArchiveObserveBusy_=true;
+    try {
+        let token;try{token=JSON.parse(fs.readFileSync(googleSharedKeyTokenFile_(),"utf8"));}catch(_){return;}
+        if(!token || !token.access_token)return;
+        if(Number(token.expiry_date||0)<=Date.now()+60000 && token.refresh_token)
+            token=await googleOauthRefresh_(googleOauthClientConfig_(),token,googleSharedKeyWriteToken_);
+        if(Number(token.expiry_date||0)<=Date.now()+60000)return;
+        const observed=await require("../common/archive-observer.js").observe({accessToken:token.access_token,previous:sharedArchiveCursor_});
+        if(observed.changed){sharedArchiveView_=observed.snapshot;sharedArchiveCursor_=observed.cursor;sharedArchiveRevision_++;}
+    } catch(error){ /* Keep last confirmed view during a temporary connection failure. */ }
+    finally{sharedArchiveObserveBusy_=false;}
+}
+function sharedArchiveIsSource_() {
+    if(!sharedArchiveView_)return true;
+    const key=crypto.createHash("sha256").update(path.resolve(archiveFolderPath_()||".")).digest("hex");
+    let publishers={};try{publishers=JSON.parse(fs.readFileSync(path.join(app.getPath("userData"),"shared_archive_publishers.json"),"utf8"));}catch(_){}
+    return publishers[key]===sharedArchiveView_.publisher;
+}
+function archiveUiView_() {
+    if(!sharedArchiveView_ || sharedArchiveIsSource_())return archiveLoad_();
+    const entries=sharedArchiveView_.entries.map(e=>{
+        const dates=e.dates.slice(),fileName=archiveFileName_(e.title,e.year);
+        return {...e,titel:e.title,jahr:e.year,fileName,name:fileName,id:fileName,staffelLabel:e.seasonLabel,
+            episoden:e.eps,termindaten:dates,activeDates:dates,datesOriginal:dates,
+            start:dates[0]||"",startDate:dates[0]||"",endDate:dates[dates.length-1]||"",
+            status:archiveStatus_(dates,e.seen),updatedMs:Date.parse(sharedArchiveView_.generatedAt),manualFlags:0};
+    });
+    return {ok:true,daten:{entries,meta:{source:"shared-google",generatedAt:sharedArchiveView_.generatedAt}},count:entries.length};
+}
+
 let archiveRequestsRunning_ = false;
 async function archiveRequestsPoll_() {
     if (calendarLab_ || archiveRequestsRunning_) return;
@@ -3386,7 +3422,11 @@ async function archiveWithWriteLock_(operation) {
     }
 }
 function archiveWriteHandler_(channel, handler) {
-    ipcMain.handle(channel, (...args) => archiveWithWriteLock_(() => handler(...args)));
+    ipcMain.handle(channel, async (...args) => {
+        await sharedArchiveObserve_();
+        if(!sharedArchiveIsSource_())return {ok:false,code:"ARCHIVE_SHARED_READER",message:bt_("ARCHIVE_SHARED_READER")};
+        return archiveWithWriteLock_(() => handler(...args));
+    });
 }
 
 function installIpc_() {
@@ -3435,7 +3475,8 @@ function installIpc_() {
             throw err;
         }
     });
-    ipcMain.handle("serkal:archive:load", () => { scheduleSharedArchive_(); return archiveLoad_(); });
+    ipcMain.handle("serkal:archive:load", async () => { scheduleSharedArchive_(); await sharedArchiveObserve_(); return archiveUiView_(); });
+    ipcMain.handle("serkal:archive:revision", () => ({revision:sharedArchiveRevision_,shared:!!sharedArchiveView_}));
     archiveWriteHandler_("serkal:archive:insert", (_event, payload) => {
         logWrite_("TRACE", "PIPELINE", bt_("IPC_ARCHIVE_RECEIVED"), {
             titel:String(payload && (payload.titel || payload.title || payload.name) || ""),
@@ -3860,6 +3901,9 @@ if (!serkalHasSingleInstanceLock_) {
         installIpc_();
         erstelleHauptfenster();
         setTimeout(archiveRequestsPoll_, 5000);
+        const observerTimer=setInterval(sharedArchiveObserve_, 10000);
+        observerTimer.unref();
+        setTimeout(sharedArchiveObserve_, 2500);
         const requestsTimer=setInterval(archiveRequestsPoll_, 30000);
         requestsTimer.unref();
         app.on("activate",()=>{

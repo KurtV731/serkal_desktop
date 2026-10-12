@@ -2410,7 +2410,7 @@
 // [VIII] HELFER: escapeHtml, fmt, etc.
 // ============================================================
 
-const SK_UI_BUILD = "2026-07-31";
+const SK_UI_BUILD = (window.serkal && window.serkal.version) || "2026-07-31";
 let SK_UI_DEBUG = false;         // UI-Debug EIN/AUS (Normalbetrieb: aus)
 let SK_UI_TRACE = false;         // TRACE nur bei gezielter Spurensuche einschalten
 // --------- UI-LOG (Debug-Helfer) ----------
@@ -3852,6 +3852,7 @@ const I18N = {
     BTN_LOG_DOCK: '📜 Log',
     BTN_SAVE_DOCK: '💾 Speichern',
     TT_SAVE_DOCK: 'Nachträgliche Änderungen an Archivnotizen und Status speichern',
+    ARCHIVE_CHANGED_PENDING: 'Neuer Archivstand vorhanden. Bitte offene Änderungen zuerst speichern.',
     BTN_ARCHIVE_RELOAD: 'Neu laden',
     TT_ARCHIVE_RELOAD: 'Archiv vollständig aus dem eingestellten Archivordner neu einlesen',
     DIRTY_PENDING: 'Ungespeicherte Änderungen ({n})',
@@ -3996,6 +3997,7 @@ const I18N = {
     BTN_LOG_DOCK: '📜 Log',
     BTN_SAVE_DOCK: '💾 Save edits',
     TT_SAVE_DOCK: 'Save later edits to archive notes and status; Insert adds a new season',
+    ARCHIVE_CHANGED_PENDING: 'A newer archive is available. Save pending edits first.',
     BTN_ARCHIVE_RELOAD: 'Reload',
     TT_ARCHIVE_RELOAD: 'Read the complete archive again from the configured archive folder',
     DIRTY_PENDING: 'Unsaved changes ({n})',
@@ -5030,6 +5032,26 @@ function isActiveSearchToken_(tok) {
     const globalSpinner = document.getElementById('globalSpinner');
     const hitCountText  = document.getElementById('hitCountText');
     const takenText     = document.getElementById('takenText');
+let archiveObservedRevision_ = -1;
+let archiveAutoReloadBusy_ = false;
+async function archiveCheckRevision_() {
+  if(archiveAutoReloadBusy_ || !window.serkal || !window.serkal.archive || !window.serkal.archive.revision)return;
+  archiveAutoReloadBusy_=true;
+  try {
+    const info=await window.serkal.archive.revision();
+    if(!info.shared)return;
+    if(info.revision===archiveObservedRevision_)return;
+    if(state.busy || state.saveBusy || state.isDirty) {
+      if(state.isDirty) uiStatus(t('ARCHIVE_CHANGED_PENDING'),{spinner:false,kind:'info'});
+      return;
+    }
+    archiveObservedRevision_=info.revision;
+    if(state.archivSelected){state.archivSelected=null;uiResetDetails_();}
+    loadArchiv();
+  }catch(_e){}finally{archiveAutoReloadBusy_=false;}
+}
+setInterval(archiveCheckRevision_, 2000);
+
 const btnArchiveReload = document.getElementById('btnArchiveReload');
 if (btnArchiveReload) btnArchiveReload.addEventListener('click', function(){
   if (state.busy || state.saveBusy || guardDirtyBeforeAction_()) return;
