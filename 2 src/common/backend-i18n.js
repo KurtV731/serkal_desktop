@@ -3,6 +3,7 @@
 // Central language catalogue for every text created by the Electron backend.
 // No user-visible backend message may be written directly at its call site.
 const PAIRS = {
+  REQUEST_PROCESS_FAILED:["Android-Archivauftrag konnte noch nicht verarbeitet werden.","An Android archive request could not yet be processed."],
   ARCHIVE_LOCK_BUSY:["Das Archiv wird gerade von einem anderen SerKal-Vorgang verwendet. Lesen ist weiterhin möglich; bitte den Schreibvorgang später erneut versuchen.", "The archive is currently in use by another SerKal operation. Reading remains available; retry writing later."],
   ARCHIVE_LOCK_UNKNOWN:["Die Archiv-Sperre ist nicht eindeutig lesbar. Schreiben wurde angehalten; bitte die Sperre prüfen lassen.", "The archive lock cannot be read reliably. Writing was stopped; have the lock checked."],
   ARCHIVE_LOCK_LOST:["Die Archiv-Sperre gehört nicht mehr diesem Vorgang. Bitte den Archivstand prüfen lassen.", "This operation no longer owns the archive lock. Have the archive state checked."],

@@ -1810,6 +1810,58 @@ async function googleSharedKeySync_(interactive) {
     } finally { sharedKeySyncRunning_=false; }
 }
 
+let archiveRequestsRunning_ = false;
+async function archiveRequestsPoll_() {
+    if (calendarLab_ || archiveRequestsRunning_) return;
+    archiveRequestsRunning_ = true;
+    try {
+        const sync = await googleSharedArchiveSync_();
+        if (!["published", "ready"].includes(sync.status)) return;
+        const token=JSON.parse(fs.readFileSync(googleSharedKeyTokenFile_(),"utf8"));
+        const protocol=require("../common/archive-requests.js"), client=protocol.client(token.access_token);
+        const user=await client.identify();
+        const sources=await client.list(sharedArchive.NAME);
+        if(sources.length!==1) return;
+        let snapshot=sharedArchive.validate(await client.load(sources[0].id),user.sub);
+        const folderKey=crypto.createHash("sha256").update(path.resolve(archiveFolderPath_())).digest("hex");
+        const publishers=JSON.parse(fs.readFileSync(path.join(app.getPath("userData"),"shared_archive_publishers.json"),"utf8"));
+        if(publishers[folderKey]!==snapshot.publisher) return;
+        const journalFile=path.join(app.getPath("userData"),"archive_request_journal.json");
+        let journal={};if(fs.existsSync(journalFile))journal=JSON.parse(fs.readFileSync(journalFile,"utf8"));
+        const save=()=>{fs.writeFileSync(journalFile+".tmp",JSON.stringify(journal),"utf8");fs.renameSync(journalFile+".tmp",journalFile);};
+        const files=await client.list(protocol.PREFIX,true);
+        for(const file of files.filter(f => { const id=String(f.name).slice(protocol.PREFIX.length,-5); return !(journal[id] && journal[id].delivered); }).slice(0,100)) {
+            if(!/^serkal-request-v1-[a-f0-9-]{36}\.json$/.test(file.name))continue;
+            const request=await client.load(file.id);
+            if(request.owner!==user.sub || request.publisher!==snapshot.publisher)continue;
+            try {
+                const result=await archiveWithWriteLock_(()=>protocol.processOne({request,snapshot,journal,save,
+                    apply:archiveApplyRequest_,publish:googleSharedArchiveSync_}));
+                if(result && result.schema===1) {
+                    await client.receipt(result);journal[request.id].delivered=true;save();
+                    snapshot=sharedArchive.validate(await client.load(sources[0].id),user.sub);
+                }
+            } catch(error) {logWrite_("WARN","ARCHIV",bt_("REQUEST_PROCESS_FAILED"),{code:String(error.code||"REQUEST_FAILED")});}
+        }
+    } catch(error) {logWrite_("WARN","ARCHIV",bt_("REQUEST_PROCESS_FAILED"),{code:String(error.code||"REQUEST_FAILED")});}
+    finally { archiveRequestsRunning_=false; }
+}
+async function archiveApplyRequest_(request) {
+    const p=request.payload;
+    if(request.action==="insert") {
+        const inserted=archiveInsert_(p);if(!inserted.ok)return inserted;
+        if(readSettings_().calendar.mode==="google")return await googleCalendarInsertSeason_(p);
+        return inserted;
+    }
+    const loaded=archiveLoad_();
+    if(!loaded.ok)return loaded;
+    const entry=loaded.daten.entries.find(e=>e.tmdbId===p.tmdbId && e.staffelLabel===p.seasonLabel);
+    if(!entry)return request.action==="delete" ? {ok:true} : {ok:false,code:"REQUEST_ENTRY_MISSING"};
+    if(request.action==="delete")return await archiveDeleteSeries_({fileName:entry.fileName});
+    const changed=await archiveSaveChanges_({request:{fileName:entry.fileName,staffelLabel:entry.staffelLabel,note:p.note}});
+    return changed;
+}
+
 let sharedArchiveRunning_ = false;
 let sharedArchiveTimer_;
 function scheduleSharedArchive_() {
@@ -3807,6 +3859,9 @@ if (!serkalHasSingleInstanceLock_) {
         maintainSerkalProtocol_();
         installIpc_();
         erstelleHauptfenster();
+        setTimeout(archiveRequestsPoll_, 5000);
+        const requestsTimer=setInterval(archiveRequestsPoll_, 30000);
+        requestsTimer.unref();
         app.on("activate",()=>{
             if (!bringSerkalToFront_() && BrowserWindow.getAllWindows().length===0) erstelleHauptfenster();
         });
