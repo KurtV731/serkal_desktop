@@ -2310,3 +2310,48 @@ Snapshot; der Quell-Desktop-Vorbehalt bleibt. Zentrale atomare Cloud-Vergabe und
 konfliktsicherer gemeinsamer Archiv-Schreibstand sind noch nicht implementiert/angebunden.
 Vor Veröffentlichung 1.2 und Android-Schreiben zwingend erledigen. Keine neue Server-
 Datenübertragung oder Google-Rechte eingeführt; öffentliche 1.1 unverändert.
+
+
+### 2026-10-12 – CE – Android 0.0.5a6: Archiv- und Kalenderaufträge über Quell-Desktop
+
+Status: **GEBAUT, SIGNIERT, BEREITGESTELLT / GOOGLE-GERÄTETEST OFFEN**
+
+Kurt beauftragt Android-Archivkomplex und Kalenderzugriff. Lösung für diesen Entwicklungsschritt:
+der bisherige Quell-Desktop bleibt der einzige Archiv-Schreiber. Android legt kontogebundene
+Änderungsaufträge in privater Google-App-Ablage ab; Desktop verarbeitet sie nacheinander unter
+der tatsächlichen Archiv-Sperre. Kein zentraler SerKal-Server, keine weiteren Android-Scopes.
+Desktop prüft Konto/Quellkennung, Schema und Ausgangsstand; veraltete Aufträge abgewiesen.
+UUID/Inhalt und Verarbeitungsergebnis werden dauerhaft erfasst, Wiederholung nach unklarer
+Übertragung mit derselben ID; Veröffentlichung nach bestätigter lokaler Aktion separat wiederholt.
+Quittung erst nach erfolgreicher Verarbeitung/Archiv-Publikation. Kein Erfolg für bloßes Senden.
+
+Desktop **1.2 Alpha 10**, CE-Zweig `serkal-0.0.5-archiv-start`, Commit
+`36582882311468f9120b5aa89ab618abb6c57b56`. Automatische Prüfung nach 5 Sekunden, dann alle 30 Sekunden;
+Quell-Desktop muss laufen und verbunden sein. Andere Desktops bleiben Snapshot-Leser.
+Android kann datierte Staffel zum Eintragen anfordern, Archivnotizen/Offset bearbeiten und
+vollständige Serie samt Kalendertermine löschen lassen. Archiv-laden prüft wartenden Auftrag.
+Quelle verwendet ihre bestehende Google-Kalenderverbindung, Kalenderaktionen bleiben am Desktop.
+Keine direkte Android-Kalenderfreigabe behaupten. Unvollständig datierte Staffeln senden nichts.
+
+Android-Zweig `android-preview-0.0.5`, Quellcommit `a5160a32daf1cdead9d5b11a2b4580be13733165`.
+APK **0.0.5a6-SerKal-Android.apk**, versionCode **14**, Paket `de.serkal.android.preview.v005`.
+CI-Lauf `38228701960`: Build und 13 Android-Tests erfolgreich. Desktop 17 Testskripte
+bestanden, darunter Auftragseigentümer, veraltete Ausgangsbasis, Inhaltskonflikt, Idempotenz und
+Wiederaufnahme nach Publikationsfehler. 13 Quell-/Test-/Dokudateien remote geprüft.
+APK 2.834.183 Bytes, SHA-256
+`79d7f15a20b2dcdb6c1ee0046a358de5dbe85eb34e35646a1507862abbd4782e`.
+Signatur v2/v3 verifiziert, gleicher privater Schlüssel wie a4/a5, SHA-1
+`0D:63:F5:08:DC:1F:E1:4E:97:6C:22:1A:0C:27:98:D3:A1:51:59:86`.
+APK-Manifest-Version/Paket aus Binärmanifest geprüft; über a5 installieren, keine Deinstallation.
+Private Signaturdatei nicht in GitHub/Actions gespeichert. APK Kurt dauerhaft bereitgestellt.
+
+Testfolge/Grenzen auf CE-Zweig: `1 docs/android-shared-write-2026-10-12.md`.
+**Offen:** echte Pixel-/Samsung-/Vier-Geräte-Prüfung, direktes Schreiben ohne laufenden
+Quell-Desktop, Quellwechsel und Schreiben aller Desktop-Installationen. Keine fertiggestellte
+allgemeine Cloud-Sperre oder fertige 1.2-Veröffentlichung behaupten. Android-Poster bleiben offen.
+Aufträge/Quittungen bleiben vorerst gespeichert, noch keine automatische Bereinigung.
+Website-Chatty vor Veröffentlichung: private Aufträge enthalten Konto-/Quellkennung, UUID,
+Archivzeitstempel, Serien-/Staffeldaten bzw. Notizen; Quittungen Status und Konto/UUID.
+Keine API-/OAuth-Schlüssel in diesen Dateien, keine neuen Server-Datenflüsse. Datenschutzerklärung
+entsprechend um die Entwicklungsfunktion ergänzen. Öffentliche 1.1 unverändert.
+Google-Antwort/neues Video und Abgleich des Veröffentlichungsstands weiterhin offen; keine Mail gesendet.
