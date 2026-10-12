@@ -2382,3 +2382,39 @@ Vier Dateien nach GitHub-Commit exakt verifiziert; ausgelieferte UI anschließen
 und vier Inline-Skriptblöcke sowie gemeinsamer globaler Gültigkeitsbereich syntaktisch
 geprüft. Packaging, DE/EN-Katalog und globale Sprachtests bestanden. Windows-Neustart
 mit Kurt noch prüfen. Kein neuer Android-Build nötig. Alpha 11 nicht weiter testen.
+
+
+### 2026-10-12 – CE – automatische Archiv-Änderungsprüfung: Alpha 13 / Android a7
+
+Kurt fordert interruptähnliche automatische Aktualisierung statt manuellem Archiv-laden.
+**Desktop 1.2 Alpha 13**, CE-Zweig, `9c34f376d682a154f1a566cb03b067ca6cd53c10`:
+Backend prüft alle 10 Sekunden die Google-Dateiversion; ganzer Snapshot nur bei Änderung.
+Renderer prüft lokale Backend-Kennung alle 2 Sekunden; lädt ohne Benutzerknopf neu.
+Andere Desktop-Installationen zeigen jetzt den gemeinsamen Snapshot statt ihren getrennten
+lokalen Bestand. Lokale Dateien dabei nicht überschrieben/zurückpubliziert. Quell-Desktop
+zeigt aktuelle lokale Wahrheit, damit eine eben erfolgte Löschung nicht kurz aus altem
+Snapshot wieder erscheint. Offene Notizänderungen verschieben Reload; aktive Suche erhalten.
+Protokoll-Buildkennung jetzt aus tatsächlicher Desktop-Version statt festem Datum.
+**Grenze:** anderer Desktop ist Leser; Schreiben dort explizit blockiert und an Quelle/Android
+verwiesen. Kein unbemerktes Weiterarbeiten am alten lokalen Archiv. Schreiben aller Desktop-
+Installationen und Quellwechsel bleiben offen. Reserve-Ladeknöpfe bleiben erhalten.
+
+Android **0.0.5a7**, versionCode **15**, Quellcommit `fd97fefe54f8697dee05363af019ec95e71240b0`.
+Sichtbare App prüft alle 10 Sekunden; nach Pause erneut. Eingabedialoge/laufende Aktionen
+verschieben Reload. Rückkehr einer Anfrage während geöffneter Bearbeitung führt zur späteren
+erneuten Prüfung statt Überschreiben. Wartende Quittungen werden automatisch geprüft.
+CI-Lauf `38250752177` erfolgreich, 13 Android-Tests ohne Fehler. Desktop 18 gesamte
+Testskripte plus zusätzlicher UI-Test (nun als 19. Script in npm test): Metadaten unverändert
+-> kein Vollabruf, Änderung/Löschung, Kontotrennung, offene Notizen und Suchvorschau erhalten,
+source-lokale Löschung nicht aus altem Snapshot wiederbelebt. Alle Prüfungen bestanden.
+Zehn Desktop-Dateien und vier Android-Dateien remote exakt geprüft; zusätzlicher Test/Script
+remote ebenfalls geprüft. Anleitung `1 docs/archive-auto-refresh.md` auf CE-Zweig.
+
+Signierte APK **0.0.5a7-SerKal-Android.apk**, 2.834.183 Bytes, SHA-256
+`da881e3325fcf8bacdca5a31d857e38615d33f839787193e753b74b5af35b186`.
+Paket `de.serkal.android.preview.v005`, VersionCode 15/Name a7 aus APK-Binärmanifest geprüft.
+Gleiche private a4/a5/a6-Signatur, v2/v3 geprüft, SHA-1
+`0D:63:F5:08:DC:1F:E1:4E:97:6C:22:1A:0C:27:98:D3:A1:51:59:86`.
+Über a6 installieren, keine Deinstallation. APK Kurt dauerhaft bereitgestellt; Geräte-Test
+noch offen. Keine weitere Google-Berechtigung/Server-Datenübertragung, öffentliche 1.1 unverändert.
+Google-Verifizierung/Antwort und vollständige 1.2-Freigabe weiterhin offen.
