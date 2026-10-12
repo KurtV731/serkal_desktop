@@ -1,0 +1,15 @@
+'use strict';
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+const html=fs.readFileSync('2 src/frontend/index.html','utf8');
+const start=html.indexOf('let archiveObservedRevision_');const end=html.indexOf('const btnArchiveReload',start);
+const state={busy:false,saveBusy:false,isDirty:true,archivSelected:null,currentPreview:{id:123}};let loaded=0,reset=0;
+const c={state,window:{serkal:{archive:{revision:async()=>({shared:true,revision:1})}}},setInterval(){},uiStatus(){},t:k=>k,uiResetDetails_:()=>reset++,loadArchiv:()=>loaded++};
+vm.createContext(c);vm.runInContext(html.slice(start,end),c);
+(async()=>{await c.archiveCheckRevision_();assert.equal(loaded,0);assert.equal(state.isDirty,true);
+ state.isDirty=false;await c.archiveCheckRevision_();assert.equal(loaded,1);assert.equal(state.currentPreview.id,123);assert.equal(reset,0);await c.archiveCheckRevision_();assert.equal(loaded,1);
+ const backend=fs.readFileSync('2 src/backend/main.js','utf8');const code=backend.slice(backend.indexOf('function archiveUiView_()'),backend.indexOf('let archiveRequestsRunning_'));
+ const bc={sharedArchiveView_:{generatedAt:'2026-10-12T00:00:00Z',entries:[{title:'Old',year:2026,dates:[],seasonLabel:'S01'}]},sharedArchiveIsSource_:()=>false,archiveLoad_:()=>({ok:true,count:0}),archiveFileName_:(t,y)=>t+' ('+y+').txt',archiveStatus_:()=>0};vm.createContext(bc);vm.runInContext(code,bc);assert.equal(bc.archiveUiView_().count,1);
+ bc.sharedArchiveView_.entries=[];assert.equal(bc.archiveUiView_().count,0);
+ bc.sharedArchiveView_.entries=[{title:'Old',year:2026,dates:[],seasonLabel:'S01'}];bc.sharedArchiveIsSource_=()=>true;assert.equal(bc.archiveUiView_().count,0);
+ console.log('Auto refresh: dirty edits and search preserved, remote deletion reflected, source deletion not revived OK');
+})().catch(e=>{console.error(e);process.exitCode=1;});
