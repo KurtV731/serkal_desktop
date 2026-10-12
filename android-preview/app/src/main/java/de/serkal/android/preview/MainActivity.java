@@ -179,6 +179,8 @@ public class MainActivity extends Activity {
     private TextView statusText, selectedName, selectedInfo;
     private Runnable pendingSearch;
     private int selectedTmdbId;
+    private JSONObject selectedArchiveEntry;
+    private boolean writeBusy;
     private JSONObject archiveSnapshot;
     private String archiveError="";
     private int archiveGeneration;
@@ -200,7 +202,7 @@ public class MainActivity extends Activity {
                 JSONObject snapshot=new SharedArchiveClient(token).load(owner);
                 handler.post(() -> {
                     if(generation!=archiveGeneration || accountGeneration!=googleGeneration || isFinishing()) return;
-                    archiveSnapshot=snapshot; archiveBusy=false; archiveError=""; renderArchive();
+                    archiveSnapshot=snapshot; archiveBusy=false; archiveError=""; renderArchive(); checkPendingRequest();
                 });
             } catch(Exception error) {
                 handler.post(() -> {
@@ -225,15 +227,14 @@ public class MainActivity extends Activity {
         }
         if(archiveSnapshot==null) { archiveStatus.setText(archiveText("INITIAL")); return; }
         org.json.JSONArray entries=archiveSnapshot.optJSONArray("entries");
-        archiveStatus.setText((archiveText("SNAPSHOT"))+entries.length()+
-            (archiveText("COUNT"))+archiveSnapshot.optString("generatedAt"));
+        archiveStatus.setText((english ? "Shared archive: " : "Gemeinsames Archiv: ")+entries.length()+"\n"+archiveSnapshot.optString("generatedAt"));
         if(entries.length()==0) archiveRows.addView(text(archiveText("EMPTY_ARCHIVE"),10,MUTED));
         for(int i=0;i<entries.length();i++) {
             JSONObject e=entries.optJSONObject(i);
             TextView item=row(e.optString("title")+" · "+e.optString("seasonLabel"),false);
             item.setOnClickListener(v -> {
                 requestGeneration++; if(pendingSearch!=null) handler.removeCallbacks(pendingSearch);
-                selectedTmdbId=e.optInt("tmdbId"); selectedName.setText(e.optString("title"));
+                selectedArchiveEntry=e; selectedTmdbId=e.optInt("tmdbId"); selectedName.setText(e.optString("title"));
                 String description=e.optString((english ? "descEN" : "descDE"));
                 org.json.JSONArray dates=e.optJSONArray("dates");
                 StringBuilder detail=new StringBuilder(e.optString("seasonLabel"));
@@ -248,6 +249,111 @@ public class MainActivity extends Activity {
         }
     }
 
+
+
+    private boolean writeReady() {
+        if(writeBusy) return false;
+        if(googleUser==null || googleAccessToken.isEmpty() || archiveSnapshot==null){
+            statusText.setText(english ? "Connect Google and load archive first." : "Zuerst Google verbinden und Archiv laden."); return false;
+        }
+        String pending=getPreferences(0).getString("request-"+googleUser.owner,"");
+        if(!pending.isEmpty()){checkPendingRequest();return false;}
+        return true;
+    }
+    private void sendRequest(String action,JSONObject payload) {
+        if(!writeReady())return;
+        writeBusy=true;
+        final int generation=googleGeneration;
+        final String token=googleAccessToken,owner=googleUser.owner;
+        final JSONObject snapshot=archiveSnapshot;
+        final String requestId=java.util.UUID.randomUUID().toString();
+        try {
+            JSONObject saved=new JSONObject().put("snapshot",new JSONObject().put("owner",owner).put("publisher",snapshot.getString("publisher")).put("generatedAt",snapshot.getString("generatedAt")))
+                .put("action",action).put("payload",payload);
+            getPreferences(0).edit().putString("request-"+owner,requestId).putString("requestData-"+owner,saved.toString()).commit();
+        } catch(Exception error){writeBusy=false;return;}
+        statusText.setText(english ? "Sending request…" : "Auftrag wird gesendet…");
+        network.execute(() -> {
+            try{
+                String id=new SharedArchiveClient(token).submit(snapshot,action,payload,requestId);
+                getPreferences(0).edit().putString("request-"+owner,id).apply();
+                handler.post(() -> {
+                    if(generation!=googleGeneration || isFinishing())return;
+                    writeBusy=false; statusText.setText(english ? "Request waiting. Keep the source desktop running. Tap Reload to check." : "Auftrag wartet. Quell-Desktop laufen lassen. Mit Archiv laden prüfen.");
+                });
+            }catch(Exception e){handler.post(() -> {if(generation!=googleGeneration)return;writeBusy=false;statusText.setText(english ? "Request could not be confirmed. Reload before retrying." : "Auftrag nicht bestätigt. Vor erneutem Versuch Archiv laden.");});}
+        });
+    }
+    private void checkPendingRequest() {
+        if(googleUser==null || googleAccessToken.isEmpty() || writeBusy)return;
+        final String owner=googleUser.owner,token=googleAccessToken,id=getPreferences(0).getString("request-"+googleUser.owner,"");
+        if(id.isEmpty())return;
+        final int generation=googleGeneration;
+        network.execute(() -> {
+            try{
+                SharedArchiveClient client=new SharedArchiveClient(token);
+                JSONObject result=client.result(owner,id);
+                if(result==null){
+                    String saved=getPreferences(0).getString("requestData-"+owner,"");
+                    if(!saved.isEmpty()) { JSONObject request=new JSONObject(saved);client.submit(request.getJSONObject("snapshot"),request.getString("action"),request.getJSONObject("payload"),id); }
+                }
+                final JSONObject receipt=result;
+                handler.post(() -> {
+                    if(generation!=googleGeneration || isFinishing())return;
+                    if(receipt==null){statusText.setText(english ? "Request still waiting for source desktop." : "Auftrag wartet noch auf den Quell-Desktop.");return;}
+                    getPreferences(0).edit().remove("request-"+owner).remove("requestData-"+owner).apply();
+                    String code=receipt.optString("code");
+                    statusText.setText(receipt.optBoolean("ok") ? (english ? "Archive request completed by desktop." : "Archivauftrag vom Desktop abgeschlossen.") :
+                        (code.equals("REQUEST_STALE") ? (english ? "Archive changed meanwhile. Reload and repeat your change." : "Archiv inzwischen geändert. Neu laden und Änderung wiederholen.") : (english ? "Request failed. Check desktop log." : "Auftrag fehlgeschlagen. Desktop-Log prüfen.")));
+                    loadArchive();
+                });
+            }catch(Exception e){handler.post(() -> {if(generation==googleGeneration)statusText.setText(english ? "Request status unavailable. Please retry Reload." : "Auftragsstatus nicht erreichbar. Archiv laden erneut versuchen.");});}
+        });
+    }
+    private void askForSeason() {
+        if(!writeReady() || selectedTmdbId<=0)return;
+        EditText input=new EditText(this);input.setText("1");input.setTextColor(Color.BLACK);input.setInputType(InputType.TYPE_CLASS_NUMBER);
+        new AlertDialog.Builder(this).setTitle(english ? "Season number" : "Staffelnummer").setView(input)
+            .setPositiveButton(english ? "Prepare" : "Vorbereiten",(d,w)->{
+                int season;try{season=Integer.parseInt(input.getText().toString());}catch(Exception e){return;}
+                if(season<1 || season>999)return;
+                final int id=selectedTmdbId,generation=googleGeneration;final String key=credential;final boolean language=english;
+                network.execute(() -> {
+                    try{
+                        TmdbClient tmdb=new TmdbClient(key);JSONObject de=tmdb.details(id,false),en=tmdb.details(id,true);
+                        JSONObject detail=language?en:de;
+                        JSONObject episodeData=tmdb.get("tv/"+id+"/season/"+season,"language="+(language?"en-US":"de-DE"));
+                        org.json.JSONArray episodes=episodeData.getJSONArray("episodes"),dates=new org.json.JSONArray();
+                        for(int i=0;i<episodes.length();i++){String date=episodes.getJSONObject(i).optString("air_date");if(!date.matches("\\d{4}-\\d{2}-\\d{2}"))throw new Exception("DATES");dates.put(date);}
+                        if(dates.length()==0)throw new Exception("DATES");
+                        String first=detail.optString("first_air_date");if(first.length()<4)throw new Exception("YEAR");
+                        JSONObject payload=new JSONObject().put("tmdbId",id).put("titel",detail.getString("name")).put("jahr",first.substring(0,4))
+                            .put("staffelNummer",season).put("episoden",dates.length()).put("termindaten",dates)
+                            .put("descDE",de.optString("overview")).put("descEN",en.optString("overview"));
+                        handler.post(() -> {if(generation!=googleGeneration || isFinishing())return;
+                            new AlertDialog.Builder(this).setTitle(english ? "Archive and calendar" : "Archiv und Kalender")
+                                .setMessage(detail.optString("name")+" · S"+season+" · "+dates.length()+(english ? " episodes. Process on source desktop?" : " Folgen. Am Quell-Desktop verarbeiten?"))
+                                .setPositiveButton(english ? "Send" : "Senden",(dialog,which)->sendRequest("insert",payload))
+                                .setNegativeButton(english ? "Cancel" : "Abbrechen",null).show();});
+                    }catch(Exception e){handler.post(()->{if(generation==googleGeneration)statusText.setText(english ? "Season unavailable or episode dates incomplete. Nothing sent." : "Staffel nicht verfügbar oder Folgentermine unvollständig. Nichts gesendet.");});}
+                });
+            }).setNegativeButton(english ? "Cancel" : "Abbrechen",null).show();
+    }
+    private void editArchiveNotes() {
+        if(!writeReady() || selectedArchiveEntry==null)return;
+        final JSONObject entry=selectedArchiveEntry;EditText input=new EditText(this);input.setTextColor(Color.BLACK);input.setText(entry.optString("note"));
+        new AlertDialog.Builder(this).setTitle(english ? "Notes (e.g. OffsetDE: +1D)" : "Notiz (z.B. OffsetDE: +1D)").setView(input)
+            .setPositiveButton(english ? "Send" : "Senden",(d,w)->{try{sendRequest("notes",new JSONObject().put("tmdbId",entry.getInt("tmdbId")).put("seasonLabel",entry.getString("seasonLabel")).put("note",input.getText().toString()));}catch(Exception ignored){}})
+            .setNegativeButton(english ? "Cancel" : "Abbrechen",null).show();
+    }
+    private void deleteArchiveSeries() {
+        if(!writeReady() || selectedArchiveEntry==null)return;
+        final JSONObject entry=selectedArchiveEntry;
+        new AlertDialog.Builder(this).setTitle(english ? "Delete all archived seasons?" : "Alle archivierten Staffeln löschen?")
+            .setMessage(entry.optString("title")+(english ? " – including its calendar events." : " – einschließlich ihrer Kalendertermine."))
+            .setPositiveButton(english ? "Delete" : "Löschen",(d,w)->{try{sendRequest("delete",new JSONObject().put("tmdbId",entry.getInt("tmdbId")).put("seasonLabel",entry.getString("seasonLabel")));}catch(Exception ignored){}})
+            .setNegativeButton(english ? "Cancel" : "Abbrechen",null).show();
+    }
 
     @Override protected void onDestroy() {
         requestGeneration++;
@@ -302,7 +408,7 @@ public class MainActivity extends Activity {
         final int generation = ++requestGeneration;
         final boolean language = english;
         suggestions.removeAllViews();
-        selectedTmdbId = 0;
+        selectedTmdbId = 0; selectedArchiveEntry=null;
         selectedName.setText(english ? "Select a series" : "Serie auswählen");
         selectedInfo.setText("");
         if (query.length() < 2) return;
@@ -340,13 +446,12 @@ public class MainActivity extends Activity {
                 JSONObject detail = new TmdbClient(key).details(id, language);
                 handler.post(() -> {
                     if (generation != requestGeneration) return;
-                    selectedTmdbId = id;
+                    selectedTmdbId = id; selectedArchiveEntry=null;
                     // Name is display text; the immutable TMDB ID is the identity.
                     selectedName.setText(detail.optString("name", entry.optString("name")));
                     selectedInfo.setText("TMDB " + id + " · " + detail.optInt("number_of_seasons") +
                         (english ? " seasons" : " Staffeln") + "\n" + detail.optString("overview"));
-                    statusText.setText(english ? "Series loaded. Shared archive not connected yet."
-                        : "Serie geladen. Gemeinsames Archiv noch nicht verbunden.");
+                    statusText.setText(english ? "Series loaded. Choose Add to archive." : "Serie geladen. Mit Ins Archiv übernehmen.");
                 });
             } catch (Exception error) { showNetworkError(generation, error); }
         });
@@ -385,7 +490,7 @@ public class MainActivity extends Activity {
     }
 
     private void showStartupError_(Throwable error) {
-        TextView message = text("SerKal 0.0.5a5\n\nStartfehler: " + error.getClass().getSimpleName() +
+        TextView message = text("SerKal 0.0.5a6\n\nStartfehler: " + error.getClass().getSimpleName() +
             "\n" + String.valueOf(error.getMessage()), 15, Color.WHITE);
         message.setBackgroundColor(Color.rgb(80, 0, 0));
         message.setPadding(dp(24), dp(24), dp(24), dp(24));
@@ -473,7 +578,7 @@ public class MainActivity extends Activity {
         TextView title = text("SerKal", 13, TEXT);
         title.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
         top.addView(title, new LinearLayout.LayoutParams(0, dp(31), 1));
-        TextView preview = text(english ? "0.0.5a5 · pinch to zoom · drag to move" : "0.0.5a5 · mit 2 Fingern zoomen · mit 1 Finger bewegen", 7.5f, MUTED);
+        TextView preview = text(english ? "0.0.5a6 · pinch to zoom · drag to move" : "0.0.5a6 · mit 2 Fingern zoomen · mit 1 Finger bewegen", 7.5f, MUTED);
         preview.setGravity(Gravity.CENTER_VERTICAL | Gravity.RIGHT);
         top.addView(preview, new LinearLayout.LayoutParams(-2, dp(31)));
         Button zoomOut = new Button(this);
@@ -559,9 +664,13 @@ public class MainActivity extends Activity {
         ScrollView detailScroll = new ScrollView(this);
         detailScroll.addView(selectedInfo);
         middle.addView(detailScroll, new LinearLayout.LayoutParams(-1, 0, 1));
-        Button add = verticalButton(archiveText("READ_ONLY"));
-        add.setEnabled(false);
+        Button add = verticalButton(english ? "Add to archive + calendar" : "Ins Archiv + Kalender");
+        add.setOnClickListener(v -> askForSeason());
         middle.addView(add);
+        Button notes=verticalButton(english ? "Edit notes / offset" : "Notiz / Offset ändern");
+        notes.setOnClickListener(v -> editArchiveNotes()); middle.addView(notes);
+        Button remove=verticalButton(english ? "Delete complete series" : "Ganze Serie löschen");
+        remove.setOnClickListener(v -> deleteArchiveSeries()); middle.addView(remove);
         columns.addView(middle);
 
         LinearLayout right = panel(28);
@@ -572,7 +681,7 @@ public class MainActivity extends Activity {
         ScrollView archiveScroll=new ScrollView(this); archiveScroll.addView(archiveRows);
         right.addView(archiveScroll,new LinearLayout.LayoutParams(-1,0,1));
         Button reload=verticalButton(archiveText("RELOAD"));
-        reload.setOnClickListener(v -> loadArchive()); right.addView(reload);
+        reload.setOnClickListener(v -> { loadArchive(); checkPendingRequest(); }); right.addView(reload);
         renderArchive();
         columns.addView(right);
 
