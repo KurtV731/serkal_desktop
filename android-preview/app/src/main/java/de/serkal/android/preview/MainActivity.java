@@ -18,6 +18,10 @@ import java.util.concurrent.Executors;
 import org.json.JSONObject;
 import java.util.List;
 import android.graphics.Color;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.widget.ImageView;
+import android.util.LruCache;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
@@ -43,6 +47,7 @@ public class MainActivity extends Activity {
     private void connectGoogle(boolean chooseAccount) {
         if (googleBusy) return;
         requestGeneration++;
+        clearPoster(); selectedDetail=null; selectedArchiveEntry=null; displayedResults.clear();
         credential = "";
         googleAccessToken = "";
         googleUser = null;
@@ -163,14 +168,77 @@ public class MainActivity extends Activity {
         statusText.setText(message);
     }
 
-    private static final int BG = Color.rgb(8, 13, 18);
-    private static final int PANEL = Color.rgb(18, 27, 36);
-    private static final int CARD = Color.rgb(27, 39, 51);
-    private static final int TEXT = Color.rgb(232, 239, 245);
-    private static final int MUTED = Color.rgb(151, 167, 181);
+    private int BG = Color.rgb(8, 13, 18);
+    private int PANEL = Color.rgb(18, 27, 36);
+    private int CARD = Color.rgb(27, 39, 51);
+    private int TEXT = Color.rgb(232, 239, 245);
+    private int MUTED = Color.rgb(151, 167, 181);
     private static final int BLUE = Color.rgb(80, 167, 238);
     private static final int RED = Color.rgb(215, 75, 75);
     private boolean english = false;
+    private boolean dark = true;
+    private final ExecutorService pictures = Executors.newSingleThreadExecutor();
+    private final LruCache<String,Bitmap> posterCache = new LruCache<String,Bitmap>(4 * 1024 * 1024) {
+        @Override protected int sizeOf(String path, Bitmap bitmap) { return bitmap.getByteCount(); }
+    };
+    private int posterGeneration;
+    private ImageView posterImage;
+    private TextView posterStatus;
+    private Bitmap selectedPoster;
+    private String selectedPosterPath = "";
+    private List<JSONObject> displayedResults = new java.util.ArrayList<>();
+    private JSONObject selectedDetail;
+
+    private void setPalette() {
+        BG = dark ? Color.rgb(8,13,18) : Color.rgb(237,242,247);
+        PANEL = dark ? Color.rgb(18,27,36) : Color.WHITE;
+        CARD = dark ? Color.rgb(27,39,51) : Color.rgb(224,234,244);
+        TEXT = dark ? Color.rgb(232,239,245) : Color.rgb(24,39,55);
+        MUTED = dark ? Color.rgb(151,167,181) : Color.rgb(72,88,105);
+    }
+    private void clearPoster() {
+        posterGeneration++; selectedPoster = null; selectedPosterPath = "";
+        if (posterImage != null) posterImage.setImageDrawable(null);
+        if (posterStatus != null) posterStatus.setText("");
+    }
+    private void showPoster(int id, String knownPath) {
+        clearPoster();
+        if (id <= 0 || credential.isEmpty()) return;
+        final int generation = posterGeneration, account = googleGeneration;
+        final String key = credential;
+        final ImageView target = posterImage;
+        posterStatus.setText(english ? "Loading image…" : "Bild wird geladen…");
+        pictures.execute(() -> {
+            try {
+                String path = knownPath;
+                if (path == null) path = new TmdbClient(key).details(id, false).optString("poster_path");
+                if (!PosterClient.validPath(path)) throw new Exception("NO_POSTER");
+                Bitmap bitmap = posterCache.get(path);
+                if (bitmap == null) {
+                    byte[] bytes = PosterClient.load(path);
+                    BitmapFactory.Options bounds = new BitmapFactory.Options(); bounds.inJustDecodeBounds = true;
+                    BitmapFactory.decodeByteArray(bytes,0,bytes.length,bounds);
+                    if (bounds.outWidth <= 0 || bounds.outHeight <= 0 || bounds.outWidth > 1024 || bounds.outHeight > 2048)
+                        throw new Exception("POSTER_INVALID");
+                    bitmap = BitmapFactory.decodeByteArray(bytes,0,bytes.length);
+                    if (bitmap == null) throw new Exception("POSTER_INVALID");
+                    posterCache.put(path,bitmap);
+                }
+                final Bitmap result = bitmap; final String loadedPath = path;
+                handler.post(() -> {
+                    if (generation != posterGeneration || account != googleGeneration || target != posterImage || isFinishing()) return;
+                    selectedPoster = result; selectedPosterPath = loadedPath;
+                    posterImage.setImageBitmap(result); posterStatus.setText("");
+                });
+            } catch (Exception error) {
+                handler.post(() -> {
+                    if (generation != posterGeneration || account != googleGeneration || target != posterImage || isFinishing()) return;
+                    posterStatus.setText(english ? "No image available" : "Kein Bild verfügbar");
+                });
+            }
+        });
+    }
+
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final ExecutorService network = Executors.newSingleThreadExecutor();
     private int requestGeneration = 0;
@@ -237,7 +305,15 @@ public class MainActivity extends Activity {
         for(int i=0;i<entries.length();i++) {
             JSONObject e=entries.optJSONObject(i);
             TextView item=row(e.optString("title")+" · "+e.optString("seasonLabel"),false);
-            item.setOnClickListener(v -> {
+            item.setOnClickListener(v -> showArchiveEntry(e));
+            archiveRows.addView(item);
+        }
+    }
+
+
+
+    private void showArchiveEntry(JSONObject e) {
+
                 requestGeneration++; if(pendingSearch!=null) handler.removeCallbacks(pendingSearch);
                 selectedArchiveEntry=e; selectedTmdbId=e.optInt("tmdbId"); selectedName.setText(e.optString("title"));
                 String description=e.optString((english ? "descEN" : "descDE"));
@@ -248,13 +324,9 @@ public class MainActivity extends Activity {
                 detail.append(archiveText("DATES"));
                 for(int j=0;j<dates.length();j++) detail.append(dates.optString(j)).append("\n");
                 if(!e.optString("note").isEmpty()) detail.append(archiveText("NOTES")).append(e.optString("note"));
-                selectedInfo.setText(detail.toString());
-            });
-            archiveRows.addView(item);
-        }
+                selectedDetail=null; selectedInfo.setText(detail.toString());
+                showPoster(selectedTmdbId,null);
     }
-
-
 
     @Override protected void onResume(){super.onResume();archiveObserveActive=true;handler.removeCallbacks(archiveProbeTask);handler.postDelayed(archiveProbeTask,2500);}
     @Override protected void onPause(){archiveObserveActive=false;handler.removeCallbacks(archiveProbeTask);super.onPause();}
@@ -273,7 +345,7 @@ public class MainActivity extends Activity {
                     if(fresh!=null){
                         if(archiveDialogOpen || writeBusy){observer.invalidateRevision();return;}
                         archiveSnapshot=fresh;archiveError="";renderArchive();
-                        if(selectedArchiveEntry!=null){selectedArchiveEntry=null;selectedTmdbId=0;selectedName.setText(english ? "Select a series" : "Serie auswählen");selectedInfo.setText("");}
+                        if(selectedArchiveEntry!=null){selectedArchiveEntry=null;selectedTmdbId=0;selectedName.setText(english ? "Select a series" : "Serie auswählen");selectedInfo.setText("");clearPoster();}
                     }
                     checkPendingRequest();
                 });
@@ -394,7 +466,7 @@ public class MainActivity extends Activity {
         googleGeneration++;
         archiveGeneration++;
         handler.removeCallbacksAndMessages(null);
-        network.shutdownNow();
+        network.shutdownNow(); pictures.shutdownNow(); posterCache.evictAll(); posterGeneration++;
         super.onDestroy();
     }
 
@@ -442,7 +514,7 @@ public class MainActivity extends Activity {
         final String query = queryField.getText().toString().trim();
         final int generation = ++requestGeneration;
         final boolean language = english;
-        suggestions.removeAllViews();
+        suggestions.removeAllViews(); displayedResults.clear(); selectedDetail=null; clearPoster();
         selectedTmdbId = 0; selectedArchiveEntry=null;
         selectedName.setText(english ? "Select a series" : "Serie auswählen");
         selectedInfo.setText("");
@@ -458,7 +530,17 @@ public class MainActivity extends Activity {
                     statusText.setText(results.isEmpty()
                         ? (english ? "No results found." : "Keine Ergebnisse gefunden.")
                         : (english ? "Tap a series." : "Serie antippen."));
-                    for (JSONObject entry : results) {
+                    displayedResults = results;
+                    renderSuggestions(results);
+                });
+            } catch (Exception error) { showNetworkError(generation, error); }
+        });
+    }
+
+    private void renderSuggestions(List<JSONObject> results) {
+        suggestions.removeAllViews();
+        final String key = credential; final boolean language=english;
+        for (JSONObject entry : results) {
                         String date = entry.optString("first_air_date");
                         TextView result = row(entry.optString("name") +
                             (date.length() >= 4 ? " · " + date.substring(0, 4) : ""), false);
@@ -466,14 +548,12 @@ public class MainActivity extends Activity {
                         result.setOnClickListener(v -> selectSeries(entry, key, language));
                         suggestions.addView(result);
                     }
-                });
-            } catch (Exception error) { showNetworkError(generation, error); }
-        });
     }
 
     private void selectSeries(JSONObject entry, String key, boolean language) {
         final int generation = ++requestGeneration;
         final int id = entry.optInt("id");
+        clearPoster(); selectedDetail=null; selectedArchiveEntry=null; selectedTmdbId=0;
         selectedName.setText(entry.optString("name"));
         statusText.setText(english ? "Loading series…" : "Serie wird geladen…");
         network.execute(() -> {
@@ -481,7 +561,8 @@ public class MainActivity extends Activity {
                 JSONObject detail = new TmdbClient(key).details(id, language);
                 handler.post(() -> {
                     if (generation != requestGeneration) return;
-                    selectedTmdbId = id; selectedArchiveEntry=null;
+                    selectedTmdbId = id; selectedArchiveEntry=null; selectedDetail=detail;
+                    showPoster(id,detail.optString("poster_path"));
                     // Name is display text; the immutable TMDB ID is the identity.
                     selectedName.setText(detail.optString("name", entry.optString("name")));
                     selectedInfo.setText("TMDB " + id + " · " + detail.optInt("number_of_seasons") +
@@ -496,6 +577,8 @@ public class MainActivity extends Activity {
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
         try {
+            english=getPreferences(0).getBoolean("english",false);
+            dark=getPreferences(0).getBoolean("dark",true); setPalette();
             configureFullscreen_();
             buildScreen();
             handler.post(() -> { if (!isFinishing()) connectGoogle(false); });
@@ -525,7 +608,7 @@ public class MainActivity extends Activity {
     }
 
     private void showStartupError_(Throwable error) {
-        TextView message = text("SerKal 0.0.5a7\n\nStartfehler: " + error.getClass().getSimpleName() +
+        TextView message = text("SerKal " + BuildConfig.VERSION_NAME + "\n\nStartfehler: " + error.getClass().getSimpleName() +
             "\n" + String.valueOf(error.getMessage()), 15, Color.WHITE);
         message.setBackgroundColor(Color.rgb(80, 0, 0));
         message.setPadding(dp(24), dp(24), dp(24), dp(24));
@@ -550,13 +633,13 @@ public class MainActivity extends Activity {
     private TextView heading(String value) {
         TextView view = text(value, 10, TEXT);
         view.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
-        view.setBackgroundColor(Color.rgb(13, 21, 29));
+        view.setBackgroundColor(dark ? Color.rgb(13,21,29) : Color.rgb(208,224,240));
         return view;
     }
 
     private TextView row(String value, boolean selected) {
-        TextView view = text(value, 8.5f, TEXT);
-        view.setBackgroundColor(selected ? Color.rgb(34, 71, 99) : CARD);
+        TextView view = text(value, 10, TEXT);
+        view.setBackgroundColor(selected ? (dark ? Color.rgb(34,71,99) : Color.rgb(183,214,240)) : CARD);
         LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(-1, -2);
         p.setMargins(0, 0, 0, dp(2));
         view.setLayoutParams(p);
@@ -577,12 +660,12 @@ public class MainActivity extends Activity {
     private Button button(String label) {
         Button b = new Button(this);
         b.setText(label);
-        b.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 7.5f);
+        b.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 10);
         b.setIncludeFontPadding(false);
         b.setMinHeight(0);
         b.setMinimumHeight(0);
         b.setPadding(dp(3), 0, dp(3), 0);
-        b.setTextColor(TEXT);
+        b.setTextColor(Color.WHITE);
         b.setAllCaps(false);
         b.setBackgroundColor(Color.rgb(38, 70, 94));
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, dp(30), 1);
@@ -601,6 +684,12 @@ public class MainActivity extends Activity {
     }
 
     private void buildScreen() {
+        String previousQuery = queryField == null ? "" : queryField.getText().toString();
+        CharSequence previousStatus = statusText == null ? "" : statusText.getText();
+        CharSequence previousName = selectedName == null ? "" : selectedName.getText();
+        CharSequence previousInfo = selectedInfo == null ? "" : selectedInfo.getText();
+        Bitmap previousPoster=selectedPoster; String previousPath=selectedPosterPath;
+        posterGeneration++;
         requestGeneration++;
         if (pendingSearch != null) handler.removeCallbacks(pendingSearch);
         LinearLayout root = new LinearLayout(this);
@@ -613,7 +702,7 @@ public class MainActivity extends Activity {
         TextView title = text("SerKal", 13, TEXT);
         title.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
         top.addView(title, new LinearLayout.LayoutParams(0, dp(31), 1));
-        TextView preview = text(english ? "0.0.5a7 · pinch to zoom · drag to move" : "0.0.5a7 · mit 2 Fingern zoomen · mit 1 Finger bewegen", 7.5f, MUTED);
+        TextView preview = text(BuildConfig.VERSION_NAME + (english ? " · zoom / move" : " · zoomen / bewegen"), 7.5f, MUTED);
         preview.setGravity(Gravity.CENTER_VERTICAL | Gravity.RIGHT);
         top.addView(preview, new LinearLayout.LayoutParams(-2, dp(31)));
         Button zoomOut = new Button(this);
@@ -634,10 +723,21 @@ public class MainActivity extends Activity {
         Button language = new Button(this);
         language.setText(english ? "DE" : "EN");
         styleTopButton_(language);
-        language.setOnClickListener(v -> { english = !english; buildScreen(); });
+        language.setOnClickListener(v -> {
+            english = !english; getPreferences(0).edit().putBoolean("english",english).apply(); buildScreen();
+            if (selectedArchiveEntry != null) showArchiveEntry(selectedArchiveEntry);
+            else if (selectedTmdbId > 0) {
+                try { selectSeries(new JSONObject().put("id",selectedTmdbId).put("name",selectedName.getText().toString()),credential,english); }
+                catch(Exception ignored) {}
+            } else if (queryField.getText().length() >= 2 && !credential.isEmpty()) searchNow();
+        });
         language.setMinHeight(0);
         language.setMinimumHeight(0);
         top.addView(language, new LinearLayout.LayoutParams(dp(42), dp(28)));
+        Button theme = new Button(this); theme.setText(english ? (dark ? "Light" : "Dark") : (dark ? "Hell" : "Dunkel"));
+        styleTopButton_(theme);
+        theme.setOnClickListener(v -> { dark=!dark;getPreferences(0).edit().putBoolean("dark",dark).apply();setPalette();configureFullscreen_();buildScreen(); });
+        top.addView(theme,new LinearLayout.LayoutParams(dp(58),dp(28)));
         root.addView(top);
 
         zoomSurface = new ZoomPanLayout(this);
@@ -657,6 +757,7 @@ public class MainActivity extends Activity {
         queryField.setTextColor(TEXT);
         queryField.setHintTextColor(MUTED);
         queryField.setHint(english ? "Series title" : "Serientitel");
+        queryField.setText(previousQuery);
         left.addView(queryField);
         suggestions = new LinearLayout(this);
         suggestions.setOrientation(LinearLayout.VERTICAL);
@@ -697,7 +798,15 @@ public class MainActivity extends Activity {
         middle.addView(selectedName);
         selectedInfo = text("", 11, TEXT);
         ScrollView detailScroll = new ScrollView(this);
-        detailScroll.addView(selectedInfo);
+        LinearLayout detailBody=new LinearLayout(this);detailBody.setOrientation(LinearLayout.HORIZONTAL);
+        LinearLayout posterColumn=new LinearLayout(this);posterColumn.setOrientation(LinearLayout.VERTICAL);
+        posterImage=new ImageView(this);posterImage.setAdjustViewBounds(true);posterImage.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        posterImage.setContentDescription(english ? "Series poster" : "Serienposter");
+        posterColumn.addView(posterImage,new LinearLayout.LayoutParams(dp(90),dp(140)));
+        posterStatus=text("",9,MUTED);posterColumn.addView(posterStatus);
+        detailBody.addView(posterColumn,new LinearLayout.LayoutParams(dp(95),-2));
+        detailBody.addView(selectedInfo,new LinearLayout.LayoutParams(0,-2,1));
+        detailScroll.addView(detailBody);
         middle.addView(detailScroll, new LinearLayout.LayoutParams(-1, 0, 1));
         Button add = verticalButton(english ? "Add to archive + calendar" : "Ins Archiv + Kalender");
         add.setOnClickListener(v -> askForSeason());
@@ -721,10 +830,18 @@ public class MainActivity extends Activity {
         columns.addView(right);
 
         setContentView(root);
+        if (!previousName.toString().isEmpty()) selectedName.setText(previousName);
+        selectedInfo.setText(previousInfo);
+        if (!previousStatus.toString().isEmpty()) statusText.setText(previousStatus);
+        if (googleBusy) statusText.setText(english ? "Connecting to Google…" : "Google wird verbunden…");
+        selectedPoster=previousPoster;selectedPosterPath=previousPath;posterImage.setImageBitmap(previousPoster);
+        renderSuggestions(displayedResults);
+        if (selectedTmdbId>0 && previousPoster==null) showPoster(selectedTmdbId, selectedDetail==null ? null : selectedDetail.optString("poster_path"));
+        else if (selectedTmdbId==0 && displayedResults.isEmpty() && previousQuery.length()>=2 && !credential.isEmpty()) searchNow();
     }
 
     private void styleTopButton_(Button button) {
-        button.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 8);
+        button.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 10);
         button.setTextColor(Color.BLACK);
         button.setBackgroundColor(Color.WHITE);
         button.setAllCaps(false);
@@ -733,4 +850,5 @@ public class MainActivity extends Activity {
         button.setPadding(dp(2), 0, dp(2), 0);
     }
 }
+
 

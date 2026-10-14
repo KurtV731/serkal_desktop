@@ -3,7 +3,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <application
         android:allowBackup="false"
-        android:label="0.0.5a5 - SerKal Android"
+        android:label="@string/app_name"
         android:theme="@style/AppTheme">
         <activity
             android:name="de.serkal.android.preview.MainActivity"
@@ -17,4 +17,5 @@
         </activity>
     </application>
 </manifest>
+
 
