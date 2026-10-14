@@ -2519,3 +2519,87 @@ Website-Commits:
 
 Beide Dateien anschließend von GitHub zurückgelesen: Werkstattlink vorhanden,
 QR-Block entfernt, normaler Windows-Downloadknopf unverändert.
+
+
+### 2026-10-14 – Website-Chatty – Tagesabschluss: Startseite, Links und späterer Android-Download
+
+Status: **HEUTIGE WEBSITE-ARBEIT ABGESCHLOSSEN / SERVER-SICHTPRÜFUNG DURCH KURT / ANDROID-PUNKT NUR VORGEMERKT**
+
+Diese Notiz hält den vollständigen heutigen Website-Stand fest, damit die Arbeit auch
+bei einem späteren Chatwechsel eindeutig übernommen werden kann.
+
+#### Heute umgesetzt
+
+1. Die deutsche und englische Startseite beginnen jetzt mit dem konkreten Nutzen von
+   SerKal statt mit technischen Einzelheiten.
+2. Verbindliche Leitzeile:
+   **„SerKal merkt sich deine Serien – damit du es nicht musst.“**
+3. Unmittelbar danach werden drei Entlastungen erklärt:
+   - nicht mehr alles merken müssen;
+   - wissen, wann es mit einer Serie weitergeht;
+   - nach längeren Pausen den Faden wiederfinden.
+4. Danach folgen drei Alltagssituationen:
+   - Vielseher mit mehreren parallelen Serien;
+   - Nutzer, die einen Staffelstart nicht verpassen möchten;
+   - Menschen, deren Gedächtnis durch Alter, Krankheit, Stress oder einen vollen Kopf
+     entlastet werden soll.
+5. Die bisherige obere Navigation zu Download, Hilfe, FAQ, Über SerKal, Rechtlichem
+   und Werkstatt bleibt erhalten.
+6. Der normale Windows-Downloadweg bleibt als klarer Knopf auf der Startseite bestehen.
+7. Deutsche und englische Fassung wurden jeweils gleichwertig überarbeitet und nach
+   dem Commit erneut von GitHub gelesen.
+
+#### Heute korrigiert
+
+1. Der Knopf **„Die Geschichte dazu“** beziehungsweise **„Read the story“** verweist
+   jetzt auf `/werkstatt.html`. Die Entstehungsgeschichte steht dort und nicht in
+   `about.html`.
+2. Der zunächst eingebaute QR-Code zur allgemeinen Downloadseite wurde wieder von
+   beiden Startseiten entfernt. Begründung: Ein Smartphone-Nutzer hätte dort im
+   Wesentlichen einen Windows-EXE-Download gefunden; das ist kein sinnvoller
+   mobiler Downloadweg.
+3. Die erzeugte SVG-QR-Datei darf unbenutzt im Repository liegen bleiben. Sie ist
+   derzeit nirgends auf der Startseite eingebunden und behauptet keine verfügbare
+   Android-Fassung.
+
+#### Nur vorgemerkt – ausdrücklich noch nicht in den Code einbauen
+
+Kurts gewünschte spätere Plattformdarstellung auf der Downloadseite:
+
+- **Windows:** aktive Schaltfläche „Windows herunterladen“; kein QR-Code erforderlich.
+- **Android:** Status künftig ungefähr **„zu 85 % fertig“** statt nur „geplant“.
+- In der Android-Kachel später eine Schaltfläche **„Android herunterladen“** und direkt
+  daneben einen kleinen QR-Code anbieten.
+- Schaltfläche und QR-Code sollen beide zur konkret freigegebenen APK beziehungsweise
+  später zum Store-Eintrag führen.
+- Der Android-Knopf darf optisch vorbereitet werden, wird aber erst aktiv verlinkt,
+  wenn CE/Hauptchef eine bestimmte ausgebbare APK ausdrücklich freigegeben hat.
+- Kein Link auf eine zukünftige oder nicht vorhandene APK; die bestehende verbindliche
+  Veröffentlichungsregel bleibt bestehen.
+- **Linux:** vorerst weiterhin „geplant“.
+
+Kurt arbeitet derzeit gemeinsam mit dem CE/Hauptchef an einer ausgebbaren Android-Fassung.
+Bis zu dessen ausdrücklicher Übergabe führt Website-Chatty an Downloadseite, Android-Kachel,
+APK-Verlinkung und QR-Code keine weitere Änderung aus.
+
+#### Zugehörige Website-Commits
+
+- QR-Datei ursprünglich erzeugt: `9eabd76c645c5074ecfe8bfb24e3e5784d5375c5`
+- deutsche Nutzen-Startseite: `0ef0177f8d35602bdb1459eb27338342e1b9b46b`
+- englische Nutzen-Startseite: `1fcf4e19410d108a45cd956a1c591fdf1386c6b7`
+- deutscher Werkstattlink / QR entfernt: `8cc46b61fbb4948858fa2654be5037d2cfa1024a`
+- englischer Werkstattlink / QR entfernt: `717412ca933cc7c211418bd1264f32f404f78b69`
+
+#### Veröffentlichung durch Kurt
+
+Für den heutigen korrigierten Stand genügen im lokalen Website-Repository:
+
+```bat
+cd /d C:\serkal-pages
+git fetch origin main
+git restore --source=origin/main -- up\start.html up\start-en.html
+NUR-WEBSITE-HOCHLADEN.BAT
+```
+
+Danach Sichtprüfung von `https://serkal.de/start.html` und der englischen Startseite.
+Website-Chatty beendet anschließend die heutige Arbeit; keine weiteren stillen Änderungen.
