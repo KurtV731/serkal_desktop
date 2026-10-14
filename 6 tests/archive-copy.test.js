@@ -35,5 +35,12 @@ function fakeRemote() {const records=[];return {records,identify:async()=>owner,
  remote.upload=upload;assert.equal((await copy.synchronize(args)).status,'saved');assert.equal(remote.records.at(-1).files[0].content,newer.content);
  state.dirty=true;const foreign=record(state.base);remote.records.push(foreign);
  await assert.rejects(copy.synchronize(args),/COPY_CONFLICT/);assert(state.dirty);assert.equal(remote.records.at(-1),foreign);
+ // A successful upload can be fetched directly while the listing still lags.
+ const lagged=fakeRemote(),lagState={owner,base:'',dirty:true};let listVisible=false;
+ const lagUpload=lagged.upload;lagged.upload=async r=>{await lagUpload(r);return {id:r.revision};};
+ const lagList=lagged.list;lagged.list=async()=>listVisible?lagList():[];
+ const lagArgs={state:lagState,local,client:lagged,save:()=>{},apply:async()=>{throw Error('do not roll back');}};
+ assert.equal((await copy.synchronize(lagArgs)).status,'saved');assert.equal(lagged.records.length,1);
+ listVisible=true;assert.equal((await copy.synchronize(lagArgs)).status,'saved');
  console.log('archive-copy: full fidelity, interrupted transfer, new local edit, conflict and recovery passed');
 })().catch(e=>{console.error(e);process.exitCode=1;});

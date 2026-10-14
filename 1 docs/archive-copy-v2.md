@@ -1,6 +1,6 @@
 # Vollständige lokale Archivkopie – Punkt 1
 
-Stand: 14.10.2026 · Desktop 1.2 Alpha 14 / Android 0.0.5a10 · Gerätetest erforderlich
+Stand: 14.10.2026 · Desktop 1.2 Alpha 15 / Android 0.0.5a11 · Gerätetest erforderlich
 
 ## Vereinbarter Ablauf
 
@@ -68,11 +68,11 @@ Zuerst den alten Auftrag mit dem bisherigen Quell-Desktop abschließen und prüf
 ## Kurze erste Testfolge mit Kurt
 
 1. Vorhandenes Archiv sichern. Alte laufende SerKal-Instanzen schließen. Auf dem bisherigen
-   Quell-PC den CE-Zweig aktualisieren und npm start ausführen; **Alpha 14** prüfen.
+   Quell-PC den CE-Zweig aktualisieren und npm start ausführen; **Alpha 15** prüfen.
    Warten bis „Bei Google gespeichert“. Zahl der Staffeln und vorhandene Notiz/Offset vergleichen.
-2. Zweiten Windows-Rechner mit Alpha 14 starten. Derselbe Bestand muss geladen werden;
+2. Zweiten Windows-Rechner mit Alpha 15 starten. Derselbe Bestand muss geladen werden;
    dessen ehemaliger lokaler Bestand wird vorher gesichert. Keine Änderung vor dem Laden.
-3. Android a10 über a8 installieren. Google-Konto und die neuen Kalenderrechte bestätigen.
+3. Android a11 über a8 installieren. Google-Konto und die neuen Kalenderrechte bestätigen.
    Archivbestand und eine bekannte Offset-Notiz prüfen. Bisherigen PC anschließend schließen.
 4. Eine klar erkennbare Testserie mit Zukunftsterminen auf Android eintragen.
    Erst „Lokal gespeichert“, dann „Bei Google gespeichert“ abwarten. Im selben bestehenden

@@ -143,16 +143,18 @@ async function synchronize({state, local, client:remote, save, apply, calendarSy
     const owner=await remote.identify();
     const current=typeof local==='function' ? local() : local;
     if(state.owner && state.owner!==owner)fail('COPY_ACCOUNT_CHANGED');
-    const tip=head(await remote.list(),owner), revision=tip ? tip.appProperties.revision : '';
+    const remoteFiles=await remote.list();const tip=head(remoteFiles,owner), revision=tip ? tip.appProperties.revision : '';
     if(state.dirty) {
         // A lost response must be checked before a second upload; the same frozen body is reused.
-        if(state.pending && revision===state.pending.revision) {
-            const confirmed=await remote.load(tip,owner);
+        if(state.pending && (revision===state.pending.revision || state.pendingFileId)) {
+            if(revision && revision!==state.base && revision!==state.pending.revision)fail('COPY_CONFLICT');
+            const proof=revision===state.pending.revision ? tip : {id:state.pendingFileId,appProperties:{revision:state.pending.revision,parent:state.pending.parent}};
+            const confirmed=await remote.load(proof,owner);
             if(digest(confirmed.files,confirmed.calendar)!==digest(state.pending.files,state.pending.calendar))fail('COPY_CONFLICT');
-            state.base=revision;state.owner=owner;
+            state.base=state.pending.revision;state.owner=owner;
             const same=digest(current.files,current.calendar)===digest(state.pending.files,state.pending.calendar);
             state.clean=digest(state.pending.files,state.pending.calendar);
-            state.dirty=!same;delete state.pending;save();
+            state.dirty=!same;delete state.pending;delete state.pendingFileId;save();
             return {status:same?'saved':'pending'};
         }
         if(revision!==(state.base||''))fail('COPY_CONFLICT');
@@ -162,11 +164,12 @@ async function synchronize({state, local, client:remote, save, apply, calendarSy
         // Check again after network calendar work. Never publish onto an unseen new parent.
         const again=head(await remote.list(),owner);
         if((again ? again.appProperties.revision : '')!==revision)fail('COPY_CONFLICT');
-        await remote.upload(state.pending);
+        const uploaded=await remote.upload(state.pending);if(uploaded && uploaded.id){state.pendingFileId=uploaded.id;save();}
         return synchronize({state,local,client:remote,save,apply,calendarSync});
     }
     if(!tip) return {status:'missing'};
     if(revision!==(state.base||'')) {
+        if(state.base && !remoteFiles.some(f=>f.appProperties.revision===state.base))fail('COPY_HISTORY_MISSING');
         const record=await remote.load(tip,owner); await apply(record);
         state.owner=owner;state.base=record.revision;state.clean=digest(record.files,record.calendar);save();
     }
