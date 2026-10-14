@@ -59,7 +59,8 @@ public class MainActivity extends Activity {
         statusText.setText(english ? "Connecting to Google…" : "Google wird verbunden…");
         AuthorizationRequest.Builder builder = AuthorizationRequest.builder().setRequestedScopes(java.util.Arrays.asList(
             new Scope("https://www.googleapis.com/auth/drive.appdata"),
-            new Scope("openid"), new Scope("https://www.googleapis.com/auth/userinfo.email")));
+            new Scope("openid"), new Scope("https://www.googleapis.com/auth/userinfo.email"),
+            new Scope("https://www.googleapis.com/auth/calendar.app.created"), new Scope("https://www.googleapis.com/auth/calendar.calendarlist.readonly")));
         if (chooseAccount) builder.setPrompt(AuthorizationRequest.Prompt.SELECT_ACCOUNT);
         Identity.getAuthorizationClient(this).authorize(builder.build())
             .addOnSuccessListener(result -> {
@@ -115,8 +116,8 @@ public class MainActivity extends Activity {
                         confirmPublish(cached);
                     } else {
                         statusText.setText(user.email + (english
-                            ? "\nNo shared key yet. On Desktop use “TMDB · Google”. Then tap Google again."
-                            : "\nNoch kein gemeinsamer Schlüssel. Am Desktop „TMDB · Google“ drücken. Danach hier erneut Google antippen."));
+                            ? "\nNo shared key yet. Enter or paste your TMDB key using API key."
+                            : "\nNoch kein gemeinsamer Schlüssel. Deinen TMDB-Schlüssel mit API-Key eingeben oder einfügen."));
                     }
                 });
             } catch (Exception error) {
@@ -258,33 +259,42 @@ public class MainActivity extends Activity {
     private int archiveGeneration;
     private boolean archiveBusy;
     private LinearLayout archiveRows;
-    private TextView archiveStatus;
+    private TextView archiveStatus,copySyncStatus;
+    private Button copySyncButton;
+    private AndroidArchiveCopy archiveCopy;
+
+    private void refreshLocalCopy() {
+        if(archiveCopy==null || googleUser==null || !archiveCopy.owner.equals(googleUser.owner) || isFinishing())return;
+        try {JSONObject local=archiveCopy.snapshot();if(local!=null){archiveSnapshot=local;archiveError="";renderArchive();}}catch(Exception error){archiveError=String.valueOf(error.getMessage());renderArchive();}
+        String code=archiveCopy.status();String label;
+        if(code.equals("saved"))label=english ? "Saved on Google · available on other devices" : "Bei Google gespeichert · auf anderen Geräten verfügbar";
+        else if(code.equals("syncing"))label=english ? "Transferring · you can keep working" : "Übertragung läuft · du kannst weiterarbeiten";
+        else if(code.equals("pending"))label=english ? "Saved locally · transfer pending" : "Lokal gespeichert · Übertragung ausstehend";
+        else if(code.equals("COPY_LOW_SPACE"))label=english ? "Not enough storage · reading only" : "Zu wenig freier Speicher · nur Lesen möglich";
+        else if(code.equals("COPY_CONFLICT"))label=english ? "Newer archive on Google · local copy preserved" : "Neuerer Archivstand bei Google · lokale Kopie bleibt erhalten";
+        else if(code.equals("COPY_NEEDS_SOURCE"))label=english ? "First transfer: start the new desktop version on the previous source PC" : "Erste Übernahme: neue Desktop-Version am bisherigen Quell-PC starten";
+        else if(code.equals("COPY_CALENDAR_PROTECTED"))label=english ? "Manual Calendar changes protected · synchronization paused" : "Manuelle Kalenderänderungen geschützt · Abgleich angehalten";
+        else if(code.equals("COPY_ACCOUNT_CHANGED"))label=english ? "Google account does not match archive" : "Google-Konto passt nicht zum Archiv";
+        else if(code.equals("loading"))label=english ? "Loading archive…" : "Archiv wird geladen…";
+        else label=english ? "Transfer pending · local copy preserved · retry Sync now" : "Übertragung ausstehend · lokale Kopie bleibt erhalten · Jetzt synchronisieren versuchen";
+        if(copySyncStatus!=null)copySyncStatus.setText(label);
+        if(copySyncButton!=null)copySyncButton.setEnabled(!archiveCopy.busy());
+    }
 
     private String archiveText(String key) { return ArchiveTexts.text(english,key); }
     private void loadArchive() {
-        if(googleUser==null || googleAccessToken.isEmpty()) {
-            archiveError="connect"; renderArchive(); return;
-        }
-        final int generation=++archiveGeneration;
-        final int accountGeneration=googleGeneration;
-        final String token=googleAccessToken,owner=googleUser.owner;
-        final SharedArchiveClient observer=archiveObserver;
-        archiveBusy=true; archiveError=""; renderArchive();
-        network.execute(() -> {
-            try {
-                JSONObject snapshot=observer.load(owner);
-                handler.post(() -> {
-                    if(generation!=archiveGeneration || accountGeneration!=googleGeneration || isFinishing()) return;
-                    archiveSnapshot=snapshot; archiveBusy=false; archiveError=""; renderArchive(); checkPendingRequest();
-                });
-            } catch(Exception error) {
-                handler.post(() -> {
-                    if(generation!=archiveGeneration || accountGeneration!=googleGeneration || isFinishing()) return;
-                    archiveSnapshot=null; archiveBusy=false;
-                    archiveError=String.valueOf(error.getMessage()); renderArchive();
-                });
-            }
-        });
+        if(googleUser==null || googleAccessToken.isEmpty()){archiveError="connect";renderArchive();return;}
+        try {
+            final int generation=googleGeneration;
+            if(archiveCopy==null || !archiveCopy.owner.equals(googleUser.owner)){
+                if(archiveCopy!=null)archiveCopy.close();
+                archiveCopy=new AndroidArchiveCopy(this,googleUser.owner,googleAccessToken,()->handler.post(()->{
+                    if(generation==googleGeneration && !isFinishing())refreshLocalCopy();
+                }));
+            }else archiveCopy.updateToken(googleAccessToken);
+            archiveCopy.setListener(()->handler.post(()->{if(generation==googleGeneration && !isFinishing())refreshLocalCopy();}));
+            archiveBusy=false;archiveError="";refreshLocalCopy();archiveCopy.schedule(0);
+        }catch(Exception error){archiveError=String.valueOf(error.getMessage());renderArchive();}
     }
     private void renderArchive() {
         if(archiveRows==null || archiveStatus==null) return;
@@ -331,87 +341,22 @@ public class MainActivity extends Activity {
     @Override protected void onResume(){super.onResume();archiveObserveActive=true;handler.removeCallbacks(archiveProbeTask);handler.postDelayed(archiveProbeTask,2500);}
     @Override protected void onPause(){archiveObserveActive=false;handler.removeCallbacks(archiveProbeTask);super.onPause();}
     private void probeArchiveChanges(){
-        if(googleUser==null || archiveObserver==null || googleBusy || writeBusy || archiveBusy || archiveProbeBusy || archiveDialogOpen)return;
-        archiveProbeBusy=true;
-        final int generation=googleGeneration;
-        final String owner=googleUser.owner;
-        final SharedArchiveClient observer=archiveObserver;
-        network.execute(()->{
-            try{
-                JSONObject fresh=observer.refreshIfChanged(owner);
-                handler.post(()->{
-                    archiveProbeBusy=false;
-                    if(generation!=googleGeneration || isFinishing())return;
-                    if(fresh!=null){
-                        if(archiveDialogOpen || writeBusy){observer.invalidateRevision();return;}
-                        archiveSnapshot=fresh;archiveError="";renderArchive();
-                        if(selectedArchiveEntry!=null){selectedArchiveEntry=null;selectedTmdbId=0;selectedName.setText(english ? "Select a series" : "Serie auswählen");selectedInfo.setText("");clearPoster();}
-                    }
-                    checkPendingRequest();
-                });
-            }catch(Exception error){handler.post(()->{archiveProbeBusy=false;});}
-        });
+        // Transfers are triggered by startup, edits and the explicit button; no cloud polling.
     }
 
     private boolean writeReady() {
-        if(writeBusy) return false;
-        if(googleUser==null || googleAccessToken.isEmpty() || archiveSnapshot==null){
-            statusText.setText(english ? "Connect Google and load archive first." : "Zuerst Google verbinden und Archiv laden."); return false;
-        }
-        String pending=getPreferences(0).getString("request-"+googleUser.owner,"");
-        if(!pending.isEmpty()){checkPendingRequest();return false;}
-        return true;
+        if(archiveCopy==null || !archiveCopy.writable()){
+            refreshLocalCopy();statusText.setText(english ? "Archive currently read-only. See synchronization status." : "Archiv derzeit nur lesbar. Synchronisationsstatus beachten.");return false;
+        }return true;
     }
     private void sendRequest(String action,JSONObject payload) {
         if(!writeReady())return;
-        writeBusy=true;
-        final int generation=googleGeneration;
-        final String token=googleAccessToken,owner=googleUser.owner;
-        final JSONObject snapshot=archiveSnapshot;
-        final String requestId=java.util.UUID.randomUUID().toString();
         try {
-            JSONObject saved=new JSONObject().put("snapshot",new JSONObject().put("owner",owner).put("publisher",snapshot.getString("publisher")).put("generatedAt",snapshot.getString("generatedAt")))
-                .put("action",action).put("payload",payload);
-            if(!getPreferences(0).edit().putString("request-"+owner,requestId).putString("requestData-"+owner,saved.toString()).commit())throw new Exception("REQUEST_LOCAL_SAVE_FAILED");
-        } catch(Exception error){writeBusy=false;return;}
-        statusText.setText(english ? "Sending request…" : "Auftrag wird gesendet…");
-        network.execute(() -> {
-            try{
-                String id=new SharedArchiveClient(token).submit(snapshot,action,payload,requestId);
-                getPreferences(0).edit().putString("request-"+owner,id).apply();
-                handler.post(() -> {
-                    if(generation!=googleGeneration || isFinishing())return;
-                    writeBusy=false; statusText.setText(english ? "Request waiting. Keep the source desktop running. Tap Reload to check." : "Auftrag wartet. Quell-Desktop laufen lassen. Mit Archiv laden prüfen.");
-                });
-            }catch(Exception e){handler.post(() -> {if(generation!=googleGeneration)return;writeBusy=false;statusText.setText(english ? "Request could not be confirmed. Reload before retrying." : "Auftrag nicht bestätigt. Vor erneutem Versuch Archiv laden.");});}
-        });
+            archiveCopy.edit(action,payload);refreshLocalCopy();
+            statusText.setText(english ? "Saved locally. Google transfer runs in the background." : "Lokal gespeichert. Google-Übertragung läuft im Hintergrund.");
+        }catch(Exception error){statusText.setText(english ? "Could not save locally. Nothing confirmed." : "Lokal konnte nicht gespeichert werden. Nichts bestätigt.");}
     }
-    private void checkPendingRequest() {
-        if(googleUser==null || googleAccessToken.isEmpty() || writeBusy)return;
-        final String owner=googleUser.owner,token=googleAccessToken,id=getPreferences(0).getString("request-"+googleUser.owner,"");
-        if(id.isEmpty())return;
-        final int generation=googleGeneration;
-        network.execute(() -> {
-            try{
-                SharedArchiveClient client=new SharedArchiveClient(token);
-                JSONObject result=client.result(owner,id);
-                if(result==null){
-                    String saved=getPreferences(0).getString("requestData-"+owner,"");
-                    if(!saved.isEmpty()) { JSONObject request=new JSONObject(saved);client.submit(request.getJSONObject("snapshot"),request.getString("action"),request.getJSONObject("payload"),id); }
-                }
-                final JSONObject receipt=result;
-                handler.post(() -> {
-                    if(generation!=googleGeneration || isFinishing())return;
-                    if(receipt==null){statusText.setText(english ? "Request still waiting for source desktop." : "Auftrag wartet noch auf den Quell-Desktop.");return;}
-                    getPreferences(0).edit().remove("request-"+owner).remove("requestData-"+owner).apply();
-                    String code=receipt.optString("code");
-                    statusText.setText(receipt.optBoolean("ok") ? (english ? "Archive request completed by desktop." : "Archivauftrag vom Desktop abgeschlossen.") :
-                        (code.equals("REQUEST_STALE") ? (english ? "Archive changed meanwhile. Reload and repeat your change." : "Archiv inzwischen geändert. Neu laden und Änderung wiederholen.") : (english ? "Request failed. Check desktop log." : "Auftrag fehlgeschlagen. Desktop-Log prüfen.")));
-                    loadArchive();
-                });
-            }catch(Exception e){handler.post(() -> {if(generation==googleGeneration)statusText.setText(english ? "Request status unavailable. Please retry Reload." : "Auftragsstatus nicht erreichbar. Archiv laden erneut versuchen.");});}
-        });
-    }
+    private void checkPendingRequest() { refreshLocalCopy(); }
     private void askForSeason() {
         if(!writeReady() || selectedTmdbId<=0)return;
         EditText input=new EditText(this);input.setText("1");input.setTextColor(Color.BLACK);input.setInputType(InputType.TYPE_CLASS_NUMBER);
@@ -436,7 +381,7 @@ public class MainActivity extends Activity {
                         handler.post(() -> {if(generation!=googleGeneration || isFinishing())return;
                             archiveDialogOpen=true;
         new AlertDialog.Builder(this).setTitle(english ? "Archive and calendar" : "Archiv und Kalender")
-                                .setMessage(detail.optString("name")+" · S"+season+" · "+dates.length()+(english ? " episodes. Process on source desktop?" : " Folgen. Am Quell-Desktop verarbeiten?"))
+                                .setMessage(detail.optString("name")+" · S"+season+" · "+dates.length()+(english ? " episodes. Save on this device?" : " Folgen. Auf diesem Gerät speichern?"))
                                 .setPositiveButton(english ? "Send" : "Senden",(dialog,which)->sendRequest("insert",payload))
                                 .setNegativeButton(english ? "Cancel" : "Abbrechen",null).setOnDismissListener(_closedDialog -> archiveDialogOpen=false).show();});
                     }catch(Exception e){handler.post(()->{if(generation==googleGeneration)statusText.setText(english ? "Season unavailable or episode dates incomplete. Nothing sent." : "Staffel nicht verfügbar oder Folgentermine unvollständig. Nichts gesendet.");});}
@@ -466,6 +411,7 @@ public class MainActivity extends Activity {
         googleGeneration++;
         archiveGeneration++;
         handler.removeCallbacksAndMessages(null);
+        if(archiveCopy!=null)archiveCopy.close();
         network.shutdownNow(); pictures.shutdownNow(); posterCache.evictAll(); posterGeneration++;
         super.onDestroy();
     }
@@ -824,8 +770,15 @@ public class MainActivity extends Activity {
         archiveRows=new LinearLayout(this); archiveRows.setOrientation(LinearLayout.VERTICAL);
         ScrollView archiveScroll=new ScrollView(this); archiveScroll.addView(archiveRows);
         right.addView(archiveScroll,new LinearLayout.LayoutParams(-1,0,1));
+        copySyncStatus=text("",11,MUTED);right.addView(copySyncStatus);
+        copySyncButton=verticalButton(english ? "Sync now" : "Jetzt synchronisieren");
+        copySyncButton.setOnClickListener(v->{if(archiveCopy!=null && !archiveCopy.busy())archiveCopy.schedule(0);});right.addView(copySyncButton);
         Button reload=verticalButton(archiveText("RELOAD"));
         reload.setOnClickListener(v -> { loadArchive(); checkPendingRequest(); }); right.addView(reload);
+        Button log=verticalButton("Log");
+        log.setOnClickListener(v->{try{TextView lines=text(archiveCopy==null?"":archiveCopy.readLog(),11,Color.BLACK);ScrollView scroll=new ScrollView(this);scroll.addView(lines);
+            archiveDialogOpen=true;new AlertDialog.Builder(this).setTitle("SerKal Log").setView(scroll).setPositiveButton(english?"Close":"Schließen",null).setOnDismissListener(d->archiveDialogOpen=false).show();
+        }catch(Exception error){statusText.setText(english?"Log unavailable":"Log nicht verfügbar");}});right.addView(log);
         renderArchive();
         columns.addView(right);
 
@@ -836,6 +789,7 @@ public class MainActivity extends Activity {
         if (googleBusy) statusText.setText(english ? "Connecting to Google…" : "Google wird verbunden…");
         selectedPoster=previousPoster;selectedPosterPath=previousPath;posterImage.setImageBitmap(previousPoster);
         renderSuggestions(displayedResults);
+        refreshLocalCopy();
         if (selectedTmdbId>0 && previousPoster==null) showPoster(selectedTmdbId, selectedDetail==null ? null : selectedDetail.optString("poster_path"));
         else if (selectedTmdbId==0 && displayedResults.isEmpty() && previousQuery.length()>=2 && !credential.isEmpty()) searchNow();
     }
