@@ -1,0 +1,29 @@
+plugins { id 'com.android.application' }
+
+def previewVersion = '0.0.5a12'
+
+android {
+    namespace 'de.serkal.android.preview'
+    compileSdk 35
+
+    defaultConfig {
+        // Stable application identity throughout the 0.0.5 previews.
+        applicationId 'de.serkal.android.preview.v005'
+        minSdk 24
+        targetSdk 35
+        versionCode 20
+        versionName previewVersion
+        resValue 'string', 'app_name', previewVersion + ' - SerKal Android'
+    }
+    buildFeatures { buildConfig true }
+    // CI produces an unsigned APK. CE signs it with the privately retained key.
+    buildTypes { debug { signingConfig null } }
+}
+
+dependencies {
+    implementation 'com.google.android.gms:play-services-auth:22.0.0'
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.json:json:20240303'
+}
+
+

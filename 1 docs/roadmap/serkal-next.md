@@ -1,27 +1,40 @@
-# SerKal – nächste Arbeitsschritte
+# SerKal – Reihenfolge nach der Arbeitsunterbrechung
 
-Stand: 14.10.2026 · CE · nach Kurts Vorgaben vom 12.–14.10.
+Stand: 14.10.2026 · CE · Arbeitsstand: ../checkpoints/2026-10-14/ARBEITSSTAND.md
 
-## Android fertigstellen
+## Kleine Einzelaufträge
 
-1. **Ohne laufenden Quell-PC arbeiten.** Gegenwärtig werden Handyaufträge am Quell-Desktop verarbeitet. Der gemeinsame Snapshot enthält nur Anzeigedaten. Ein vollständiger, geprüfter gemeinsamer Schreibstand und konkurrierende Schreibprüfung müssen vor direktem Android-Schreiben fertig sein. Keine bloße Umschaltung des publisher-Feldes und keine Rekonstruktion des Archivs allein aus aktiven Terminen.
-2. **Laptop als Hauptrechner übernehmen.** Vollständige Original-/DE-Startanker, ursprüngliche Termine, Notizen, manuelle Schutzflags und das vorhandene Kalenderziel übernehmen. Alten Schreiber kontrolliert stilllegen. Lokale Archive vorher sichern; kein neues Kalenderziel bei bestehender ID erzeugen.
-3. **Desktop-ähnliche Optik.** Suche – Anzeige/Bearbeitung – Archiv, verwandte Farben und verständliche Schaltflächen, auf Pixel und Tablet lesbar. a8 ergänzt Poster und gespeicherte Hell-/Dunkel-Auswahl; eine abschließende Sichtprüfung steht aus.
-4. **Version eindeutig anzeigen.** a8 korrigiert den veralteten Android-Anzeigenamen a5; Startkopf nutzt die Build-Version.
-5. **Strukturierter Abschlusstest.** Eingabe, Offset/Notiz, ganze Serie löschen, Neustart, Konto-/Netzwechsel, wartende Aufträge, Änderungen auf den vier Geräten und Schutz offener Eingaben prüfen. Kein fertiger unabhängiger Vier-Gerätebetrieb behaupten.
+1. Arbeitsstand sichern und prüfen: dieser Dokumentationsauftrag. Windows Alpha 15 gespeichert,
+   22 Testskripte bestanden; Android a11-CI mit 21 Tests bestanden. Vier lokale Reständerungen
+   getrennt als .pending gesichert. Keine neue installierbare Android-APK freigegeben.
+2. Ausschließlich Windows: Alpha 15 prüfen und erste vollständige Archivübernahme mit Kurt testen.
+3. Ausschließlich Android: Reständerungen prüfen, passende neue APK bauen/signieren/verifizieren.
+4. Gerätewechsel: PC → Handy, Handy → Laptop, anschließend Netz-/Prozessabbruch und Wiederaufnahme.
+5. **Ursprünglicher Punkt 1A:** geprüfte Vorab-APK auf der Website anbieten, mit direktem
+   Android-Downloadknopf und QR-Code. Dies geschieht vor Wartung und vollständiger Funktionsgleichheit.
+6. Wartung mit eigener gesammelter Vorausschauliste reparieren/fertigstellen und anschließend
+   dieselbe Fachlogik auf Android verfügbar machen.
+7. Desktop und Android vergleichen, fehlende Funktionen in kleinen Aufgaben ergänzen;
+   ausdrücklich Löschen, Log-Anzeige, gut lesbare Version und Desktop-ähnliche Optik.
 
-## Desktop 1.2
+## Verbindliches neues Archivmodell
 
-- Wartung reparieren und überprüfen, ob ein fehlender Kalender vollständig aus dem Archiv aufgebaut werden kann.
-- Im Wartungslauf entdeckte neue Staffeln sammeln und am Ende als eigene übersichtliche Liste ausgeben.
-- Streaming-Anbieter der Serie anzeigen; Länderbezug berücksichtigen.
-- Mittelfristig großes Mittelfeld mit nützlichen Angaben und eventuell Trailern ergänzen.
-- Google-OAuth-Verifizierung: ausgelieferten Stand und angeforderte Rechte abgleichen, neues vollständiges Video aufnehmen, Antwort an Google steht weiterhin aus.
+Ein Nutzer mit wechselnden Geräten: beim Start vollständiges Google-Archiv laden, lokal
+arbeiten, nach echten Archivänderungen im Hintergrund synchronisieren. Beim Nachschauen,
+Suchen und Ausprobieren kein ständiger Archivtransfer. Status unterscheidet lokal gespeichert,
+ausstehend/laufend und bei Google bestätigt. Zusätzlich „Jetzt synchronisieren“.
+Bei Platzknappheit Lesen erlauben und Schreiben sperren. Unterbrechung erhält lokale Daten;
+älterer Transfer darf neuere lokale Änderung nicht als erledigt behandeln.
 
-## Nach der abgeschlossenen 1.2
+Damit wird der frühere feste Quell-PC ersetzt; der Laptop braucht danach keine besondere
+Hauptrechnerrolle. Nur die Erstübernahme erfolgt kontrolliert vom bisherigen Quell-PC.
 
-- Filme zusätzlich zu Serien: gemeinsame Suche, Poster, Beschreibungen, Archiv; Kino-/Streaming-/Kaufstarts unterscheiden. Kalenderauswahl pro Veröffentlichungsart fachlich vor Umsetzung festlegen.
+## Weitere Wünsche
 
-## Play Store
-
-Veröffentlichung eigenständig vorbereiten: Entwicklerkonto/-verifikation, dauerhaftes Paket und Produktionssignatur inklusive OAuth-Zuordnung, AAB, Storetexte/Bilder, Altersfreigabe, Datenschutzlink in der App und Datensicherheitsangaben. Bei einschlägigem neuem Privatkonto mindestens zwölf Tester mit vierzehn durchgängigen Tagen im geschlossenen Test; konkrete Play-Console-Anforderungen beim Einrichten erneut prüfen. Veröffentlichung ersetzt keine OAuth-Prüfung.
+- Streaming-Anbieter mit Länderbezug anzeigen.
+- Großes Mittelfeld mit nützlichen Angaben und eventuell Trailern ergänzen.
+- Filme nach der abgeschlossenen 1.2 ergänzen; Kino-/Streaming-/Kaufstarts unterscheiden.
+- Google-OAuth-Verifizierung: Veröffentlichungsstand/Rechte abgleichen, neues Video und Antwort offen.
+- Play Store separat vorbereiten: Entwicklerkonto, Produktionssignatur/OAuth, AAB, Storeangaben,
+  Datenschutz/Datensicherheit und die für das Konto erforderliche Testgruppe. Website-APK ist
+  eine eigene vorherige Etappe und ersetzt weder Play-Freigabe noch OAuth-Prüfung.

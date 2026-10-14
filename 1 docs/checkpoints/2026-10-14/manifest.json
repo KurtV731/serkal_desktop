@@ -1,0 +1,26 @@
+{
+  "date": "2026-10-14",
+  "desktop": {
+    "branch": "serkal-0.0.5-archiv-start",
+    "version": "1.2.0-alpha.15",
+    "sha": "b6d25a79bbe3c95735e8d25382407508983506f7",
+    "tests": 22
+  },
+  "android": {
+    "branch": "android-preview-0.0.5",
+    "version": "0.0.5a11",
+    "versionCode": 19,
+    "sha": "fb0744f90b420f3b25f5cfa41d7fe3ba8836cf38",
+    "workflowRun": 38595315565,
+    "tests": 21,
+    "unsigned": true,
+    "delivered": false
+  },
+  "pendingFiles": [
+    "1 docs/checkpoints/2026-10-14/MainActivity.java.pending",
+    "1 docs/checkpoints/2026-10-14/app-build.gradle.pending",
+    "1 docs/checkpoints/2026-10-14/android-preview.yml.pending",
+    "1 docs/checkpoints/2026-10-14/archive-copy-v2.md.pending"
+  ],
+  "developmentPaused": true
+}

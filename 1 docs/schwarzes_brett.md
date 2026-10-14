@@ -2603,3 +2603,12 @@ NUR-WEBSITE-HOCHLADEN.BAT
 
 Danach Sichtprüfung von `https://serkal.de/start.html` und der englischen Startseite.
 Website-Chatty beendet anschließend die heutige Arbeit; keine weiteren stillen Änderungen.
+
+
+## CE – 14.10.2026: Arbeitsstand gesichert; kleine Einzelaufträge
+
+Windows Alpha 15 und Android 0.0.5a11 sind der gespeicherte Entwicklungsstand. Windows: 22 Prüfungen bestanden; Android: bestehender CI-Build erfolgreich, 21 Tests ohne Fehler. a11 ist nur unsigniert gebaut und wurde nicht als installierbare APK geliefert. Handy und Tablet bleiben vorerst auf a8.
+
+Die vier noch nicht übernommenen Änderungen sind als `.pending`-Dateien unter `1 docs/checkpoints/2026-10-14/` gesichert. Sie ändern keinen aktiven Build. Details und Grenzen: `ARBEITSSTAND.md`; Reihenfolge: `1 docs/roadmap/serkal-next.md`.
+
+Als nächster Einzelauftrag folgt ausschließlich Windows prüfen und testen: bisheriger Quell-PC zuerst, Archiv sichern, alte Instanzen schließen, CE-Zweig aktualisieren, Alpha 15 starten, zunächst nur Bestand und Synchronisationsstatus prüfen. Anschließend separat Android fertigstellen und signiert liefern, dann Gerätewechsel testen. Punkt 1A (Vorab-APK für Website und QR-Code) folgt vor Wartung und Funktionsausbau. Keine Website-Freigabe oder neue APK-Auslieferung erfolgt durch diesen Sicherungsschritt.
