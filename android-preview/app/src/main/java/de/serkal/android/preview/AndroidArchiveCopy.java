@@ -16,9 +16,10 @@ final class AndroidArchiveCopy {
     private final AtomicFile disk;
     private final File directory;
     private final ScheduledExecutorService worker=Executors.newSingleThreadScheduledExecutor();
-    private JSONObject state;
+    private JSONObject state,readOnlyRecord;
     private volatile String token;
     private volatile boolean closed,busy;
+    private boolean loaded;
     private String status="loading",error="";
     private Listener listener;
     private File logFile;
@@ -36,7 +37,7 @@ final class AndroidArchiveCopy {
         }catch(FileNotFoundException absent){}catch(Exception invalid){error="COPY_LOCAL_STATE_INVALID";}
     }
     private synchronized void save(JSONObject value) throws Exception {
-        if(closed)throw new Exception("COPY_CLOSED");FileOutputStream out=null;
+        if(closed)throw new Exception("COPY_CLOSED");if(!spaceFor(value))throw new Exception("COPY_LOW_SPACE");FileOutputStream out=null;
         try {out=disk.startWrite();out.write(value.toString().getBytes(StandardCharsets.UTF_8));disk.finishWrite(out);state=value;}
         catch(Exception failure){if(out!=null)disk.failWrite(out);throw failure;}
     }
@@ -50,13 +51,14 @@ final class AndroidArchiveCopy {
         StringBuilder text=new StringBuilder();try(BufferedReader reader=new BufferedReader(new InputStreamReader(new FileInputStream(logFile),StandardCharsets.UTF_8))){String line;while((line=reader.readLine())!=null){text.append(line).append('\n');if(text.length()>20000)text.delete(0,text.length()-15000);}}catch(FileNotFoundException absent){}
         return text.toString();
     }
-    private synchronized boolean space(){long bytes=state.toString().getBytes(StandardCharsets.UTF_8).length;return directory.getUsableSpace()>=Math.max(10*1024*1024L,bytes*3+1024*1024L);}
-    synchronized boolean writable(){return state.has("record") && space() && !fatal() && !closed;}
+    private boolean spaceFor(JSONObject value){long bytes=value.toString().getBytes(StandardCharsets.UTF_8).length;return directory.getUsableSpace()>=Math.max(10*1024*1024L,bytes*3+1024*1024L);}
+    private synchronized boolean space(){return spaceFor(state);}
+    synchronized boolean writable(){return loaded && state.has("record") && space() && !fatal() && !closed;}
     private boolean fatal(){return error.matches("COPY_(CONFLICT|ACCOUNT_CHANGED|LOCAL_STATE_INVALID|INVALID|HISTORY_MISSING|NEEDS_SOURCE|LEGACY_PENDING)");}
     synchronized String status(){if(!space())return "COPY_LOW_SPACE";if(!error.isEmpty())return error;return status;}
     boolean busy(){return busy;}
     synchronized JSONObject snapshot() throws Exception {
-        if(!state.has("record"))return null;JSONObject r=state.getJSONObject("record");
+        if(readOnlyRecord==null && !state.has("record"))return null;JSONObject r=readOnlyRecord!=null?readOnlyRecord:state.getJSONObject("record");
         return new JSONObject().put("owner",owner).put("generatedAt",r.getString("generatedAt")).put("entries",ArchiveCodec.entries(r));
     }
     synchronized void edit(String action,JSONObject payload) throws Exception {
@@ -64,6 +66,7 @@ final class AndroidArchiveCopy {
         JSONObject next=new JSONObject(state.toString());next.put("record",ArchiveCodec.edit(next.getJSONObject("record"),action,payload));
         next.put("dirty",true).put("epoch",next.getLong("epoch")+1);save(next);status="pending";error="";log("LOCAL_SAVED","");notifyChange();schedule(1);
     }
+    synchronized boolean useOfflineCache(){loaded=state.has("record") && !fatal();if(loaded){status=state.optBoolean("dirty")?"pending":"offline";error="COPY_CONNECT";}return loaded;}
     void updateToken(String token){this.token=token;}
     void setListener(Listener listener){this.listener=listener;}
     synchronized void schedule(int seconds){if(closed)return;if(scheduled!=null)scheduled.cancel(false);scheduled=worker.schedule(this::synchronize,seconds,TimeUnit.SECONDS);}
@@ -88,6 +91,7 @@ final class AndroidArchiveCopy {
         synchronized(this){if(closed||busy)return;busy=true;status="syncing";log("SYNC_START","");}notifyChange();
         try {
             if(error.equals("COPY_LOCAL_STATE_INVALID"))throw new Exception(error);
+            if(token==null || token.isEmpty())throw new Exception("COPY_CONNECT");
             ArchiveCopyClient client=new ArchiveCopyClient(token);if(!owner.equals(client.owner()))throw new Exception("COPY_ACCOUNT_CHANGED");
             JSONObject tip=ArchiveCopyClient.head(client.list(ArchiveCodec.PREFIX),owner);String revision=tip==null?"":tip.getJSONObject("appProperties").getString("revision");
             JSONObject pending;String base;boolean dirty;
@@ -116,11 +120,12 @@ final class AndroidArchiveCopy {
                         next.put("record",record).put("dirty",true).put("epoch",1);if(!space())throw new Exception("COPY_LOW_SPACE");save(next);status="pending";schedule(1);}
                 } else if(!revision.equals(base)) {
                     JSONObject record=client.load(tip,owner);
-                    synchronized(this){if(state.optBoolean("dirty"))throw new Exception("COPY_CONFLICT");if(!space())throw new Exception("COPY_LOW_SPACE");
-                        JSONObject next=new JSONObject(state.toString());next.put("record",record).put("base",revision).put("lastSynced",now());save(next);status="saved";error="";}
+                    synchronized(this){if(state.optBoolean("dirty"))throw new Exception("COPY_CONFLICT");
+                        JSONObject next=new JSONObject(state.toString());next.put("record",record).put("base",revision).put("lastSynced",now());
+                        if(!spaceFor(next)){readOnlyRecord=record;throw new Exception("COPY_LOW_SPACE");}save(next);readOnlyRecord=null;status="saved";error="";}
                 } else synchronized(this){status="saved";error="";}
             }
         }catch(Exception failure){synchronized(this){if(!closed){error=String.valueOf(failure.getMessage());status="error";if(state.optBoolean("dirty") && !fatal())schedule(30);}}}
-        finally {synchronized(this){busy=false;log("SYNC_END",error);}notifyChange();}
+        finally {synchronized(this){busy=false;if(state.has("record") && !fatal())loaded=true;log("SYNC_END",error);}notifyChange();}
     }
 }

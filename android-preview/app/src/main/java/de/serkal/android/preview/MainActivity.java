@@ -107,6 +107,7 @@ public class MainActivity extends Activity {
                     if (generation != googleGeneration || isFinishing()) return;
                     googleBusy = false;
                     googleUser = user;
+                    getPreferences(0).edit().putString("lastOwner",user.owner).putString("lastEmail",user.email).apply();
                     loadArchive();
                     if (!loaded.key.isEmpty()) {
                         credential = loaded.key;
@@ -167,6 +168,19 @@ public class MainActivity extends Activity {
             + ((ApiException)error).getStatusCode() + (english ? ". Check Android OAuth package and signing SHA-1." : ". Android-OAuth-Paket und Signatur-SHA-1 prüfen.");
         else message = english ? "Google/key connection failed. Please retry." : "Google-/Schlüsselverbindung fehlgeschlagen. Bitte erneut versuchen.";
         statusText.setText(message);
+        if(googleUser==null)restoreLocalArchive();
+    }
+    private void restoreLocalArchive() {
+        String owner=getPreferences(0).getString("lastOwner","");if(owner.isEmpty())return;
+        try {
+            googleAccessToken="";
+            if(archiveCopy==null || !archiveCopy.owner.equals(owner)){
+                if(archiveCopy!=null)archiveCopy.close();archiveCopy=new AndroidArchiveCopy(this,owner,"",()->handler.post(this::refreshLocalCopy));
+            }
+            if(!archiveCopy.useOfflineCache())return;
+            credential=KeyCache.load(this,owner);googleUser=new SharedKeyClient.Result(credential,owner,getPreferences(0).getString("lastEmail",""));
+            refreshLocalCopy();statusText.setText(googleUser.email+(english ? "\nOffline local archive. Google transfer is pending." : "\nLokales Archiv ohne Verbindung. Google-Übertragung ausstehend."));
+        }catch(Exception ignored){}
     }
 
     private int BG = Color.rgb(8, 13, 18);
@@ -274,6 +288,7 @@ public class MainActivity extends Activity {
         else if(code.equals("COPY_CONFLICT"))label=english ? "Newer archive on Google · local copy preserved" : "Neuerer Archivstand bei Google · lokale Kopie bleibt erhalten";
         else if(code.equals("COPY_NEEDS_SOURCE"))label=english ? "First transfer: start the new desktop version on the previous source PC" : "Erste Übernahme: neue Desktop-Version am bisherigen Quell-PC starten";
         else if(code.equals("COPY_CALENDAR_PROTECTED"))label=english ? "Manual Calendar changes protected · synchronization paused" : "Manuelle Kalenderänderungen geschützt · Abgleich angehalten";
+        else if(code.equals("COPY_CONNECT"))label=english ? "Local copy · connect Google to transfer" : "Lokale Kopie · zum Übertragen Google verbinden";
         else if(code.equals("COPY_ACCOUNT_CHANGED"))label=english ? "Google account does not match archive" : "Google-Konto passt nicht zum Archiv";
         else if(code.equals("loading"))label=english ? "Loading archive…" : "Archiv wird geladen…";
         else label=english ? "Transfer pending · local copy preserved · retry Sync now" : "Übertragung ausstehend · lokale Kopie bleibt erhalten · Jetzt synchronisieren versuchen";
