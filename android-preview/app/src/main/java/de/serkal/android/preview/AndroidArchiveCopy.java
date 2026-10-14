@@ -16,7 +16,8 @@ final class AndroidArchiveCopy {
     private final AtomicFile disk;
     private final File directory;
     private final ScheduledExecutorService worker=Executors.newSingleThreadScheduledExecutor();
-    private JSONObject state,readOnlyRecord;
+    private volatile JSONObject state;
+    private JSONObject readOnlyRecord;
     private volatile String token;
     private volatile boolean closed,busy;
     private boolean loaded;
@@ -93,24 +94,27 @@ final class AndroidArchiveCopy {
             if(error.equals("COPY_LOCAL_STATE_INVALID"))throw new Exception(error);
             if(token==null || token.isEmpty())throw new Exception("COPY_CONNECT");
             ArchiveCopyClient client=new ArchiveCopyClient(token);if(!owner.equals(client.owner()))throw new Exception("COPY_ACCOUNT_CHANGED");
-            JSONObject tip=ArchiveCopyClient.head(client.list(ArchiveCodec.PREFIX),owner);String revision=tip==null?"":tip.getJSONObject("appProperties").getString("revision");
+            List<JSONObject> remoteFiles=client.list(ArchiveCodec.PREFIX);JSONObject tip=ArchiveCopyClient.head(remoteFiles,owner);String revision=tip==null?"":tip.getJSONObject("appProperties").getString("revision");
             JSONObject pending;String base;boolean dirty;
-            synchronized(this){dirty=state.optBoolean("dirty");base=state.optString("base");pending=state.optJSONObject("pending");}
+            synchronized(this){dirty=state.optBoolean("dirty");base=state.optString("base");pending=state.has("pending")?new JSONObject(state.getJSONObject("pending").toString()):null;}
             if(dirty) {
-                if(pending!=null && revision.equals(pending.getString("revision"))) {
-                    JSONObject confirmed=client.load(tip,owner);
+                if(pending!=null && (revision.equals(pending.getString("revision")) || state.has("pendingFileId"))) {
+                    if(!revision.isEmpty() && !revision.equals(base) && !revision.equals(pending.getString("revision")))throw new Exception("COPY_CONFLICT");
+                    JSONObject proof=revision.equals(pending.getString("revision"))?tip:new JSONObject().put("id",state.getString("pendingFileId")).put("appProperties",new JSONObject().put("revision",pending.getString("revision")).put("parent",pending.getString("parent")));
+                    JSONObject confirmed=client.load(proof,owner);
                     if(!confirmed.getJSONArray("files").toString().equals(pending.getJSONArray("files").toString()))throw new Exception("COPY_CONFLICT");
-                    synchronized(this){JSONObject next=new JSONObject(state.toString());boolean same=next.getLong("epoch")==next.getLong("pendingEpoch");next.put("base",revision).put("dirty",!same);
-                        next.getJSONObject("record").put("revision",revision).put("parent",confirmed.getString("parent")).put("generatedAt",confirmed.getString("generatedAt"));
-                        next.remove("pending");next.remove("pendingEpoch");next.put("lastSynced",now());save(next);status=same?"saved":"pending";error="";if(!same)schedule(1);}
+                    synchronized(this){JSONObject next=new JSONObject(state.toString());boolean same=next.getLong("epoch")==next.getLong("pendingEpoch");next.put("base",confirmed.getString("revision")).put("dirty",!same);
+                        next.getJSONObject("record").put("revision",confirmed.getString("revision")).put("parent",confirmed.getString("parent")).put("generatedAt",confirmed.getString("generatedAt"));
+                        next.remove("pending");next.remove("pendingFileId");next.remove("pendingEpoch");next.put("lastSynced",now());save(next);status=same?"saved":"pending";error="";if(!same)schedule(1);}
                 } else {
                     if(!revision.equals(base))throw new Exception("COPY_CONFLICT");
                     if(pending==null)synchronized(this){JSONObject next=new JSONObject(state.toString());pending=new JSONObject(next.getJSONObject("record").toString());
                         pending.put("revision",java.util.UUID.randomUUID().toString()).put("parent",base).put("generatedAt",now());next.put("pending",pending).put("pendingEpoch",next.getLong("epoch"));save(next);}
+                    pending=new JSONObject(pending.toString());
                     ensureCalendar(client,pending);CalendarCopy.synchronize(client,pending);
                     JSONObject latest=ArchiveCopyClient.head(client.list(ArchiveCodec.PREFIX),owner);
                     if(!(latest==null?"":latest.getJSONObject("appProperties").getString("revision")).equals(base))throw new Exception("COPY_CONFLICT");
-                    client.upload(pending);schedule(1);
+                    String uploaded=client.upload(pending);synchronized(this){JSONObject next=new JSONObject(state.toString());next.put("pendingFileId",uploaded);save(next);}schedule(1);
                 }
             } else {
                 if(tip==null) {
@@ -119,6 +123,7 @@ final class AndroidArchiveCopy {
                         .put("parent","").put("generatedAt",now()).put("calendar",new JSONObject().put("mode","google").put("id","" )).put("files",new JSONArray());
                         next.put("record",record).put("dirty",true).put("epoch",1);if(!space())throw new Exception("COPY_LOW_SPACE");save(next);status="pending";schedule(1);}
                 } else if(!revision.equals(base)) {
+                    if(!base.isEmpty()){boolean known=false;for(JSONObject f:remoteFiles)if(base.equals(f.getJSONObject("appProperties").getString("revision")))known=true;if(!known)throw new Exception("COPY_HISTORY_MISSING");}
                     JSONObject record=client.load(tip,owner);
                     synchronized(this){if(state.optBoolean("dirty"))throw new Exception("COPY_CONFLICT");
                         JSONObject next=new JSONObject(state.toString());next.put("record",record).put("base",revision).put("lastSynced",now());

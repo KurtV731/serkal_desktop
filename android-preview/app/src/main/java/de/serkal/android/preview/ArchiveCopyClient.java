@@ -49,11 +49,11 @@ final class ArchiveCopyClient {
         JSONObject r=ArchiveCodec.validate(get("https://www.googleapis.com/drive/v3/files/"+esc(file.getString("id"))+"?alt=media"),owner);
         if(!r.getString("revision").equals(file.getJSONObject("appProperties").getString("revision")) || !r.getString("parent").equals(file.getJSONObject("appProperties").getString("parent")))throw new Exception("COPY_INVALID");return r;
     }
-    void upload(JSONObject record) throws Exception {
+    String upload(JSONObject record) throws Exception {
         ArchiveCodec.validate(record,record.getString("owner"));String id=record.getString("revision"),boundary="serkal-"+id;
         JSONObject meta=new JSONObject().put("name",ArchiveCodec.PREFIX+id+".json").put("mimeType","application/json").put("parents",new JSONArray().put("appDataFolder"))
             .put("appProperties",new JSONObject().put("owner",record.getString("owner")).put("revision",id).put("parent",record.getString("parent").isEmpty()?"root":record.getString("parent")));
         String body="--"+boundary+"\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n"+meta+"\r\n--"+boundary+"\r\nContent-Type: application/json\r\n\r\n"+record+"\r\n--"+boundary+"--\r\n";
-        request("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id","POST",body,"multipart/related; boundary="+boundary);
+        return request("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id","POST",body,"multipart/related; boundary="+boundary).getString("id");
     }
 }
