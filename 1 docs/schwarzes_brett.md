@@ -2467,3 +2467,34 @@ eigene Vorausschauliste, Streaming-Anbieter, spätere Filme und Play-Store-Vorbe
 Google-OAuth-Antwort/neues Video weiterhin offen; keine E-Mail gesendet.
 Website-Chatty: Bilder werden nun direkt von image.tmdb.org geladen; vor Veröffentlichung
 Android-Entwicklungsbeschreibung und Datenschutzhinweise dazu abgleichen.
+
+
+### 2026-10-14 – Website-Chatty – Startseite erklärt zuerst den Nutzen
+
+Status: **QUELLSTAND FERTIG / SERVER-UPLOAD UND SICHTPRÜFUNG DURCH KURT OFFEN**
+
+Auf Kurts Auftrag beginnt die deutsche und englische SerKal-Startseite nicht mehr mit
+TMDB-, Google-Kalender- und Archivtechnik, sondern unmittelbar mit dem Nutzen:
+
+> SerKal merkt sich deine Serien – damit du es nicht musst.
+
+Die neue Schnelllesestruktur nennt zuerst die drei Entlastungen „nicht alles merken“,
+„wissen, wann es weitergeht“ und „den Faden wiederfinden“. Danach folgen konkrete
+Beispiele für Vielseher, planende Nutzer sowie Menschen, deren Gedächtnis durch Alter,
+Krankheit, Stress oder einen vollen Kopf entlastet werden soll. Navigation und alle
+übrigen Seiten bleiben oben erreichbar. Die Entstehungsgeschichte und der Download
+sind als nächste, klar getrennte Schritte verlinkt.
+
+Zusätzlich wurde ein eigener, lokal ausgelieferter SVG-QR-Code eingebaut. Er führt zu
+`https://serkal.de/download.html`; es wird kein externer QR-Dienst geladen. Der QR-Code
+behauptet keinen veröffentlichten Android-Download. Die englische Startseite wurde
+inhaltlich gleichwertig aktualisiert.
+
+Website-Commits:
+- QR-Code: `9eabd76c645c5074ecfe8bfb24e3e5784d5375c5`
+- deutsche Startseite: `0ef0177f8d35602bdb1459eb27338342e1b9b46b`
+- englische Startseite: `1fcf4e19410d108a45cd956a1c591fdf1386c6b7`
+
+Alle drei Dateien nach dem Commit von GitHub zurückgelesen und auf Leittext,
+Beispielabschnitte und QR-Einbindung kontrolliert. Server-Upload erfolgt über Kurts
+`NUR-WEBSITE-HOCHLADEN.BAT`; anschließende Sichtprüfung im Browser bleibt offen.
