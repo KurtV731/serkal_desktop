@@ -1869,6 +1869,7 @@
 
           <div class="archivHeaderRight">
             <!-- Umschalter: Status ? A–Z -->
+            <button class="btnSmall" id="btnArchiveSync" type="button"></button>
             <button class="btnSmall" id="btnArchiveReload" type="button" title=""></button>
             <button class="btnSmall" id="btnSortToggle" type="button" title="">Status</button>
 
@@ -1885,6 +1886,7 @@
             <!-- Einträge werden per apiLadeArchivDaten gefüllt -->
           </div>
 
+          <div class="hint" id="archiveSyncStatus" role="status" aria-live="polite"></div>
           <div class="hint" id="archivHint"></div>
         </div>
       </section>
@@ -3852,6 +3854,18 @@ const I18N = {
     BTN_LOG_DOCK: '📜 Log',
     BTN_SAVE_DOCK: '💾 Speichern',
     TT_SAVE_DOCK: 'Nachträgliche Änderungen an Archivnotizen und Status speichern',
+    BTN_ARCHIVE_SYNC: "Jetzt synchronisieren",
+    COPY_UI_UNSAVED: 'Ungespeicherte Eingabe · zuerst speichern',
+    COPY_UI_LOADING: "Archiv wird geladen – Lesen möglich",
+    COPY_UI_PENDING: "Lokal gespeichert · Übertragung ausstehend",
+    COPY_UI_SYNCING: "Übertragung läuft · du kannst weiterarbeiten",
+    COPY_UI_SAVED: "Bei Google gespeichert · auf anderen Geräten verfügbar",
+    COPY_UI_ERROR: "Übertragung ausstehend · lokale Kopie bleibt erhalten",
+    COPY_UI_LOW_SPACE: "Zu wenig freier Speicher · nur Lesen möglich",
+    COPY_UI_CONFLICT: "Neuerer Archivstand bei Google · lokale Kopie bleibt erhalten",
+    COPY_UI_CONNECT: "Google verbinden · vorhandene lokale Kopie bleibt erhalten",
+    COPY_UI_SOURCE: "Erste Übernahme: bitte am bisherigen Quell-PC starten",
+    COPY_UI_CALENDAR: "Kalenderabgleich ausstehend · Log prüfen",
     ARCHIVE_CHANGED_PENDING: 'Neuer Archivstand vorhanden. Bitte offene Änderungen zuerst speichern.',
     BTN_ARCHIVE_RELOAD: 'Neu laden',
     TT_ARCHIVE_RELOAD: 'Archiv vollständig aus dem eingestellten Archivordner neu einlesen',
@@ -3997,6 +4011,18 @@ const I18N = {
     BTN_LOG_DOCK: '📜 Log',
     BTN_SAVE_DOCK: '💾 Save edits',
     TT_SAVE_DOCK: 'Save later edits to archive notes and status; Insert adds a new season',
+    BTN_ARCHIVE_SYNC: "Sync now",
+    COPY_UI_UNSAVED: "Unsaved input · save first",
+    COPY_UI_LOADING: "Loading archive \u2013 reading available",
+    COPY_UI_PENDING: "Saved locally \u00b7 transfer pending",
+    COPY_UI_SYNCING: "Transfer running \u00b7 you can keep working",
+    COPY_UI_SAVED: "Saved on Google \u00b7 available on other devices",
+    COPY_UI_ERROR: "Transfer pending \u00b7 local copy preserved",
+    COPY_UI_LOW_SPACE: "Not enough free storage \u00b7 reading only",
+    COPY_UI_CONFLICT: "Newer archive on Google \u00b7 local copy preserved",
+    COPY_UI_CONNECT: "Connect Google \u00b7 existing local copy preserved",
+    COPY_UI_SOURCE: "First transfer: start on the previous source PC",
+    COPY_UI_CALENDAR: "Calendar synchronization pending \u00b7 check log",
     ARCHIVE_CHANGED_PENDING: 'A newer archive is available. Save pending edits first.',
     BTN_ARCHIVE_RELOAD: 'Reload',
     TT_ARCHIVE_RELOAD: 'Read the complete archive again from the configured archive folder',
@@ -5052,7 +5078,35 @@ async function archiveCheckRevision_() {
 }
 setInterval(archiveCheckRevision_, 2000);
 
+
+
+
 const btnArchiveReload = document.getElementById('btnArchiveReload');
+let archiveSyncButtonBusy_ = false;
+async function archiveCopyStatus_() {
+  if(!window.serkal?.archive?.syncStatus)return;
+  try {
+    const info=await window.serkal.archive.syncStatus();
+    const label=document.getElementById('archiveSyncStatus');
+    let key=info.status==='saved'?'COPY_UI_SAVED':info.status==='syncing'?'COPY_UI_SYNCING':info.status==='pending'?'COPY_UI_PENDING':info.status==='loading'?'COPY_UI_LOADING':'COPY_UI_ERROR';
+    if(info.code==='COPY_LOW_SPACE')key='COPY_UI_LOW_SPACE';
+    else if(info.code==='COPY_CONFLICT')key='COPY_UI_CONFLICT';
+    else if(info.code==='COPY_CONNECT')key='COPY_UI_CONNECT';
+    else if(info.code==='COPY_NEEDS_SOURCE')key='COPY_UI_SOURCE';
+    else if(info.code?.startsWith('COPY_CALENDAR'))key='COPY_UI_CALENDAR';
+    if(state.isDirty)key='COPY_UI_UNSAVED';
+    label.textContent=t(key);
+    const button=document.getElementById('btnArchiveSync');
+    button.disabled=info.busy||archiveSyncButtonBusy_;
+  }catch(_e){}
+}
+document.getElementById('btnArchiveSync')?.addEventListener('click',async()=>{
+  if(archiveSyncButtonBusy_ || guardDirtyBeforeAction_())return;
+  archiveSyncButtonBusy_=true;archiveCopyStatus_();
+  try{await window.serkal.archive.sync();}finally{archiveSyncButtonBusy_=false;archiveCopyStatus_();}
+});
+setInterval(archiveCopyStatus_,1000);
+archiveCopyStatus_();
 if (btnArchiveReload) btnArchiveReload.addEventListener('click', function(){
   if (state.busy || state.saveBusy || guardDirtyBeforeAction_()) return;
   state.archivSelected = null;
@@ -5091,6 +5145,7 @@ const I18N_MAP = [
   { sel: '#tmdbPreview',                       attr: { 'aria-label': 'ARIA_PREVIEW' } },
   { sel: '#hitCountText',                      attr: { 'aria-label': 'ARIA_RESULT_INFO' } },
   { sel: '#noteHelpBtn',                       attr: { title: 'NOTE_HELP', 'aria-label': 'NOTE_HELP' } },
+  { sel: '#btnArchiveSync', text: 'BTN_ARCHIVE_SYNC' },
   { sel: '#btnArchiveReload', text: 'BTN_ARCHIVE_RELOAD', attr: { title: 'TT_ARCHIVE_RELOAD', 'aria-label': 'TT_ARCHIVE_RELOAD' } },
   { sel: '#btnSortToggle',                     attr: { title: 'TT_SORT_SWITCH' } },
   { sel: '#archivCount',                       attr: { title: 'TT_ARCHIVE_COUNT' } },
@@ -9228,3 +9283,4 @@ try {
 </body>
 
 </html>
+

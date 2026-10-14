@@ -54,6 +54,8 @@ contextBridge.exposeInMainWorld("serkal", {
         poster:(id,lang)=>ipcRenderer.invoke("serkal:tmdb:poster",id,lang||"de")
     },
     archive:{
+        sync:()=>ipcRenderer.invoke("serkal:archive:sync"),
+        syncStatus:()=>ipcRenderer.invoke("serkal:archive:syncStatus"),
         revision:()=>ipcRenderer.invoke("serkal:archive:revision"),
         load:()=>ipcRenderer.invoke("serkal:archive:load"),
         insert:(payload)=>ipcRenderer.invoke("serkal:archive:insert",payload||{}),
@@ -81,3 +83,4 @@ contextBridge.exposeInMainWorld("serkal", {
         run:()=>ipcRenderer.invoke("serkal:maintenance:run")
     }
 });
+

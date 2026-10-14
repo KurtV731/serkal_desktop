@@ -1,0 +1,13 @@
+'use strict';
+const assert=require('node:assert/strict'),protocol=require('../2 src/common/archive-calendar-copy');
+const entry={title:'Serie',year:2026,seasonLabel:'S01',tmdbId:42,activeDates:['2026-10-12','2026-10-19']},revision='12345678-1234-1234-1234-123456789abc';
+const initial=protocol.plan([entry],[],revision,2026);assert.equal(initial.length,2);assert.equal(initial[0].body.summary,'Serie (2026) S01E01');
+assert.equal(initial[0].body.end.date,'2026-10-13');
+const existing=initial.map(o=>o.body);assert.deepEqual(protocol.plan([entry],existing,revision,2026),[]);
+const shifted={...entry,activeDates:['2026-10-13','2026-10-20']};assert(protocol.plan([shifted],existing,revision,2026).every(o=>o.method==='PUT'));
+assert(protocol.plan([],existing,revision,2026).every(o=>o.method==='DELETE'));
+const manual=JSON.parse(JSON.stringify(existing));manual[0].summary='My own title';assert.throws(()=>protocol.plan([shifted],manual,revision,2026),/COPY_CALENDAR_PROTECTED/);
+const grouped=protocol.plan([{...entry,activeDates:['2026-10-12','2026-10-12']}],[],revision,2026);assert.equal(grouped.length,1);assert.equal(grouped[0].body.summary,'Serie (2026) S01E01–E02');
+const unrelated={id:'personal',summary:'Birthday',start:{date:'2026-10-12'}};assert.deepEqual(protocol.plan([], [unrelated],revision,2026),[]);
+const past={...entry,activeDates:['2025-10-12']},pastEvents=protocol.plan([past],[],revision,2025).map(o=>o.body);assert.deepEqual(protocol.plan([past],pastEvents,revision,2026),[]);
+console.log('archive calendar copy: create, update, delete, manual protection, grouped episodes and past seasons passed');

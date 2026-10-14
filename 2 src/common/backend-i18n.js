@@ -3,6 +3,24 @@
 // Central language catalogue for every text created by the Electron backend.
 // No user-visible backend message may be written directly at its call site.
 const PAIRS = {
+  COPY_SYNC_LOG:["Archiv-Synchronisation", "Archive synchronization"],
+  COPY_LOADING:["Archiv wird vorbereitet. Lesen ist möglich; bitte vor Änderungen das Laden abwarten.", "Preparing archive. Reading is available; wait for loading before making changes."],
+  COPY_LOW_SPACE:["Zu wenig freier Speicher. Ansehen ist möglich, Änderungen können derzeit nicht gespeichert werden.", "Not enough free storage. You can view the archive, but changes cannot currently be saved."],
+  COPY_CONFLICT:["Ein neuerer oder konkurrierender Archivstand liegt bei Google. Deine lokale Kopie bleibt erhalten; nichts wurde überschrieben.", "A newer or conflicting archive exists on Google. Your local copy is preserved; nothing was overwritten."],
+  COPY_CONNECT:["Google verbinden. Lokale Änderungen bleiben bis zur Übertragung auf diesem Gerät.", "Connect Google. Local changes remain on this device until transferred."],
+  COPY_NEEDS_SOURCE:["Für den ersten vollständigen Archivtransfer SerKal zunächst auf dem bisherigen Quell-PC starten.", "For the first complete archive transfer, start SerKal on the previous source PC first."],
+  COPY_LEGACY_PENDING:["Ein alter Android-Auftrag wartet noch. Bitte vor dem Wechsel mit der bisherigen Desktop-Fassung abschließen.", "An old Android request is pending. Complete it with the previous desktop version before switching."],
+  COPY_ACCOUNT_CHANGED:["Google-Konto passt nicht zu dieser Archivkopie oder Kalenderverbindung. Lokale Daten wurden nicht ersetzt.", "The Google account does not match this archive copy or calendar connection. Local data was not replaced."],
+  COPY_LOCAL_STATE_INVALID:["Die lokale Synchronisationsdatei ist beschädigt. Archiv bleibt zum Lesen erhalten; bitte das Log prüfen lassen.", "The local synchronization state is damaged. The archive remains available for reading; have the log checked."],
+  COPY_INVALID:["Archivübertragung konnte nicht geprüft werden. Die bisherige Kopie bleibt erhalten.", "Archive transfer could not be validated. The previous copy is preserved."],
+  COPY_HISTORY_MISSING:["Die Archivstände bei Google sind unvollständig. Deine lokale Kopie bleibt erhalten.", "Archive history on Google is incomplete. Your local copy is preserved."],
+  COPY_FAILED:["Übertragung noch nicht abgeschlossen. Deine lokale Kopie bleibt erhalten.", "Transfer is not complete yet. Your local copy is preserved."],
+  COPY_PENDING:["Lokal gespeichert; Übertragung ausstehend.", "Saved locally; transfer pending."],
+  COPY_CALENDAR_FAILED:["Lokal gespeichert; Kalenderübertragung noch nicht abgeschlossen.", "Saved locally; calendar transfer is not complete yet."],
+  COPY_CALENDAR_PROTECTED:["Manuelle Änderungen im Google-Kalender schützen einen Termin. Lokale Änderungen bleiben erhalten; Kalenderabgleich angehalten.", "Manual changes in Google Calendar protect an event. Local changes are preserved; calendar synchronization paused."],
+  COPY_MISSING:["Noch kein vollständiges gemeinsames Archiv verfügbar.", "No complete shared archive is available yet."],
+  COPY_TOO_LARGE:["Das Archiv überschreitet die zulässige Übertragungsgröße. Lokale Daten bleiben erhalten.", "The archive exceeds the transfer size limit. Local data is preserved."],
+
   ARCHIVE_SHARED_READER:["Dieser Desktop zeigt das gemeinsame Archiv. Änderungen bitte am Quell-Desktop oder über Android ausführen.","This desktop displays the shared archive. Make changes on the source desktop or through Android."],
   REQUEST_PROCESS_FAILED:["Android-Archivauftrag konnte noch nicht verarbeitet werden.","An Android archive request could not yet be processed."],
   ARCHIVE_LOCK_BUSY:["Das Archiv wird gerade von einem anderen SerKal-Vorgang verwendet. Lesen ist weiterhin möglich; bitte den Schreibvorgang später erneut versuchen.", "The archive is currently in use by another SerKal operation. Reading remains available; retry writing later."],
@@ -111,3 +129,4 @@ function text(language, key, values) {
 }
 
 module.exports = { PAIRS, text };
+

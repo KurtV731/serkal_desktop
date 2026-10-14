@@ -823,7 +823,7 @@ async function archiveDeleteSeries_(payload) {
             };
         }
 
-        if (calendarEntries.length > 0 && calendarMode === "google") {
+        if (calendarEntries.length > 0 && calendarMode === "google" && !(typeof copyLocalMode_!=="undefined" && copyLocalMode_)) {
             const resolvedCalendar = await googleResolveSerkalCalendar_();
             const calendarId = String(resolvedCalendar.id || "").trim();
 
@@ -1013,7 +1013,7 @@ async function archiveSaveChanges_(dirtyMap) {
                     const nextEntry = archiveEntryFromLine_(fileName, fs.statSync(fullPath), line);
                     if (previousEntry && nextEntry &&
                         JSON.stringify(previousEntry.termindaten) !== JSON.stringify(nextEntry.termindaten)) {
-                        const calendar = await maintenanceSyncCalendar_({ payload:{
+                        const calendar = (typeof copyLocalMode_!=="undefined" && copyLocalMode_) ? {ok:true,queued:true} : await maintenanceSyncCalendar_({ payload:{
                             titel:nextEntry.titel, jahr:nextEntry.jahr,
                             staffelNummer:Number(nextEntry.staffelLabel.replace(/\D/g, "")),
                             tmdbId:nextEntry.tmdbId, episoden:nextEntry.episoden,
@@ -1810,11 +1810,76 @@ async function googleSharedKeySync_(interactive) {
     } finally { sharedKeySyncRunning_=false; }
 }
 
+
+const copyLocalMode_ = !calendarLab_;
+let desktopCopy_;
+function copyManager_() {
+    if(desktopCopy_)return desktopCopy_;
+    const module=require("../common/archive-copy-desktop.js");
+    const key=crypto.createHash("sha256").update(path.resolve(archiveFolderPath_()||".")).digest("hex");
+    desktopCopy_=new module.DesktopCopy({
+        folder:archiveFolderPath_,
+        stateFile:path.join(app.getPath("userData"),"archive-copy-"+key+".json"),
+        calendar:()=>readSettings_().calendar,
+        selectCalendar:calendar=>{const settings=readSettings_();settings.calendar.mode=calendar.mode;settings.calendar.googleCalendarId=calendar.id;writeSettings_(settings);},
+        token:async()=>{
+            let token;try{token=JSON.parse(fs.readFileSync(googleSharedKeyTokenFile_(),"utf8"));}catch(_){return "";}
+            if(Number(token.expiry_date||0)<=Date.now()+60000 && token.refresh_token)
+                token=await googleOauthRefresh_(googleOauthClientConfig_(),token,googleSharedKeyWriteToken_);
+            return Number(token.expiry_date||0)>Date.now()+60000 ? token.access_token : "";
+        },
+        bootstrap:async(owner,access)=>{
+            const client=require("../common/archive-requests.js").client(access);
+            const legacy=await client.list(sharedArchive.NAME);
+            if(legacy.length>1)throw Object.assign(new Error("COPY_CONFLICT"),{code:"COPY_CONFLICT"});
+            if(legacy.length) {
+                const snapshot=sharedArchive.validate(await client.load(legacy[0].id),owner);
+                const identity=JSON.parse(fs.readFileSync(path.join(app.getPath("userData"),"shared_archive_publishers.json"),"utf8"));
+                if(identity[key]!==snapshot.publisher)throw Object.assign(new Error("COPY_NEEDS_SOURCE"),{code:"COPY_NEEDS_SOURCE"});
+                const pending=await client.list("serkal-request-v1-",true),receipts=await client.list("serkal-result-v1-",true);
+                const completed=new Set(receipts.map(f=>f.name.replace("serkal-result-v1-","")));
+                if(pending.some(f=>!completed.has(f.name.replace("serkal-request-v1-",""))))
+                    throw Object.assign(new Error("COPY_LEGACY_PENDING"),{code:"COPY_LEGACY_PENDING"});
+            }
+        },
+        calendarSync:copyCalendarSync_,
+        lock:async fn=>{const result=await archiveWithWriteLock_(fn);if(result && result.ok===false)throw Object.assign(new Error(result.code||"ARCHIVE_LOCK_BUSY"),{code:result.code||"ARCHIVE_LOCK_BUSY"});return result;},
+        onChange:()=>{sharedArchiveRevision_++;},
+        onStatus:status=>logWrite_(status.code?"WARN":"INFO","SYNC",bt_("COPY_SYNC_LOG"),{status:status.status,code:status.code,dirty:status.dirty})
+    });
+    return desktopCopy_;
+}
+async function copyCalendarSync_(record) {
+    if(record.calendar.mode!=="google")return;
+    if(!record.calendar.id) {
+        const resolved=await googleResolveSerkalCalendar_();
+        record.calendar.id=resolved.id;copyManager_().save();
+    }
+    const calendarToken=await googleOauthAccessToken_();
+    const response=await fetch("https://www.googleapis.com/oauth2/v3/userinfo",{headers:{Authorization:"Bearer "+calendarToken},signal:AbortSignal.timeout(20000)});
+    if(!response.ok || (await response.json()).sub!==record.owner)throw Object.assign(new Error("COPY_ACCOUNT_CHANGED"),{code:"COPY_ACCOUNT_CHANGED"});
+    const entries=record.files.flatMap(f=>f.content.split(/\r?\n/).map(line=>archiveEntryFromLine_(f.name,{mtime:new Date(record.generatedAt)},line)).filter(Boolean));
+    const events=await googleCalendarManagedEvents_(record.calendar.id);
+    const protocol=require("../common/archive-calendar-copy.js");
+    const operations=protocol.plan(entries,events,record.revision);
+    for(const op of operations) {
+        const result=await googleCalendarApi_(op.method,record.calendar.id,op.id,op.body);
+        if(result.ok || (op.method==="DELETE" && [404,410].includes(result.status)))continue;
+        if(op.method==="POST" && result.status===409) {
+            const previous=await googleCalendarApi_("GET",record.calendar.id,op.body.id,null);
+            if(previous.ok && protocol.signature(previous.data)===protocol.signature(op.body))continue;
+        }
+        throw Object.assign(new Error("COPY_CALENDAR_FAILED"),{code:"COPY_CALENDAR_FAILED"});
+    }
+}
+
+
 let sharedArchiveCursor_ = null;
 let sharedArchiveView_ = null;
 let sharedArchiveObserveBusy_ = false;
 let sharedArchiveRevision_ = 0;
 async function sharedArchiveObserve_() {
+    if(copyLocalMode_){await copyManager_().sync();return;}
     if(calendarLab_ || sharedArchiveObserveBusy_)return;
     sharedArchiveObserveBusy_=true;
     try {
@@ -1906,6 +1971,7 @@ function scheduleSharedArchive_() {
 }
 async function googleSharedArchiveSync_() {
     if (calendarLab_) return {status:"disabled"};
+    if(copyLocalMode_){const result=await copyManager_().sync();return {status:result.status==="saved"?"ready":result.status==="pending"?"busy":"failed",code:result.code};}
     if(sharedArchiveRunning_) { scheduleSharedArchive_(); return {status:"busy"}; }
     sharedArchiveRunning_=true;
     try {
@@ -2021,6 +2087,10 @@ async function calendarRebuildRun_() {
    Der sichtbare Kalendername ist die fachliche Wahrheit; die technische
    Google-ID wird automatisch ermittelt und nur lokal zwischengespeichert. */
 async function googleResolveSerkalCalendar_() {
+    if(typeof copyLocalMode_!=="undefined" && copyLocalMode_ && readSettings_().calendar.googleCalendarId) {
+        const id=readSettings_().calendar.googleCalendarId;
+        await googleCalendarCheckAppAccess_(id);return {id,created:false,matches:1};
+    }
     const rebuildState = calendarRebuildRead_();
     if (rebuildState) {
         if (!rebuildState.newId || (rebuildState.phase !== "complete" && !calendarRebuildRunning_)) {
@@ -3423,6 +3493,12 @@ async function archiveWithWriteLock_(operation) {
 }
 function archiveWriteHandler_(channel, handler) {
     ipcMain.handle(channel, async (...args) => {
+        if(copyLocalMode_) {
+            try {
+                const manager=copyManager_();manager.assertWrite();
+                return await archiveWithWriteLock_(async()=>{try{return await handler(...args);}finally{manager.changed();}});
+            }catch(error){const code=String(error.code||"COPY_FAILED");return {ok:false,code,message:bt_(code)};}
+        }
         await sharedArchiveObserve_();
         if(!sharedArchiveIsSource_())return {ok:false,code:"ARCHIVE_SHARED_READER",message:bt_("ARCHIVE_SHARED_READER")};
         return archiveWithWriteLock_(() => handler(...args));
@@ -3475,8 +3551,13 @@ function installIpc_() {
             throw err;
         }
     });
-    ipcMain.handle("serkal:archive:load", async () => { scheduleSharedArchive_(); await sharedArchiveObserve_(); return archiveUiView_(); });
-    ipcMain.handle("serkal:archive:revision", () => ({revision:sharedArchiveRevision_,shared:!!sharedArchiveView_}));
+    ipcMain.handle("serkal:archive:load", async () => {
+        if(copyLocalMode_)return archiveLoad_();
+        scheduleSharedArchive_(); await sharedArchiveObserve_(); return archiveUiView_();
+    });
+    ipcMain.handle("serkal:archive:sync", () => copyManager_().sync());
+    ipcMain.handle("serkal:archive:syncStatus", () => copyManager_().view());
+    ipcMain.handle("serkal:archive:revision", () => ({revision:sharedArchiveRevision_,shared:copyLocalMode_ || !!sharedArchiveView_}));
     archiveWriteHandler_("serkal:archive:insert", (_event, payload) => {
         logWrite_("TRACE", "PIPELINE", bt_("IPC_ARCHIVE_RECEIVED"), {
             titel:String(payload && (payload.titel || payload.title || payload.name) || ""),
@@ -3505,7 +3586,7 @@ function installIpc_() {
             titel:String(payload && (payload.titel || payload.title || payload.name) || ""),
             tmdbId:Number(payload && (payload.tmdbId || payload.id) || 0) || null
         });
-        const result = await googleCalendarInsertSeason_(payload);
+        const result = copyLocalMode_ ? {ok:true,mode:"google",queued:true,message:bt_("COPY_PENDING")} : await googleCalendarInsertSeason_(payload);
         logWrite_(result && result.ok ? "TRACE" : "ERROR", "PIPELINE", bt_("IPC_CALENDAR_FINISHED"), {
             ok:Boolean(result && result.ok),
             skipped:Boolean(result && result.skipped),
@@ -3900,12 +3981,13 @@ if (!serkalHasSingleInstanceLock_) {
         maintainSerkalProtocol_();
         installIpc_();
         erstelleHauptfenster();
-        setTimeout(archiveRequestsPoll_, 5000);
-        const observerTimer=setInterval(sharedArchiveObserve_, 10000);
-        observerTimer.unref();
-        setTimeout(sharedArchiveObserve_, 2500);
-        const requestsTimer=setInterval(archiveRequestsPoll_, 30000);
-        requestsTimer.unref();
+        if(copyLocalMode_)setTimeout(()=>copyManager_().sync(),100);
+        else {
+            setTimeout(archiveRequestsPoll_,5000);
+            const observerTimer=setInterval(sharedArchiveObserve_,10000);observerTimer.unref();
+            setTimeout(sharedArchiveObserve_,2500);
+            const requestsTimer=setInterval(archiveRequestsPoll_,30000);requestsTimer.unref();
+        }
         app.on("activate",()=>{
             if (!bringSerkalToFront_() && BrowserWindow.getAllWindows().length===0) erstelleHauptfenster();
         });
@@ -3913,3 +3995,4 @@ if (!serkalHasSingleInstanceLock_) {
 
     app.on("window-all-closed",()=>{ if (process.platform!=="darwin") app.quit(); });
 }
+
