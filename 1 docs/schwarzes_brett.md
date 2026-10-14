@@ -2418,3 +2418,52 @@ Gleiche private a4/a5/a6-Signatur, v2/v3 geprüft, SHA-1
 Über a6 installieren, keine Deinstallation. APK Kurt dauerhaft bereitgestellt; Geräte-Test
 noch offen. Keine weitere Google-Berechtigung/Server-Datenübertragung, öffentliche 1.1 unverändert.
 Google-Verifizierung/Antwort und vollständige 1.2-Freigabe weiterhin offen.
+
+### 2026-10-14 – CE – Android 0.0.5a8: Poster, Darstellung und Versionsanzeige
+
+Status: **GEBAUT, SIGNIERT, BEREITGESTELLT / PIXEL- UND TABLET-SICHTTEST OFFEN**
+
+Kurt setzt Android-Arbeit fort und fordert stärkere optische Annäherung an Desktop.
+Die PC-Unabhängigkeit wurde geprüft, bleibt aber ungelöst: bestehender Cloud-Snapshot
+enthält nur Anzeigeinformationen. Für eine vollständige Übernahme fehlen Originalanker,
+manuelle Schutzflags und das sicher koordinierte gemeinsame Schreiben. Keine schnelle
+publisher-Umschaltung oder vollständige Android-Kalenderfunktion behaupten. Desktop
+bleibt **Alpha 13**, öffentlicher Stand unverändert.
+
+Konkrete nächste APK **0.0.5a8**, versionCode **16**, Android-Zweig
+`android-preview-0.0.5`, Commit `a8a3d7f4f90085e58f01c7dddd6676bfce4d0ee0`:
+- Poster in der Serienanzeige für TMDB-Suche und Archiveinträge, eigener Hintergrundabruf.
+  Nur feste öffentliche TMDB-Bildadresse, keine Credentials zum Bilderhost; beschränkte
+  Download-/Bildgröße, Speicher-Cache und Schutz gegen verspätete Antworten nach Auswahl-
+  oder Kontowechsel. Fehlende Bilder lassen Archiv-/Kalenderaktionen weiter bedienbar.
+- Hell-/Dunkel-Schalter; Auswahl und Sprache bleiben nach Neustart gespeichert.
+  Darstellungswechsel erhält Suchtext, vorhandene Treffer und Auswahl; Sprachwechsel lädt
+  die passende Beschreibung. Native Drei-Spalten-Struktur Suche – Anzeige – Archiv erhalten.
+  Schrift der Treffer-/Bedienknöpfe vergrößert. Abschließende Geräte-Sichtprüfung erforderlich.
+- Tatsächliche Ursache der a5-Anzeige: Manifest-Anzeigename seit a5 fest eingetragen.
+  Jetzt aus derselben Versionsquelle wie Gradle; Kopfzeile aus BuildConfig.VERSION_NAME.
+
+CI `38567653600` erfolgreich; **16 Android-Unit-Tests**, null Fehler/Ausfälle.
+Sechs geänderte Quelldateien nach Commit exakt remote kontrolliert.
+Signierte APK **2.842.375 Bytes**, SHA-256
+`edaa9f36862275950fd1f76344180e22bd51cbdf119a7b0b70e20136117428b7`.
+v2/v3 verifiziert, bisheriger a4–a7-Schlüssel SHA-1
+`0D:63:F5:08:DC:1F:E1:4E:97:6C:22:1A:0C:27:98:D3:A1:51:59:86`.
+Binärmanifest und aufgelöste Ressourcen direkt aus signierter APK geprüft:
+Paket `de.serkal.android.preview.v005`, versionName a8, versionCode 16,
+sichtbarer Anzeigename **0.0.5a8 - SerKal Android**.
+APK dauerhaft für Kurt bereitgestellt. Darüberinstallieren; keine Deinstallation und
+keine Google-OAuth-Neueinrichtung. Kein Windows-Update für diesen Schritt nötig.
+
+Kurzer Gerätetest: bestehende a7 aktualisieren, App-Info/Kopf auf a8 prüfen;
+Suchserie und Archivserie mit Poster öffnen; bei schneller Auswahl kein falsches
+nachgeliefertes Bild; Hell/Dunkel und DE/EN wechseln, Neustart und gespeicherte
+Auswahl prüfen; bestehende Schreibaufträge weiterhin nur mit laufendem Quell-Desktop.
+Keine echte Google-/Pixel-/Samsung-Prüfung durch Unit-Tests behaupten.
+
+Neue zentrale Arbeitsliste: `1 docs/roadmap/serkal-next.md` auf main.
+Sie enthält PC-Unabhängigkeit, Laptop-Quellwechsel, Android-Optik, Wartungsreparatur,
+eigene Vorausschauliste, Streaming-Anbieter, spätere Filme und Play-Store-Vorbereitung.
+Google-OAuth-Antwort/neues Video weiterhin offen; keine E-Mail gesendet.
+Website-Chatty: Bilder werden nun direkt von image.tmdb.org geladen; vor Veröffentlichung
+Android-Entwicklungsbeschreibung und Datenschutzhinweise dazu abgleichen.
