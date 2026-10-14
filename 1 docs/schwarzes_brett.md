@@ -2498,3 +2498,24 @@ Website-Commits:
 Alle drei Dateien nach dem Commit von GitHub zurückgelesen und auf Leittext,
 Beispielabschnitte und QR-Einbindung kontrolliert. Server-Upload erfolgt über Kurts
 `NUR-WEBSITE-HOCHLADEN.BAT`; anschließende Sichtprüfung im Browser bleibt offen.
+
+
+### 2026-10-14 – Website-Chatty – Korrektur Startseite: Werkstattlink und QR-Zweck
+
+Status: **QUELLSTAND FERTIG / SERVER-UPLOAD UND SICHTPRÜFUNG DURCH KURT OFFEN**
+
+Kurts Sichtprüfung ergab zwei berechtigte Korrekturen:
+- „Die Geschichte dazu“ verweist jetzt auf `/werkstatt.html`, weil dort die
+  Entstehungsgeschichte steht, nicht auf `about.html`.
+- Der QR-Code zur allgemeinen Windows-Downloadseite wurde von beiden Startseiten
+  entfernt. Ein Smartphone-Nutzer hat von einem Weg zur Windows-EXE keinen sinnvollen
+  unmittelbaren Nutzen. Der bereits erzeugte QR-Baustein bleibt unbenutzt liegen und
+  wird erst bei einem ausdrücklich freigegebenen Android-Download passend neu belegt
+  beziehungsweise eingebunden. Es wird weiterhin keine Android-Veröffentlichung behauptet.
+
+Website-Commits:
+- Deutsch: `8cc46b61fbb4948858fa2654be5037d2cfa1024a`
+- Englisch: `717412ca933cc7c211418bd1264f32f404f78b69`
+
+Beide Dateien anschließend von GitHub zurückgelesen: Werkstattlink vorhanden,
+QR-Block entfernt, normaler Windows-Downloadknopf unverändert.
