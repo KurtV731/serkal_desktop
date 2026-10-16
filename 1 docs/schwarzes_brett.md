@@ -2647,3 +2647,41 @@ Status: GEBAUT / SIGNIERT / TESTFASSUNG AN KURT. Android-Quellcommit `a37dcc2492
 Jetzt nur zwei kompakte Archivknöpfe (Datum/A–Z und Menü). Alle fünf übrigen Archivaktionen im Menü, Status auf zwei sichtbare Zeilen begrenzt, vollständiger Text durch Antippen. Detailaktionen in gemeinsamer Zeile statt vier großer Knöpfe. Titel links, Datum und farbiges Statuszeichen rechts, Häkchen antippbar. Datumssortierung anhand aktiver Termine, ohne Termin zuerst, danach absteigend, Staffeltie absteigend; Sortierwahl bleibt gespeichert.
 
 Actions 38936898389: Build erfolgreich, 27 Tests ohne Fehler/Fehlschläge. Signatur und tatsächliche Paketversion geprüft. APK `0.0.5a13-SerKal-Android.apk`, 2871047 Bytes, SHA256 `e8263945c6b533844dca7e923c4becf78dbdb6b29e0214ed61ca2783c3f4ebd6`. Über a12 installieren, keine Deinstallation. Realer Layouttest auf Pixel/Samsung offen. Details `1 docs/android-a13-layout.md`. Keine öffentliche Freigabe/Websiteänderung.
+
+
+## Installer – 16.10.2026: Alpha 17.1 für Windows-Testinstaller vorbereitet
+
+Status: **INSTALLERSTAND VORBEREITET / WINDOWS-BUILD AUF KURTS RECHNER OFFEN / NICHT ÖFFENTLICH**
+
+Kurt beauftragt, den aktuellen CE-Stand Alpha 17 als neuen eindeutig nummerierten
+Windows-Testinstaller zu übernehmen. Grundlage bleibt unverändert der CE-Commit
+`38883f11321d11576ddb7dbc5bddd545b42140c0`.
+
+Damit keine künftige CE-Bezeichnung „Alpha 18“ vorweggenommen und kein bereits
+installierbares Artefakt wiederverwendet wird, trägt der Installerstand die eindeutige
+technische Version **`1.2.0-alpha.17.1`**. Setupname:
+`SerKal_Alpha_17_1_Setup.exe`.
+
+Vorbereiteter Installerzweig: `installer-alpha-17-1`.
+Stand mit Versionsdaten, Setupname, angepasstem OAuth-Pakettest und geschützter
+Windows-Baudatei: `34e9293792b7f20d656af5f6e72e9cd5efaebaed`.
+Die SerKal-Fachlogik entspricht Alpha 17; es wurden keine Alpha-18-Funktionen ergänzt.
+
+Die Baudatei `SERKAL-ALPHA-17-1-TESTINSTALLER-BAUEN.BAT`:
+
+1. checkt den festgeschriebenen Installercommit `5b795e68e948861de7ba122a8ff467be5b25639a` aus;
+2. prüft die eindeutige Version `1.2.0-alpha.17.1`;
+3. übernimmt das bewährte lokale Windows-Symbol;
+4. verlangt und prüft die private OAuth-Grunddatei;
+5. führt `npm ci`, alle 26 Testprogramme und `npm run make` aus;
+6. kontrolliert die gepackte OAuth-Datei und schließt persönliche Google-Tokens aus;
+7. erzeugt den Ein-Datei-Testinstaller sowie SHA-256 unter
+   `C:\ppd\serkal\testinstallationen\alpha-17-1\`;
+8. überschreibt weder vorhandenen Bauordner noch vorhandenes Testartefakt.
+
+Testreihenfolge: zunächst Kurt. Erst nach Kurts praktischer Freigabe darf exakt dieselbe
+Datei zusammen mit ihrer SHA-256-Prüfsumme an VelcroFist weitergegeben werden.
+**Keine öffentliche Veröffentlichung, kein Website-Download und kein GitHub-Release.**
+
+Offen bleibt der reale Windows-Build mit privater OAuth-Datei, anschließend Rückmeldung
+von Dateigröße, SHA-256 und Kurts praktischem Testergebnis.
