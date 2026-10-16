@@ -135,6 +135,7 @@ function defaultArchiveFolder_() {
 const DEFAULT_SETTINGS = {
     setupDone: false,
     language: "de",
+    watchCountry: "DE",
     archive: { folderPath: defaultArchiveFolder_() },
     calendar: { mode: "", googleCalendarId: "" }
 };
@@ -170,6 +171,7 @@ function normalizeSettings_(raw) {
     const out = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
     if (raw && typeof raw === "object") {
         out.setupDone = raw.setupDone === true;
+        if (/^[A-Z]{2}$/.test(raw.watchCountry || "")) out.watchCountry = raw.watchCountry;
         out.language = String(raw.language || "de").toLowerCase().startsWith("en") ? "en" : "de";
         activeLanguage_ = out.language;
         if (raw.archive && typeof raw.archive === "object") {
@@ -642,6 +644,9 @@ function archiveEntryFromLine_(fileName, stats, line) {
         termindaten:activeDates, dates:activeDates, datesOriginal, datesDE, activeDates, termCount:activeDates.length,
         descDE:archiveDecode_(archiveField_(line,"descDE") || archiveField_(line,"ov_de")),
         descEN:archiveDecode_(archiveField_(line,"descEN") || archiveField_(line,"ov_en")),
+        watchProviders:require(path.join(__dirname,"../common/watch-providers")).parse(archiveDecode_(archiveField_(line,"watchProviders"))),
+        providerText:require(path.join(__dirname,"../common/watch-providers")).text(require(path.join(__dirname,"../common/watch-providers")).parse(archiveDecode_(archiveField_(line,"watchProviders"))),noteText,activeLanguage_==="en"),
+        titleDE:archiveDecode_(archiveField_(line,"titleDE")), titleEN:archiveDecode_(archiveField_(line,"titleEN")),
         note:noteText, flags:Number(archiveField_(line,"flags") || 0) || 0,
         manualFlags,
         manualTitle:Boolean(manualFlags & SERKAL_MANUAL_TITLE),
@@ -736,6 +741,7 @@ function archiveInsert_(payload) {
         if (oldNote) parts.push("note="+oldNote);
         parts.push("flags="+flags);
         if (manualFlags) parts.push("manualFlags="+manualFlags);
+        for (const field of ["watchProviders","titleDE","titleEN"]) { const old=archiveField_(oldLine,field); if(old)parts.push(field+"="+old); }
         const newLine = parts.join("; ");
         const kept = oldLines.filter(x=>!new RegExp("^"+label+"(?:\\b|;|\\|)","i").test(x));
         kept.push(newLine);
@@ -1578,6 +1584,8 @@ function calendarCreateIcs_(payload) {
 /* Originalverhalten aus modul5-kalender.gs benötigt:
    Kalender "SerKal" suchen, bei Bedarf anlegen und danach Events verwalten. */
 const GOOGLE_CALENDAR_SCOPES = [
+    "openid",
+    "email",
     // Nur die vorhandene Kalenderliste lesen, damit SerKal seinen Kalender wiederfindet.
     "https://www.googleapis.com/auth/calendar.calendarlist.readonly",
     // Nur von dieser App angelegte Kalender und deren Termine verwalten.
@@ -1585,7 +1593,7 @@ const GOOGLE_CALENDAR_SCOPES = [
 ];
 
 function googleOauthTokenHasRequiredScope_(token) {
-    const scopes = new Set(String(token && token.scope || "").split(/\s+/).filter(Boolean));
+    const scopes = new Set(String(token && token.scope || "").split(/\s+/).filter(Boolean).map(scope => scope === "https://www.googleapis.com/auth/userinfo.email" ? "email" : scope));
     const broad = ["calendar", "calendar.events", "calendar.events.owned", "calendar.calendars"];
     return GOOGLE_CALENDAR_SCOPES.every(scope => scopes.has(scope)) &&
         !broad.some(scope => scopes.has("https://www.googleapis.com/auth/" + scope));
@@ -1851,13 +1859,12 @@ function copyManager_() {
 }
 async function copyCalendarSync_(record) {
     if(record.calendar.mode!=="google")return;
+    const calendarToken=await googleOauthAccessToken_();
+    await require(path.join(__dirname,"../common/google-identity")).verifyCalendarOwner(calendarToken,record.owner);
     if(!record.calendar.id) {
         const resolved=await googleResolveSerkalCalendar_();
         record.calendar.id=resolved.id;copyManager_().save();
     }
-    const calendarToken=await googleOauthAccessToken_();
-    const response=await fetch("https://www.googleapis.com/oauth2/v3/userinfo",{headers:{Authorization:"Bearer "+calendarToken},signal:AbortSignal.timeout(20000)});
-    if(!response.ok || (await response.json()).sub!==record.owner)throw Object.assign(new Error("COPY_ACCOUNT_CHANGED"),{code:"COPY_ACCOUNT_CHANGED"});
     const entries=record.files.flatMap(f=>f.content.split(/\r?\n/).map(line=>archiveEntryFromLine_(f.name,{mtime:new Date(record.generatedAt)},line)).filter(Boolean));
     const events=await googleCalendarManagedEvents_(record.calendar.id);
     const protocol=require("../common/archive-calendar-copy.js");
@@ -2781,9 +2788,10 @@ function maintenanceAnalyse_(groups, snapshot) {
         const title = String(tv.name || group.entries[0] && group.entries[0].titel || "");
         const maxArchiveSeason = group.entries.reduce((max, entry) =>
             Math.max(max, maintenanceSeasonNumber_(entry)), 0);
-        const maxTmdbSeason = Number(tv.number_of_seasons || 0) || 0;
+        const maxTmdbSeasonCount = Number(tv.number_of_seasons || 0) || 0;
 
-        if (maxTmdbSeason > maxArchiveSeason) {
+        for (let maxTmdbSeason=1; maxTmdbSeason<=maxTmdbSeasonCount; maxTmdbSeason++) {
+            if(group.entries.some(e=>maintenanceSeasonNumber_(e)===maxTmdbSeason))continue;
             const seasonRecord = record.seasons && record.seasons[String(maxTmdbSeason)];
             const seasonData = seasonRecord && seasonRecord.ok && seasonRecord.data
                 ? seasonRecord.data : null;
@@ -2898,7 +2906,7 @@ function maintenanceBuildOperations_(groups, snapshot, findings) {
         if (!maintenanceSeasonIsComplete_(analysed)) continue;
         const existing = group.entries.find(entry => maintenanceSeasonNumber_(entry) === seasonNumber) || null;
         const base = existing || group.entries[0];
-        if (!base) continue;
+        if (!base || !existing) continue;
 
         const key = maintenanceOperationKey_(tmdbId, seasonNumber);
         if (operations.has(key)) continue;
@@ -2970,9 +2978,12 @@ function maintenanceWriteArchive_(operation) {
     if (index < 0) throw new Error(bt_("SEASON_NOT_FOUND", { value:operation.fileName + " / " + label }));
 
     let line = String(lines[index] || "").trim();
-    line = archiveSetField_(line, "eps", String(operation.payload.episoden));
-    line = archiveSetField_(line, "startOriginal", String(operation.payload.termindaten[0] || ""));
-    line = archiveSetField_(line, "dates", archiveCompactDates_(operation.payload.termindaten).join(","));
+    const flags=Number(archiveField_(line,"manualFlags")||0);
+    if(!(flags & SERKAL_MANUAL_EPISODES))line = archiveSetField_(line, "eps", String(operation.payload.episoden));
+    if(!(flags & SERKAL_MANUAL_CALENDAR)) {
+        line = archiveSetField_(line, "startOriginal", String(operation.payload.termindaten[0] || ""));
+        line = archiveSetField_(line, "dates", archiveCompactDates_(operation.payload.termindaten).join(","));
+    }
     lines[index] = line;
     const tempPath = snapshot.fullPath + ".serkal-maint-tmp";
     fs.writeFileSync(tempPath, lines.join("\n").replace(/\n*$/, "\n"), "utf8");
@@ -3107,6 +3118,7 @@ async function maintenanceCleanupCalendarDuplicates_() {
 async function maintenanceSyncCalendar_(operation) {
     const settings = readSettings_();
     const mode = String(settings && settings.calendar && settings.calendar.mode || "none").toLowerCase();
+    if(copyLocalMode_)return {ok:true,skipped:true,reason:"local_sync_pending"};
     if (mode !== "google") {
         return { ok:true, skipped:true, reason:mode === "ics" ? "ics_requires_export" : "calendar_disabled", created:0, updated:0, removed:0 };
     }
@@ -3199,7 +3211,7 @@ async function maintenanceApplyOperations_(operations) {
         }
     }
     try {
-        const cleanup = await maintenanceCleanupCalendarDuplicates_();
+        const cleanup = copyLocalMode_?{removed:0,protected:0}:await maintenanceCleanupCalendarDuplicates_();
         result.removed += Number(cleanup && cleanup.removed || 0);
         result.protected += Number(cleanup && cleanup.protected || 0);
     } catch (err) {
@@ -3217,13 +3229,13 @@ async function maintenanceFetchGroup_(group, cache, snapshot, counters) {
     const key = String(group.tmdbId);
     const cached = cache.series[key];
 
-    if (maintenanceCacheIsFresh_(cached, group.entries)) {
+    if (maintenanceCacheIsFresh_(cached, group.entries) && cached.watchProviders && Date.now()-Date.parse(cached.watchProviders.checkedAt)<MAINTENANCE_DAY_MS && cached.watchProviders.country===readSettings_().watchCountry && cached.language===activeLanguage_) {
         snapshot.set(key, Object.assign({}, cached, { ok:true, source:"cache" }));
         counters.cacheHits++;
         return;
     }
 
-    const tvResult = await tmdbTvDetails_(group.tmdbId, "de");
+    const tvResult = await tmdbTvDetails_(group.tmdbId, activeLanguage_);
     counters.requests++;
     if (!tvResult || tvResult.ok === false) {
         const error = {
@@ -3242,11 +3254,11 @@ async function maintenanceFetchGroup_(group, cache, snapshot, counters) {
     const seasonNumbers = new Set(group.entries.map(maintenanceSeasonNumber_).filter(Boolean));
     const maxArchiveSeason = Math.max(0, ...Array.from(seasonNumbers));
     const maxTmdbSeason = Number(tv.number_of_seasons || 0) || 0;
-    if (maxTmdbSeason > maxArchiveSeason) seasonNumbers.add(maxTmdbSeason);
+    for(let number=1;number<=maxTmdbSeason;number++)seasonNumbers.add(number);
 
     const seasons = {};
     for (const seasonNumber of Array.from(seasonNumbers).sort((a, b) => a - b)) {
-        const seasonResult = await tmdbSeasonDetails_(group.tmdbId, seasonNumber, "de");
+        const seasonResult = await tmdbSeasonDetails_(group.tmdbId, seasonNumber, activeLanguage_);
         counters.requests++;
         if (seasonResult && seasonResult.ok) {
             seasons[String(seasonNumber)] = { ok:true, data:seasonResult.data || {} };
@@ -3279,7 +3291,10 @@ async function maintenanceFetchGroup_(group, cache, snapshot, counters) {
         }
     }
 
+    const providers=await tmdbRequest_("/tv/"+group.tmdbId+"/watch/providers",{});counters.requests++;
+    const watchProviders=providers.ok?require(path.join(__dirname,"../common/watch-providers")).normalize(providers.data,readSettings_().watchCountry):null;
     const record = {
+        watchProviders, language:activeLanguage_,
         ok:true,
         source:"network",
         fetchedAt:new Date().toISOString(),
@@ -3319,7 +3334,30 @@ async function maintenanceFetchAll_(groups, cache, snapshot, counters) {
     await Promise.all(Array.from({ length:workerCount }, () => worker_()));
 }
 
-async function maintenanceRun_() {
+function maintenanceWriteProviders_(groups,snapshot) {
+    const writes=new Map();
+    for(const group of groups){
+        const record=snapshot.get(String(group.tmdbId));if(!record || !record.ok)continue;
+        for(const entry of group.entries){
+            const file=path.join(archiveFolderPath_(),entry.fileName);
+            const text=writes.has(file)?writes.get(file):fs.readFileSync(file,"utf8");
+            const lines=text.split(/\r?\n/).map(line=>{
+                if(Number(archiveField_(line,"tmdb"))!==group.tmdbId)return line;
+                if(record.watchProviders)line=archiveSetField_(line,"watchProviders",archiveEncode_(JSON.stringify(record.watchProviders)));
+                const names=require(path.join(__dirname,"../common/tmdb-title")).resolve(activeLanguage_==="de"?record.tv:null,activeLanguage_==="en"?record.tv:null,null,activeLanguage_);
+                if(activeLanguage_==="de" && names.de)line=archiveSetField_(line,"titleDE",archiveEncode_(names.de));
+                if(activeLanguage_==="en" && names.en)line=archiveSetField_(line,"titleEN",archiveEncode_(names.en));
+                return line;
+            });writes.set(file,lines.join("\n"));
+        }
+    }
+    for(const [file,text] of writes){const temp=file+".maintenance-meta-tmp";fs.writeFileSync(temp,text,"utf8");fs.renameSync(temp,file);}
+}
+
+async function maintenanceRun_(options={}) {
+    const country=String(options.country||readSettings_().watchCountry||"DE").toUpperCase();
+    if(!/^[A-Z]{2}$/.test(country))return {ok:false,message:bt_("PROVIDER_COUNTRY_INVALID")};
+    const settings=readSettings_();settings.watchCountry=country;writeSettings_(settings);
     if (maintenanceRunning_) {
         return { ok:false, message:bt_("MAINT_ALREADY_RUNNING") };
     }
@@ -3359,6 +3397,7 @@ async function maintenanceRun_() {
 
         maintenanceSetStatus_("auswertung", bt_("MAINT_COMPARE"), null, groups.length, groups.length);
         const findings = maintenanceAnalyse_(groups, snapshot);
+        const report=require(path.join(__dirname,"../common/maintenance-report")).build(groups,snapshot);
         const decisionCounts = findings.reduce((counts, finding) => {
             const action = String(finding && finding.action || "observe");
             if (action === "apply") counts.ready++;
@@ -3388,6 +3427,7 @@ async function maintenanceRun_() {
             errors:[]
         };
         if (counters.errors.length === 0) {
+            maintenanceWriteProviders_(groups,snapshot);
             const operations = maintenanceBuildOperations_(groups, snapshot, findings);
             maintenanceSetStatus_("uebernahme", bt_("MAINT_APPLY"), null, 0, operations.length);
             applied = await maintenanceApplyOperations_(operations);
@@ -3424,10 +3464,13 @@ async function maintenanceRun_() {
             removed:Number(applied.removed || 0),
             kalenderGeschuetzt:Number(applied.protected || 0),
             skipped:grouped.withoutTmdbId.length + Number(applied.skipped || 0),
+            report, country,
+            providers:groups.map(g=>({tmdbId:g.tmdbId,title:g.entries[0].title||g.entries[0].titel,info:snapshot.get(String(g.tmdbId))?.watchProviders||null})),
             findings,
             errors:allErrors
         };
 
+        fs.writeFileSync(path.join(app.getPath("userData"),"maintenance-last.json"),JSON.stringify(result),"utf8");
         maintenanceSetStatus_(ok ? "ende" : "fehler", result.message, null, groups.length, groups.length);
         logWrite_(ok ? "INFO" : "ERROR", "WARTUNG", bt_("MAINT_COMPLETED"), result);
         return result;
@@ -3598,7 +3641,8 @@ function installIpc_() {
         return result;
     });
     ipcMain.handle("serkal:maintenance:status", () => maintenanceGetStatus_());
-    archiveWriteHandler_("serkal:maintenance:run", async () => { const result=await maintenanceRun_(); if(result && result.ok) scheduleSharedArchive_(); return result; });
+    ipcMain.handle("serkal:maintenance:last", () => {try{return JSON.parse(fs.readFileSync(path.join(app.getPath("userData"),"maintenance-last.json"),"utf8"));}catch(_){return null;}});
+    archiveWriteHandler_("serkal:maintenance:run", async (_event,options) => { const result=await maintenanceRun_(options||{}); if(result && result.ok) scheduleSharedArchive_(); return result; });
     ipcMain.handle("serkal:calendar:createIcs", async (_event, payload) => {
         const result = calendarCreateIcs_(payload);
         if (result.ok) {
@@ -3783,13 +3827,13 @@ function installDesktopTmdbBridge_(hauptfenster) {
           failure({message:(e && e.message) ? e.message : String(e)});
         }
       },
-      async apiStarteZukunftspruefung() {
+      async apiStarteZukunftspruefung(options) {
         try {
           if (!window.serkal || !window.serkal.maintenance) {
             success({ok:false, message:bridgeText_('MAINT_BRIDGE_MISSING')});
             return;
           }
-          success(await window.serkal.maintenance.run());
+          success(await window.serkal.maintenance.run(options||{}));
         } catch (e) {
           failure({message:(e && e.message) ? e.message : String(e)});
         }

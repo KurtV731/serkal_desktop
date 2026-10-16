@@ -3847,6 +3847,21 @@ const I18N = {
     BTN_SORT_STATUS: 'Status',
     TT_SORT_ALPHA: 'Sortierung: Alphabetisch (A–Z) – klicken für Datum',
     TT_SORT_DATE: 'Sortierung: Startdatum (neu→alt) – klicken für A–Z',
+    MAINT_EXTRA_0: "Ergebnis der Wartung",
+    MAINT_EXTRA_1: "Neue Staffeln sind Vorschläge; sie wurden nicht automatisch eingetragen.",
+    MAINT_EXTRA_2: "Fehlende Staffel",
+    MAINT_EXTRA_3: "Anstehende Episode",
+    MAINT_EXTRA_4: "Neue Episode",
+    MAINT_EXTRA_5: "Termin geändert",
+    MAINT_EXTRA_6: "Keine neuen Staffeln oder Episodenänderungen gefunden.",
+    MAINT_EXTRA_7: "Anbieter (Serienebene; einzelne Staffeln können abweichen)",
+    MAINT_EXTRA_8: "Keine Angebote gemeldet",
+    MAINT_EXTRA_9: "Abfrage fehlgeschlagen; bisherige Angaben bleiben erhalten",
+    MAINT_EXTRA_10: "Liste drucken",
+    MAINT_EXTRA_11: "Schließen",
+    MAINT_EXTRA_12: "Streaming-Land (DE, AU, US, GB …): ",
+    MAINT_EXTRA_13: "Wartung starten",
+    MAINT_EXTRA_14: "Abbrechen",
     BTN_MAINT: '🔧 Wartung',
     BTN_START_DOCK: '▶️ Start',
     BTN_CALENDAR_DOCK: '📅 Kalender',
@@ -4004,6 +4019,21 @@ const I18N = {
     BTN_SORT_STATUS: 'Status',
     TT_SORT_ALPHA: 'Sorting: Alphabetical (A–Z) – click for Date',
     TT_SORT_DATE: 'Sorting: Start date (new→old) – click for A–Z',
+    MAINT_EXTRA_0: "Maintenance results",
+    MAINT_EXTRA_1: "New seasons are suggestions; nothing was added automatically.",
+    MAINT_EXTRA_2: "Missing season",
+    MAINT_EXTRA_3: "Upcoming episode",
+    MAINT_EXTRA_4: "New episode",
+    MAINT_EXTRA_5: "Changed date",
+    MAINT_EXTRA_6: "No new seasons or episode changes found.",
+    MAINT_EXTRA_7: "Providers (series level; individual seasons may differ)",
+    MAINT_EXTRA_8: "No offers reported",
+    MAINT_EXTRA_9: "Lookup failed; previous data retained",
+    MAINT_EXTRA_10: "Print list",
+    MAINT_EXTRA_11: "Close",
+    MAINT_EXTRA_12: "Streaming country (DE, AU, US, GB …): ",
+    MAINT_EXTRA_13: "Start maintenance",
+    MAINT_EXTRA_14: "Cancel",
     BTN_MAINT: '🔧 Maintenance',
     BTN_START_DOCK: '▶️ Start',
     BTN_CALENDAR_DOCK: '📅 Calendar',
@@ -5547,7 +5577,29 @@ function stopMaintenanceStatusPolling_() {
  * @status aktiv
  * @loeschung nein
  */
-function runMaintenance_() {
+function showMaintenanceReport_(res){
+  const en=LANG==='en',dialog=document.createElement('dialog');dialog.style.cssText='width:80vw;max-height:80vh;overflow:auto';
+  const title=document.createElement('h2');title.textContent=t('MAINT_EXTRA_0');dialog.append(title);
+  const lines=[res.message||'',t('MAINT_EXTRA_1')];
+  for(const item of res.report||[])lines.push([item.title,'S'+String(item.season).padStart(2,'0')+(item.episode?'E'+String(item.episode).padStart(2,'0'):''),item.date||'—',({ 'missing-season':t('MAINT_EXTRA_2'),'upcoming-episode':t('MAINT_EXTRA_3'),'new-episode':t('MAINT_EXTRA_4'),'changed-episode':t('MAINT_EXTRA_5')})[item.kind]||item.kind].join(' · '));
+  if(!(res.report||[]).length)lines.push(t('MAINT_EXTRA_6'));
+  lines.push(t('MAINT_EXTRA_7'));
+  for(const row of res.providers||[]){const p=row.info;lines.push(row.title+': '+(p?(p.offers||[]).map(o=>o.name+' ['+o.type+']').join(', ')||(t('MAINT_EXTRA_8')):(t('MAINT_EXTRA_9')))+(p?' · '+p.country+' · '+p.checkedAt.slice(0,10)+' · JustWatch via TMDB':''));}
+  const pre=document.createElement('pre');pre.style.whiteSpace='pre-wrap';pre.textContent=lines.join('\n\n');dialog.append(pre);
+  const print=document.createElement('button');print.textContent=t('MAINT_EXTRA_10');print.onclick=()=>{const frame=document.createElement('iframe');frame.style.display='none';document.body.append(frame);const doc=frame.contentDocument;const text=doc.createElement('pre');text.style.whiteSpace='pre-wrap';text.textContent=pre.textContent;doc.body.append(text);frame.contentWindow.focus();frame.contentWindow.print();setTimeout(()=>frame.remove(),1000);};dialog.append(print);
+  const close=document.createElement('button');close.textContent=t('MAINT_EXTRA_11');close.onclick=()=>dialog.close();dialog.append(close);dialog.onclose=()=>dialog.remove();document.body.append(dialog);dialog.showModal();
+}
+
+function runMaintenance_(country) {
+  if(!country){
+    const dialog=document.createElement('dialog'),form=document.createElement('form');form.method='dialog';
+    const label=document.createElement('label');label.textContent=t('MAINT_EXTRA_12');
+    const input=document.createElement('input');input.value=localStorage.getItem('serkalWatchCountry')||'DE';input.maxLength=2;input.required=true;input.pattern='[A-Za-z]{2}';label.append(input);form.append(label);
+    const start=document.createElement('button');start.textContent=t('MAINT_EXTRA_13');form.append(start);
+    const cancel=document.createElement('button');cancel.type='button';cancel.textContent=t('MAINT_EXTRA_14');cancel.onclick=()=>dialog.close();form.append(cancel);
+    form.onsubmit=()=>{const region=input.value.trim().toUpperCase();localStorage.setItem('serkalWatchCountry',region);dialog.close();runMaintenance_(region);};
+    dialog.append(form);dialog.onclose=()=>dialog.remove();document.body.append(dialog);dialog.showModal();return;
+  }
   try {
     try { uiLogAction_(t('LOG_MAINT_STARTED'), {}); } catch (_eAction) {}
     if (guardDirtyBeforeAction_()) return;
@@ -5563,6 +5615,7 @@ function runMaintenance_() {
       .withSuccessHandler(function(res){
         stopMaintenanceStatusPolling_();
         uiSetBusy_(false);
+        if(res && res.report)showMaintenanceReport_(res);
         var ok = !!(res && res.ok);
         if (!ok) {
           var msgBad = (res && res.message) ? String(res.message) : t('MAINT_FAILED');
@@ -5605,7 +5658,7 @@ function runMaintenance_() {
         uiStatus(msgErr, { spinner:false, kind:'error', sound:true });
         try { uiLogAction_(t('MAINT_FAILED'), { message: msgErr }); } catch (_eAction) {}
       })
-      .apiStarteZukunftspruefung();
+      .apiStarteZukunftspruefung({country:country});
   } catch (e) {
     uiSetBusy_(false);
     var msg = t('MAINT_FAILED') + ': ' + (e && e.message ? e.message : String(e));
@@ -7095,6 +7148,7 @@ function fillDetailsFromArchiv_(it) {
     if (tc !== '') html += '<div class="summaryCell"><span class="summaryLabel">' + escapeHtml(t('PV_DATES')) + ':</span>' + escapeHtml(String(tc)) + '</div>';
     html += '</div>';
     html += summaryInfoHtml_(it);
+    if(it && it.providerText)html += '<div style="white-space:pre-wrap">'+escapeHtml(it.providerText)+'</div>';
     sum.innerHTML = html;
     try { appendTmdbIdToSummary_(it); } catch (_eTmdb) {}
   }
@@ -8896,6 +8950,11 @@ if (btnLangDe) btnLangDe.addEventListener('click', function(){ setLang_('de', tr
 if (btnLangEn) btnLangEn.addEventListener('click', function(){ setLang_('en', true); });
 if (langToggleTrack) langToggleTrack.addEventListener('click', function(){ toggleLang_(); });
 if (btnWartung) btnWartung.addEventListener('click', function(){ runMaintenance_(); });
+if(btnWartung && window.serkal && window.serkal.maintenance){
+  const last=document.createElement('button');last.className='btnSmall';last.textContent='☷';last.title=t('MAINT_EXTRA_0');last.setAttribute('aria-label',t('MAINT_EXTRA_0'));
+  last.onclick=async()=>{const result=await window.serkal.maintenance.last();if(result)showMaintenanceReport_(result);};btnWartung.insertAdjacentElement('afterend',last);
+}
+
 if (btnCalendarDock) btnCalendarDock.addEventListener('click', function(){ try { uiLogAction_(t('LOG_CALENDAR_OPENED'), {}); } catch (_eAction) {} openCalendarFromDock_(); });
 if (btnAnalyseDock) btnAnalyseDock.addEventListener('click', function(){ try { uiLogAction_(t('LOG_ANALYSIS_OPENED'), {}); } catch (_eAction) {} openAnalyseFromDock_(); });
 var skFanalCloseBtn_ = document.getElementById('skFanalCloseBtn');

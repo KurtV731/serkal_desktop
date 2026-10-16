@@ -3,6 +3,9 @@
 // Central language catalogue for every text created by the Electron backend.
 // No user-visible backend message may be written directly at its call site.
 const PAIRS = {
+  GOOGLE_IDENTITY_UNAVAILABLE:["Google konnte die Kontoidentität gerade nicht bestätigen. Lokale Daten bleiben erhalten; bitte die Google-Anmeldung prüfen und erneut synchronisieren.","Google could not confirm the account identity. Local data is preserved; check your Google sign-in and retry synchronization."],
+  GOOGLE_IDENTITY_INVALID:["Die Google-Kontoidentität ist unvollständig oder nicht bestätigt. Es wurde kein fremder Archivstand übernommen.","The Google account identity is incomplete or unverified. No other account's archive was adopted."],
+  PROVIDER_COUNTRY_INVALID:["Bitte ein Land mit zwei Buchstaben angeben, zum Beispiel DE oder AU.","Please enter a two-letter country code, for example DE or AU."],
   COPY_SYNC_LOG:["Archiv-Synchronisation", "Archive synchronization"],
   COPY_LOADING:["Archiv wird vorbereitet. Lesen ist möglich; bitte vor Änderungen das Laden abwarten.", "Preparing archive. Reading is available; wait for loading before making changes."],
   COPY_LOW_SPACE:["Zu wenig freier Speicher. Ansehen ist möglich, Änderungen können derzeit nicht gespeichert werden.", "Not enough free storage. You can view the archive, but changes cannot currently be saved."],

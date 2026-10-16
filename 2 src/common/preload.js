@@ -79,8 +79,9 @@ contextBridge.exposeInMainWorld("serkal", {
         createIcs:(payload)=>ipcRenderer.invoke("serkal:calendar:createIcs",payload||{})
     },
     maintenance:{
+        last:()=>ipcRenderer.invoke("serkal:maintenance:last"),
         status:()=>ipcRenderer.invoke("serkal:maintenance:status"),
-        run:()=>ipcRenderer.invoke("serkal:maintenance:run")
+        run:options=>ipcRenderer.invoke("serkal:maintenance:run",options||{})
     }
 });
 

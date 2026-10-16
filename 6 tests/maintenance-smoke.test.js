@@ -52,7 +52,7 @@ const context = {
 vm.createContext(context);
 const mainSource = `(function(){\n` + fs.readFileSync(mainPath, "utf8") + `
 globalThis.__maintenanceTest={
-  archiveLoad_, maintenanceAnalyse_, maintenanceBuildOperations_,
+  archiveLoad_, maintenanceAnalyse_, maintenanceBuildOperations_, maintenanceWriteProviders_,
   maintenanceArchiveSnapshot_, maintenanceWriteArchive_, maintenanceRestoreArchive_,
   googleCalendarEventWasManuallyChanged_
 };\n})();`;
@@ -88,6 +88,16 @@ assert.match(changed, /note=Meine%20Notiz/);
 api.maintenanceRestoreArchive_(before);
 assert.equal(fs.readFileSync(filePath, "utf8"), original);
 
+const providerInfo={country:"AU",checkedAt:"2026-10-16",offers:[{id:8,name:"Netflix",type:"flatrate"}],source:"JustWatch via TMDB",link:""};
+snapshot.get("123").watchProviders=providerInfo;
+api.maintenanceWriteProviders_([group],snapshot);
+const metadata=api.archiveLoad_().daten.entries[0];
+assert.equal(metadata.watchProviders.country,"AU");
+assert.equal(metadata.note,"Meine Notiz");
+assert.equal(metadata.tmdbId,123);
+assert.match(fs.readFileSync(filePath,"utf8"),/flags=32/);
+api.maintenanceRestoreArchive_(before);
+
 const managed = {
     summary:"Testserie (2025) S01E01",
     start:{ date:"2026-01-02" },
@@ -105,3 +115,4 @@ managed.summary += " händisch";
 assert.equal(api.googleCalendarEventWasManuallyChanged_(managed), true);
 
 console.log("SERKAL maintenance smoke test: OK");
+

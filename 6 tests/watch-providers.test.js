@@ -1,0 +1,11 @@
+'use strict';
+const assert=require('node:assert/strict');
+const p=require('../2 src/common/watch-providers');
+const data={results:{DE:{flatrate:[{provider_id:8,provider_name:'Netflix'}],buy:[{provider_id:9,provider_name:'Amazon'}],link:'https://www.themoviedb.org/tv/1/watch?locale=DE'},AU:{rent:[{provider_id:10,provider_name:'Other'}]}}};
+const de=p.normalize(data,'DE','2026-10-16T00:00:00Z');
+assert.equal(de.offers.length,2);assert.equal(p.normalize(data,'AU').offers[0].name,'Other');
+assert.match(p.text(de,''),/Netflix \(Abo\)/);assert.match(p.text(de,'Anbieter: Paramount',true),/manual.*Paramount/);
+assert.doesNotMatch(p.text(de,'Anbieter: Paramount',true),/Netflix/);
+assert.match(p.text(p.normalize({},'DE'),''),/Keine Angebote gemeldet/);
+assert.equal(p.normalize({results:{DE:{link:'javascript:bad'}}},'DE').link,'');
+assert.throws(()=>p.normalize(data,'bad'));console.log('Watch provider regions, manual override and missing data: OK');
