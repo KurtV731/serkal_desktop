@@ -60,7 +60,14 @@ final class AndroidArchiveCopy {
     boolean busy(){return busy;}
     synchronized JSONObject snapshot() throws Exception {
         if(readOnlyRecord==null && !state.has("record"))return null;JSONObject r=readOnlyRecord!=null?readOnlyRecord:state.getJSONObject("record");
-        return new JSONObject().put("owner",owner).put("generatedAt",r.getString("generatedAt")).put("entries",ArchiveCodec.entries(r));
+        return new JSONObject().put("epoch",state.optLong("epoch")).put("owner",owner).put("generatedAt",r.getString("generatedAt")).put("entries",ArchiveCodec.entries(r));
+    }
+    synchronized void maintenance(long epoch,JSONArray patches) throws Exception {
+        if(!writable())throw new Exception("COPY_LOADING");
+        if(state.optLong("epoch")!=epoch)throw new Exception("COPY_LOCAL_CHANGED");
+        JSONObject next=new JSONObject(state.toString());next.put("record",ArchiveCodec.maintenance(next.getJSONObject("record"),patches));
+        if(next.getJSONObject("record").toString().equals(state.getJSONObject("record").toString()))return;
+        next.put("dirty",true).put("epoch",epoch+1);save(next);status="pending";error="";log("MAINTENANCE_SAVED","");notifyChange();schedule(1);
     }
     synchronized void edit(String action,JSONObject payload) throws Exception {
         if(!writable())throw new Exception(!space()?"COPY_LOW_SPACE":error.isEmpty()?"COPY_LOADING":error);

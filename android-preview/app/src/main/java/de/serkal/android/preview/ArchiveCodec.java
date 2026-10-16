@@ -75,6 +75,8 @@ final class ArchiveCodec {
                     .put("startOriginal",anchor).put("startDE",f.getOrDefault("startDE",""))
                     .put("descDE",decode(f.getOrDefault("descDE",f.getOrDefault("ov_de",""))))
                     .put("descEN",decode(f.getOrDefault("descEN",f.getOrDefault("ov_en",""))))
+                    .put("watchProviders",provider(f.getOrDefault("watchProviders","")))
+                    .put("titleDE",decode(f.getOrDefault("titleDE",""))).put("titleEN",decode(f.getOrDefault("titleEN","")))
                     .put("note",decode(f.getOrDefault("note",""))).put("manualFlags",number(f.getOrDefault("manualFlags","0")))
                     .put("seen",number(f.getOrDefault("seen",f.getOrDefault("buttonPressed","0")))));
             }
@@ -97,7 +99,7 @@ final class ArchiveCodec {
     static JSONObject edit(JSONObject original,String action,JSONObject payload) throws Exception {
         JSONObject r=new JSONObject(original.toString());JSONArray files=r.getJSONArray("files");int id=payload.getInt("tmdbId");
         if(id<=0)throw new Exception("COPY_INVALID");String season=action.equals("insert")?String.format(Locale.ROOT,"S%02d",payload.getInt("staffelNummer")):payload.getString("seasonLabel");
-        if(!Arrays.asList("insert","notes","delete").contains(action))throw new Exception("COPY_INVALID");
+        if(!Arrays.asList("insert","notes","delete","seen").contains(action))throw new Exception("COPY_INVALID");
         boolean found=false;JSONArray result=new JSONArray();String target="";
         for(int i=0;i<files.length();i++){
             JSONObject file=files.getJSONObject(i);StringBuilder content=new StringBuilder();boolean fileHas=false;
@@ -107,6 +109,7 @@ final class ArchiveCodec {
                 if(matches && action.equals("delete")){found=true;continue;}
                 if(matches && f.getOrDefault("season","").equalsIgnoreCase(season)) {
                     found=true;
+                    if(action.equals("seen")){f.put("seen",payload.optBoolean("seen")?"1":"0");raw=line(f);}
                     if(action.equals("notes")){note(f,payload.getString("note"));raw=line(f);}
                     if(action.equals("insert")){f.put("eps",String.valueOf(payload.getInt("episoden")));f.put("dates",compact(payload.getJSONArray("termindaten")));f.put("startOriginal",payload.getJSONArray("termindaten").getString(0));
                         f.put("descDE",encode(payload.optString("descDE")));f.put("descEN",encode(payload.optString("descEN")));note(f,decode(f.getOrDefault("note","")));raw=line(f);}
@@ -127,5 +130,19 @@ final class ArchiveCodec {
             if(!appended){String text=line(f)+"\n";result.put(new JSONObject().put("name",target).put("content",text).put("sha256",hash(text)));}
         } else if(!found && !action.equals("delete"))throw new Exception("COPY_ENTRY_MISSING");
         r.put("files",result);return r;
+    }
+    static JSONObject provider(String raw){try{return new JSONObject(decode(raw));}catch(Exception ignored){return null;}}
+    static JSONObject maintenance(JSONObject original,JSONArray patches) throws Exception {
+        JSONObject record=new JSONObject(original.toString());JSONArray files=record.getJSONArray("files");
+        for(int i=0;i<files.length();i++){JSONObject file=files.getJSONObject(i);String[] lines=file.getString("content").split("\\r?\\n",-1);boolean changed=false;
+            for(int j=0;j<lines.length;j++){LinkedHashMap<String,String> f=fields(lines[j]);
+                for(int k=0;k<patches.length();k++){JSONObject p=patches.getJSONObject(k);if(number(f.getOrDefault("tmdb","0"))!=p.getInt("tmdbId") || !f.getOrDefault("season","").equals(p.getString("seasonLabel")))continue;
+                    if(p.has("watchProviders"))f.put("watchProviders",encode(p.getJSONObject("watchProviders").toString()));
+                    for(String name:new String[]{"titleDE","titleEN"})if(p.has(name))f.put(name,encode(p.getString(name)));
+                    if(p.has("termindaten") && (number(f.getOrDefault("manualFlags","0"))&56)==0){JSONArray dates=p.getJSONArray("termindaten");f.put("dates",compact(dates));f.put("startOriginal",dates.getString(0));f.put("eps",String.valueOf(p.getInt("episoden")));note(f,decode(f.getOrDefault("note","")));}
+                    lines[j]=line(f);changed=true;
+                }
+            }if(changed){String text=join("\n",lines);file.put("content",text).put("sha256",hash(text));}
+        }return record;
     }
 }

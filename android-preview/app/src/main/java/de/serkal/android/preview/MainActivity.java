@@ -255,6 +255,8 @@ public class MainActivity extends Activity {
     }
 
     private final Handler handler = new Handler(Looper.getMainLooper());
+    private final ExecutorService maintenanceWorker = Executors.newSingleThreadExecutor();
+    private boolean maintenanceBusy;
     private final ExecutorService network = Executors.newSingleThreadExecutor();
     private int requestGeneration = 0;
     private String credential = "";
@@ -329,7 +331,7 @@ public class MainActivity extends Activity {
         if(entries.length()==0) archiveRows.addView(text(archiveText("EMPTY_ARCHIVE"),10,MUTED));
         for(int i=0;i<entries.length();i++) {
             JSONObject e=entries.optJSONObject(i);
-            TextView item=row(e.optString("title")+" · "+e.optString("seasonLabel"),false);
+            TextView item=row(archiveStatusLabel(e)+" · "+archiveTitle(e)+" · "+e.optString("seasonLabel"),false);
             item.setOnClickListener(v -> showArchiveEntry(e));
             archiveRows.addView(item);
         }
@@ -340,10 +342,12 @@ public class MainActivity extends Activity {
     private void showArchiveEntry(JSONObject e) {
 
                 requestGeneration++; if(pendingSearch!=null) handler.removeCallbacks(pendingSearch);
-                selectedArchiveEntry=e; selectedTmdbId=e.optInt("tmdbId"); selectedName.setText(e.optString("title"));
+                selectedArchiveEntry=e; selectedTmdbId=e.optInt("tmdbId"); selectedName.setText(archiveTitle(e));
                 String description=e.optString((english ? "descEN" : "descDE"));
                 org.json.JSONArray dates=e.optJSONArray("dates");
-                StringBuilder detail=new StringBuilder(e.optString("seasonLabel"));
+                StringBuilder detail=new StringBuilder(archiveStatusLabel(e)+" · "+e.optString("seasonLabel"));
+                String providers=WatchProviders.text(e.optJSONObject("watchProviders"),e.optString("note"),english);
+                if(!providers.isEmpty())detail.append("\n\n").append(providers);
                 detail.append(archiveText("EPISODES")).append(e.optInt("eps"));
                 if(!description.isEmpty()) detail.append("\n\n").append(description);
                 detail.append(archiveText("DATES"));
@@ -368,10 +372,65 @@ public class MainActivity extends Activity {
         if(!writeReady())return;
         try {
             archiveCopy.edit(action,payload);refreshLocalCopy();
+            if((action.equals("notes") || action.equals("seen")) && archiveSnapshot!=null){
+                org.json.JSONArray entries=archiveSnapshot.getJSONArray("entries");
+                for(int i=0;i<entries.length();i++){JSONObject entry=entries.getJSONObject(i);if(entry.optInt("tmdbId")==payload.getInt("tmdbId") && entry.optString("seasonLabel").equals(payload.getString("seasonLabel"))){showArchiveEntry(entry);break;}}
+            } else if(action.equals("delete")){
+                selectedArchiveEntry=null;selectedTmdbId=0;selectedName.setText(english ? "Select a series" : "Serie auswählen");selectedInfo.setText("");clearPoster();
+            }
             statusText.setText(english ? "Saved locally. Google transfer runs in the background." : "Lokal gespeichert. Google-Übertragung läuft im Hintergrund.");
         }catch(Exception error){statusText.setText(english ? "Could not save locally. Nothing confirmed." : "Lokal konnte nicht gespeichert werden. Nichts bestätigt.");}
     }
     private void checkPendingRequest() { refreshLocalCopy(); }
+    private String archiveTitle(JSONObject e){String localized=e.optString(english?"titleEN":"titleDE");return localized.isEmpty()?e.optString("title"):localized;}
+    private String archiveStatusLabel(JSONObject e){
+        if(e.optInt("seen")==1)return english?"✓ Watched":"✓ Gesehen";
+        org.json.JSONArray dates=e.optJSONArray("dates");if(dates==null || dates.length()==0)return english?"○ Waiting":"○ Wartet";
+        String today=new java.text.SimpleDateFormat("yyyy-MM-dd",java.util.Locale.ROOT).format(new java.util.Date());
+        if(dates.optString(0).compareTo(today)>0)return english?"◷ Upcoming":"◷ Geplant";
+        if(dates.optString(dates.length()-1).compareTo(today)>=0)return english?"● Running":"● Läuft";
+        return english?"○ Unwatched":"○ Ungesehen";
+    }
+    private void askMaintenanceCountry(){
+        if(maintenanceBusy || !writeReady() || credential.isEmpty())return;
+        EditText input=new EditText(this);input.setTextColor(Color.BLACK);input.setSingleLine(true);input.setText(getPreferences(0).getString("watchCountry","DE"));
+        archiveDialogOpen=true;new AlertDialog.Builder(this).setTitle(english?"Streaming country (DE, AU, US, GB …)":"Streaming-Land (DE, AU, US, GB …)").setView(input)
+            .setPositiveButton(english?"Start":"Starten",(d,w)->{String country=input.getText().toString().trim().toUpperCase(java.util.Locale.ROOT);if(country.matches("[A-Z]{2}")){getPreferences(0).edit().putString("watchCountry",country).apply();runMaintenance(country);}})
+            .setNegativeButton(english?"Cancel":"Abbrechen",null).setOnDismissListener(d->archiveDialogOpen=false).show();
+    }
+    private void runMaintenance(String country){
+        if(maintenanceBusy || !writeReady())return;
+        final AndroidArchiveCopy target=archiveCopy;final JSONObject initial;try{initial=target.snapshot();}catch(Exception e){return;}
+        if(initial==null)return;final int generation=googleGeneration;final boolean language=english;final String key=credential;
+        maintenanceBusy=true;statusText.setText(english?"Maintenance running · you can keep working":"Wartung läuft · du kannst weiterarbeiten");
+        maintenanceWorker.execute(()->{
+            try{TmdbClient client=new TmdbClient(key);String now=new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX",java.util.Locale.ROOT).format(new java.util.Date());
+                JSONObject result=Maintenance.run(initial.getJSONArray("entries"),client::get,country,language,now);
+                if(Thread.currentThread().isInterrupted())return;
+                // This checks the local epoch under the same lock as every local edit.
+                try{target.maintenance(initial.getLong("epoch"),result.getJSONArray("patches"));result.put("applied",true);}catch(Exception changed){result.put("applied",false);}
+                result.remove("patches");
+                handler.post(()->{maintenanceBusy=false;if(generation!=googleGeneration || target!=archiveCopy || isFinishing())return;
+                    getPreferences(0).edit().putString("maintenanceReport",result.toString()).apply();refreshLocalCopy();showMaintenanceReport(result);
+                    statusText.setText(english?"Maintenance checked. See results and Google transfer status.":"Wartung geprüft. Ergebnis und Google-Übertragungsstatus beachten.");});
+            }catch(Exception error){handler.post(()->{maintenanceBusy=false;if(generation==googleGeneration)statusText.setText(english?"Maintenance stopped. Local archive preserved.":"Wartung angehalten. Lokales Archiv bleibt erhalten.");});}
+        });
+    }
+    private void showMaintenanceReport(JSONObject result){
+        StringBuilder b=new StringBuilder();b.append(result.optString("checkedAt")).append(" · ").append(result.optString("country"));
+        b.append(english?"\nNew seasons are suggestions, never added automatically.\n":"\nNeue Staffeln sind Vorschläge und werden nicht automatisch eingetragen.\n");
+        if(result.has("applied") && !result.optBoolean("applied"))b.append(english?"\nNOT APPLIED: archive changed or currently read-only. Repeat maintenance.\n":"\nNICHT ÜBERNOMMEN: Archiv geändert oder derzeit nur lesbar. Wartung wiederholen.\n");
+        org.json.JSONArray rows=result.optJSONArray("report");if(rows!=null)for(int i=0;i<rows.length();i++){JSONObject row=rows.optJSONObject(i);String kind=row.optString("kind");
+            String label=kind.equals("missing-season")?(english?"Missing season":"Fehlende Staffel"):kind.equals("upcoming-episode")?(english?"Upcoming episode":"Anstehende Episode"):kind.equals("new-episode")?(english?"New episode":"Neue Episode"):(english?"Changed date":"Termin geändert");
+            b.append("\n").append(row.optString("title")).append(" · S").append(row.optInt("season"));if(row.has("episode"))b.append("E").append(row.optInt("episode"));b.append(" · ").append(row.optString("date")).append(" · ").append(label).append('\n');}
+        if(rows==null || rows.length()==0)b.append(english?"\nNo new seasons or episode changes found.\n":"\nKeine neuen Staffeln oder Episodenänderungen gefunden.\n");
+        b.append(english?"\nSeries availability; individual seasons may differ.\n":"\nSerienangebote; einzelne Staffeln können abweichen.\n");
+        org.json.JSONArray providers=result.optJSONArray("providers");if(providers!=null)for(int i=0;i<providers.length();i++){JSONObject row=providers.optJSONObject(i);b.append("\n").append(row.optString("title")).append("\n");JSONObject info=row.optJSONObject("info");b.append(info==null?(english?"Provider lookup failed; old data retained.":"Anbieterabfrage fehlgeschlagen; bisherige Daten bleiben erhalten."):WatchProviders.text(info,"",english)).append('\n');}
+        org.json.JSONArray errors=result.optJSONArray("errors");if(errors!=null && errors.length()>0)b.append(english?"\nIncomplete checks: ":"\nUnvollständige Prüfungen: ").append(errors.length());
+        TextView text=text(b.toString(),12,Color.BLACK);text.setTextIsSelectable(true);ScrollView scroll=new ScrollView(this);scroll.addView(text);
+        archiveDialogOpen=true;new AlertDialog.Builder(this).setTitle(english?"Maintenance results":"Wartungsergebnis").setView(scroll).setPositiveButton(english?"Close":"Schließen",null).setOnDismissListener(d->archiveDialogOpen=false).show();
+    }
+
     private void askForSeason() {
         if(!writeReady() || selectedTmdbId<=0)return;
         EditText input=new EditText(this);input.setText("1");input.setTextColor(Color.BLACK);input.setInputType(InputType.TYPE_CLASS_NUMBER);
@@ -407,7 +466,7 @@ public class MainActivity extends Activity {
         if(!writeReady() || selectedArchiveEntry==null)return;
         final JSONObject entry=selectedArchiveEntry;EditText input=new EditText(this);input.setTextColor(Color.BLACK);input.setText(entry.optString("note"));
         archiveDialogOpen=true;
-        new AlertDialog.Builder(this).setTitle(english ? "Notes (e.g. OffsetDE: +1D)" : "Notiz (z.B. OffsetDE: +1D)").setView(input)
+        new AlertDialog.Builder(this).setTitle(english ? "Notes: Provider: … / OffsetDE: +1D" : "Notiz: Anbieter: … / OffsetDE: +1D").setView(input)
             .setPositiveButton(english ? "Send" : "Senden",(d,w)->{try{sendRequest("notes",new JSONObject().put("tmdbId",entry.getInt("tmdbId")).put("seasonLabel",entry.getString("seasonLabel")).put("note",input.getText().toString()));}catch(Exception ignored){}})
             .setNegativeButton(english ? "Cancel" : "Abbrechen",null).setOnDismissListener(_closedDialog -> archiveDialogOpen=false).show();
     }
@@ -427,7 +486,7 @@ public class MainActivity extends Activity {
         archiveGeneration++;
         handler.removeCallbacksAndMessages(null);
         if(archiveCopy!=null)archiveCopy.close();
-        network.shutdownNow(); pictures.shutdownNow(); posterCache.evictAll(); posterGeneration++;
+        network.shutdownNow(); maintenanceWorker.shutdownNow(); pictures.shutdownNow(); posterCache.evictAll(); posterGeneration++;
         super.onDestroy();
     }
 
@@ -774,12 +833,16 @@ public class MainActivity extends Activity {
         middle.addView(add);
         Button notes=verticalButton(english ? "Edit notes / offset" : "Notiz / Offset ändern");
         notes.setOnClickListener(v -> editArchiveNotes()); middle.addView(notes);
+        Button seen=verticalButton(english ? "✓ Toggle watched" : "✓ Gesehen umschalten");
+        seen.setOnClickListener(v->{if(selectedArchiveEntry==null)return;try{JSONObject e=selectedArchiveEntry;sendRequest("seen",new JSONObject().put("tmdbId",e.getInt("tmdbId")).put("seasonLabel",e.getString("seasonLabel")).put("seen",e.optInt("seen")!=1));}catch(Exception ignored){}});middle.addView(seen);
         Button remove=verticalButton(english ? "Delete complete series" : "Ganze Serie löschen");
         remove.setOnClickListener(v -> deleteArchiveSeries()); middle.addView(remove);
         columns.addView(middle);
 
         LinearLayout right = panel(28);
         right.addView(heading(english ? "SHARED ARCHIVE" : "GEMEINSAMES ARCHIV"));
+        Button maintenance=verticalButton(english ? "Maintenance" : "Wartung");maintenance.setOnClickListener(v->askMaintenanceCountry());right.addView(maintenance);
+        Button report=verticalButton(english ? "Last maintenance results" : "Letztes Wartungsergebnis");report.setOnClickListener(v->{try{String value=getPreferences(0).getString("maintenanceReport","");if(!value.isEmpty())showMaintenanceReport(new JSONObject(value));}catch(Exception ignored){}});right.addView(report);
         archiveStatus=text("",9,MUTED);
         right.addView(archiveStatus);
         archiveRows=new LinearLayout(this); archiveRows.setOrientation(LinearLayout.VERTICAL);
