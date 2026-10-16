@@ -79,9 +79,11 @@ function resolve(detDE, detEN, fallback, searchLanguage) {
   const readableFallback = en || de || fallbackName || originalName || '—';
   return {
     de:de || readableFallback,
-    en:en || de || fallbackName || originalName || '—',
+    // Missing English metadata must never silently select the German translation.
+    en:en || originalName || '—',
     original:originalName
   };
 }
 
 module.exports = { resolve };
+

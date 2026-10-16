@@ -45,6 +45,17 @@ result = titles.resolve(noGermanTitle, englishDetails, null, 'de');
 assert.equal(result.de, 'Take Charge of My Heart');
 assert.equal(result.en, 'Take Charge of My Heart');
 
+const germanOnly = {
+  name:'Deutscher Anzeigename', original_name:'Original series', original_language:'ko',
+  translations:{translations:[{iso_639_1:'de', iso_3166_1:'DE', data:{name:'Deutscher Anzeigename'}}]}
+};
+result = titles.resolve(germanOnly, {name:'Original series', original_name:'Original series', original_language:'ko'}, null, 'en');
+assert.equal(result.de, 'Deutscher Anzeigename');
+assert.equal(result.en, 'Original series');
+result = titles.resolve({translations:germanOnly.translations}, null, null, 'en');
+assert.equal(result.en, '—');
+
 assert.match(html, /inpTitle\.value\s*=\s*localizedTitleFromAny_\(state\.currentPreview/);
 
 console.log('SERKAL TMDB localized title selection test: OK');
+
