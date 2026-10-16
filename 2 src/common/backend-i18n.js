@@ -3,6 +3,17 @@
 // Central language catalogue for every text created by the Electron backend.
 // No user-visible backend message may be written directly at its call site.
 const PAIRS = {
+  COPY_CALENDAR_CHECK_LOG:["Archivtransfer prüft Kalenderziel", "Archive transfer checking calendar target"],
+  COPY_CALENDAR_RECOVERED:["Vorhandenen App-Kalender für ausstehende Übertragung wiedergefunden", "Existing app calendar recovered for pending transfer"],
+  COPY_CALENDAR_READ_LOG:["Kalendertermine für Archivtransfer konnten nicht gelesen werden", "Calendar events for archive transfer could not be read"],
+  COPY_CALENDAR_TARGET_MISSING:["Der bisherige Google-Kalender ist nicht erreichbar. Kein eindeutig zugänglicher SerKal-App-Kalender gefunden. Automatischer Versuch pausiert; lokale Daten bleiben erhalten.", "Previous Google calendar is unavailable. No unambiguous accessible SerKal app calendar found. Automatic retry paused; local data preserved."],
+  COPY_CALENDAR_AMBIGUOUS:["Mehrere zugängliche SerKal-Kalender gefunden. Bitte Kalenderziel klären; es wurde kein Ersatzkalender angelegt.", "Multiple accessible SerKal calendars found. Resolve the calendar target; no replacement calendar was created."],
+  COPY_CALENDAR_ACCESS_DENIED:["Google verweigert den Zugriff auf den gespeicherten Kalender. Automatische Wiederholung pausiert; lokale Daten bleiben erhalten.", "Google denied access to the stored calendar. Automatic retry paused; local data preserved."],
+  COPY_CALENDAR_CHECK_FAILED:["Das Kalenderziel konnte vorübergehend nicht geprüft werden. Übertragung bleibt ausstehend.", "The calendar target could not be checked temporarily. Transfer remains pending."],
+  COPY_CALENDAR_LIST_FAILED:["Die Google-Kalenderliste konnte nicht gelesen werden. Übertragung bleibt ausstehend.", "Google calendar list could not be read. Transfer remains pending."],
+  COPY_CALENDAR_READ_FAILED:["Kalendertermine konnten nicht gelesen werden. Übertragung bleibt ausstehend.", "Calendar events could not be read. Transfer remains pending."],
+  MAINT_CHECK_SEASON:["Prüfe {title} · Staffel {season} von {total}", "Checking {title} · season {season} of {total}"],
+
   GOOGLE_IDENTITY_UNAVAILABLE:["Google konnte die Kontoidentität gerade nicht bestätigen. Lokale Daten bleiben erhalten; bitte die Google-Anmeldung prüfen und erneut synchronisieren.","Google could not confirm the account identity. Local data is preserved; check your Google sign-in and retry synchronization."],
   GOOGLE_IDENTITY_INVALID:["Die Google-Kontoidentität ist unvollständig oder nicht bestätigt. Es wurde kein fremder Archivstand übernommen.","The Google account identity is incomplete or unverified. No other account's archive was adopted."],
   PROVIDER_COUNTRY_INVALID:["Bitte ein Land mit zwei Buchstaben angeben, zum Beispiel DE oder AU.","Please enter a two-letter country code, for example DE or AU."],

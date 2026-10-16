@@ -1853,7 +1853,7 @@ function copyManager_() {
         calendarSync:copyCalendarSync_,
         lock:async fn=>{const result=await archiveWithWriteLock_(fn);if(result && result.ok===false)throw Object.assign(new Error(result.code||"ARCHIVE_LOCK_BUSY"),{code:result.code||"ARCHIVE_LOCK_BUSY"});return result;},
         onChange:()=>{sharedArchiveRevision_++;},
-        onStatus:status=>logWrite_(status.code?"WARN":"INFO","SYNC",bt_("COPY_SYNC_LOG"),{status:status.status,code:status.code,dirty:status.dirty})
+        onStatus:status=>logWrite_(status.code?"WARN":"INFO","SYNC",bt_("COPY_SYNC_LOG"),{status:status.status,code:status.code,dirty:status.dirty,progress:status.progress})
     });
     return desktopCopy_;
 }
@@ -1861,15 +1861,34 @@ async function copyCalendarSync_(record) {
     if(record.calendar.mode!=="google")return;
     const calendarToken=await googleOauthAccessToken_();
     await require(path.join(__dirname,"../common/google-identity")).verifyCalendarOwner(calendarToken,record.owner);
-    if(!record.calendar.id) {
-        const resolved=await googleResolveSerkalCalendar_();
-        record.calendar.id=resolved.id;copyManager_().save();
+    const manager=copyManager_();manager.report("calendar-check");
+    const preferred=String(readSettings_().calendar.googleCalendarId||"");
+    if(!record.calendar.id && !preferred){const created=await googleResolveSerkalCalendar_();record.calendar.id=created.id;manager.save();}
+    const target=await require(path.join(__dirname,"../common/copy-calendar-target")).resolve({
+        id:record.calendar.id,preferred,
+        check:async id=>{
+            const result=await googleCalendarJsonRequest_("GET","https://www.googleapis.com/calendar/v3/calendars/"+encodeURIComponent(id)+"/events?maxResults=1");
+            logWrite_(result.ok?"TRACE":"WARN","SYNC",bt_("COPY_CALENDAR_CHECK_LOG"),{kalender:googleCalendarIdForLog_(id),httpStatus:result.status,ok:result.ok});
+            return result;
+        },
+        list:async()=>{let items=[],page="";do {
+            const response=await googleCalendarJsonRequest_("GET","https://www.googleapis.com/calendar/v3/users/me/calendarList?maxResults=250&showHidden=true&pageToken="+encodeURIComponent(page));
+            if(!response.ok)throw Object.assign(new Error("COPY_CALENDAR_LIST_FAILED"),{code:"COPY_CALENDAR_LIST_FAILED",status:response.status});
+            items.push(...(response.data.items||[]));page=response.data.nextPageToken||"";
+        }while(page);return items;}
+    });
+    if(target.recovered){
+        logWrite_("INFO","SYNC",bt_("COPY_CALENDAR_RECOVERED"),{vorher:googleCalendarIdForLog_(record.calendar.id),kalender:googleCalendarIdForLog_(target.id)});
+        record.calendar.id=target.id;manager.save();const settings=readSettings_();settings.calendar.googleCalendarId=target.id;writeSettings_(settings);
     }
+    manager.report("calendar-read");
     const entries=record.files.flatMap(f=>f.content.split(/\r?\n/).map(line=>archiveEntryFromLine_(f.name,{mtime:new Date(record.generatedAt)},line)).filter(Boolean));
     const events=await googleCalendarManagedEvents_(record.calendar.id);
     const protocol=require("../common/archive-calendar-copy.js");
     const operations=protocol.plan(entries,events,record.revision);
+    let completed=0;manager.report("calendar-write",0,operations.length);
     for(const op of operations) {
+        manager.report("calendar-write",completed++,operations.length);
         const result=await googleCalendarApi_(op.method,record.calendar.id,op.id,op.body);
         if(result.ok || (op.method==="DELETE" && [404,410].includes(result.status)))continue;
         if(op.method==="POST" && result.status===409) {
@@ -1878,6 +1897,7 @@ async function copyCalendarSync_(record) {
         }
         throw Object.assign(new Error("COPY_CALENDAR_FAILED"),{code:"COPY_CALENDAR_FAILED"});
     }
+    manager.report("archive-upload");
 }
 
 
@@ -3013,7 +3033,9 @@ async function googleCalendarManagedEvents_(calendarId, includeLegacy) {
         const result = await googleCalendarJsonRequest_("GET", url.toString());
         if (!result.ok) {
             const detail = result.data && result.data.error && result.data.error.message;
-            throw new Error(detail || bt_("GOOGLE_EVENTS_CHECK_FAILED", { status:result.status }));
+            logWrite_("ERROR","SYNC",bt_("COPY_CALENDAR_READ_LOG"),{kalender:googleCalendarIdForLog_(calendarId),httpStatus:result.status,googleMessage:detail||""});
+            const code=[404,410].includes(result.status)?"COPY_CALENDAR_TARGET_MISSING":result.status===403?"COPY_CALENDAR_ACCESS_DENIED":"COPY_CALENDAR_READ_FAILED";
+            throw Object.assign(new Error(code),{code,status:result.status});
         }
         all.push(...(Array.isArray(result.data && result.data.items) ? result.data.items : []));
         pageToken = String(result.data && result.data.nextPageToken || "");
@@ -3258,6 +3280,7 @@ async function maintenanceFetchGroup_(group, cache, snapshot, counters) {
 
     const seasons = {};
     for (const seasonNumber of Array.from(seasonNumbers).sort((a, b) => a - b)) {
+        maintenanceSetStatus_("tmdb",bt_("MAINT_CHECK_SEASON",{title:tv.name||group.entries[0]?.titel||"",season:seasonNumber,total:Math.max(maxTmdbSeason,...seasonNumbers)}),group.entries[0],0,0);
         const seasonResult = await tmdbSeasonDetails_(group.tmdbId, seasonNumber, activeLanguage_);
         counters.requests++;
         if (seasonResult && seasonResult.ok) {
@@ -3599,7 +3622,7 @@ function installIpc_() {
         scheduleSharedArchive_(); await sharedArchiveObserve_(); return archiveUiView_();
     });
     ipcMain.handle("serkal:archive:sync", () => copyManager_().sync());
-    ipcMain.handle("serkal:archive:syncStatus", () => copyManager_().view());
+    ipcMain.handle("serkal:archive:syncStatus", () => {const view=copyManager_().view();return {...view,message:view.code?bt_(view.code):""};});
     ipcMain.handle("serkal:archive:revision", () => ({revision:sharedArchiveRevision_,shared:copyLocalMode_ || !!sharedArchiveView_}));
     archiveWriteHandler_("serkal:archive:insert", (_event, payload) => {
         logWrite_("TRACE", "PIPELINE", bt_("IPC_ARCHIVE_RECEIVED"), {

@@ -3875,6 +3875,13 @@ const I18N = {
     COPY_UI_PENDING: "Lokal gespeichert · Übertragung ausstehend",
     COPY_UI_SYNCING: "Übertragung läuft · du kannst weiterarbeiten",
     COPY_UI_SAVED: "Bei Google gespeichert · auf anderen Geräten verfügbar",
+    "COPY_PHASE_identity":"Google-Konto wird geprüft",
+    "COPY_PHASE_archive-list":"Archivstand bei Google wird geprüft",
+    "COPY_PHASE_calendar-check":"Google-Kalender wird geprüft",
+    "COPY_PHASE_calendar-read":"Kalendertermine werden gelesen",
+    "COPY_PHASE_calendar-write":"Kalenderabgleich: {current} von {total}",
+    "COPY_PHASE_archive-upload":"Vollständiges Archiv wird übertragen und bestätigt",
+    COPY_LOCAL_COUNT:"{count} Archiveinträge lokal geladen",
     COPY_UI_ERROR: "Übertragung ausstehend · lokale Kopie bleibt erhalten",
     COPY_UI_LOW_SPACE: "Zu wenig freier Speicher · nur Lesen möglich",
     COPY_UI_CONFLICT: "Neuerer Archivstand bei Google · lokale Kopie bleibt erhalten",
@@ -4047,6 +4054,13 @@ const I18N = {
     COPY_UI_PENDING: "Saved locally \u00b7 transfer pending",
     COPY_UI_SYNCING: "Transfer running \u00b7 you can keep working",
     COPY_UI_SAVED: "Saved on Google \u00b7 available on other devices",
+    "COPY_PHASE_identity":"Checking Google account",
+    "COPY_PHASE_archive-list":"Checking archive on Google",
+    "COPY_PHASE_calendar-check":"Checking Google calendar",
+    "COPY_PHASE_calendar-read":"Reading calendar events",
+    "COPY_PHASE_calendar-write":"Calendar synchronization: {current} of {total}",
+    "COPY_PHASE_archive-upload":"Transferring and confirming the complete archive",
+    COPY_LOCAL_COUNT:"{count} archive entries loaded locally",
     COPY_UI_ERROR: "Transfer pending \u00b7 local copy preserved",
     COPY_UI_LOW_SPACE: "Not enough free storage \u00b7 reading only",
     COPY_UI_CONFLICT: "Newer archive on Google \u00b7 local copy preserved",
@@ -5125,7 +5139,11 @@ async function archiveCopyStatus_() {
     else if(info.code==='COPY_NEEDS_SOURCE')key='COPY_UI_SOURCE';
     else if(info.code?.startsWith('COPY_CALENDAR'))key='COPY_UI_CALENDAR';
     if(state.isDirty)key='COPY_UI_UNSAVED';
-    label.textContent=t(key);
+    let text=t(key);
+    if(info.busy && info.progress){const p=info.progress,phaseKey='COPY_PHASE_'+p.phase;text=t(phaseKey,{current:p.current,total:p.total});}
+    else if(info.status==='error' && info.message)text=info.message;
+    if(!info.writable && Array.isArray(state.archivEntries))text=t('COPY_LOCAL_COUNT',{count:state.archivEntries.length})+' · '+text;
+    label.textContent=text;label.style.whiteSpace='normal';label.style.fontSize='14px';label.style.fontWeight='600';
     const button=document.getElementById('btnArchiveSync');
     button.disabled=info.busy||archiveSyncButtonBusy_;
   }catch(_e){}
