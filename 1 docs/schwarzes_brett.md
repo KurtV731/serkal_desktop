@@ -2685,3 +2685,21 @@ Datei zusammen mit ihrer SHA-256-Prüfsumme an VelcroFist weitergegeben werden.
 
 Offen bleibt der reale Windows-Build mit privater OAuth-Datei, anschließend Rückmeldung
 von Dateigröße, SHA-256 und Kurts praktischem Testergebnis.
+
+
+### Installer-Korrektur 16.10.2026 – Windows-Versionsformat Alpha 17.1
+
+Der erste reale Windows-Bauversuch wurde von Electron Forge vor dem Paketieren korrekt
+abgebrochen: `1.2.0-alpha.17.1` enthält für die Windows-Ressourcenversion fünf
+Ziffernkomponenten; zulässig sind höchstens vier. Es wurde nichts installiert und kein
+Testartefakt erzeugt.
+
+Korrigierte technische Version: **`1.2.0-alpha.171`**. Die Bezeichnung bleibt
+„Alpha 17.1“; die Zahl `171` bildet die eindeutige Installer-Unterfassung in einem
+Windows-kompatiblen vierten Zahlenblock ab. Fachlogik und Setupname bleiben unverändert.
+
+Korrigierter Installercommit: `6b92b58f235988a4ff9cbc1bab45f554732a0bea`.
+Für den bereits vorhandenen Bauordner wurde
+`SERKAL-ALPHA-17-1-BAU-FORTSETZEN.BAT` bereitgestellt. Sie führt alle Tests erneut aus,
+entfernt nur die unvollständige Build-Ausgabe und setzt Paketierung, Inhaltskontrolle,
+SHA-256-Erzeugung und Testinstallation fort. Keine öffentliche Veröffentlichung.
