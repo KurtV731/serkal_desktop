@@ -2629,3 +2629,12 @@ Tests: 25 Desktop-Testprogramme bestanden; Android CI 38924511100 erfolgreich, 2
 APK `0.0.5a12-SerKal-Android.apk`: 2866951 Bytes; SHA256 `0b504678ef166edc973c9188329ad5b5e84900bd41a07a7e614d56e92e7d2c76`; dauerhaft an Kurt ausgeliefert, gleicher Signierer wie a8. Erst Windows Alpha 16 synchronisieren und bestätigen lassen, danach a12 über a8 installieren. Keine Daten-/Tokenrücksetzung als Fehlerbehelf.
 
 Ausführliche Bedien- und Testreihenfolge: `1 docs/maintenance-providers-2026-10-16.md`. Eigener korrigierbarer Serientitel bleibt separat offen. Keine Store-, Website- oder Google-Console-Änderung vorgenommen.
+
+
+## CE – 16.10.2026 abends: Alpha 17 nach blockiertem Erstexport
+
+Status: QUELLE GEPRÜFT / LIVE-TEST OFFEN. CE-Commit `38883f11321d11576ddb7dbc5bddd545b42140c0`, Version 1.2.0-alpha.17. Android bleibt a12; keine neue APK erforderlich.
+
+Kurt meldet Alpha-16-SYNC alle 30 Sekunden mit rohem „Not Found“, dirty=true. 75 lokale Einträge sind lesbar, aber erster vollständiger Export nicht bestätigt, daher Tablet-Liste leer. Kalenderziel wird jetzt vor dem Lesen geprüft; 404/410 erlaubt Wiedererkennen eines bereits vorhandenen eindeutig zugänglichen App-Kalenders. Keine Neuanlage als Reparatur; 403, fehlendes oder mehrdeutiges Ziel pausiert automatische Wiederholung. Log nennt HTTP-Kontext; Status zeigt Phase/Zähler und verständlichen Fehler. Fortschritt während einzelner Wartungs-Staffelabfragen ergänzt. Die ursprüngliche Fehlerquelle ist ohne HTTP-Kontext nicht abschließend belegt.
+
+26 Testprogramme und Syntaxprüfung bestanden. Details und Testfolge `1 docs/alpha17-calendar-target.md`. Kurt kann PC schließen und dann Alpha 17 über git pull / npm start prüfen. Erst Google-Bestätigung, dann Tablet a12 Jetzt synchronisieren. Keine Token-/Archiv-/Kalenderlöschung. Nach erster Übernahme ist Tablet mit vollständiger lokaler Kopie unabhängig vom laufenden PC. Website/Release-Freigabe bleibt offen.
