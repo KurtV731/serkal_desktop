@@ -2612,3 +2612,20 @@ Windows Alpha 15 und Android 0.0.5a11 sind der gespeicherte Entwicklungsstand. W
 Die vier noch nicht übernommenen Änderungen sind als `.pending`-Dateien unter `1 docs/checkpoints/2026-10-14/` gesichert. Sie ändern keinen aktiven Build. Details und Grenzen: `ARBEITSSTAND.md`; Reihenfolge: `1 docs/roadmap/serkal-next.md`.
 
 Als nächster Einzelauftrag folgt ausschließlich Windows prüfen und testen: bisheriger Quell-PC zuerst, Archiv sichern, alte Instanzen schließen, CE-Zweig aktualisieren, Alpha 15 starten, zunächst nur Bestand und Synchronisationsstatus prüfen. Anschließend separat Android fertigstellen und signiert liefern, dann Gerätewechsel testen. Punkt 1A (Vorab-APK für Website und QR-Code) folgt vor Wartung und Funktionsausbau. Keine Website-Freigabe oder neue APK-Auslieferung erfolgt durch diesen Sicherungsschritt.
+
+
+## CE – 16.10.2026: Alpha 16 und Android a12 zum Gerätetest
+
+Status: IMPLEMENTIERT / AUTOMATISCH GEPRÜFT / GERÄTETEST OFFEN. Empfänger: Kurt, Installer-Chatty, Website-Chatty.
+
+Desktop-CE: `be71a7993ef3eb129957a7bec731222c030f1de5` (1.2.0-alpha.16). Android: `fb6f2b962a614356e159fbdccc6ec005c4e62fb3` (0.0.5a12, Code 20). Keine öffentliche Veröffentlichung; Website-APK/QR noch nicht freigegeben.
+
+Behoben: Kalender-OAuth fordert Identitätsrechte an; fehlgeschlagene Identitätsabfrage wird nicht mehr als bewiesener Kontowechsel gemeldet. Echte Kontoabweichungen bleiben gesperrt. Der zuvor gemeldete COPY_ACCOUNT_CHANGED muss am echten Konto noch nachgetestet werden.
+
+Wartung beider Plattformen: alle regulären Staffeln prüfen, fehlende alte/zwischenliegende/neue Staffeln als eigene Vorschläge sammeln, Episodentermine/Änderungen in Ergebnisliste. Keine automatische Neuanlage weiterer Staffeln. Anbieter aus TMDB/JustWatch je ausdrücklich gewähltem Land, mit Datum, Angebotsart und Attribution. Manuell per eigener Notizzeile `Anbieter: …` / `Provider: …` übersteuerbar; Wartung erhält Notizen. Gemeinsames TXT-Feld watchProviders; Kalenderbeschreibung wird über gesicherte Archivkopie aktualisiert. Desktop-Liste druckbar; beide letzten Ergebnisse erneut aufrufbar. Android-Gesehen-Häkchen und Statuswerte ergänzt.
+
+Tests: 25 Desktop-Testprogramme bestanden; Android CI 38924511100 erfolgreich, 24 JUnit-Tests ohne Fehler/Fehlschläge. APK signiert und tatsächliches Manifest sowie Signatur geprüft. Quelle und Desktop-Dateien nach dem Commit verglichen. Visueller Desktop-Browserlauf hier nicht verfügbar; echte Geräte- und Google-Ende-zu-Ende-Prüfung offen.
+
+APK `0.0.5a12-SerKal-Android.apk`: 2866951 Bytes; SHA256 `0b504678ef166edc973c9188329ad5b5e84900bd41a07a7e614d56e92e7d2c76`; dauerhaft an Kurt ausgeliefert, gleicher Signierer wie a8. Erst Windows Alpha 16 synchronisieren und bestätigen lassen, danach a12 über a8 installieren. Keine Daten-/Tokenrücksetzung als Fehlerbehelf.
+
+Ausführliche Bedien- und Testreihenfolge: `1 docs/maintenance-providers-2026-10-16.md`. Eigener korrigierbarer Serientitel bleibt separat offen. Keine Store-, Website- oder Google-Console-Änderung vorgenommen.
