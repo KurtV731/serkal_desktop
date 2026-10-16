@@ -294,7 +294,7 @@ public class MainActivity extends Activity {
         else if(code.equals("COPY_ACCOUNT_CHANGED"))label=english ? "Google account does not match archive" : "Google-Konto passt nicht zum Archiv";
         else if(code.equals("loading"))label=english ? "Loading archive…" : "Archiv wird geladen…";
         else label=english ? "Transfer pending · local copy preserved · retry Sync now" : "Übertragung ausstehend · lokale Kopie bleibt erhalten · Jetzt synchronisieren versuchen";
-        if(copySyncStatus!=null)copySyncStatus.setText(label);
+        if(copySyncStatus!=null){copySyncStatus.setText(label);copySyncStatus.setContentDescription(label);}
         if(copySyncButton!=null)copySyncButton.setEnabled(!archiveCopy.busy());
     }
 
@@ -327,12 +327,20 @@ public class MainActivity extends Activity {
         }
         if(archiveSnapshot==null) { archiveStatus.setText(archiveText("INITIAL")); return; }
         org.json.JSONArray entries=archiveSnapshot.optJSONArray("entries");
-        archiveStatus.setText((english ? "Shared archive: " : "Gemeinsames Archiv: ")+entries.length()+"\n"+archiveSnapshot.optString("generatedAt"));
+        archiveStatus.setText((english ? "Archive: " : "Archiv: ")+entries.length());
         if(entries.length()==0) archiveRows.addView(text(archiveText("EMPTY_ARCHIVE"),10,MUTED));
-        for(int i=0;i<entries.length();i++) {
-            JSONObject e=entries.optJSONObject(i);
-            TextView item=row(archiveStatusLabel(e)+" · "+archiveTitle(e)+" · "+e.optString("seasonLabel"),false);
-            item.setOnClickListener(v -> showArchiveEntry(e));
+        final boolean byDate=getPreferences(0).getString("archiveSort","date").equals("date");
+        String today=new java.text.SimpleDateFormat("yyyy-MM-dd",java.util.Locale.ROOT).format(new java.util.Date());
+        for(JSONObject e:ArchiveOrder.sorted(entries,byDate,english)) {
+            LinearLayout item=new LinearLayout(this);item.setOrientation(LinearLayout.HORIZONTAL);item.setGravity(Gravity.CENTER_VERTICAL);item.setBackgroundColor(CARD);item.setMinimumHeight(dp(38));
+            LinearLayout.LayoutParams rowParams=new LinearLayout.LayoutParams(-1,-2);rowParams.setMargins(0,0,0,dp(2));item.setLayoutParams(rowParams);
+            TextView title=text(ArchiveOrder.label(e,english),10,TEXT);title.setMaxLines(2);title.setEllipsize(android.text.TextUtils.TruncateAt.END);item.addView(title,new LinearLayout.LayoutParams(0,-2,1));
+            String iso=ArchiveOrder.start(e);String display=iso.isEmpty()?"—":iso.substring(8,10)+"."+iso.substring(5,7)+"."+iso.substring(0,4);
+            TextView date=text(display,8,MUTED);date.setSingleLine(true);date.setGravity(Gravity.RIGHT);item.addView(date,new LinearLayout.LayoutParams(dp(59),-2));
+            int status=ArchiveOrder.status(e,today);TextView mark=text(ArchiveOrder.icon(status),16,status==4?Color.rgb(40,170,110):status==3?RED:status==1?Color.rgb(210,160,30):BLUE);
+            mark.setGravity(Gravity.CENTER);mark.setContentDescription(archiveStatusLabel(e));item.addView(mark,new LinearLayout.LayoutParams(dp(32),dp(38)));
+            item.setContentDescription(ArchiveOrder.label(e,english)+" · "+display+" · "+archiveStatusLabel(e));item.setOnClickListener(v->showArchiveEntry(e));
+            if(status==3 || status==4)mark.setOnClickListener(v->toggleArchiveSeen(e));
             archiveRows.addView(item);
         }
     }
@@ -382,7 +390,7 @@ public class MainActivity extends Activity {
         }catch(Exception error){statusText.setText(english ? "Could not save locally. Nothing confirmed." : "Lokal konnte nicht gespeichert werden. Nichts bestätigt.");}
     }
     private void checkPendingRequest() { refreshLocalCopy(); }
-    private String archiveTitle(JSONObject e){String localized=e.optString(english?"titleEN":"titleDE");return localized.isEmpty()?e.optString("title"):localized;}
+    private String archiveTitle(JSONObject e){return ArchiveOrder.title(e,english);}
     private String archiveStatusLabel(JSONObject e){
         if(e.optInt("seen")==1)return english?"✓ Watched":"✓ Gesehen";
         org.json.JSONArray dates=e.optJSONArray("dates");if(dates==null || dates.length()==0)return english?"○ Waiting":"○ Wartet";
@@ -429,6 +437,24 @@ public class MainActivity extends Activity {
         org.json.JSONArray errors=result.optJSONArray("errors");if(errors!=null && errors.length()>0)b.append(english?"\nIncomplete checks: ":"\nUnvollständige Prüfungen: ").append(errors.length());
         TextView text=text(b.toString(),12,Color.BLACK);text.setTextIsSelectable(true);ScrollView scroll=new ScrollView(this);scroll.addView(text);
         archiveDialogOpen=true;new AlertDialog.Builder(this).setTitle(english?"Maintenance results":"Wartungsergebnis").setView(scroll).setPositiveButton(english?"Close":"Schließen",null).setOnDismissListener(d->archiveDialogOpen=false).show();
+    }
+
+    private void toggleArchiveSeen(JSONObject entry){
+        try{sendRequest("seen",new JSONObject().put("tmdbId",entry.getInt("tmdbId")).put("seasonLabel",entry.getString("seasonLabel")).put("seen",entry.optInt("seen")!=1));}catch(Exception ignored){}
+    }
+    private void showArchiveMenu(){
+        archiveDialogOpen=true;new AlertDialog.Builder(this).setTitle(english?"Archive actions":"Archivaktionen")
+            .setItems(english?new String[]{"Sync now","Reload archive","Maintenance","Last maintenance results","Log"}:new String[]{"Jetzt synchronisieren","Archiv neu laden","Wartung","Letztes Wartungsergebnis","Log"},(d,which)->handler.post(()->runArchiveMenuAction(which)))
+            .setNegativeButton(english?"Close":"Schließen",null).setOnDismissListener(d->archiveDialogOpen=false).show();
+    }
+    private void runArchiveMenuAction(int which){
+        if(which==0){if(archiveCopy!=null && !archiveCopy.busy())archiveCopy.schedule(0);return;}
+        if(which==1){loadArchive();checkPendingRequest();return;}
+        if(which==2){askMaintenanceCountry();return;}
+        if(which==3){try{String result=getPreferences(0).getString("maintenanceReport","");if(!result.isEmpty())showMaintenanceReport(new JSONObject(result));else statusText.setText(english?"No maintenance results yet.":"Noch kein Wartungsergebnis vorhanden.");}catch(Exception ignored){}return;}
+        try{TextView lines=text(archiveCopy==null?"":archiveCopy.readLog(),11,Color.BLACK);lines.setTextIsSelectable(true);ScrollView scroll=new ScrollView(this);scroll.addView(lines);
+            archiveDialogOpen=true;new AlertDialog.Builder(this).setTitle("SerKal Log").setView(scroll).setPositiveButton(english?"Close":"Schließen",null).setOnDismissListener(d->archiveDialogOpen=false).show();
+        }catch(Exception error){statusText.setText(english?"Log unavailable":"Log nicht verfügbar");}
     }
 
     private void askForSeason() {
@@ -828,35 +854,26 @@ public class MainActivity extends Activity {
         detailBody.addView(selectedInfo,new LinearLayout.LayoutParams(0,-2,1));
         detailScroll.addView(detailBody);
         middle.addView(detailScroll, new LinearLayout.LayoutParams(-1, 0, 1));
-        Button add = verticalButton(english ? "Add to archive + calendar" : "Ins Archiv + Kalender");
-        add.setOnClickListener(v -> askForSeason());
-        middle.addView(add);
-        Button notes=verticalButton(english ? "Edit notes / offset" : "Notiz / Offset ändern");
-        notes.setOnClickListener(v -> editArchiveNotes()); middle.addView(notes);
-        Button seen=verticalButton(english ? "✓ Toggle watched" : "✓ Gesehen umschalten");
-        seen.setOnClickListener(v->{if(selectedArchiveEntry==null)return;try{JSONObject e=selectedArchiveEntry;sendRequest("seen",new JSONObject().put("tmdbId",e.getInt("tmdbId")).put("seasonLabel",e.getString("seasonLabel")).put("seen",e.optInt("seen")!=1));}catch(Exception ignored){}});middle.addView(seen);
-        Button remove=verticalButton(english ? "Delete complete series" : "Ganze Serie löschen");
-        remove.setOnClickListener(v -> deleteArchiveSeries()); middle.addView(remove);
+        LinearLayout editBar=new LinearLayout(this);editBar.setOrientation(LinearLayout.HORIZONTAL);
+        Button add=button(english ? "Add to archive" : "Ins Archiv");add.setOnClickListener(v->askForSeason());editBar.addView(add);
+        Button edit=button(english ? "Edit ▾" : "Bearbeiten ▾");
+        edit.setOnClickListener(v->{archiveDialogOpen=true;new AlertDialog.Builder(this).setTitle(english?"Selected series":"Ausgewählte Serie")
+            .setItems(english?new String[]{"Edit notes / offset / provider","Toggle watched","Delete complete series"}:new String[]{"Notiz / Offset / Anbieter ändern","Gesehen umschalten","Ganze Serie löschen"},(d,which)->handler.post(()->{if(which==0)editArchiveNotes();else if(which==1 && selectedArchiveEntry!=null)toggleArchiveSeen(selectedArchiveEntry);else if(which==2)deleteArchiveSeries();}))
+            .setNegativeButton(english?"Close":"Schließen",null).setOnDismissListener(d->archiveDialogOpen=false).show();});editBar.addView(edit);middle.addView(editBar);
         columns.addView(middle);
 
         LinearLayout right = panel(28);
         right.addView(heading(english ? "SHARED ARCHIVE" : "GEMEINSAMES ARCHIV"));
-        Button maintenance=verticalButton(english ? "Maintenance" : "Wartung");maintenance.setOnClickListener(v->askMaintenanceCountry());right.addView(maintenance);
-        Button report=verticalButton(english ? "Last maintenance results" : "Letztes Wartungsergebnis");report.setOnClickListener(v->{try{String value=getPreferences(0).getString("maintenanceReport","");if(!value.isEmpty())showMaintenanceReport(new JSONObject(value));}catch(Exception ignored){}});right.addView(report);
-        archiveStatus=text("",9,MUTED);
-        right.addView(archiveStatus);
-        archiveRows=new LinearLayout(this); archiveRows.setOrientation(LinearLayout.VERTICAL);
-        ScrollView archiveScroll=new ScrollView(this); archiveScroll.addView(archiveRows);
-        right.addView(archiveScroll,new LinearLayout.LayoutParams(-1,0,1));
-        copySyncStatus=text("",11,MUTED);right.addView(copySyncStatus);
-        copySyncButton=verticalButton(english ? "Sync now" : "Jetzt synchronisieren");
-        copySyncButton.setOnClickListener(v->{if(archiveCopy!=null && !archiveCopy.busy())archiveCopy.schedule(0);});right.addView(copySyncButton);
-        Button reload=verticalButton(archiveText("RELOAD"));
-        reload.setOnClickListener(v -> { loadArchive(); checkPendingRequest(); }); right.addView(reload);
-        Button log=verticalButton("Log");
-        log.setOnClickListener(v->{try{TextView lines=text(archiveCopy==null?"":archiveCopy.readLog(),11,Color.BLACK);ScrollView scroll=new ScrollView(this);scroll.addView(lines);
-            archiveDialogOpen=true;new AlertDialog.Builder(this).setTitle("SerKal Log").setView(scroll).setPositiveButton(english?"Close":"Schließen",null).setOnDismissListener(d->archiveDialogOpen=false).show();
-        }catch(Exception error){statusText.setText(english?"Log unavailable":"Log nicht verfügbar");}});right.addView(log);
+        LinearLayout archiveBar=new LinearLayout(this);archiveBar.setOrientation(LinearLayout.HORIZONTAL);
+        Button sort=button(getPreferences(0).getString("archiveSort","date").equals("date")?(english?"Date ↓":"Datum ↓"):"A–Z");
+        sort.setContentDescription(english?"Switch archive sorting between date and alphabet":"Archivsortierung zwischen Datum und Alphabet wechseln");
+        sort.setOnClickListener(v->{boolean date=getPreferences(0).getString("archiveSort","date").equals("date");getPreferences(0).edit().putString("archiveSort",date?"alpha":"date").apply();sort.setText(date?"A–Z":(english?"Date ↓":"Datum ↓"));renderArchive();});archiveBar.addView(sort);
+        Button menu=button(english?"Menu ▾":"Menü ▾");menu.setOnClickListener(v->showArchiveMenu());archiveBar.addView(menu);right.addView(archiveBar);
+        archiveStatus=text("",9,MUTED);archiveStatus.setMaxLines(1);right.addView(archiveStatus);
+        archiveRows=new LinearLayout(this);archiveRows.setOrientation(LinearLayout.VERTICAL);
+        ScrollView archiveScroll=new ScrollView(this);archiveScroll.addView(archiveRows);right.addView(archiveScroll,new LinearLayout.LayoutParams(-1,0,1));
+        copySyncButton=null;copySyncStatus=text("",9,MUTED);copySyncStatus.setMaxLines(2);copySyncStatus.setEllipsize(android.text.TextUtils.TruncateAt.END);right.addView(copySyncStatus);
+        copySyncStatus.setOnClickListener(v->{archiveDialogOpen=true;new AlertDialog.Builder(this).setTitle(english?"Synchronization":"Synchronisation").setMessage(copySyncStatus.getText()).setPositiveButton(english?"Close":"Schließen",null).setOnDismissListener(d->archiveDialogOpen=false).show();});
         renderArchive();
         columns.addView(right);
 
