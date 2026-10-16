@@ -11,7 +11,7 @@ assert.strictEqual(pkg.version, '1.2.0-alpha.17.1');
 assert.match(backend, /path\.join\(process\.resourcesPath,\s*["']google_oauth_client\.json["']\)/);
 assert.match(forge, /extraResource:\s*\[googleOauthSource\]/);
 assert.match(forge, /SERKAL_GOOGLE_OAUTH_FILE/);
-assert.match(forge, /SerKal_1\.007f2_Setup\.exe/);
+assert.match(forge, /SerKal_Alpha_17_1_Setup\.exe/);
 assert.doesNotMatch(forge, /client_secret/);
 assert.doesNotMatch(forge, /client_id/);
 
