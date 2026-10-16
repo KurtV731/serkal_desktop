@@ -2638,3 +2638,12 @@ Status: QUELLE GEPRÜFT / LIVE-TEST OFFEN. CE-Commit `38883f11321d11576ddb7dbc5b
 Kurt meldet Alpha-16-SYNC alle 30 Sekunden mit rohem „Not Found“, dirty=true. 75 lokale Einträge sind lesbar, aber erster vollständiger Export nicht bestätigt, daher Tablet-Liste leer. Kalenderziel wird jetzt vor dem Lesen geprüft; 404/410 erlaubt Wiedererkennen eines bereits vorhandenen eindeutig zugänglichen App-Kalenders. Keine Neuanlage als Reparatur; 403, fehlendes oder mehrdeutiges Ziel pausiert automatische Wiederholung. Log nennt HTTP-Kontext; Status zeigt Phase/Zähler und verständlichen Fehler. Fortschritt während einzelner Wartungs-Staffelabfragen ergänzt. Die ursprüngliche Fehlerquelle ist ohne HTTP-Kontext nicht abschließend belegt.
 
 26 Testprogramme und Syntaxprüfung bestanden. Details und Testfolge `1 docs/alpha17-calendar-target.md`. Kurt kann PC schließen und dann Alpha 17 über git pull / npm start prüfen. Erst Google-Bestätigung, dann Tablet a12 Jetzt synchronisieren. Keine Token-/Archiv-/Kalenderlöschung. Nach erster Übernahme ist Tablet mit vollständiger lokaler Kopie unabhängig vom laufenden PC. Website/Release-Freigabe bleibt offen.
+
+
+## CE – 16.10.2026 abends: Android a13 – Archiv wieder sichtbar
+
+Status: GEBAUT / SIGNIERT / TESTFASSUNG AN KURT. Android-Quellcommit `a37dcc24928e6a7c18a742749d3ca2c54d214dae`, Version 0.0.5a13, Code 21. Desktop bleibt Alpha 17. Kurt meldete, dass große feste Aktionsknöpfe die Smartphone-Archivliste verdrängen; Status sollte rechts stehen und Datumssortierung fehlte.
+
+Jetzt nur zwei kompakte Archivknöpfe (Datum/A–Z und Menü). Alle fünf übrigen Archivaktionen im Menü, Status auf zwei sichtbare Zeilen begrenzt, vollständiger Text durch Antippen. Detailaktionen in gemeinsamer Zeile statt vier großer Knöpfe. Titel links, Datum und farbiges Statuszeichen rechts, Häkchen antippbar. Datumssortierung anhand aktiver Termine, ohne Termin zuerst, danach absteigend, Staffeltie absteigend; Sortierwahl bleibt gespeichert.
+
+Actions 38936898389: Build erfolgreich, 27 Tests ohne Fehler/Fehlschläge. Signatur und tatsächliche Paketversion geprüft. APK `0.0.5a13-SerKal-Android.apk`, 2871047 Bytes, SHA256 `e8263945c6b533844dca7e923c4becf78dbdb6b29e0214ed61ca2783c3f4ebd6`. Über a12 installieren, keine Deinstallation. Realer Layouttest auf Pixel/Samsung offen. Details `1 docs/android-a13-layout.md`. Keine öffentliche Freigabe/Websiteänderung.
