@@ -2738,3 +2738,18 @@ Ergebnisliste jetzt reine Fund-/Änderungsliste: unveränderte bekannte zukünft
 CE `f4dd59080753c6832b5c49fc915c7240b4e89e04`, Version 1.2.0-alpha.20; enthält auch Häkchen-/Titelkorrekturen aus Alpha 18/19. 27 Testprogramme bestanden; zusätzlicher direkter Analysefall danach erneut geprüft. Android `989fdd8e6855cddee61525e40139b6409003701b`, 0.0.5a14 / Code 22. CI 39008008178 erfolgreich, 28 Tests ohne Fehler/Fehlschläge. Manifest/Signatur geprüft, gleicher Signierer wie a13. APK `0.0.5a14-SerKal-Android.apk`, 2871047 Bytes, SHA256 `8279944acad6dc8d10dd82f7bfe940a50d5d3de4df093e539a012d6e4078d335`, an Kurt bereitgestellt. Über a13 installieren; keine Deinstallation. Neuer Windows-Installer nicht gebaut; bestehenden Alpha-17.1-Testinstaller nicht still ersetzen. Kein öffentlicher Release/Websiteänderung.
 
 Details: `1 docs/maintenance-tracked-range-2026-10-17.md`.
+
+
+## CE – 17.10.2026: Desktop Alpha 21 – dauerhafte Ankündigungskarten
+
+Status: IMPLEMENTIERT UND AUTOMATISCH GEPRÜFT / WINDOWS-GOOGLE-LIVETEST OFFEN. CE `b15b4d513b3c150c7f61de4f1ca3549c336aca4e`, Version 1.2.0-alpha.21. Android bleibt a14; kein neuer Installer, keine öffentliche Freigabe.
+
+Kurt beauftragt Desktop zuerst: angekündigte Staffeln getrennt von bereits gestarteten fehlenden Staffeln; eigene Kalenderkarte bei bekanntem Startdatum, Historie mit erfasst am / von / auf. Unveränderte Ankündigung bleibt aus der Wartungsliste. Geänderte Termine werden einmal gemeldet und dieselbe Karte verschoben. Karte bleibt auch nach Staffelstart und Serienlöschung dauerhaft; nur manuell löschen. Google-Löschmarkierungen werden berücksichtigt, stabile Karten-ID verhindert zweite Karten. Eigener Typ serkal=announcement schützt vor normalen Episodenabgleichen einschließlich Android a14 und Desktop-Dublettenbereinigung. Noch ohne Startdatum keine erfundene Kalenderplatzierung. Bei später entfallenem Termin bleibt Karte am letzten bekannten Datum, Historie nennt unbekannten Termin.
+
+Vollständiger Verlauf im gemeinsamen TXT-Feld announcements; Archivzeile zeigt Sxx: Datum (?). Kalender-Anbietertext mit gewählter Desktop-Sprache, erklärtem Prüfdatum und Hinweis auf serienweite Anbieterangaben. Native Android-Textgenerierung folgt später und kann reguläre Episoden noch deutsch beschriften; keine Plattformgleichheit behauptet.
+
+28 Desktop-Testprogramme erfolgreich; zusätzliche echte Backend-TXT-Rundreise und zweiter Wartungslauf geprüft, vier Inline-UI-Skripte und Backend-Syntax geprüft. Alle 13 Quell-/Test-/Dokumentdateien nach Übertragung per GitHub-Blobhash verglichen. Kein Windows-/Google-Livetest hier. Details/Testfolge `1 docs/desktop-announcements-2026-10-17.md`.
+
+Für 1.3 vorgemerkt: normale Wartung sammelt Zweifelsfälle; erweiterte Wartung hält mit verständlichen Auswahlfragen und Überspringen an. Noch nicht implementiert.
+
+Installer-Chatty: nächsten neuen, eindeutig nummerierten Installer vom Alpha-21-Gesamtstand ableiten; Alpha17.1 nicht ersetzen. Website unverändert.
