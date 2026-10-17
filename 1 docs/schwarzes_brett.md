@@ -2865,3 +2865,51 @@ Auch die allgemeine Vier-Pakete-Baudatei wurde dauerhaft korrigiert: Kurt, Lars 
 Jürgen erhalten die deutsche Anleitung; `serkal-testerpaket-velcrofist69.zip`
 erhält automatisch die englische Anleitung. Korrigierter Installercommit:
 `cd5e851918542bf0b54e49474b2251cba8842b1e`.
+
+
+## Kurt – 17.10.2026: vollständige APK-Testanleitung für externe Tester
+
+Status: **AUFTRAG AN CE / DANACH ÜBERGABE AN WEBSITE-CHATTY / NOCH NICHT ÖFFENTLICH**
+
+Kurt weist darauf hin, dass die Android-APK bisher noch nie an externe Tester ausgegeben
+wurde. Deshalb genügt eine reine Installationsnotiz nicht. Vor der Weitergabe der
+Testerpakete wird eine kurze, vollständige und verständliche APK-Anleitung benötigt:
+Was SerKal Android kann, was es derzeit noch nicht kann, welche Besonderheiten und
+Grenzen gelten und was die Tester konkret prüfen sollen.
+
+**Auftrag an CE:** Bitte den fachlichen Teil für den aktuellen Android-Stand **a15**
+(Quelle `3e3b49aa9fe11851c6ea73a215e1332194eb39d8`) ergänzen. Dazu gehören mindestens:
+
+1. aktuelle Funktionen und Zusammenspiel mit Desktop, Laptop, Tablet und gemeinsamem Archiv;
+2. derzeit bekannte Einschränkungen und noch fehlende Desktop-Parität;
+3. sinnvoller kurzer Testablauf einschließlich Google-Anmeldung/Abbruch, Synchronisation,
+   Archivanzeige, Anbieterinformationen und geräteübergreifendem Verhalten;
+4. klare Hinweise, was die APK weder automatisch erkennt noch eigenmächtig verändert;
+5. alle für Tester wichtigen Datenschutz-, Konto- und Datenhinweise.
+
+Technische Grundlage für Installation und Sicherheit:
+
+- Datei: `0.0.5a15-serkal-android.apk`, SHA-256
+  `29fe514aba88ddfcc785c05ac33cf6dd4e853f9c045fd1c8b494e2ec9933f59b`;
+- private Test-APK außerhalb des Play Stores; keine öffentliche Veröffentlichung und keine
+  Weitergabe außerhalb der benannten Tester;
+- vorhandene SerKal-Version grundsätzlich **nicht deinstallieren**, sondern die APK als
+  Update installieren; eine Deinstallation kann lokale App-Daten und Einstellungen entfernen;
+- Android kann je nach Gerät/Quelle „Unbekannte Apps installieren“ verlangen und Play Protect
+  kann einen Scan anbieten; bei bereits identischer installierter a15 kann unmittelbar
+  „Öffnen“ erscheinen;
+- Android prüft Paketname und Signatur; die beiliegende SHA-256-Datei ist für die Installation
+  nicht erforderlich, dient aber der zusätzlichen Integritätsprüfung;
+- die APK enthält die notwendige OAuth-Grundkonfiguration, jedoch keine persönlichen Google-
+  Tokens oder Zugangsdaten; Anmeldung und Berechtigungsvergabe erfolgen auf dem jeweiligen Gerät;
+- für das gemeinsame Archiv zuerst den vollständigen Desktop-Abgleich abwarten und anschließend
+  Android synchronisieren; Tokens, Kalender oder App-Daten nicht als normale Fehlerbehebung löschen.
+
+**Ergebnis von CE:** Bitte daraus zusammen mit dem fachlichen Status eine vollständige,
+kurze Tester-Readme erstellen und Pfad sowie Commit hier zurückmelden. Deutsche Fassung für
+Kurt, Lars und Jürgen; englische Fassung für VelcroFist.
+
+**Danach Website-Chatty:** Den von CE vervollständigten und freigegebenen Text zunächst für
+die mitgesandten Tester-Unterlagen übernehmen und später als Grundlage für eine deutsche und
+englische Android-Installations-/Hilfeseite verwenden. Noch keinen öffentlichen APK-Link setzen,
+solange Kurt das konkrete öffentliche Artefakt nicht ausdrücklich freigegeben hat.
