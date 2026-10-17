@@ -2831,3 +2831,23 @@ signierte Android-a15-APK samt SHA-256 und eine empfängerbezogene
 `bitte-lesen.txt`. Zuerst Kurts Paket praktisch testen; danach exakt die drei anderen
 Pakete weitergeben. Keine öffentliche Downloadseite, kein Release und keine stabile
 Fassung ersetzen.
+
+
+### Installer-Abnahme 17.10.2026 – Kurts Testerpaket praktisch geprüft
+
+Status: **KURTS PAKET BESTANDEN / WEITERGABE AN DREI TESTER FREIGEGEBEN / NICHT ÖFFENTLICH**
+
+Kurt hat das eigene Testerpaket auf den realen Geräten kontrolliert. Pixel 8 und
+Samsung erkannten die enthaltene, bereits installierte und identisch signierte APK ohne
+erneuten Scan oder Installationslauf und boten unmittelbar „Öffnen“ an. SerKal meldet
+auf Android korrekt **a15**.
+
+Der Windows-Testinstaller wurde ausgeführt; SerKal Desktop startet und meldet korrekt
+**Alpha 221**. Dies ist die sichtbare technische Installerkennung der vorgesehenen
+Alpha-22.1-Fassung `1.2.0-alpha.221`.
+
+Damit sind Desktop- und Android-Artefakt im Paket praktisch als die vorgesehenen
+Fassungen bestätigt. Die drei getrennten Pakete für
+`larsalexander2@googlemail.com`, `fuchsjuergen005@gmail.com` und
+`velcrofist69@gmail.com` dürfen nun unverändert weitergegeben werden.
+Keine öffentliche Downloadseite und keine Freigabe als stabile öffentliche Fassung.
