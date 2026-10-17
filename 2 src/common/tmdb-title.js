@@ -67,13 +67,17 @@ function resolve(detDE, detEN, fallback, searchLanguage) {
   const searched = String(searchLanguage || '').toLowerCase().startsWith('en') ? 'en' : 'de';
 
   const de = translationName_(details, 'de', ['DE', 'AT', 'CH']) ||
-    alternativeName_(details, ['DE', 'AT', 'CH']) ||
     localizedDetailName_(detDE, 'de') ||
+    alternativeName_(details, ['DE', 'AT', 'CH']) ||
     (searched === 'de' && !same_(fallbackName, originalName) ? fallbackName : '');
 
-  const en = translationName_(details, 'en', ['US', 'GB', 'AU', 'CA']) ||
-    alternativeName_(details, ['US', 'GB', 'AU', 'CA']) ||
+  // English originals are already valid English titles. A regional alias (for
+  // example a French Canadian title) must not replace them.
+  const englishOriginal = details.find(item => String(item.original_language || '').toLowerCase() === 'en' && clean_(item.original_name));
+  const en = (englishOriginal && clean_(englishOriginal.original_name)) ||
+    translationName_(details, 'en', ['US', 'GB', 'AU', 'CA']) ||
     localizedDetailName_(detEN, 'en') ||
+    alternativeName_(details, ['US', 'GB', 'AU', 'CA']) ||
     (searched === 'en' && !same_(fallbackName, originalName) ? fallbackName : '');
 
   const readableFallback = en || de || fallbackName || originalName || '—';

@@ -3862,6 +3862,7 @@ const I18N = {
     MAINT_EXTRA_12: "Streaming-Land (DE, AU, US, GB …): ",
     MAINT_EXTRA_13: "Wartung starten",
     MAINT_EXTRA_14: "Abbrechen",
+    MAINT_TITLE_CORRECTED:'Titel korrigiert',
     BTN_MAINT: '🔧 Wartung',
     BTN_START_DOCK: '▶️ Start',
     BTN_CALENDAR_DOCK: '📅 Kalender',
@@ -4041,6 +4042,7 @@ const I18N = {
     MAINT_EXTRA_12: "Streaming country (DE, AU, US, GB …): ",
     MAINT_EXTRA_13: "Start maintenance",
     MAINT_EXTRA_14: "Cancel",
+    MAINT_TITLE_CORRECTED:'Title corrected',
     BTN_MAINT: '🔧 Maintenance',
     BTN_START_DOCK: '▶️ Start',
     BTN_CALENDAR_DOCK: '📅 Calendar',
@@ -5599,7 +5601,7 @@ function showMaintenanceReport_(res){
   const en=LANG==='en',dialog=document.createElement('dialog');dialog.style.cssText='width:80vw;max-height:80vh;overflow:auto';
   const title=document.createElement('h2');title.textContent=t('MAINT_EXTRA_0');dialog.append(title);
   const lines=[res.message||'',t('MAINT_EXTRA_1')];
-  for(const item of res.report||[])lines.push([item.title,'S'+String(item.season).padStart(2,'0')+(item.episode?'E'+String(item.episode).padStart(2,'0'):''),item.date||'—',({ 'missing-season':t('MAINT_EXTRA_2'),'upcoming-episode':t('MAINT_EXTRA_3'),'new-episode':t('MAINT_EXTRA_4'),'changed-episode':t('MAINT_EXTRA_5')})[item.kind]||item.kind].join(' · '));
+  for(const item of res.report||[])lines.push([(item.previousTitle?item.previousTitle+' → ':'')+item.title,'S'+String(item.season).padStart(2,'0')+(item.episode?'E'+String(item.episode).padStart(2,'0'):''),item.date||'—',({ 'title-correction':t('MAINT_TITLE_CORRECTED'),'missing-season':t('MAINT_EXTRA_2'),'upcoming-episode':t('MAINT_EXTRA_3'),'new-episode':t('MAINT_EXTRA_4'),'changed-episode':t('MAINT_EXTRA_5')})[item.kind]||item.kind].join(' · '));
   if(!(res.report||[]).length)lines.push(t('MAINT_EXTRA_6'));
   lines.push(t('MAINT_EXTRA_7'));
   for(const row of res.providers||[]){const p=row.info;lines.push(row.title+': '+(p?(p.offers||[]).map(o=>o.name+' ['+o.type+']').join(', ')||(t('MAINT_EXTRA_8')):(t('MAINT_EXTRA_9')))+(p?' · '+p.country+' · '+p.checkedAt.slice(0,10)+' · JustWatch via TMDB':''));}

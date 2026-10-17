@@ -52,7 +52,7 @@ const context = {
 vm.createContext(context);
 const mainSource = `(function(){\n` + fs.readFileSync(mainPath, "utf8") + `
 globalThis.__maintenanceTest={
-  archiveLoad_, maintenanceAnalyse_, maintenanceBuildOperations_, maintenanceWriteProviders_,
+  archiveLoad_, maintenanceAnalyse_, maintenanceBuildOperations_, maintenanceWriteProviders_, saveSettingsPatch_,
   maintenanceArchiveSnapshot_, maintenanceWriteArchive_, maintenanceRestoreArchive_,
   googleCalendarEventWasManuallyChanged_
 };\n})();`;
@@ -97,6 +97,21 @@ assert.equal(metadata.note,"Meine Notiz");
 assert.equal(metadata.tmdbId,123);
 assert.match(fs.readFileSync(filePath,"utf8"),/flags=32/);
 api.maintenanceRestoreArchive_(before);
+
+// An existing wrong localized archive title is repaired, not deleted/reinserted.
+api.saveSettingsPatch_({language:"en"});
+snapshot.get("123").tv={name:"The Testaments",original_name:"The Testaments",original_language:"en",alternative_titles:{results:[{iso_3166_1:"CA",title:"Les Testaments"}]}};
+fs.writeFileSync(filePath,original.trim()+"; titleEN=Les%20Testaments\n","utf8");
+const titleChanges=api.maintenanceWriteProviders_([group],snapshot);
+assert.equal(titleChanges[0].previousTitle,"Les Testaments");assert.equal(titleChanges[0].title,"The Testaments");
+assert.equal(api.archiveLoad_().daten.entries[0].titleEN,"The Testaments");
+assert.equal(api.archiveLoad_().daten.entries[0].note,"Meine Notiz");
+assert.equal(api.archiveLoad_().daten.entries[0].tmdbId,123);
+// The same maintenance must preserve a user-protected title.
+fs.writeFileSync(filePath,original.trim()+"; titleEN=My%20own%20title; manualFlags=1\n","utf8");
+assert.equal(api.maintenanceWriteProviders_([group],snapshot).length,0);
+assert.equal(api.archiveLoad_().daten.entries[0].titleEN,"My own title");
+api.maintenanceRestoreArchive_(before);api.saveSettingsPatch_({language:"de"});
 
 const managed = {
     summary:"Testserie (2025) S01E01",

@@ -3359,6 +3359,7 @@ async function maintenanceFetchAll_(groups, cache, snapshot, counters) {
 
 function maintenanceWriteProviders_(groups,snapshot) {
     const writes=new Map();
+    const corrections=[];
     for(const group of groups){
         const record=snapshot.get(String(group.tmdbId));if(!record || !record.ok)continue;
         for(const entry of group.entries){
@@ -3367,7 +3368,11 @@ function maintenanceWriteProviders_(groups,snapshot) {
             const lines=text.split(/\r?\n/).map(line=>{
                 if(Number(archiveField_(line,"tmdb"))!==group.tmdbId)return line;
                 if(record.watchProviders)line=archiveSetField_(line,"watchProviders",archiveEncode_(JSON.stringify(record.watchProviders)));
+                if(Number(archiveField_(line,"manualFlags")||0)&SERKAL_MANUAL_TITLE)return line;
                 const names=require(path.join(__dirname,"../common/tmdb-title")).resolve(activeLanguage_==="de"?record.tv:null,activeLanguage_==="en"?record.tv:null,null,activeLanguage_);
+                const field=activeLanguage_==="en"?"titleEN":"titleDE",next=activeLanguage_==="en"?names.en:names.de;
+                const previous=archiveDecode_(archiveField_(line,field))||entry.title||entry.titel||"";
+                if(next && next!=="—" && previous!==next)corrections.push({kind:"title-correction",fileName:entry.fileName,tmdbId:group.tmdbId,title:next,previousTitle:previous,season:Number((line.match(/^S(\d+)/i)||[])[1]||0),date:""});
                 if(activeLanguage_==="de" && names.de)line=archiveSetField_(line,"titleDE",archiveEncode_(names.de));
                 if(activeLanguage_==="en" && names.en)line=archiveSetField_(line,"titleEN",archiveEncode_(names.en));
                 return line;
@@ -3375,6 +3380,7 @@ function maintenanceWriteProviders_(groups,snapshot) {
         }
     }
     for(const [file,text] of writes){const temp=file+".maintenance-meta-tmp";fs.writeFileSync(temp,text,"utf8");fs.renameSync(temp,file);}
+    return corrections;
 }
 
 async function maintenanceRun_(options={}) {
@@ -3450,10 +3456,12 @@ async function maintenanceRun_(options={}) {
             errors:[]
         };
         if (counters.errors.length === 0) {
-            maintenanceWriteProviders_(groups,snapshot);
+            const titleCorrections=maintenanceWriteProviders_(groups,snapshot);
+            report.push(...titleCorrections);
             const operations = maintenanceBuildOperations_(groups, snapshot, findings);
             maintenanceSetStatus_("uebernahme", bt_("MAINT_APPLY"), null, 0, operations.length);
             applied = await maintenanceApplyOperations_(operations);
+            applied.changedFileCount=new Set([...Array.from(applied.changedFiles||[]),...titleCorrections.map(item=>item.fileName)]).size;
         } else {
             logWrite_("WARN", "WARTUNG", bt_("MAINT_APPLY_SUSPENDED"), {
                 fehler:counters.errors.length

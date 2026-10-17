@@ -55,6 +55,17 @@ assert.equal(result.en, 'Original series');
 result = titles.resolve({translations:germanOnly.translations}, null, null, 'en');
 assert.equal(result.en, '—');
 
+// Reproducer for TMDB 287527: a regional French title must not win over
+// an English original, even if an alternative translation is mislabeled.
+const testaments={name:'The Testaments',original_name:'The Testaments',original_language:'en',
+  alternative_titles:{results:[{iso_3166_1:'CA',title:'Les Testaments'}]},
+  translations:{translations:[{iso_639_1:'en',iso_3166_1:'CA',data:{name:'Les Testaments'}}]}};
+result=titles.resolve(null,testaments,{name:'The Testaments'},'en');
+assert.equal(result.en,'The Testaments');
+const translated={name:'English localized name',original_name:'원제',original_language:'ko',
+  alternative_titles:{results:[{iso_3166_1:'CA',title:'Titre français'}]}};
+assert.equal(titles.resolve(null,translated,null,'en').en,'English localized name');
+
 assert.match(html, /inpTitle\.value\s*=\s*localizedTitleFromAny_\(state\.currentPreview/);
 
 console.log('SERKAL TMDB localized title selection test: OK');
