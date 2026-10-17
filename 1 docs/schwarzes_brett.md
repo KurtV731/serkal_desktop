@@ -2813,8 +2813,8 @@ kein Verwerfen ungespeicherter Änderungen. Installerstand einschließlich Bauda
 
 Die Baudatei `serkal-alpha-22-1-vier-testerpakete-bauen.bat` führt alle 28
 Desktop-Tests, OAuth-/Token-Paketkontrollen, Windows-Bau, Ein-Datei-Verpackung und
-SHA-256-Erzeugung aus. Anschließend verlangt sie ausdrücklich die bereits signierte
-Android-a15-APK und akzeptiert nur deren freigegebene SHA-256
+SHA-256-Erzeugung aus. Anschließend übernimmt sie die bereits signierte Android-a15-APK automatisch aus
+`G:\\Meine Ablage\\- - androidtrans\\0.0.5a15-serkal-android.apk` und akzeptiert nur deren freigegebene SHA-256
 `29fe514aba88ddfcc785c05ac33cf6dd4e853f9c045fd1c8b494e2ec9933f59b`.
 Das in GitHub Actions verfügbare a15-Artefakt ist als unsigned bezeichnet und wird
 deshalb nicht für Testerpakete verwendet.
