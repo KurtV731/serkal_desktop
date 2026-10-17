@@ -2810,7 +2810,8 @@ function maintenanceAnalyse_(groups, snapshot) {
             Math.max(max, maintenanceSeasonNumber_(entry)), 0);
         const maxTmdbSeasonCount = Number(tv.number_of_seasons || 0) || 0;
 
-        for (let maxTmdbSeason=1; maxTmdbSeason<=maxTmdbSeasonCount; maxTmdbSeason++) {
+        const firstArchiveSeason=Math.min(...group.entries.map(maintenanceSeasonNumber_).filter(n=>n>0));
+        for (let maxTmdbSeason=firstArchiveSeason; maxTmdbSeason<=maxTmdbSeasonCount; maxTmdbSeason++) {
             if(group.entries.some(e=>maintenanceSeasonNumber_(e)===maxTmdbSeason))continue;
             const seasonRecord = record.seasons && record.seasons[String(maxTmdbSeason)];
             const seasonData = seasonRecord && seasonRecord.ok && seasonRecord.data
@@ -3276,7 +3277,8 @@ async function maintenanceFetchGroup_(group, cache, snapshot, counters) {
     const seasonNumbers = new Set(group.entries.map(maintenanceSeasonNumber_).filter(Boolean));
     const maxArchiveSeason = Math.max(0, ...Array.from(seasonNumbers));
     const maxTmdbSeason = Number(tv.number_of_seasons || 0) || 0;
-    for(let number=1;number<=maxTmdbSeason;number++)seasonNumbers.add(number);
+    const firstArchiveSeason=Math.min(...Array.from(seasonNumbers).filter(n=>n>0));
+    for(let number=firstArchiveSeason;number<=maxTmdbSeason;number++)seasonNumbers.add(number);
 
     const seasons = {};
     for (const seasonNumber of Array.from(seasonNumbers).sort((a, b) => a - b)) {

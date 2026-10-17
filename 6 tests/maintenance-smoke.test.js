@@ -113,6 +113,11 @@ assert.equal(api.maintenanceWriteProviders_([group],snapshot).length,0);
 assert.equal(api.archiveLoad_().daten.entries[0].titleEN,"My own title");
 api.maintenanceRestoreArchive_(before);api.saveSettingsPatch_({language:"de"});
 
+const laterGroup={tmdbId:77,entries:[7,9].map(n=>({tmdbId:77,titel:"Later start",fileName:"Later start (2026).txt",staffelLabel:"S0"+n,episoden:2,datesOriginal:["2026-11-01","2026-11-08"]}))};
+const laterSeasons={};for(let n=1;n<=9;n++)laterSeasons[n]={ok:true,data:{episodes:[{air_date:"2026-11-01"},{air_date:"2026-11-08"}]}};
+const limitedFindings=api.maintenanceAnalyse_([laterGroup],new Map([["77",{ok:true,tv:{name:"Later start",number_of_seasons:9},seasons:laterSeasons}]]));
+assert.deepEqual(Array.from(limitedFindings.filter(f=>f.type.startsWith("NEW_SEASON")),f=>f.tmdbSeason),[8]);
+
 const managed = {
     summary:"Testserie (2025) S01E01",
     start:{ date:"2026-01-02" },

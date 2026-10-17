@@ -3863,6 +3863,7 @@ const I18N = {
     MAINT_EXTRA_13: "Wartung starten",
     MAINT_EXTRA_14: "Abbrechen",
     MAINT_TITLE_CORRECTED:'Titel korrigiert',
+    MAINT_PROVIDER_SUMMARY:'Anbieterangaben findest du direkt beim jeweiligen Archiveintrag.',
     BTN_MAINT: '🔧 Wartung',
     BTN_START_DOCK: '▶️ Start',
     BTN_CALENDAR_DOCK: '📅 Kalender',
@@ -4043,6 +4044,7 @@ const I18N = {
     MAINT_EXTRA_13: "Start maintenance",
     MAINT_EXTRA_14: "Cancel",
     MAINT_TITLE_CORRECTED:'Title corrected',
+    MAINT_PROVIDER_SUMMARY:'Provider information is available in each archive entry.',
     BTN_MAINT: '🔧 Maintenance',
     BTN_START_DOCK: '▶️ Start',
     BTN_CALENDAR_DOCK: '📅 Calendar',
@@ -5603,8 +5605,7 @@ function showMaintenanceReport_(res){
   const lines=[res.message||'',t('MAINT_EXTRA_1')];
   for(const item of res.report||[])lines.push([(item.previousTitle?item.previousTitle+' → ':'')+item.title,'S'+String(item.season).padStart(2,'0')+(item.episode?'E'+String(item.episode).padStart(2,'0'):''),item.date||'—',({ 'title-correction':t('MAINT_TITLE_CORRECTED'),'missing-season':t('MAINT_EXTRA_2'),'upcoming-episode':t('MAINT_EXTRA_3'),'new-episode':t('MAINT_EXTRA_4'),'changed-episode':t('MAINT_EXTRA_5')})[item.kind]||item.kind].join(' · '));
   if(!(res.report||[]).length)lines.push(t('MAINT_EXTRA_6'));
-  lines.push(t('MAINT_EXTRA_7'));
-  for(const row of res.providers||[]){const p=row.info;lines.push(row.title+': '+(p?(p.offers||[]).map(o=>o.name+' ['+o.type+']').join(', ')||(t('MAINT_EXTRA_8')):(t('MAINT_EXTRA_9')))+(p?' · '+p.country+' · '+p.checkedAt.slice(0,10)+' · JustWatch via TMDB':''));}
+  if((res.providers||[]).length)lines.push(t('MAINT_PROVIDER_SUMMARY'));
   const pre=document.createElement('pre');pre.style.whiteSpace='pre-wrap';pre.textContent=lines.join('\n\n');dialog.append(pre);
   const print=document.createElement('button');print.textContent=t('MAINT_EXTRA_10');print.onclick=()=>{const frame=document.createElement('iframe');frame.style.display='none';document.body.append(frame);const doc=frame.contentDocument;const text=doc.createElement('pre');text.style.whiteSpace='pre-wrap';text.textContent=pre.textContent;doc.body.append(text);frame.contentWindow.focus();frame.contentWindow.print();setTimeout(()=>frame.remove(),1000);};dialog.append(print);
   const close=document.createElement('button');close.textContent=t('MAINT_EXTRA_11');close.onclick=()=>dialog.close();dialog.append(close);dialog.onclose=()=>dialog.remove();document.body.append(dialog);dialog.showModal();
