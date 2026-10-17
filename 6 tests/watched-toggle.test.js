@@ -1,0 +1,14 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
+const source=fs.readFileSync('2 src/frontend/index.html','utf8');
+const context={Date,isFinite};vm.createContext(context);
+vm.runInContext(source.slice(source.indexOf('function deriveStatus_('),source.indexOf('function statusToLabel_(')),context);
+vm.runInContext(source.slice(source.indexOf('function statusValueFromAny_('),source.indexOf('function statusToCss_(')),context);
+vm.runInContext(source.slice(source.indexOf('function toggleWatched_('),source.indexOf('function renderArchivList()')),context);
+const entry={startDate:'2020-01-01',endDate:'2020-02-01',buttonPressed:0,seen:0,status:3,note:'Keep my note',tmdbId:42};
+assert.equal(context.toggleWatched_(entry).seen,1);assert.equal(entry.status,4);
+assert.equal(context.toggleWatched_(entry).seen,0);assert.equal(entry.status,3);
+assert.equal(entry.note,'Keep my note');assert.equal(entry.tmdbId,42);
+entry.startDate='2090-01-01';entry.endDate='2090-02-01';entry.status=4;entry.buttonPressed=1;entry.seen=1;
+context.toggleWatched_(entry);assert.equal(entry.status,1);assert.equal(entry.seen,0);
+assert.match(source,/if \(st === 2 \|\| st === 3 \|\| st === 4\)/);
+console.log('Watched state: red-to-green, green-to-red, future date status and notes preserved: OK');

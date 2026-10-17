@@ -3915,7 +3915,7 @@ const I18N = {
     ARIA_LOG: 'Loganzeige', ARIA_LOG_RESIZE: 'Logfensterhöhe ändern', TT_LOG_RESIZE: 'Ziehen: Höhe des Logfensters ändern', ARIA_LOG_DAY: 'Logtag wählen', PH_LOG_SEARCH: 'Im Log suchen …',
     TT_LOG_FIND: 'Nächsten Treffer suchen', LOG_FIND: '🔎 Weiter', TT_LOG_SELECT_ALL: 'Den gesamten sichtbaren Logtext markieren', LOG_SELECT_ALL: '☑ Alles markieren', TT_LOG_COPY: 'Log oder Auswahl kopieren', LOG_COPY: '📋 Kopieren',
     TT_LOG_DELETE_SELECTION: 'Markierten Text dauerhaft aus der ausgewählten TXT-Logdatei löschen', LOG_DELETE_SELECTION: '✂ Markiertes', TT_LOG_CLEAR: 'Das ausgewählte TXT-Log vollständig leeren', LOG_CLEAR: '🧹 Log leeren', TT_LOG_HELP: 'Funktionen des Logfensters erklären', ARIA_LOG_HELP: 'Hilfe zu den Logfunktionen', TT_LOG_CLOSE: 'Logfenster schließen',
-    ARIA_POSTER: 'Poster groß anzeigen', TT_POSTER_CLOSE: 'Zum Schließen klicken', SEEN_TITLE: 'Hab ich geschaut', INPUT_CHANGED: 'Eingabe geändert – bitte neu suchen.', HELP_OPEN: 'SerKal-Hilfe öffnen',
+    ARIA_POSTER: 'Poster groß anzeigen', TT_POSTER_CLOSE: 'Zum Schließen klicken', UNSEEN_TITLE: 'Wieder als ungesehen markieren', SEEN_TITLE: 'Hab ich geschaut', INPUT_CHANGED: 'Eingabe geändert – bitte neu suchen.', HELP_OPEN: 'SerKal-Hilfe öffnen',
     CALENDAR_HELP_FAILED: 'Kalender-Hilfe konnte nicht geöffnet werden: {error}', CALENDAR_OPEN_FAILED: 'Kalender konnte nicht geöffnet werden: {error}',
     CALENDAR_ICS_SELECTED: 'ICS ist ausgewählt. Der eigentliche ICS-Export folgt in einer späteren SerKal-Version.', CALENDAR_DISABLED: 'Kalender ist in SerKal deaktiviert.',
     CANCEL:'Abbrechen', CLOSE:'Schließen', UNKNOWN_ERROR:'Unbekannter Fehler', UNKNOWN_ERROR_LOWER:'unbekannter Fehler', POSTER_BRIDGE_MISSING:'Keine TMDB-Posterbrücke verfügbar.', POSTER_LOAD_FAILED:'Poster konnte nicht geladen werden', POSTER_CACHE_USED:'Poster aus Sitzungscache übernommen', POSTER_RESPONSE_USED:'Posterantwort übernommen', POSTER_RESPONSE_FAILED:'Posterantwort konnte nicht verarbeitet werden', POSTER_BRIDGE_ERROR:'Posterbrücke meldet Fehler', POSTER_BRIDGE_START_FAILED:'Posterbrücke konnte nicht gestartet werden',
@@ -4094,7 +4094,7 @@ const I18N = {
     ARIA_LOG: 'Log display', ARIA_LOG_RESIZE: 'Resize log window', TT_LOG_RESIZE: 'Drag to resize the log window', ARIA_LOG_DAY: 'Choose log day', PH_LOG_SEARCH: 'Search log …',
     TT_LOG_FIND: 'Find next result', LOG_FIND: '🔎 Next', TT_LOG_SELECT_ALL: 'Select all visible log text', LOG_SELECT_ALL: '☑ Select all', TT_LOG_COPY: 'Copy log or selection', LOG_COPY: '📋 Copy',
     TT_LOG_DELETE_SELECTION: 'Permanently delete selected text from the selected TXT log file', LOG_DELETE_SELECTION: '✂ Selection', TT_LOG_CLEAR: 'Completely clear the selected TXT log', LOG_CLEAR: '🧹 Clear log', TT_LOG_HELP: 'Explain log window functions', ARIA_LOG_HELP: 'Help for log functions', TT_LOG_CLOSE: 'Close log window',
-    ARIA_POSTER: 'Show large poster', TT_POSTER_CLOSE: 'Click to close', SEEN_TITLE: 'I watched this', INPUT_CHANGED: 'Input changed — please search again.', HELP_OPEN: 'Open SerKal Help',
+    ARIA_POSTER: 'Show large poster', TT_POSTER_CLOSE: 'Click to close', UNSEEN_TITLE: 'Mark as unwatched again', SEEN_TITLE: 'I watched this', INPUT_CHANGED: 'Input changed — please search again.', HELP_OPEN: 'Open SerKal Help',
     CALENDAR_HELP_FAILED: 'Calendar help could not be opened: {error}', CALENDAR_OPEN_FAILED: 'Calendar could not be opened: {error}',
     CALENDAR_ICS_SELECTED: 'ICS is selected. The actual ICS export will follow in a later SerKal version.', CALENDAR_DISABLED: 'Calendar is disabled in SerKal.',
     CANCEL:'Cancel', CLOSE:'Close', UNKNOWN_ERROR:'Unknown error', UNKNOWN_ERROR_LOWER:'unknown error', POSTER_BRIDGE_MISSING:'No TMDB poster bridge is available.', POSTER_LOAD_FAILED:'Poster could not be loaded', POSTER_CACHE_USED:'Poster restored from session cache', POSTER_RESPONSE_USED:'Poster response applied', POSTER_RESPONSE_FAILED:'Poster response could not be processed', POSTER_BRIDGE_ERROR:'Poster bridge reported an error', POSTER_BRIDGE_START_FAILED:'Poster bridge could not be started',
@@ -6668,6 +6668,13 @@ function formatDateShort_(dt){
  * @status aktiv
  * @loeschung nein
  */
+function toggleWatched_(it) {
+  const seen=statusValueFromAny_(it)===4?0:1;
+  it.buttonPressed=seen;it.seen=seen;
+  it.status=deriveStatus_(it);
+  return {seen:seen};
+}
+
 function renderArchivList() {
   archivList.innerHTML = '';
 
@@ -6751,22 +6758,22 @@ function renderArchivList() {
     dateSpan.textContent = ds + ((it && it.deRule) ? ' • DE' : '');
     meta.appendChild(dateSpan);
 
-    if (st === 2 || st === 3) {
+    if (st === 2 || st === 3 || st === 4) {
       const btnSeen = document.createElement('span');
       btnSeen.className = 'amSym';
       btnSeen.textContent = '✓';
-      btnSeen.title = t('SEEN_TITLE');
+      btnSeen.title = statusToLabel_(st) + ' · ' + t(st === 4 ? 'UNSEEN_TITLE' : 'SEEN_TITLE');
+      btnSeen.setAttribute('role','button');btnSeen.tabIndex=0;btnSeen.setAttribute('aria-label',btnSeen.title);btnSeen.setAttribute('aria-pressed',String(st===4));
+      btnSeen.addEventListener('keydown',function(ev){if(ev.key==='Enter' || ev.key===' '){ev.preventDefault();ev.stopPropagation();btnSeen.click();}});
       btnSeen.style.cursor = 'pointer';
 
       btnSeen.addEventListener('click', function(ev) {
         ev.preventDefault();
         ev.stopPropagation();
         try {
-          it.buttonPressed = 1;
-          it.seen = 1;
-          it.status = 4;
-          it.statusText = 'geschaut';
-          setDirtyForEntry_(it, { seen: 1 });
+          const patch=toggleWatched_(it);
+          it.statusText=statusToLabel_(it.status);
+          setDirtyForEntry_(it, patch);
           renderArchivList();
           if (state.archivSelected && entryKeyFromArchiv_(state.archivSelected) === entryKeyFromArchiv_(it)) {
             fillDetailsFromArchiv_(it);
