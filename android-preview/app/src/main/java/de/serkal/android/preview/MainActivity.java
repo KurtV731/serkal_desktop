@@ -44,16 +44,36 @@ public class MainActivity extends Activity {
     private int googleGeneration;
     private int pendingGoogleGeneration;
 
+    private void googleMenu() {
+        if(googleBusy){
+            new AlertDialog.Builder(this).setTitle(english?"Google connection":"Google-Verbindung")
+                .setMessage(english?"Cancel the current connection attempt?":"Den laufenden Verbindungsversuch abbrechen?")
+                .setPositiveButton(english?"Cancel connection":"Verbindung abbrechen",(d,w)->cancelGoogleConnection())
+                .setNegativeButton(english?"Keep waiting":"Weiter warten",null).show();
+            return;
+        }
+        new AlertDialog.Builder(this).setTitle(english?"Google account":"Google-Konto")
+            .setMessage(googleUser==null?(english?"Connect Google to load your shared archive?":"Google verbinden, um dein gemeinsames Archiv zu laden?"):
+                googleUser.email+(english?"\nReconnect or choose another account?":"\nNeu verbinden oder ein anderes Konto auswählen?"))
+            .setPositiveButton(english?"Continue":"Weiter",(d,w)->connectGoogle(true))
+            .setNegativeButton(english?"Cancel":"Abbrechen",null).show();
+    }
+
+    private void cancelGoogleConnection(){
+        googleGeneration++; googleBusy=false;
+        if(googleUser==null)restoreLocalArchive();else if(!googleAccessToken.isEmpty())loadArchive();
+        statusText.setText(english?"Google connection cancelled. Your local archive is unchanged.":"Google-Verbindung abgebrochen. Dein lokales Archiv bleibt unverändert.");
+    }
+
+    @Override public void onBackPressed(){
+        if(googleBusy){cancelGoogleConnection();return;}
+        super.onBackPressed();
+    }
+
     private void connectGoogle(boolean chooseAccount) {
         if (googleBusy) return;
-        requestGeneration++;
-        clearPoster(); selectedDetail=null; selectedArchiveEntry=null; displayedResults.clear();
-        credential = "";
-        googleAccessToken = "";
-        googleUser = null;
-        archiveSnapshot=null; archiveGeneration++; archiveBusy=false; archiveError=""; renderArchive();
-        selectedTmdbId=0; selectedInfo.setText(""); selectedName.setText(english ? "Select a series" : "Serie auswählen"); suggestions.removeAllViews();
-        googleBusy = true; writeBusy=false;
+        // Keep the current account, local archive and selection until a new login succeeds.
+        googleBusy = true;
         final int generation = ++googleGeneration;
         pendingGoogleGeneration = generation;
         statusText.setText(english ? "Connecting to Google…" : "Google wird verbunden…");
@@ -78,8 +98,7 @@ public class MainActivity extends Activity {
         if (requestCode != GOOGLE_REQUEST) return;
         if (pendingGoogleGeneration != googleGeneration) return;
         if (resultCode != RESULT_OK || data == null) {
-            googleBusy = false;
-            statusText.setText(english ? "Google connection cancelled." : "Google-Verbindung abgebrochen.");
+            cancelGoogleConnection();
             return;
         }
         try { useGoogleResult(Identity.getAuthorizationClient(this).getAuthorizationResultFromIntent(data), pendingGoogleGeneration); }
@@ -92,7 +111,6 @@ public class MainActivity extends Activity {
         }
         String accessToken = result.getAccessToken();
         if (accessToken == null || accessToken.isEmpty()) { googleFailure(new Exception("GOOGLE_TOKEN_MISSING")); return; }
-        googleAccessToken = accessToken; archiveObserver=new SharedArchiveClient(accessToken);
         network.execute(() -> {
             try {
                 SharedKeyClient client = new SharedKeyClient(accessToken);
@@ -106,6 +124,13 @@ public class MainActivity extends Activity {
                 handler.post(() -> {
                     if (generation != googleGeneration || isFinishing()) return;
                     googleBusy = false;
+                    boolean accountChanged=googleUser==null || !googleUser.owner.equals(user.owner);
+                    if(accountChanged){
+                        requestGeneration++; clearPoster(); selectedDetail=null; selectedArchiveEntry=null; displayedResults.clear();
+                        credential=""; archiveSnapshot=null; archiveGeneration++; archiveBusy=false; archiveError="";
+                        selectedTmdbId=0; selectedInfo.setText(""); selectedName.setText(english ? "Select a series" : "Serie auswählen"); suggestions.removeAllViews();
+                    }
+                    googleAccessToken=accessToken; archiveObserver=new SharedArchiveClient(accessToken);
                     googleUser = user;
                     getPreferences(0).edit().putString("lastOwner",user.owner).putString("lastEmail",user.email).apply();
                     loadArchive();
@@ -167,8 +192,8 @@ public class MainActivity extends Activity {
         else if (error instanceof ApiException) message = (english ? "Google setup error " : "Google-Einrichtungsfehler ")
             + ((ApiException)error).getStatusCode() + (english ? ". Check Android OAuth package and signing SHA-1." : ". Android-OAuth-Paket und Signatur-SHA-1 prüfen.");
         else message = english ? "Google/key connection failed. Please retry." : "Google-/Schlüsselverbindung fehlgeschlagen. Bitte erneut versuchen.";
+        if(googleUser==null)restoreLocalArchive();else if(!googleAccessToken.isEmpty())loadArchive();
         statusText.setText(message);
-        if(googleUser==null)restoreLocalArchive();
     }
     private void restoreLocalArchive() {
         String owner=getPreferences(0).getString("lastOwner","");if(owner.isEmpty())return;
@@ -355,9 +380,9 @@ public class MainActivity extends Activity {
                 org.json.JSONArray dates=e.optJSONArray("dates");
                 StringBuilder detail=new StringBuilder(archiveStatusLabel(e)+" · "+e.optString("seasonLabel"));
                 String providers=WatchProviders.text(e.optJSONObject("watchProviders"),e.optString("note"),english);
-                if(!providers.isEmpty())detail.append("\n\n").append(providers);
                 detail.append(archiveText("EPISODES")).append(e.optInt("eps"));
                 if(!description.isEmpty()) detail.append("\n\n").append(description);
+                if(!providers.isEmpty())detail.append("\n\n").append(providers);
                 detail.append(archiveText("DATES"));
                 for(int j=0;j<dates.length();j++) detail.append(dates.optString(j)).append("\n");
                 if(!e.optString("note").isEmpty()) detail.append(archiveText("NOTES")).append(e.optString("note"));
@@ -831,7 +856,7 @@ public class MainActivity extends Activity {
         keyButton.setOnClickListener(v -> askForKey());
         leftButtons.addView(keyButton);
         Button google = button("Google");
-        google.setOnClickListener(v -> connectGoogle(true));
+        google.setOnClickListener(v -> googleMenu());
         leftButtons.addView(google);
         left.addView(leftButtons);
         columns.addView(left);
