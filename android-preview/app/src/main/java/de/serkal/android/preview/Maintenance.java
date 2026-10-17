@@ -26,7 +26,8 @@ final class Maintenance {
                     patches.put(metadata);
                 }
                 int max=tv.optInt("number_of_seasons");if(max<0 || max>999)throw new Exception("MAINT_INVALID_SEASONS");
-                for(int n=1;n<=max;n++){
+                int first=Integer.MAX_VALUE;for(int number:existing.keySet())if(number>0)first=Math.min(first,number);
+                for(int n=first;n<=max;n++){
                     if(Thread.currentThread().isInterrupted())throw new InterruptedException();
                     JSONObject e=existing.get(n),season;
                     try{season=source.get("tv/"+id+"/season/"+n,language);}catch(Exception error){errors.put(new JSONObject().put("tmdbId",id).put("season",n));if(e==null)report.put(new JSONObject().put("kind","missing-season").put("title",title).put("season",n).put("date",""));continue;}
@@ -35,7 +36,7 @@ final class Maintenance {
                     for(int j=0;j<episodes.length();j++){JSONObject ep=episodes.getJSONObject(j);String date=ep.optString("air_date");int number=ep.optInt("episode_number",j+1);
                         if(!date.matches("\\d{4}-\\d{2}-\\d{2}")){complete=false;continue;}ArchiveCodec.dateShift(date,0);dates.put(date);
                         JSONArray old=e==null?null:e.optJSONArray("datesOriginal");String previous=old==null?"":old.optString(number-1);
-                        if(date.compareTo(now.substring(0,10))>=0 || (e!=null && !previous.equals(date)))report.put(new JSONObject().put("kind",date.compareTo(now.substring(0,10))>=0?"upcoming-episode":previous.isEmpty()?"new-episode":"changed-episode").put("title",title).put("season",n).put("episode",number).put("date",date));
+                        if(e!=null && !previous.equals(date))report.put(new JSONObject().put("kind",previous.isEmpty()?"new-episode":"changed-episode").put("title",title).put("season",n).put("episode",number).put("date",date));
                     }
                     if(e!=null){JSONObject patch=new JSONObject().put("tmdbId",id).put("seasonLabel",e.getString("seasonLabel"));if(offers!=null)patch.put("watchProviders",offers);
                         int flags=e.optInt("manualFlags");if(complete && (flags&56)==0)patch.put("termindaten",dates).put("episoden",episodes.length());
