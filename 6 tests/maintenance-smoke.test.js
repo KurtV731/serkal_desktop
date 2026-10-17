@@ -136,3 +136,15 @@ assert.equal(api.googleCalendarEventWasManuallyChanged_(managed), true);
 
 console.log("SERKAL maintenance smoke test: OK");
 
+// Announcement metadata survives TXT round trips and a second maintenance is silent.
+const announcementRecord={ok:true,tv:{name:'Testserie'},seasons:{2:{ok:true,data:{air_date:'2099-01-01',episodes:[]}}}};
+let announcementGroup={tmdbId:123,entries:api.archiveLoad_().daten.entries};
+const announcementSnapshot=new Map([['123',announcementRecord]]);
+const announced=api.maintenanceWriteProviders_([announcementGroup],announcementSnapshot);
+assert.equal(announced.filter(r=>r.kind==='announced-season').length,1);
+announcementGroup={tmdbId:123,entries:api.archiveLoad_().daten.entries};
+assert.equal(announcementGroup.entries[0].announcements[0].date,'2099-01-01');
+assert.equal(announcementGroup.entries[0].calendarLanguage,'de');
+assert.equal(api.maintenanceWriteProviders_([announcementGroup],announcementSnapshot).filter(r=>r.kind==='announced-season'||r.kind==='announcement-changed').length,0);
+assert.equal(announcementGroup.entries[0].note,'Meine Notiz');
+console.log('Maintenance announcement TXT round trip and second-run silence: OK');

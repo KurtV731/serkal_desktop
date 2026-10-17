@@ -18,7 +18,7 @@ function text(value,note,english=false){
     const types=english?{flatrate:'subscription',free:'free',ads:'ads',rent:'rent',buy:'buy'}:{flatrate:'Abo',free:'kostenlos',ads:'Werbung',rent:'Leihe',buy:'Kauf'};
     const offers=(value.offers||[]).map(p=>p.name+' ('+types[p.type]+')');
     return (english?'Providers':'Anbieter')+' ['+value.country+']: '+(offers.join(', ')||(english?'No offers reported':'Keine Angebote gemeldet'))+
-        ' · '+String(value.checkedAt||'').slice(0,10)+' · JustWatch via TMDB'+(value.link?'\n'+value.link:'');
+        ' · '+(english?'Checked: ':'Geprüft: ')+String(value.checkedAt||'').slice(0,10)+(english?' · Series availability; individual seasons may differ':' · Serienangebot; einzelne Staffeln können abweichen')+' · JustWatch via TMDB'+(value.link?'\n'+value.link:'');
 }
 function parse(raw){try{return JSON.parse(raw);}catch(_){return null;}}
 module.exports={normalize,manual,text,parse};

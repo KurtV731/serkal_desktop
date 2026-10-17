@@ -644,6 +644,8 @@ function archiveEntryFromLine_(fileName, stats, line) {
         termindaten:activeDates, dates:activeDates, datesOriginal, datesDE, activeDates, termCount:activeDates.length,
         descDE:archiveDecode_(archiveField_(line,"descDE") || archiveField_(line,"ov_de")),
         descEN:archiveDecode_(archiveField_(line,"descEN") || archiveField_(line,"ov_en")),
+        announcements:require(path.join(__dirname,"../common/watch-providers")).parse(archiveDecode_(archiveField_(line,"announcements")))||[],
+        calendarLanguage:archiveField_(line,"calendarLanguage")||"de",
         watchProviders:require(path.join(__dirname,"../common/watch-providers")).parse(archiveDecode_(archiveField_(line,"watchProviders"))),
         providerText:require(path.join(__dirname,"../common/watch-providers")).text(require(path.join(__dirname,"../common/watch-providers")).parse(archiveDecode_(archiveField_(line,"watchProviders"))),noteText,activeLanguage_==="en"),
         titleDE:archiveDecode_(archiveField_(line,"titleDE")), titleEN:archiveDecode_(archiveField_(line,"titleEN")),
@@ -741,7 +743,7 @@ function archiveInsert_(payload) {
         if (oldNote) parts.push("note="+oldNote);
         parts.push("flags="+flags);
         if (manualFlags) parts.push("manualFlags="+manualFlags);
-        for (const field of ["watchProviders","titleDE","titleEN"]) { const old=archiveField_(oldLine,field); if(old)parts.push(field+"="+old); }
+        for (const field of ["watchProviders","titleDE","titleEN","announcements","calendarLanguage"]) { const old=archiveField_(oldLine,field); if(old)parts.push(field+"="+old); }
         const newLine = parts.join("; ");
         const kept = oldLines.filter(x=>!new RegExp("^"+label+"(?:\\b|;|\\|)","i").test(x));
         kept.push(newLine);
@@ -1883,7 +1885,7 @@ async function copyCalendarSync_(record) {
     }
     manager.report("calendar-read");
     const entries=record.files.flatMap(f=>f.content.split(/\r?\n/).map(line=>archiveEntryFromLine_(f.name,{mtime:new Date(record.generatedAt)},line)).filter(Boolean));
-    const events=await googleCalendarManagedEvents_(record.calendar.id);
+    const events=await googleCalendarManagedEvents_(record.calendar.id,true,true);
     const protocol=require("../common/archive-calendar-copy.js");
     const operations=protocol.plan(entries,events,record.revision);
     let completed=0;manager.report("calendar-write",0,operations.length);
@@ -1893,6 +1895,7 @@ async function copyCalendarSync_(record) {
         if(result.ok || (op.method==="DELETE" && [404,410].includes(result.status)))continue;
         if(op.method==="POST" && result.status===409) {
             const previous=await googleCalendarApi_("GET",record.calendar.id,op.body.id,null);
+            if(previous.ok && op.body.extendedProperties?.private?.serkal==="announcement" && previous.data?.status==="cancelled")continue;
             if(previous.ok && protocol.signature(previous.data)===protocol.signature(op.body))continue;
         }
         throw Object.assign(new Error("COPY_CALENDAR_FAILED"),{code:"COPY_CALENDAR_FAILED"});
@@ -3012,7 +3015,7 @@ function maintenanceWriteArchive_(operation) {
     return { ok:true, fileName:operation.fileName, staffelLabel:label };
 }
 
-async function googleCalendarManagedEvents_(calendarId, includeLegacy) {
+async function googleCalendarManagedEvents_(calendarId, includeLegacy, includeDeleted) {
     const all = [];
     let pageToken = "";
     do {
@@ -3020,7 +3023,7 @@ async function googleCalendarManagedEvents_(calendarId, includeLegacy) {
             encodeURIComponent(calendarId) + "/events";
         const url = new URL(base);
         url.searchParams.set("singleEvents", "true");
-        url.searchParams.set("showDeleted", "false");
+        url.searchParams.set("showDeleted", includeDeleted ? "true" : "false");
         url.searchParams.set("maxResults", "2500");
         /*
          * Normale Wartung arbeitet nur mit eindeutig von SerKal markierten
@@ -3080,6 +3083,7 @@ async function maintenanceCleanupCalendarDuplicates_() {
     const events = await googleCalendarManagedEvents_(calendarId, true);
     const groups = new Map();
     for (const event of events) {
+        if(event.extendedProperties?.private?.serkal==="announcement")continue;
         const key = maintenanceCalendarDuplicateKey_(event);
         if (!key) continue;
         if (!groups.has(key)) groups.set(key, []);
@@ -3364,11 +3368,15 @@ function maintenanceWriteProviders_(groups,snapshot) {
     const corrections=[];
     for(const group of groups){
         const record=snapshot.get(String(group.tmdbId));if(!record || !record.ok)continue;
+        const announcementUpdate=require(path.join(__dirname,"../common/season-announcements")).update(group,record,undefined,activeLanguage_);
+        corrections.push(...announcementUpdate.changes);
         for(const entry of group.entries){
             const file=path.join(archiveFolderPath_(),entry.fileName);
             const text=writes.has(file)?writes.get(file):fs.readFileSync(file,"utf8");
             const lines=text.split(/\r?\n/).map(line=>{
                 if(Number(archiveField_(line,"tmdb"))!==group.tmdbId)return line;
+                line=archiveSetField_(line,"announcements",archiveEncode_(JSON.stringify(announcementUpdate.announcements)));
+                line=archiveSetField_(line,"calendarLanguage",activeLanguage_);
                 if(record.watchProviders)line=archiveSetField_(line,"watchProviders",archiveEncode_(JSON.stringify(record.watchProviders)));
                 if(Number(archiveField_(line,"manualFlags")||0)&SERKAL_MANUAL_TITLE)return line;
                 const names=require(path.join(__dirname,"../common/tmdb-title")).resolve(activeLanguage_==="de"?record.tv:null,activeLanguage_==="en"?record.tv:null,null,activeLanguage_);
@@ -3463,7 +3471,7 @@ async function maintenanceRun_(options={}) {
             const operations = maintenanceBuildOperations_(groups, snapshot, findings);
             maintenanceSetStatus_("uebernahme", bt_("MAINT_APPLY"), null, 0, operations.length);
             applied = await maintenanceApplyOperations_(operations);
-            applied.changedFileCount=new Set([...Array.from(applied.changedFiles||[]),...titleCorrections.map(item=>item.fileName)]).size;
+            applied.changedFileCount=new Set([...Array.from(applied.changedFiles||[]),...titleCorrections.map(item=>item.fileName).filter(Boolean)]).size;
         } else {
             logWrite_("WARN", "WARTUNG", bt_("MAINT_APPLY_SUSPENDED"), {
                 fehler:counters.errors.length

@@ -3863,6 +3863,7 @@ const I18N = {
     MAINT_EXTRA_13: "Wartung starten",
     MAINT_EXTRA_14: "Abbrechen",
     MAINT_TITLE_CORRECTED:'Titel korrigiert',
+    MAINT_ANNOUNCED:'Staffel angekündigt', MAINT_ANNOUNCEMENT_CHANGED:'Angekündigter Start geändert',
     MAINT_PROVIDER_SUMMARY:'Anbieterangaben findest du direkt beim jeweiligen Archiveintrag.',
     BTN_MAINT: '🔧 Wartung',
     BTN_START_DOCK: '▶️ Start',
@@ -4044,6 +4045,7 @@ const I18N = {
     MAINT_EXTRA_13: "Start maintenance",
     MAINT_EXTRA_14: "Cancel",
     MAINT_TITLE_CORRECTED:'Title corrected',
+    MAINT_ANNOUNCED:'Season announced', MAINT_ANNOUNCEMENT_CHANGED:'Announced start changed',
     MAINT_PROVIDER_SUMMARY:'Provider information is available in each archive entry.',
     BTN_MAINT: '🔧 Maintenance',
     BTN_START_DOCK: '▶️ Start',
@@ -5603,7 +5605,7 @@ function showMaintenanceReport_(res){
   const en=LANG==='en',dialog=document.createElement('dialog');dialog.style.cssText='width:80vw;max-height:80vh;overflow:auto';
   const title=document.createElement('h2');title.textContent=t('MAINT_EXTRA_0');dialog.append(title);
   const lines=[res.message||'',t('MAINT_EXTRA_1')];
-  for(const item of res.report||[])lines.push([(item.previousTitle?item.previousTitle+' → ':'')+item.title,'S'+String(item.season).padStart(2,'0')+(item.episode?'E'+String(item.episode).padStart(2,'0'):''),item.date||'—',({ 'title-correction':t('MAINT_TITLE_CORRECTED'),'missing-season':t('MAINT_EXTRA_2'),'upcoming-episode':t('MAINT_EXTRA_3'),'new-episode':t('MAINT_EXTRA_4'),'changed-episode':t('MAINT_EXTRA_5')})[item.kind]||item.kind].join(' · '));
+  for(const item of res.report||[])lines.push([(item.previousTitle?item.previousTitle+' → ':'')+item.title,'S'+String(item.season).padStart(2,'0')+(item.episode?'E'+String(item.episode).padStart(2,'0'):''),(item.previousDate?item.previousDate+' → ':'')+(item.date||'—'),({ 'title-correction':t('MAINT_TITLE_CORRECTED'),'announced-season':t('MAINT_ANNOUNCED'),'announcement-changed':t('MAINT_ANNOUNCEMENT_CHANGED'),'missing-season':t('MAINT_EXTRA_2'),'upcoming-episode':t('MAINT_EXTRA_3'),'new-episode':t('MAINT_EXTRA_4'),'changed-episode':t('MAINT_EXTRA_5')})[item.kind]||item.kind].join(' · '));
   if(!(res.report||[]).length)lines.push(t('MAINT_EXTRA_6'));
   if((res.providers||[]).length)lines.push(t('MAINT_PROVIDER_SUMMARY'));
   const pre=document.createElement('pre');pre.style.whiteSpace='pre-wrap';pre.textContent=lines.join('\n\n');dialog.append(pre);
@@ -6758,7 +6760,10 @@ function renderArchivList() {
 
     const dateSpan = document.createElement('span');
     dateSpan.className = 'amDate';
-    dateSpan.textContent = ds + ((it && it.deRule) ? ' • DE' : '');
+    const upcoming=(it.announcements||[]).filter(a=>a.date).map(a=>'S'+String(a.season).padStart(2,'0')+': '+formatDateShort_(a.date)+' (?)');
+    dateSpan.textContent = ds + ((it && it.deRule) ? ' • DE' : '')+(upcoming.length?' · '+upcoming.join(' · '):'');
+    dateSpan.title=upcoming.join(' · ');
+    if(upcoming.length){dateSpan.style.maxWidth='190px';dateSpan.style.whiteSpace='normal';}
     meta.appendChild(dateSpan);
 
     if (st === 2 || st === 3 || st === 4) {

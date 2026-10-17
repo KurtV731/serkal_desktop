@@ -9,7 +9,8 @@ function build(groups,snapshot,today=new Date().toISOString().slice(0,10)) {
         for(const [number,season] of Object.entries(r.seasons||{})){
             if(Number(number)<floor)continue;
             const entry=existing.get(Number(number)),data=season.data||{},episodes=data.episodes||[];
-            if(!entry)items.push({kind:'missing-season',tmdbId:group.tmdbId,title,season:Number(number),date:String(data.air_date||''),episodes:episodes.length});
+            const seasonDate=String(data.air_date||episodes.find(e=>Number(e.episode_number)===1)?.air_date||'');
+            if(!entry && /^\d{4}-\d{2}-\d{2}$/.test(seasonDate) && seasonDate<=today)items.push({kind:'missing-season',tmdbId:group.tmdbId,title,season:Number(number),date:seasonDate,episodes:episodes.length});
             for(const ep of episodes){
                 const date=String(ep.air_date||'');if(!/^\d{4}-\d{2}-\d{2}$/.test(date))continue;
                 const old=entry && (entry.datesOriginal||entry.dates||[])[Number(ep.episode_number)-1];
