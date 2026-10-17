@@ -1,0 +1,212 @@
+SERKAL – ANDROID TESTER GUIDE
+Private test build 0.0.5a15 · 17 October 2026
+Companion desktop build: Alpha 22.1 (displayed as Alpha 221)
+
+Please read this before testing. It replaces the short installation note in
+your package and describes a15, not features planned for later builds.
+
+1. WHAT IS INCLUDED
+SerKal is a series-calendar entry tool and a personal series archive. Search
+TMDB, view posters and summaries, add seasons to your archive, and synchronise
+their dates with Google Calendar. Notes, date offsets, watched markers and
+complete-series deletion are supported. It does not play or download films
+or episodes, and it cannot tell what you have actually watched.
+
+Your test package contains:
+- serkal-desktop-alpha-22-1-test.exe: Windows installer;
+- serkal-android-0.0.5a15.apk: Android app;
+- matching .sha256 files: optional integrity checks, not installers.
+Outside the package, the APK may be named 0.0.5a15-serkal-android.apk instead.
+The names refer to the same approved file only if its checksum matches.
+APK SHA-256:
+29fe514aba88ddfcc785c05ac33cf6dd4e853f9c045fd1c8b494e2ec9933f59b
+
+2. INSTALLING OR UPDATING
+Install and check Windows first. Answer any open SerKal prompts, such as a
+save confirmation, and close SerKal completely before updating it.
+Android requires a phone or tablet running Android 7.0 or later. Testing has
+covered a Pixel 8 and a Samsung tablet, not every device. APK files do not
+run on an iPhone or iPad.
+
+Extract the ZIP first. Transfer the APK to your Android device and open it
+there, for example from Downloads. Do not open the Windows EXE on your phone.
+If Android asks, allow “Install unknown apps” for the specific browser or file
+manager opening this APK. You can remove that permission afterwards. Wording
+varies by device. Play Protect may offer a scan or warn about an unknown app.
+Keep Play Protect enabled. If it reports actual malware or blocks installation
+in an unclear way, stop and send Kurt the exact message; do not disable
+protection across the device.
+
+Do NOT uninstall an existing SerKal app first. Install a15 over it as an update.
+Android checks the package identity and signing certificate. If the identical
+a15 is already installed, “Open” may appear straight away. Uninstalling can
+remove local data and settings, including changes not yet uploaded. If you see
+“App not installed”, report it rather than trying an uninstall as a workaround.
+
+The app must display version 0.0.5a15. It runs in landscape orientation.
+
+3. SETTING UP GOOGLE AND TMDB
+Use your OWN Google account. It need not have a Gmail address, but it must be
+a Google account. Choose the same account on your own SerKal devices. Each
+tester uses their own account: sharing between your devices does not create
+a public archive shared with other testers.
+
+SerKal may try to connect to Google automatically at startup. Tap “Google” to
+reconnect or choose an account. You can select “Cancel” before “Continue”.
+Use Android Back to leave Google's account/consent screen. While SerKal itself
+is waiting for a connection, tapping “Google” again offers cancellation.
+Cancelling preserves an existing local archive. The status may then show a
+cancelled connection or a pending transfer.
+
+Enter Google credentials only in Google's own sign-in screen. The APK contains
+no personal Google tokens or developer account. SerKal requests access to its
+private Google Drive app data and its SerKal calendar; the calendar list lets
+it find the target calendar.
+
+A TMDB key already shared through your account is adopted automatically. If
+none exists, paste your own TMDB credential using “API key”. Do not type a long
+key character by character. If asked to “Share”, this means making the key
+available to your other SerKal installations under the same Google account,
+not publishing it. Other testers do not automatically receive your key.
+
+Already have a desktop archive? Start the current desktop build on the previous
+source PC first and wait for its full Google synchronisation to finish. Then
+connect/synchronise Android. “First transfer … previous source PC” means that
+migration has not finished. Once Android has received the full copy, your PC
+does not have to stay on. A genuinely new account with no legacy archive can
+start an empty archive on Android, but still needs a working TMDB credential.
+
+4. FINDING YOUR WAY AROUND
+Search on the left, view/edit in the middle, archive on the right.
+- DE/EN at the top switches language. The button names the destination language.
+- Light/Dark changes the main view. Some Android dialogs remain light in a15.
+- + and − change magnification; the percentage button resets to 100%.
+  Pinch and pan are also supported. If a tablet ignores the initial gesture
+  at 100%, try + once first.
+- Date ↓ / A–Z switches archive ordering. Date uses the active season start,
+  newest first; entries without a date come first.
+- Archive “Menu”: Sync now, Reload archive, Maintenance, Last maintenance
+  results and Log.
+- Tap an archive entry for details and its poster. Providers appear below the
+  synopsis. A missing poster does not by itself mean an archive/calendar failure.
+
+5. ADDING AND EDITING A SERIES
+Enter a title, select the correct search result and check its details.
+Tap “Add to archive”, enter a season number, choose “Prepare” and check the
+summary. “Send” confirms a local save, not a completed Google upload. In a15,
+all episode dates must be available before the season can be added. Incomplete
+episode dates cause the new entry to be rejected rather than partly inserted.
+TMDB dates are not automatically Australian or German streaming dates. Seasons
+whose dates are entirely before the current calendar year are not added as
+new regular calendar events.
+
+Select an existing archive entry, then “Edit”:
+- Edit notes / offset / provider, then “Send” to save. A separate line
+  “OffsetDE: +1D” moves dates one day later relative to the ORIGINAL dates;
+  “OffsetDE: -1D” moves them one day earlier. +1D followed by -1D does not
+  return to the original dates. Remove the offset line to reset that offset,
+  retaining your other notes. This field keeps its OffsetDE name in English.
+- Override a provider with a separate line such as “Provider: Paramount+”
+  (the German “Anbieter:” is also accepted). Remove that line to return to
+  the automatically reported provider information.
+- Toggle watched marks a season as watched or reverses your choice.
+- Delete complete series removes ALL its archived seasons and its managed
+  calendar events after a successful sync. Read the confirmation carefully.
+  Only use a deliberately added test entry for a deletion test. Permanent
+  announcement cards created by the desktop intentionally remain.
+
+Archive symbols on the right:
+Green tick = explicitly marked watched by you. Red tick = season dates have
+passed, but it is not marked watched. Yellow clock = upcoming start; blue dot
+= season running according to its dates; circle = no dates available.
+Tap a red/green tick to toggle it, or use “Edit”. No viewing is detected for you.
+
+6. SAVING AND SWITCHING DEVICES
+Each device has a full local archive copy. Edits save locally, then transfer
+in the background. Continuous cloud polling is deliberately not used: devices
+sync at startup, after edits, or on request. A second device left open will
+not necessarily notice another device's edit immediately.
+
+“Saved locally / transfer pending” confirms only this device.
+“Transferring” means it is still working; you can continue using the interface.
+“Saved on Google” confirms that this archive state is available to other devices.
+Tap the shortened status below the archive to read its full text. Wait for
+Google confirmation before switching devices. Restart the second device's app
+or use Menu → Sync now. “Reload archive” refreshes the view through the current
+connection and initiates a sync; “Sync now” is the direct transfer action.
+
+Internet is needed for the first transfer and synchronisation. A previously
+loaded local copy may remain usable after a connection failure; fresh searches
+and posters need internet. After switching apps or Android terminating SerKal,
+reopen and sync if necessary. Uploads are not guaranteed while the app is
+completely stopped.
+
+Avoid deliberately editing on several devices at once. Conflicts protect
+copies rather than silently merging contradictory changes. Low storage can
+make the archive read-only: at least 10 MiB reserve is required, and larger
+archives may need more. Read the synchronisation status.
+
+7. MAINTENANCE AND STREAMING PROVIDERS
+Menu → Maintenance. Select your real streaming country, e.g. AU for Australia
+or DE for Germany. Switching the interface to English does NOT automatically
+select AU. Maintenance checks dates/providers, updates eligible existing
+entries and lists new seasons as suggestions. It does not automatically add
+further seasons. It starts at your first archived regular season: with S07 and
+S09, S08 matters, while S01–S06 are ignored. Title metadata may also be updated.
+
+You can reopen the last results. “NOT APPLIED” or an incomplete check does not
+mean full success. Avoid further archive edits during maintenance; if applying
+the result is rejected because the archive changed, repeat the check later.
+
+Provider information comes from JustWatch via TMDB. It concerns the selected
+country and the series as a whole, not guaranteed availability of every season
+or episode. No reported offers does not mean “unavailable everywhere”.
+Subscriptions, rental/purchase terms and availability can change; check with
+the service before paying.
+
+8. CURRENT a15 LIMITS
+- Android maintenance does not yet create the new desktop announcement cards,
+  permanent date-change history or (?) markers in the archive itself.
+- “Missing season” can still refer to a season that has only been announced.
+- The newest language-safe desktop title correction is not fully ported to
+  Android. Please report foreign-language/wrong titles with a concrete example.
+- Provider descriptions written by Android into Google Calendar can still be
+  German, even with the interface set to English.
+- Some dialogs do not follow Dark mode yet. Small text, gestures and differences
+  between devices are explicitly part of this test.
+- A freely editable series-title field and interactive maintenance questions
+  are not promised features of this APK.
+
+9. SHORT TEST RUN
+1) Check a15, landscape layout, language, Light/Dark and +/−.
+2) Connect your own Google account; check key adoption and archive contents.
+3) With a series selected, test Google → Cancel: archive/selection should remain.
+   Optionally choose Continue, then Back in Google's dialog.
+4) Open an archive entry: check poster, synopsis, providers and Date/A–Z.
+5) Add an unarchived test series with complete dates. Observe local save, then
+   wait for “Saved on Google”.
+6) Sync another device of your own: the same entry should appear there.
+7) Toggle watched both ways and add a harmless note; sync again.
+8) Run maintenance for the correct country and reopen its last results.
+9) Delete only your newly added test series, confirm, wait for Google sync and
+   check the second device.
+You can take part with one Android device; simply skip the two-device step.
+
+10. YOUR DATA AND BUG REPORTS
+Archive data and a shared TMDB key are held locally and/or in your Google
+account's private app data (not a normal folder in My Drive); managed events
+are held in your Google calendar.
+TMDB receives search, metadata and image requests. SerKal does not download
+films, monitor your television or infer your viewing. Listing calendars is not
+unrestricted permission to read all calendar contents. This technical guide
+does not replace the privacy notice on serkal.de.
+
+Report device/Android version, app version, language, steps, time and the exact
+message to Kurt; include Menu → Log where useful. Check screenshots/logs for
+personal data before sharing. Never post passwords, TMDB keys, access tokens
+or full archives publicly. Report conflicts, blocked syncs or manual calendar
+changes instead of deleting tokens, calendars, archives or app data as a fix.
+Manual Google Calendar changes can pause an automatic sync.
+
+This package is for the named private testers only. Please do not publish or
+redistribute its APK or Windows installer. Thanks for helping test SerKal!

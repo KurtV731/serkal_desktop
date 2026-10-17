@@ -1,0 +1,225 @@
+SERKAL – ANLEITUNG FÜR ANDROID-TESTER
+Private Testfassung 0.0.5a15 · Stand 17.10.2026
+Zusammen mit SerKal Desktop Alpha 22.1 (Anzeige: Alpha 221)
+
+Bitte zuerst lesen. Diese Anleitung ersetzt die kurze Installationsnotiz im
+Testerpaket. Sie gilt genau für a15, nicht für angekündigte spätere Funktionen.
+
+1. WAS DU BEKOMMST
+SerKal ist ein Eingabetool für Serientermine und ein persönliches Serienarchiv.
+Du kannst Serien bei TMDB suchen, Poster und Inhaltsangaben ansehen, Staffeln
+ins Archiv aufnehmen und deren Termine mit Google Kalender abgleichen.
+Notizen, Terminverschiebungen, Gesehen-Markierungen und das Löschen einer
+kompletten Serie sind möglich. Filme oder Serien werden weder abgespielt noch
+heruntergeladen. SerKal erkennt nicht, was du tatsächlich gesehen hast.
+
+Im Testerpaket liegen:
+- serkal-desktop-alpha-22-1-test.exe: Windows-Installer;
+- serkal-android-0.0.5a15.apk: Android-App;
+- passende .sha256-Dateien: zusätzliche Prüfsummen, keine Installationsdateien.
+Die APK kann außerhalb des Pakets auch 0.0.5a15-serkal-android.apk heißen.
+Beide Namen bezeichnen dieselbe freigegebene Datei, wenn die Prüfsumme stimmt.
+APK-SHA-256:
+29fe514aba88ddfcc785c05ac33cf6dd4e853f9c045fd1c8b494e2ec9933f59b
+
+2. INSTALLIEREN UND AKTUALISIEREN
+Windows zuerst installieren und prüfen. Offene SerKal-Rückfragen beantworten
+(z. B. Speichern), SerKal vollständig schließen und erst dann aktualisieren.
+Für Android brauchst du ein Smartphone oder Tablet ab Android 7.0. Getestet
+wurde auf Pixel 8 und einem Samsung-Tablet; nicht jedes Gerät ist geprüft.
+Eine APK funktioniert nicht auf iPhone oder iPad.
+
+Das ZIP zuerst entpacken. Die APK auf das Android-Gerät übertragen und dort
+öffnen, z. B. aus Downloads. Nicht die Windows-EXE auf dem Handy starten.
+Falls Android es verlangt, „Unbekannte Apps installieren“ für genau die App
+zulassen, aus der du die APK öffnest (Browser oder Dateimanager). Nach der
+Installation kannst du diese Erlaubnis wieder ausschalten. Die Bezeichnungen
+unterscheiden sich je nach Gerät. Play Protect kann die App prüfen oder vor
+einer unbekannten App warnen. Play Protect eingeschaltet lassen. Bei einer
+konkreten Schadsoftwaremeldung oder unklaren Blockade abbrechen und Kurt den
+Wortlaut schicken; Schutzmechanismen nicht pauschal umgehen.
+
+Bereits vorhandenes SerKal grundsätzlich NICHT vorher deinstallieren:
+a15 als Update darüber installieren. Android kontrolliert dabei Paket und
+Signatur. Bei identischer bereits installierter a15 kann direkt „Öffnen“
+angeboten werden. Eine Deinstallation kann lokale Daten und Einstellungen
+entfernen, darunter noch nicht übertragene Änderungen. Bei „App wurde nicht
+installiert“ deshalb nicht versuchsweise deinstallieren, sondern melden.
+
+Die Versionsanzeige muss 0.0.5a15 nennen. Die App läuft im Querformat.
+
+3. GOOGLE-KONTO UND TMDB EINRICHTEN
+Benutze dein EIGENES Google-Konto; eine Gmail-Adresse ist nicht zwingend,
+ein Google-Konto dagegen schon. Auf deinen eigenen SerKal-Geräten dasselbe
+Konto auswählen. Verschiedene Tester benutzen jeweils ihre eigenen Konten.
+Ein Archiv über mehrere eigene Geräte ist kein öffentliches Gemeinschaftsarchiv.
+
+Nach dem Start kann SerKal automatisch eine Google-Verbindung versuchen.
+Über „Google“ kannst du die Verbindung erneut öffnen oder ein Konto wählen.
+Vor „Weiter“ kannst du „Abbrechen“ wählen. Den Google-Dialog kannst du mit
+Androids Zurück-Funktion verlassen. Während die App selbst auf eine Verbindung
+wartet, bietet erneutes Antippen von „Google“ einen Abbruch an. Bei Abbruch
+bleiben vorhandene lokale Archivdaten erhalten. Die Anzeige kann danach die
+abgebrochene Verbindung oder einen ausstehenden Abgleich melden.
+
+Google-Zugangsdaten nur in Googles eigener Anmeldung eingeben. Die APK enthält
+keine persönlichen Google-Tokens und kein Konto des Entwicklers. Die App
+benötigt den Zugriff auf ihre privaten Google-Drive-App-Daten und ihren
+SerKal-Kalender; die Kalenderliste dient zum Finden des Kalenderziels.
+
+Ein bereits für dein Konto bereitgestellter TMDB-Schlüssel wird automatisch
+übernommen. Fehlt er, über „API-Key“ deinen eigenen TMDB-Zugang einfügen.
+Nicht Zeichen für Zeichen abtippen. Falls „Bereitstellen“ gefragt wird,
+bedeutet das: für deine weiteren SerKal-Installationen desselben Google-Kontos
+speichern, nicht öffentlich verteilen. Andere Tester erhalten deinen Schlüssel
+nicht automatisch.
+
+Du hast bereits ein Desktop-Archiv? Zuerst den aktuellen Desktop am bisherigen
+Quellrechner starten und seinen vollständigen Google-Abgleich abwarten. Danach
+Android verbinden und synchronisieren. Bei „Erste Übernahme … Quell-PC starten“
+ist dieser Schritt noch nicht abgeschlossen. Sobald Android die vollständige
+Kopie übernommen hat, muss der PC für die weitere Nutzung nicht laufen.
+Bei einem wirklich neuen Konto ohne älteres Archiv kann Android ein leeres
+Archiv beginnen; ein fehlender TMDB-Zugang muss trotzdem eingerichtet werden.
+
+4. BEDIENUNG AUF DEM BILDSCHIRM
+Links suchen, in der Mitte ansehen/bearbeiten, rechts das Archiv.
+- DE/EN oben: Sprache wechseln. Der Knopf nennt die Zielsprache.
+- Hell/Dunkel: Darstellung wechseln. Einige Android-Dialoge bleiben in a15 hell.
+- + und −: Ansicht vergrößern/verkleinern; Prozentknopf: auf 100 % zurücksetzen.
+  Zwei-Finger-Zoom und Verschieben sind zusätzlich möglich. Falls die Geste auf
+  dem Tablet bei 100 % nicht reagiert, zuerst einmal + verwenden.
+- Datum ↓ / A–Z am Archiv: Sortierung umschalten. Datum sortiert nach dem
+  aktiven Staffelstart absteigend; Einträge ohne Datum stehen zuerst.
+- Menü am Archiv: Jetzt synchronisieren, Archiv neu laden, Wartung,
+  letztes Wartungsergebnis und Log.
+- Archiveintrag antippen: Details und Poster ansehen. Anbieter stehen unter
+  der Inhaltsbeschreibung. Fehlendes Poster bedeutet nicht automatisch,
+  dass Archiv oder Kalendereintrag fehlgeschlagen sind.
+
+5. SERIE HINZUFÜGEN UND BEARBEITEN
+Titel eingeben, passenden Suchtreffer auswählen und die Details kontrollieren.
+„Ins Archiv“ antippen, Staffelnummer eingeben, „Vorbereiten“ wählen und die
+Zusammenfassung prüfen. „Senden“ bestätigt das lokale Speichern; es ist noch
+keine Bestätigung des Google-Uploads. In a15 müssen für die Staffel vollständige
+Episodentermine vorliegen. Bei unvollständigen Daten wird nichts neu eingetragen.
+TMDB-Termine sind nicht automatisch die deutschen oder australischen
+Streamingtermine. Staffeln, die vollständig vor dem aktuellen Kalenderjahr
+liegen, werden nicht als neue normale Kalendertermine eingetragen.
+
+Vorhandenen Archiveintrag auswählen → „Bearbeiten“:
+- Notiz / Offset / Anbieter ändern: Text bearbeiten und mit „Senden“ speichern.
+  Eine eigene Zeile „OffsetDE: +1D“ verschiebt gegenüber den ORIGINALTERMINEN
+  einen Tag nach hinten; „OffsetDE: -1D“ einen Tag nach vorn. +1D und danach
+  -1D ergibt nicht wieder das ursprüngliche Datum. Zum Zurücksetzen die
+  Offset-Zeile entfernen; andere Notizen stehen lassen.
+- Eigene Anbieterangabe: separate Zeile „Anbieter: Paramount+“ oder
+  „Provider: Paramount+“. Sie hat Vorrang vor der automatisch ermittelten
+  Anzeige. Zeile entfernen, um wieder die automatische Angabe zu verwenden.
+- Gesehen umschalten: markiert eine Staffel als gesehen oder nimmt dies zurück.
+- Ganze Serie löschen: betrifft ALLE archivierten Staffeln dieser Serie und
+  ihre verwalteten Kalendertermine nach erfolgreichem Abgleich. Bestätigung
+  genau lesen; für einen Test nur einen eigens angelegten Testeintrag verwenden.
+  Dauerhafte Desktop-Ankündigungskarten bleiben absichtlich bestehen.
+
+Status rechts im Archiv:
+Grünes Häkchen = von dir als gesehen markiert. Rotes Häkchen = Staffeltermine
+liegen zurück, aber noch nicht als gesehen bestätigt. Gelbe Uhr = zukünftiger
+Start, blauer Punkt = nach Terminen laufende Staffel, Kreis = ohne Termine.
+Rot/Grün lassen sich am Zeichen umschalten; alternativ „Bearbeiten“ verwenden.
+Es gibt keine automatische Erkennung deines Sehverhaltens.
+
+6. SPEICHERN UND GERÄTEWECHSEL
+Jedes Gerät hält eine vollständige lokale Archivkopie. Änderungen werden lokal
+gespeichert und im Hintergrund mit Google abgeglichen. Nicht ständig im Netz
+zu prüfen ist beabsichtigt: Die Geräte gleichen beim Start, nach Änderungen
+und auf ausdrücklichen Wunsch ab. Ein schon lange geöffnetes zweites Gerät
+bekommt Änderungen deshalb nicht zwangsläufig sofort mit.
+
+„Lokal gespeichert / Übertragung ausstehend“ = nur dieses Gerät ist bestätigt.
+„Übertragung läuft“ = noch warten; die Bedienung darf weitergehen.
+„Bei Google gespeichert“ = dieser Stand ist auch für andere Geräte verfügbar.
+Den gekürzten Status unten im Archiv antippen, um den ganzen Text zu lesen.
+Vor dem Wechsel auf ein anderes Gerät diese Google-Bestätigung abwarten.
+Am zweiten Gerät neu starten oder Menü → Jetzt synchronisieren verwenden.
+„Archiv neu laden“ lädt die Ansicht über die bestehende Verbindung und stößt
+den Abgleich an; „Jetzt synchronisieren“ ist der direkte Übertragungsweg.
+
+Für die erste Übernahme und den Abgleich brauchst du Internet. Eine bereits
+vorhandene lokale Kopie kann nach einem Verbindungsproblem weiter verfügbar
+sein; neue Suche und Poster benötigen Internet. Nach App-Wechsel oder
+Android-Beendigung gegebenenfalls erneut öffnen und synchronisieren. Keine
+garantierte Übertragung bei vollständig beendeter App erwarten.
+
+Nicht absichtlich parallel auf mehreren Geräten ändern. Bei einem Konflikt
+werden Kopien geschützt; SerKal führt widersprüchliche Änderungen nicht blind
+zusammen. Bei zu wenig Speicher (mindestens 10 MiB Reserve erforderlich, bei
+größeren Archiven mehr) kann das Archiv nur lesbar sein. Status beachten.
+
+7. WARTUNG UND STREAMING-ANBIETER
+Menü → Wartung. Das tatsächliche Streaming-Land wählen: z. B. DE für Deutschland,
+AU für Australien. Eine englische Oberfläche stellt das Land nicht automatisch
+auf AU um. Die Wartung prüft Episodendaten und Anbieter, aktualisiert geeignete
+bestehende Einträge und sammelt neue Staffeln als Vorschläge. Sie trägt keine
+weiteren Staffeln automatisch ein. Die Prüfung beginnt bei der ersten selbst
+archivierten regulären Staffel: S07 und S09 im Archiv → S08 relevant, S01–S06
+nicht. Titelmetadaten können ebenfalls aktualisiert werden.
+
+Das letzte Ergebnis ist wieder aufrufbar. „Nicht übernommen“ oder eine
+unvollständige Prüfung ist kein vollständiger Erfolg. Während des Wartungslaufs
+möglichst keine weiteren Archivänderungen machen; bei abgewiesener Übernahme
+später erneut prüfen.
+
+Anbieterinformationen stammen aus JustWatch über TMDB. Sie gelten für das
+gewählte Land und die Serie insgesamt, nicht verbindlich für jede Staffel oder
+Folge. Keine Angabe bedeutet nicht „nirgends verfügbar“. Abos/Kauf/Leihe und
+Verfügbarkeit können sich ändern; vor Abschluss beim Anbieter nachsehen.
+
+8. WAS a15 NOCH NICHT KANN
+- Die neuen Desktop-Ankündigungskarten mit dauerhaftem Terminverlauf und (?)
+  in der Archivliste werden von der Android-Wartung noch nicht selbst erzeugt.
+- „Fehlende Staffel“ kann hier noch eine erst angekündigte Staffel bezeichnen.
+- Die jüngste sprachsichere Desktop-Titelkorrektur ist noch nicht vollständig
+  auf Android portiert. Fremdsprachige/falsche Titel bitte mit Beispiel melden.
+- Anbietertexte in von Android geschriebenen Google-Terminen können noch
+  deutsch sein, auch bei englischer Oberfläche.
+- Einige Dialoge folgen dem Dunkelmodus noch nicht. Kleine Schrift/Gesten
+  und abweichende Gerätebedienung gehören ausdrücklich zum Test.
+- Ein frei bearbeitbarer Serientitel und eine Wartung mit Zwischenfragen sind
+  keine zugesicherten Funktionen dieser APK.
+
+9. KURZER TESTABLAUF
+1) Version a15, Querformat, Sprache, Hell/Dunkel und +/− prüfen.
+2) Eigenes Google-Konto verbinden, Schlüsselübernahme und Archivbestand prüfen.
+3) Bei ausgewählter Serie Google → Abbrechen testen. Auswahl/Archiv müssen
+   erhalten bleiben. Optional Weiter → Zurück im Google-Dialog testen.
+4) Archiv öffnen: Poster, Inhalt, Anbieter und Datum/A–Z vergleichen.
+5) Eine noch nicht archivierte Testserie mit vollständigen Terminen aufnehmen.
+   Lokalen Status und anschließend „Bei Google gespeichert“ beobachten.
+6) Zweites eigenes Gerät synchronisieren: derselbe Eintrag muss dort erscheinen.
+7) Gesehen hin/zurück und eine harmlose Notiz testen; erneut abgleichen.
+8) Wartung mit richtigem Land ausführen und letztes Ergebnis erneut öffnen.
+9) Nur die eigens angelegte Testserie löschen, bestätigen, Google-Abgleich
+   abwarten und das Ergebnis auf dem zweiten Gerät prüfen.
+Ein Android-Gerät reicht zum Mitmachen; den Zwei-Geräte-Schritt dann auslassen.
+
+10. DATEN UND FEHLERMELDUNGEN
+Archiv und bereitgestellter TMDB-Schlüssel liegen lokal bzw. in privaten
+App-Daten deines Google-Kontos (kein normaler Ordner in „Meine Ablage“);
+die verwalteten Termine in deinem Google-
+Kalender. TMDB erhält Such-/Metadaten-/Bildanfragen. SerKal lädt keine Filme,
+prüft nicht deinen Fernseher und liest keine Gedanken. Die Kalenderliste ist
+nicht dasselbe wie ein uneingeschränkter Zugriff auf sämtliche Kalenderinhalte.
+Dieser technische Hinweis ersetzt nicht die Datenschutzerklärung auf serkal.de.
+
+Bei Problemen: Gerät/Android-Version, App-Version, Sprache, letzte Schritte,
+Uhrzeit, genauen Wortlaut und gegebenenfalls Menü → Log an Kurt melden.
+Screenshots/Logs vor dem Weitergeben auf persönliche Angaben prüfen. Keine
+Passwörter, TMDB-Schlüssel, Zugangstokens oder kompletten Archivdaten öffentlich
+posten. Konflikte, blockierte Abgleiche und eigene Kalenderänderungen melden,
+statt Tokens, Kalender, Archive oder App-Daten zu löschen. Manuelle Änderungen
+in Google Kalender können einen automatischen Abgleich anhalten.
+
+Dieses Paket ist nur für die benannten privaten Tester bestimmt. Bitte weder
+APK noch Installer öffentlich einstellen oder an weitere Personen verteilen.
+Vielen Dank fürs Testen!
