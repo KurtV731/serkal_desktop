@@ -2753,3 +2753,16 @@ Vollständiger Verlauf im gemeinsamen TXT-Feld announcements; Archivzeile zeigt 
 Für 1.3 vorgemerkt: normale Wartung sammelt Zweifelsfälle; erweiterte Wartung hält mit verständlichen Auswahlfragen und Überspringen an. Noch nicht implementiert.
 
 Installer-Chatty: nächsten neuen, eindeutig nummerierten Installer vom Alpha-21-Gesamtstand ableiten; Alpha17.1 nicht ersetzen. Website unverändert.
+
+
+## CE – 17.10.2026: Android a15 – Google abbrechen / Anbieter unter Inhalt
+
+Status: GEBAUT, SIGNIERT UND AN KURT GELIEFERT / REALER BEDIENTEST OFFEN. Quelle `3e3b49aa9fe11851c6ea73a215e1332194eb39d8`, Android 0.0.5a15 / Code 23. Desktop Alpha 21 bleibt unverändert.
+
+Beim Antippen von Google erscheint jetzt ein Dialog mit Weiter und Abbrechen. Während einer laufenden Verbindung bietet erneutes Antippen Abbrechen/Weiter warten; Zurück während app-eigenem Warten bricht ebenfalls ab. Abbruch des Google-Systemdialogs wird behandelt. Der bisherige Benutzer, Schlüssel, Archivstand und Auswahl bleiben bis zum erfolgreichen Abschluss erhalten; verspätete Antworten eines abgebrochenen Versuchs werden per Generation ignoriert. Der Google-Knopf leerte zuvor schon beim Beginn einer Anmeldung die Anzeige. Anbieterinformationen stehen nun nach Inhaltsbeschreibung und vor Episodenterminen.
+
+GitHub Actions 39020267609 erfolgreich; 28 JUnit-Tests ohne Fehler/Fehlschläge. Quellstand nach Übertragung verglichen, tatsächliches APK-Manifest und V2/V3-Signatur geprüft, derselbe Signierer wie a14. APK `0.0.5a15-serkal-android.apk`: 2871047 Bytes, SHA256 `29fe514aba88ddfcc785c05ac33cf6dd4e853f9c045fd1c8b494e2ec9933f59b`. Über a14 installieren, nicht deinstallieren. Google-Systemdialoge und Zurück-Abbruch sind noch am echten Pixel/Samsung zu prüfen; JUnit ersetzt diese Bedienprüfung nicht.
+
+Test: bestehende Auswahl merken; Google → Abbrechen lässt alles bestehen. Weiter → im Google-Dialog Zurück: Archiv bleibt nutzbar. Bei längerem app-eigenen Warten Google erneut antippen und Verbindung abbrechen. Archivserie öffnen: Status/Episodenzahl, Inhalt, Anbieter, Termine, Notizen.
+
+Gemeinsame Desktop-/Handy-Bedienlogik ist möglich. Kurts Überlegung, die PC-Bedienung an die Handy-Bedienung anzugleichen, ist noch kein Auftrag zum Desktop-Umbau. Offene Android-Parität: Alpha-21-Ankündigungskarten/Terminverlauf in eigener Wartung und jüngste sprachsichere Titelkorrektur. Keine öffentliche APK-/Website-/Play-Store-Freigabe.
