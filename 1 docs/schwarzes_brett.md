@@ -2792,3 +2792,42 @@ Zusätzlicher bestätigter Updatefall von Kurt: Eine noch offene Anwendung/Rück
 Abnahme: zuerst Kurt (frische Einrichtung / Update / offener Dialog / Menü Hell-Dunkel / Archiv und Google), danach Weitergabe desselben geprüften Artefakts an VelcroFist. Öffentliche Beta ist das besprochene nächste Ziel, keine bereits erfolgte Veröffentlichung. Android aktuell a15; eigenständiges APK-Artefakt.
 
 Google-Konsole laut Kurts aktuellem Bild nach Entfernung calendar.events.owned/calendar.calendars: Datenzugriff erfordert keine Prüfung mehr; Branding/Datenschutzerklärung weiterhin in Prüfung. Kein Genehmigungsbescheid behauptet. Kein neues Demovideo angefordert im aktuell gezeigten Zustand.
+
+
+## Installer – 17.10.2026: Alpha 22.1 und vier Testerpakete vorbereitet
+
+Status: **INSTALLERSTAND UND BAUDATEI FERTIG / REALER WINDOWS-BUILD DURCH KURT OFFEN / NICHT ÖFFENTLICH**
+
+Verbindliche Desktop-Grundlage ist Alpha 22, CE-Commit
+`21f4bada3be03b8fa70f479e1a4c9a343b4e49fc`. Neuer Installerzweig:
+`installer-alpha-22-1`. Eindeutige Windows-kompatible technische Version:
+`1.2.0-alpha.221`, Bezeichnung Alpha 22.1. Setup und sämtliche auszugebenden
+Dateinamen sind gemäß Kurts Regel kleingeschrieben und ohne Leerzeichen.
+
+Der bestätigte Updatefall mit offenem Speichern-/Rückfragedialog wurde im
+Installer behandelt: Ein laufendes SerKal wird nach vorn geholt. Der Installer fordert
+verständlich auf, offene Rückfragen zu beantworten und SerKal selbst zu schließen.
+Er wartet auf „Wiederholen“ oder bricht sicher ab. Kein automatisches Schließen und
+kein Verwerfen ungespeicherter Änderungen. Installerstand einschließlich Baudatei:
+`0e0e944ff69df627f47bec5b73b4a9302e07fc8c`.
+
+Die Baudatei `serkal-alpha-22-1-vier-testerpakete-bauen.bat` führt alle 28
+Desktop-Tests, OAuth-/Token-Paketkontrollen, Windows-Bau, Ein-Datei-Verpackung und
+SHA-256-Erzeugung aus. Anschließend verlangt sie ausdrücklich die bereits signierte
+Android-a15-APK und akzeptiert nur deren freigegebene SHA-256
+`29fe514aba88ddfcc785c05ac33cf6dd4e853f9c045fd1c8b494e2ec9933f59b`.
+Das in GitHub Actions verfügbare a15-Artefakt ist als unsigned bezeichnet und wird
+deshalb nicht für Testerpakete verwendet.
+
+Vier getrennte ZIP-Pakete werden erzeugt:
+
+- `serkal-testerpaket-kurt.zip` – Kurts eigenes Kontroll- und Archivexemplar;
+- `serkal-testerpaket-larsalexander2.zip` – larsalexander2@googlemail.com;
+- `serkal-testerpaket-fuchsjuergen005.zip` – fuchsjuergen005@gmail.com;
+- `serkal-testerpaket-velcrofist69.zip` – velcrofist69@gmail.com.
+
+Jedes ZIP enthält denselben Desktop-Testinstaller Alpha 22.1 samt SHA-256, dieselbe
+signierte Android-a15-APK samt SHA-256 und eine empfängerbezogene
+`bitte-lesen.txt`. Zuerst Kurts Paket praktisch testen; danach exakt die drei anderen
+Pakete weitergeben. Keine öffentliche Downloadseite, kein Release und keine stabile
+Fassung ersetzen.
