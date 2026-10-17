@@ -2725,3 +2725,16 @@ Kurt zeigt TMDB 287527: korrekter englischer Suchvorschlag, nach Suche französi
 Auf Kurts Wunsch aktualisiert Desktop-Wartung bestehende sprachspezifische Anzeigenamen und protokolliert Titel korrigiert (alt → neu) in der Ergebnisliste. Eigene Titel via manualFlags=1 geschützt. ID, Notizen, Daten, Archivdateiname und Kalenderzuordnung bleiben erhalten. Korrigierte titleDE/titleEN-Felder werden an Android a13 synchronisiert. Native Android-TMDB-Auswahl und bestehende Kalender-Titel in diesem Schritt nicht geändert. Titelsprache unabhängig von Oberflächensprache und Editor für eigene Titel bleiben offen.
 
 27 Testprogramme bestanden; Wartungs-Smoke nach Zählerergänzung erneut bestanden; vier UI-Skripte syntaktisch geprüft. Details/Testablauf `1 docs/title-maintenance-2026-10-17.md`. Installer-Chatty soll beim nächsten neuen Testinstaller diesen Gesamtstand statt nur Alpha 18 übernehmen, unter neuer eindeutiger Versionsnummer. Keine öffentliche Freigabe.
+
+
+## CE – 17.10.2026: Alpha 20 / Android a14 – Wartung ist kein Serienlexikon
+
+Status: QUELLE GEPRÜFT / APK GEBAUT UND SIGNIERT / GERÄTETEST OFFEN.
+
+Kurt präzisiert: Bei Archiv S07/S09 nur S08 als fehlend melden; S01–S06 ignorieren. Neue S10 bleibt relevant. Untergrenze ist deshalb die erste positive Staffel im eigenen Archiv je TMDB-ID. Desktop-Abfragen, Analyse, Bericht und Android-Abfragen/Bericht entsprechend begrenzt. Alte Desktop-Cache-Daten vor dem Einstieg werden nicht ausgegeben. Keine Löschung alter Archivdaten.
+
+Ergebnisliste jetzt reine Fund-/Änderungsliste: unveränderte bekannte zukünftige Episoden entfallen; neue Staffel wird einmal zusammengefasst statt jeder ihrer Folgen. Vollständige Anbieterübersicht entfällt aus dem Bericht; Daten werden weiter aktualisiert und beim Archiveintrag gezeigt. Für neue Liste neuen Wartungslauf durchführen, nicht alten Ergebnisbericht wieder öffnen.
+
+CE `f4dd59080753c6832b5c49fc915c7240b4e89e04`, Version 1.2.0-alpha.20; enthält auch Häkchen-/Titelkorrekturen aus Alpha 18/19. 27 Testprogramme bestanden; zusätzlicher direkter Analysefall danach erneut geprüft. Android `989fdd8e6855cddee61525e40139b6409003701b`, 0.0.5a14 / Code 22. CI 39008008178 erfolgreich, 28 Tests ohne Fehler/Fehlschläge. Manifest/Signatur geprüft, gleicher Signierer wie a13. APK `0.0.5a14-SerKal-Android.apk`, 2871047 Bytes, SHA256 `8279944acad6dc8d10dd82f7bfe940a50d5d3de4df093e539a012d6e4078d335`, an Kurt bereitgestellt. Über a13 installieren; keine Deinstallation. Neuer Windows-Installer nicht gebaut; bestehenden Alpha-17.1-Testinstaller nicht still ersetzen. Kein öffentlicher Release/Websiteänderung.
+
+Details: `1 docs/maintenance-tracked-range-2026-10-17.md`.
