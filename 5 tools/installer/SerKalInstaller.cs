@@ -4,6 +4,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
 
@@ -28,43 +29,26 @@ internal static class SerKalInstaller
         try
         {
             Process[] running = FindRunningSerKal();
-            if (running.Length > 0)
+            while (running.Length > 0)
             {
-                using (var countdown = new CountdownForm())
-                {
-                    if (countdown.ShowDialog() != DialogResult.OK)
-                    {
-                        MessageBox.Show(
-                            "Die Installation/Aktualisierung wurde abgebrochen.\r\nDie vorhandene SerKal-Installation wurde nicht verändert.",
-                            "SerKal Desktop",
-                            MessageBoxButtons.OK,
-                            MessageBoxIcon.Information);
-                        return 2;
-                    }
-                }
-
-                foreach (Process process in FindRunningSerKal())
-                {
-                    try { process.CloseMainWindow(); }
-                    catch { }
-                }
-
-                DateTime deadline = DateTime.UtcNow.AddSeconds(12);
-                while (DateTime.UtcNow < deadline && FindRunningSerKal().Length > 0)
-                {
-                    Application.DoEvents();
-                    Thread.Sleep(200);
-                }
-
-                if (FindRunningSerKal().Length > 0)
+                BringSerKalToFront(running);
+                DialogResult choice = MessageBox.Show(
+                    "SerKal Desktop läuft noch. Möglicherweise wartet dort ein Dialog, zum Beispiel „Änderungen speichern“.\r\n\r\nBitte beantworten Sie zuerst alle offenen Rückfragen und schließen Sie SerKal anschließend selbst. So gehen keine ungespeicherten Änderungen verloren.\r\n\r\nDanach hier auf „Wiederholen“ klicken.",
+                    "SerKal Desktop aktualisieren",
+                    MessageBoxButtons.RetryCancel,
+                    MessageBoxIcon.Information,
+                    MessageBoxDefaultButton.Button1,
+                    MessageBoxOptions.DefaultDesktopOnly);
+                if (choice != DialogResult.Retry)
                 {
                     MessageBox.Show(
-                        "Installation/Aktualisierung fehlgeschlagen.\r\n\r\nSerKal Desktop konnte nicht regulär geschlossen werden. Bitte schließen Sie SerKal selbst und starten Sie diese Datei erneut.",
+                        "Die Installation/Aktualisierung wurde sicher abgebrochen.\r\nDie vorhandene SerKal-Installation wurde nicht verändert.",
                         "SerKal Desktop",
                         MessageBoxButtons.OK,
-                        MessageBoxIcon.Error);
-                    return 3;
+                        MessageBoxIcon.Information);
+                    return 2;
                 }
+                running = FindRunningSerKal();
             }
 
             string workFolder = Path.Combine(Path.GetTempPath(), "SerKalInstaller-" + Guid.NewGuid().ToString("N"));
@@ -111,6 +95,26 @@ internal static class SerKalInstaller
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Error);
             return 1;
+        }
+    }
+
+    [DllImport("user32.dll")]
+    private static extern bool SetForegroundWindow(IntPtr hWnd);
+
+    [DllImport("user32.dll")]
+    private static extern bool ShowWindowAsync(IntPtr hWnd, int nCmdShow);
+
+    private static void BringSerKalToFront(Process[] running)
+    {
+        foreach (Process process in running)
+        {
+            try
+            {
+                if (process.MainWindowHandle == IntPtr.Zero) continue;
+                ShowWindowAsync(process.MainWindowHandle, 9);
+                SetForegroundWindow(process.MainWindowHandle);
+            }
+            catch { }
         }
     }
 
