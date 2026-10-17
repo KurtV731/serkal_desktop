@@ -15,6 +15,7 @@ set "SERKAL_SETUP=%SERKAL_BUILD_DIR%\out\make\squirrel.windows\x64\serkal-alpha-
 set "SERKAL_DESKTOP=%SERKAL_DEST_DIR%\serkal-desktop-alpha-22-1-test.exe"
 set "SERKAL_DESKTOP_NEW=%SERKAL_DESKTOP%.neu"
 set "SERKAL_DESKTOP_SHA=%SERKAL_DESKTOP%.sha256"
+set "SERKAL_APK_FILE=G:\Meine Ablage\- - androidtrans\0.0.5a15-serkal-android.apk"
 set "SERKAL_APK_SHA_EXPECTED=29fe514aba88ddfcc785c05ac33cf6dd4e853f9c045fd1c8b494e2ec9933f59b"
 if not defined SERKAL_GOOGLE_OAUTH_FILE set "SERKAL_GOOGLE_OAUTH_FILE=C:\serkal_dev\serkal_private\google_oauth_client.json"
 
@@ -73,10 +74,7 @@ if not exist "%SERKAL_DESKTOP_NEW%" goto :failed
 move /y "%SERKAL_DESKTOP_NEW%" "%SERKAL_DESKTOP%" >nul || goto :failed
 powershell -NoProfile -Command "$h=(Get-FileHash -Algorithm SHA256 -LiteralPath $env:SERKAL_DESKTOP).Hash.ToLower();Set-Content -Encoding ascii -LiteralPath $env:SERKAL_DESKTOP_SHA -Value ($h+'  '+[IO.Path]::GetFileName($env:SERKAL_DESKTOP));Write-Host ('Desktop-Groesse: '+(Get-Item -LiteralPath $env:SERKAL_DESKTOP).Length+' Bytes');Write-Host ('Desktop-SHA256: '+$h)" || goto :failed
 
-echo [10/12] Signierte Android-a15-APK auswaehlen ...
-set "SERKAL_APK_FILE="
-for /f "usebackq delims=" %%F in (`powershell -NoProfile -STA -Command "Add-Type -AssemblyName System.Windows.Forms;$d=New-Object System.Windows.Forms.OpenFileDialog;$d.Title='Signierte 0.0.5a15 SerKal-Android-APK auswaehlen';$d.Filter='Android APK (*.apk)|*.apk';$d.FileName='0.0.5a15-serkal-android.apk';if($d.ShowDialog() -eq 'OK'){$d.FileName}"`) do set "SERKAL_APK_FILE=%%F"
-if not defined SERKAL_APK_FILE goto :apk_cancelled
+echo [10/12] Signierte Android-a15-APK aus dem festen Transferordner pruefen ...
 if not exist "%SERKAL_APK_FILE%" goto :missing_apk
 for /f "delims=" %%H in ('powershell -NoProfile -Command "(Get-FileHash -Algorithm SHA256 -LiteralPath $env:SERKAL_APK_FILE).Hash.ToLower()"') do set "SERKAL_APK_SHA=%%H"
 if /I not "%SERKAL_APK_SHA%"=="%SERKAL_APK_SHA_EXPECTED%" goto :wrong_apk
@@ -171,11 +169,9 @@ goto :stop
 :personal_token_found
 echo FEHLER: Eine persoenliche Google-Token-Datei wurde gefunden.
 goto :stop
-:apk_cancelled
-echo FEHLER: Es wurde keine signierte a15-APK ausgewaehlt.
-goto :stop
 :missing_apk
-echo FEHLER: Die ausgewaehlte APK wurde nicht gefunden.
+echo FEHLER: Die signierte a15-APK wurde im festen Transferordner nicht gefunden:
+echo %SERKAL_APK_FILE%
 goto :stop
 :wrong_apk
 echo FEHLER: Die APK ist nicht die freigegebene signierte a15-Datei.
