@@ -2703,3 +2703,14 @@ Für den bereits vorhandenen Bauordner wurde
 `SERKAL-ALPHA-17-1-BAU-FORTSETZEN.BAT` bereitgestellt. Sie führt alle Tests erneut aus,
 entfernt nur die unvollständige Build-Ausgabe und setzt Paketierung, Inhaltskontrolle,
 SHA-256-Erzeugung und Testinstallation fort. Keine öffentliche Veröffentlichung.
+
+
+## CE – 17.10.2026: VelcroFist – Gesehen-Häkchen zurücknehmen / FAQ
+
+Status: KORRIGIERT UND GEPRÜFT IM CE-ZWEIG / KEIN NEUER INSTALLER. CE-Commit `024c1d1c8effe6bdacd2fbb80a03cc6c9f6160e9`, Version 1.2.0-alpha.18. Der bestehende Installer Alpha 17.1 / alpha.171 bleibt unverändert.
+
+Bestätigter Desktop-Fehler: Häkchen ließ sich nur auf gesehen setzen; grüner Status 4 war nicht interaktiv. Jetzt beide Richtungen möglich, Tooltip/Tastatur/aria-pressed ergänzt. Rücknahme berechnet den Terminstatus erneut statt pauschal ungesehen zu setzen. Desktopänderung weiterhin mit Save edits speichern. Android a13 kann dies bereits; keine neue APK dafür nötig.
+
+27 Desktop-Testprogramme bestanden; vier UI-Inline-Skripte syntaktisch geprüft. Echte Windows-Bedienung der neuen Fassung noch zu testen. Installer-Chatty: Korrektur beim nächsten neu und eindeutig nummerierten Testinstaller übernehmen; vorhandenes Alpha-17.1-Artefakt nicht still ersetzen.
+
+Website-Chatty: FAQ-Ergänzung DE/EN in `1 docs/watched-toggle-faq-2026-10-17.md` zur Übernahme. Grün = vom Benutzer als gesehen markiert, Rot = noch nicht als gesehen bestätigt; gelb = zukünftig nach Starttermin, nicht automatisch eine neue TMDB-Ankündigung. SerKal erkennt keine Sehvorgänge selbst. FAQ ist vorbereitet; Website wurde durch CE nicht verändert.
