@@ -2913,3 +2913,23 @@ Kurt, Lars und Jürgen; englische Fassung für VelcroFist.
 die mitgesandten Tester-Unterlagen übernehmen und später als Grundlage für eine deutsche und
 englische Android-Installations-/Hilfeseite verwenden. Noch keinen öffentlichen APK-Link setzen,
 solange Kurt das konkrete öffentliche Artefakt nicht ausdrücklich freigegeben hat.
+
+
+## CE – 17.10.2026: vollständige Android-a15-Anleitung DE/EN geliefert
+
+Status: FACHLICH VERVOLLSTÄNDIGT / ZUM MITSENDEN AN DIE BENANNTEN TESTER FREIGEGEBEN / KEINE ÖFFENTLICHE APK-FREIGABE.
+
+Auftrag von Kurt/Installer ausgeführt. Vorarbeit aus Installercommit cd5e851918542bf0b54e49474b2251cba8842b1e (kurze bitte-lesen.txt) mit a15-Quellstand 3e3b49aa9fe11851c6ea73a215e1332194eb39d8 abgeglichen und zu vollständigen Benutzeranleitungen ergänzt. Dokumentcommit `e304755c8993203b5c2aeaec2cef13aaed9fd623` auf main; beide Dateien von GitHub zurückgelesen und inhaltsgleich geprüft:
+
+- `1 docs/android-a15-testeranleitung/bitte-lesen.txt` – Deutsch für Kurt, Lars und Jürgen.
+- `1 docs/android-a15-testeranleitung/please-read.txt` – vollständig Englisch für VelcroFist.
+
+Lieferung an Kurt: serkal-android-a15-anleitungen.zip, 12732 Bytes, SHA256 709f9ff5e67327e35264f13f93de893ef40dc82d71ad7b2d5807b8876e0e6537. Enthält de/bitte-lesen.txt, en/bitte-lesen.txt und paketinhalt.txt, UTF-8 mit BOM und Windows-Zeilenenden; ZIP-Inhalt/Lesbarkeit/Versions- und Prüfsummenangaben geprüft. EXE, APK und deren Prüfsummen bleiben unverändert. Bereits auf Kurts Platte vorhandene vier Tester-ZIPs wurden von CE nicht verändert.
+
+Inhalte: Installation/Update ohne Deinstallation, Play-Protect-/Quellenhinweise ohne pauschales Abschalten, Android 7+ und Querformat, eigenes Google-Konto und Abbruch, automatische bzw. manuelle TMDB-Einrichtung, vollständige Erstübernahme vom Desktop, lokale Kopie/Google-Bestätigung/Gerätewechsel, Menüs/Sortierung/Zoom, Staffelaufnahme mit vollständigen Terminen, Notizen/Offset relativ zum Original/Provider-Override, Gesehen-Farben, ganze Serie löschen, Länderwahl AU/DE unabhängig von Sprache, Wartungsgrenze ab erster eigener Staffel, echte a15-Grenzen und kurzer Praxistest, Datenwege/Fehlermeldung ohne Geheimnisse.
+
+Offene Parität wird ausdrücklich genannt: Android-Ankündigungskarten/Verlauf/(?), jüngste Titelkorrektur, noch deutsche Anbietertexte im Kalender und teilweise helle Android-Dialoge. Keine Gedankenlese-/Streaming-/Film-Download-Funktion versprochen, kein ständig live synchronisierter Mehrgerätebetrieb behauptet. Automatisches Pflegen bestehender Metadaten und Termine erklärt.
+
+**Installer-Chatty:** Kurze bisherige bitte-lesen.txt durch passende vollständige Sprachfassung ersetzen oder als zusätzliche Anleitung beilegen; VelcroFist unbedingt Englisch. Kein neuer App-/Installer-Build für diese reine Dokumentergänzung notwendig, vorhandene Binärdateien und SHA256 nicht verändern. Vor Weitergabe sicherstellen, dass die neuen Texte tatsächlich mitgesendet werden; vorhandene lokale ZIPs sind nicht automatisch aktualisiert.
+
+**Website-Chatty:** Dieselben Texte sind fachliche Grundlage für spätere deutsche/englische Android-Installations-/Hilfeseiten. Private Testerlieferung bleibt privat; noch keinen öffentlichen APK-/QR-Link freischalten. Bei späteren APK-Funktionen dokumentierte Grenzen aktualisieren.
