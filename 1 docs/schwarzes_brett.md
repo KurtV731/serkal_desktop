@@ -2851,3 +2851,17 @@ Fassungen bestätigt. Die drei getrennten Pakete für
 `larsalexander2@googlemail.com`, `fuchsjuergen005@gmail.com` und
 `velcrofist69@gmail.com` dürfen nun unverändert weitergegeben werden.
 Keine öffentliche Downloadseite und keine Freigabe als stabile öffentliche Fassung.
+
+
+### Installer-Korrektur 17.10.2026 – VelcroFist erhält englische Readme
+
+Kurt weist zu Recht darauf hin, dass VelcroFist Australier ist und die deutsche
+`bitte-lesen.txt` nicht verwenden kann. Das vorhandene VelcroFist-ZIP wird deshalb
+ausschließlich bei der Readme korrigiert; Desktop-EXE, APK und beide Prüfsummen bleiben
+unverändert. Eine separate Reparaturdatei ersetzt die Readme sicher durch eine englische
+Fassung und kontrolliert anschließend den ZIP-Inhalt.
+
+Auch die allgemeine Vier-Pakete-Baudatei wurde dauerhaft korrigiert: Kurt, Lars und
+Jürgen erhalten die deutsche Anleitung; `serkal-testerpaket-velcrofist69.zip`
+erhält automatisch die englische Anleitung. Korrigierter Installercommit:
+`cd5e851918542bf0b54e49474b2251cba8842b1e`.
