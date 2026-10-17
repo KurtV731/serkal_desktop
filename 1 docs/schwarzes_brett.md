@@ -2766,3 +2766,14 @@ GitHub Actions 39020267609 erfolgreich; 28 JUnit-Tests ohne Fehler/Fehlschläge.
 Test: bestehende Auswahl merken; Google → Abbrechen lässt alles bestehen. Weiter → im Google-Dialog Zurück: Archiv bleibt nutzbar. Bei längerem app-eigenen Warten Google erneut antippen und Verbindung abbrechen. Archivserie öffnen: Status/Episodenzahl, Inhalt, Anbieter, Termine, Notizen.
 
 Gemeinsame Desktop-/Handy-Bedienlogik ist möglich. Kurts Überlegung, die PC-Bedienung an die Handy-Bedienung anzugleichen, ist noch kein Auftrag zum Desktop-Umbau. Offene Android-Parität: Alpha-21-Ankündigungskarten/Terminverlauf in eigener Wartung und jüngste sprachsichere Titelkorrektur. Keine öffentliche APK-/Website-/Play-Store-Freigabe.
+
+
+## CE – 17.10.2026: Desktop Alpha 22 – gemeinsames Menü und Dunkelmodus
+
+Status: IMPLEMENTIERT / AUTOMATISCH GEPRÜFT / WINDOWS-SICHTPRÜFUNG OFFEN. CE `21f4bada3be03b8fa70f479e1a4c9a343b4e49fc`, Version 1.2.0-alpha.22. Android bleibt a15, kein neuer Installer und keine öffentliche Freigabe.
+
+Kurt beauftragt das Android-Menüprinzip auch für Desktop, einschließlich Löschen, statt vieler Einzelknöpfe. Jetzt Archivkopf mit Sortierung, Menü und Anzahl. Im Menü: Änderungen speichern, Synchronisieren, Neu laden, Wartung, letztes Wartungsergebnis, Log, Kalender, TMDB/Google, Hell/Dunkel und Serie löschen. Bestehende tatsächliche Knöpfe mit identischen IDs verschoben; Fachfunktionen, Sperrzustände und Löschbestätigung erhalten. Menü schließt vor Aktionsaufruf, Escape/Schließen und native Fokusführung. Sprachwahl und Speicherstatus bleiben direkt sichtbar; bei ungespeicherten Änderungen wird Menü zusätzlich hervorgehoben.
+
+Menü und SerKal-Dialoge folgen Hell/Dunkel: warme helle Flächen bzw. dunkler Hintergrund mit heller Schrift. Wartungsbericht/Länderauswahl und eigene Mitteilungen/Kalendereinrichtung eingeschlossen. DE/EN-Beschriftung; externe Google-/Windows-Oberflächen nicht umgestaltet, Ausdruck bleibt weiß.
+
+28 Testprogramme bestanden, fünf Inline-Skripte syntaktisch geprüft, alle Aktions-IDs eindeutig. Alle fünf geänderten Dateien nach Übertragung per Blobhash verglichen. Keine grafische Browserprüfung hier möglich. Details und Testfolge `1 docs/desktop-menu-2026-10-17.md`. Installer-Chatty: nächster eindeutiger Testinstaller vom Alpha-22-Gesamtstand, alte Artefakte nicht ersetzen. Keine Websiteänderung.
