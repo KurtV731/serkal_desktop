@@ -2714,3 +2714,14 @@ Bestätigter Desktop-Fehler: Häkchen ließ sich nur auf gesehen setzen; grüner
 27 Desktop-Testprogramme bestanden; vier UI-Inline-Skripte syntaktisch geprüft. Echte Windows-Bedienung der neuen Fassung noch zu testen. Installer-Chatty: Korrektur beim nächsten neu und eindeutig nummerierten Testinstaller übernehmen; vorhandenes Alpha-17.1-Artefakt nicht still ersetzen.
 
 Website-Chatty: FAQ-Ergänzung DE/EN in `1 docs/watched-toggle-faq-2026-10-17.md` zur Übernahme. Grün = vom Benutzer als gesehen markiert, Rot = noch nicht als gesehen bestätigt; gelb = zukünftig nach Starttermin, nicht automatisch eine neue TMDB-Ankündigung. SerKal erkennt keine Sehvorgänge selbst. FAQ ist vorbereitet; Website wurde durch CE nicht verändert.
+
+
+## CE – 17.10.2026: Alpha 19 – The Testaments / Titelkorrektur durch Wartung
+
+Status: QUELLE KORRIGIERT UND GEPRÜFT / LIVE-TEST OFFEN. CE-Commit `e84d9a0c93963d55df860ddb4944f8d694ec4807`, Version 1.2.0-alpha.19 (enthält auch Alpha-18-Häkchenkorrektur). Kein neuer Installer; Alpha 17.1 unverändert.
+
+Kurt zeigt TMDB 287527: korrekter englischer Suchvorschlag, nach Suche französischer Titel in Eingabe/Details. Auswahlpriorität korrigiert: englischer Originaltitel vor regionalen Aliasnamen; lokalisierter Detailname vor regionaler Alternative. Gezielter Testfall französischer CA-Titel reproduziert den falschen alten Pfad. Live-TMDB-Rohantwort hier nicht zugänglich; keine pauschale Behauptung über deren aktuellen Inhalt.
+
+Auf Kurts Wunsch aktualisiert Desktop-Wartung bestehende sprachspezifische Anzeigenamen und protokolliert Titel korrigiert (alt → neu) in der Ergebnisliste. Eigene Titel via manualFlags=1 geschützt. ID, Notizen, Daten, Archivdateiname und Kalenderzuordnung bleiben erhalten. Korrigierte titleDE/titleEN-Felder werden an Android a13 synchronisiert. Native Android-TMDB-Auswahl und bestehende Kalender-Titel in diesem Schritt nicht geändert. Titelsprache unabhängig von Oberflächensprache und Editor für eigene Titel bleiben offen.
+
+27 Testprogramme bestanden; Wartungs-Smoke nach Zählerergänzung erneut bestanden; vier UI-Skripte syntaktisch geprüft. Details/Testablauf `1 docs/title-maintenance-2026-10-17.md`. Installer-Chatty soll beim nächsten neuen Testinstaller diesen Gesamtstand statt nur Alpha 18 übernehmen, unter neuer eindeutiger Versionsnummer. Keine öffentliche Freigabe.
