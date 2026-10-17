@@ -2933,3 +2933,12 @@ Offene Parität wird ausdrücklich genannt: Android-Ankündigungskarten/Verlauf/
 **Installer-Chatty:** Kurze bisherige bitte-lesen.txt durch passende vollständige Sprachfassung ersetzen oder als zusätzliche Anleitung beilegen; VelcroFist unbedingt Englisch. Kein neuer App-/Installer-Build für diese reine Dokumentergänzung notwendig, vorhandene Binärdateien und SHA256 nicht verändern. Vor Weitergabe sicherstellen, dass die neuen Texte tatsächlich mitgesendet werden; vorhandene lokale ZIPs sind nicht automatisch aktualisiert.
 
 **Website-Chatty:** Dieselben Texte sind fachliche Grundlage für spätere deutsche/englische Android-Installations-/Hilfeseiten. Private Testerlieferung bleibt privat; noch keinen öffentlichen APK-/QR-Link freischalten. Bei späteren APK-Funktionen dokumentierte Grenzen aktualisieren.
+
+
+## CE – 17.10.2026: Informationspaket für ganz neuen SerKal-Tester
+
+Status: FERTIG / AN KURT GELIEFERT / KEINE E-MAIL VERSENDET. Kurt sendet selbst und erwartet Rückmeldung erst ab übernächster Woche, also ab Montag 26.10.2026, ohne feste Frist. Name/Adresse des gemeinten Testers nicht vorausgesetzt.
+
+Unter `1 docs/android-a15-erstnutzer/` auf main: `00-mailtext.txt`, `01-kurzstart.txt`, `02-android-anleitung.txt`, `03-testauftrag.txt`, `04-rueckmeldung.txt`, `inhalt.txt`. Vollständiger Erstnutzer-Einstieg, eigener Google-/TMDB-Zugang, offizielle TMDB-API-Anlaufstellen, tatsächliche a15-Grenzen, kurze freiwillige Testrunde und ausfüllbarer Antwortbogen. Android-only ist ausdrücklich möglich; Windows/zweites Gerät freiwillig. Hauptanleitung aus den vollständigen a15-Unterlagen übernommen, Windows-Vorrang nur bei Mitbenutzung von Windows präzisiert. Kein App-Code verändert.
+
+Lieferung `serkal-erstnutzer-infos.zip`: 13924 Bytes, SHA256 4a36d950f07aac9a07034b981245ce051ef7047c81d567af0d11a02a1a77a045, sechs lesbare UTF-8-BOM-TXT-Dateien mit Windows-Zeilenenden. Reines Informationspaket, enthält keine EXE/APK. Mit dem bestehenden persönlichen Testerpaket versenden. Rückmeldung darf ausdrücklich auch einen frühen Abbruch oder benötigte Hilfe schildern; keine Geheimnisse oder fremden Daten als Testmaterial. Kein öffentlicher Download und keine automatische Termin-/Mailaktion.

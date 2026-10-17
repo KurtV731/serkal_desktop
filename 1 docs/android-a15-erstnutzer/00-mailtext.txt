@@ -1,0 +1,19 @@
+Betreff: Dein erster Test mit SerKal – Anleitung und Rückmeldung
+
+Hallo,
+
+vielen Dank, dass du SerKal ausprobieren möchtest. Du musst das Programm noch nicht kennen – gerade dein erster Eindruck ist für mich besonders hilfreich.
+
+SerKal hilft dabei, Serien und ihre Sendetermine im Blick zu behalten. Es sucht Informationen und Bilder bei TMDB und kann Termine in einen eigenen Google-Kalender eintragen. Filme oder Folgen kannst du damit nicht ansehen oder herunterladen.
+
+Du bekommst das private Testerpaket und dieses Informationspaket mit Kurzstart, ausführlicher Android-Anleitung und einem Rückmeldebogen. Die Android-App ist Version 0.0.5a15. Falls du auch Windows testen möchtest, liegt dort der Desktop-Installer Alpha 22.1 bei; angezeigt wird Alpha 221. Ein Windows-PC ist für einen reinen Android-Ersttest nicht erforderlich.
+
+Bitte versuche den Einstieg zunächst nur mit den beiliegenden Unterlagen. Besonders interessiert mich: Was ist sofort verständlich? Wo musst du raten? Wo kommst du nicht weiter? Wenn du Hilfe brauchst, melde dich einfach – notiere vorher bitte kurz die Stelle und den Wortlaut. Du sollst dich nicht stundenlang durchbeißen.
+
+Für den Einstieg brauchst du Internet, dein eigenes Google-Konto und einen TMDB-Zugang. Benutze bitte keine Zugangsdaten von mir. Die ersten Schritte stehen im Kurzstart. Teste Änderungen und Löschen nur mit einer eigens dafür aufgenommenen Serie.
+
+Es hat keine Eile: Deine Rückmeldung passt ab Montag, dem 26. Oktober 2026, oder später. Schick mir den ausgefüllten Rückmeldebogen einfach per Antwort auf diese Mail; kurze Antworten reichen. Auch „hier habe ich aufgehört“ ist ein nützliches Ergebnis. Passwörter, Schlüssel und Zugangstokens bitte niemals mitschicken.
+
+Vielen Dank und viel Spaß beim Ausprobieren!
+Kurt
+

@@ -1,0 +1,84 @@
+SERKAL – DEIN ERSTER EINSTIEG
+Android 0.0.5a15 · privater Test · Stand 17.10.2026
+
+Worum geht es?
+SerKal merkt sich deine Serien, Staffeln und Termine. Es nutzt TMDB für
+Serieninformationen/Bilder und Google für dein Archiv und den Kalender.
+Es spielt keine Filme ab und erkennt nicht automatisch, was du gesehen hast.
+
+Was brauche ich?
+- Ein Android-Smartphone oder -Tablet ab Android 7.0 und Internet.
+- Dein eigenes Google-Konto. Die Adresse muss nicht auf @gmail.com enden.
+- Einen eigenen TMDB-Zugang mit API-Schlüssel oder unterstütztem Zugriffstoken.
+- Das persönliche Testerpaket mit der APK. Dieses Informationspaket allein
+  enthält keine Installationsdateien.
+Ein Windows-PC ist nur nötig, wenn du auch die Desktop-Version testen willst.
+Für die TMDB-Registrierung ist ein Computer mit Browser allerdings bequemer.
+
+1. Auspacken und installieren
+Tester-ZIP entpacken. Auf Android die Datei serkal-android-0.0.5a15.apk öffnen.
+Sie kann außerhalb des ZIP auch 0.0.5a15-serkal-android.apk heißen. Die EXE ist
+nur für Windows, die .sha256-Dateien sind zusätzliche Integritätsprüfungen.
+Falls SerKal schon installiert ist, als Update installieren, nicht vorher
+deinstallieren. Bei Installation aus unbekannter Quelle oder Play-Protect-
+Meldungen die Hinweise in 02-android-anleitung.txt beachten.
+Bei unklarer Blockade den genauen Text an Kurt melden.
+
+2. Google verbinden
+App öffnen, Version a15 und Querformat prüfen. Dein eigenes Google-Konto
+wählen, die angefragten Berechtigungen lesen und zustimmen, wenn du einverstanden
+bist. Anmeldung nur in Googles eigener Oberfläche. Du brauchst weder Kurts
+Google-Konto noch Zugriff auf sein Archiv.
+Abbrechen ist möglich. Dann ist die vollständige Einrichtung noch nicht fertig.
+
+3. TMDB: Was mache ich ohne vorhandenen Schlüssel?
+Bei einem ganz neuen SerKal-Nutzer kann noch nichts automatisch übernommen
+werden. Das ist zu erwarten.
+- Auf https://www.themoviedb.org ein eigenes Konto anlegen/anmelden.
+- In den Kontoeinstellungen den Bereich „API“ öffnen; direkte Adresse:
+  https://www.themoviedb.org/settings/api
+- Dort einen API-Zugang für deinen privaten Test beantragen. TMDB bezeichnet
+  den entsprechenden Zugang als Developer API; das bedeutet hier nicht,
+  dass du programmieren musst. Nutzungsbedingungen lesen und nur zutreffende
+  Angaben machen. Bei einer Frage zur App: SerKal, https://serkal.de,
+  persönliche Serienverwaltung und Kalender; keine erfundenen Angaben.
+- Wenn dir stattdessen ein kostenpflichtiger Geschäftsvertrag angeboten wird,
+  nichts abschließen, sondern Kurt fragen. Nicht-kommerzielle API-Nutzung
+  ist laut TMDB unter dessen Bedingungen kostenlos.
+- Den erhaltenen API-Key bzw. API Read Access Token kopieren und in SerKal
+  über „API-Key“ einfügen. Keine Passwörter dort eintragen.
+- „Bereitstellen“ bezieht sich auf deine weiteren SerKal-Geräte unter demselben
+  Google-Konto. Es veröffentlicht deinen Schlüssel nicht.
+Offizielle Hilfe:
+https://developer.themoviedb.org/docs/getting-started
+https://developer.themoviedb.org/docs/faq
+https://developer.themoviedb.org/docs/authentication-application
+Wenn dieser Schritt unverständlich ist, bitte genau das zurückmelden. Das
+gehört zum Erstnutzer-Test und ist kein Fehler von dir.
+
+4. Leeres Archiv oder vorhandenes Archiv?
+Für einen echten Neueinsteiger ist ein leeres Archiv normal.
+Du kannst auf Android anfangen. Wenn du vorher bereits ein Desktop-Archiv
+hattest, zuerst dessen vollständige Übertragung zu Google abwarten und danach
+Android synchronisieren. Für dieselben Daten auf deinen Geräten immer dasselbe
+eigene Google-Konto verwenden.
+
+5. Die erste Serie
+Links Titel suchen und passenden Treffer auswählen. In der Mitte Details prüfen.
+„Ins Archiv“ → Staffelnummer → „Vorbereiten“ → Zusammenfassung prüfen → „Senden“.
+Wähle zunächst eine noch nicht archivierte Testserie mit vollständigen
+Episodenterminen. Fehlen Termine, kann a15 die Staffel noch nicht aufnehmen.
+Kein Löschen nötig, um eine andere Suche auszuprobieren.
+
+6. Wann ist es wirklich fertig?
+„Lokal gespeichert“ bestätigt dieses Gerät. Erst „Bei Google gespeichert“
+bestätigt die Übertragung für andere Geräte. Den gekürzten Status unten im
+Archiv kannst du antippen. Ein zweites Gerät erhält Änderungen beim Start
+oder über Menü → Jetzt synchronisieren, nicht zwingend sofort von selbst.
+Die ausführliche Anleitung erklärt Menüs, Notizen, Gesehen, Anbieter und Löschen.
+
+Für diesen privaten Test
+Bitte nichts öffentlich weiterverteilen. Teste nur mit deinem eigenen Konto
+und lösche nur deine eigens angelegte Testserie. Bei Fehlermeldungen keine
+Kalender, Tokens oder App-Daten als Reparatur löschen. Fragen sind erlaubt.
+

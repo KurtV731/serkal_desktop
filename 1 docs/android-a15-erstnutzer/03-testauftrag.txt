@@ -1,0 +1,55 @@
+SERKAL – KURZER AUFTRAG FÜR DEN ERSTNUTZER-TEST
+Rückmeldung ab 26.10.2026 oder später; kein fester Abgabetermin.
+
+Ziel
+Wir prüfen Programm und Unterlagen, nicht deine Fähigkeiten. Bitte zunächst
+ohne zusätzliche mündliche Erklärung probieren. Hilfe ist jederzeit erlaubt;
+notiere vorher, was unklar war. 20–30 Minuten für einen ersten Eindruck reichen.
+Du musst nicht alle Punkte an einem Stück oder überhaupt vollständig schaffen.
+
+A. Normaler Einstieg
+1) Informationspaket lesen: Verstehst du, wofür SerKal gedacht ist?
+2) App installieren/öffnen: Ist klar, welche Datei für welches Gerät gedacht ist?
+3) Eigenes Google-Konto verbinden; TMDB-Einrichtung versuchen.
+4) Prüfen, ob du den Unterschied zwischen einer leeren neuen Sammlung und
+   einer fehlgeschlagenen Archivübernahme erkennen kannst.
+Schon ein Abbruch an dieser Stelle ist eine wertvolle Rückmeldung.
+
+B. Eine kleine Runde im Programm
+5) Eine Serie suchen, Details/Poster ansehen und eine Staffel aufnehmen.
+6) Prüfen: Wo erfährst du, dass lokal gespeichert wurde? Wo, dass Google fertig ist?
+7) Archiveintrag öffnen, Sprache und Datum/A–Z umschalten. Sind Schrift,
+   Knöpfe, Inhaltsbeschreibung und Anbieter verständlich und lesbar?
+8) Eine harmlose Notiz speichern; „Gesehen“ setzen und wieder zurücknehmen.
+   Wichtig: SerKal erkennt nicht selbst, was du gesehen hast.
+9) Google antippen und vor einer erneuten Anmeldung „Abbrechen“ wählen:
+   Vorhandenes Archiv und Auswahl sollten erhalten bleiben.
+10) Menü → Wartung mit deinem tatsächlichen Land ausführen, z. B. DE.
+    Wird verständlich, was geprüft wurde? Letztes Wartungsergebnis erneut öffnen.
+11) Wenn du möchtest: Nur die eigens angelegte Testserie löschen, Bestätigung
+    lesen, Google-Abgleich abwarten. Keine bestehende persönliche Serie löschen.
+
+C. Nur wenn du ein zweites Gerät benutzen möchtest
+12) Nach „Bei Google gespeichert“ dort dasselbe eigene Google-Konto verwenden.
+    Neu starten oder synchronisieren. Sind Eintrag, Notiz und Gesehen-Status da?
+Ein zweites Gerät oder Windows ist keine Teilnahmevoraussetzung.
+
+Bitte besonders beobachten
+- Wo suchst du spontan eine Funktion? Wo findest du sie tatsächlich?
+- Ist „Senden“ verständlich, obwohl zuerst lokal gespeichert wird?
+- Sind Warnungen/Rückfragen verständlich? Ist klar, wie man abbricht?
+- Ist das Verhalten nach Warten, App-Wechsel oder erneutem Öffnen nachvollziehbar?
+- Fehlt ein Hinweis in den Unterlagen, oder versprechen sie etwas Falsches?
+
+Bekannte Grenzen von a15
+Nicht alle Desktop-Funktionen sind bereits auf Android: neue Ankündigungskarten/
+Terminverlauf fehlen, „fehlende Staffel“ kann „erst angekündigt“ bedeuten,
+Titel können noch in der falschen Sprache erscheinen, Kalender-Anbietertexte
+teilweise auf Deutsch sein und einige Dialoge trotz Dunkelmodus hell bleiben.
+Du darfst diese Punkte trotzdem kurz melden, besonders wenn sie dich behindern.
+
+Bitte nichts erzwingen
+Bei blockiertem Speichern oder widersprüchlichen Daten nicht deinstallieren
+oder zurücksetzen. Wortlaut und Uhrzeit notieren; bei Bedarf Kurt fragen.
+Passwörter, TMDB-Schlüssel und Tokens niemals als Testnachweis schicken.
+

@@ -1,0 +1,18 @@
+SERKAL – INFORMATIONSPAKET FÜR EINEN GANZ NEUEN TESTER
+Stand 17.10.2026 · Android a15 · privater Test
+
+00-mailtext.txt          Fertiger Begleittext für Kurt.
+01-kurzstart.txt         Einstieg ohne SerKal-Vorkenntnisse, einschließlich TMDB.
+02-android-anleitung.txt Vollständige Bedienungsanleitung zur Android-a15-Fassung.
+03-testauftrag.txt       Kleine Testrunde; zweites Gerät freiwillig.
+04-rueckmeldung.txt      Ausfüllbarer Antwortbogen.
+
+Kurt: Dieses Informations-ZIP zusammen mit dem bestehenden persönlichen
+Testerpaket verschicken. Das Informationspaket enthält keine EXE und keine APK.
+Den Inhalt von 00-mailtext.txt kannst du als Mailtext übernehmen.
+Rückmeldungen sind ab Montag, 26. Oktober 2026, oder später willkommen.
+Namen und E-Mail-Adresse des neuen Testers wurden bewusst nicht vorausgesetzt.
+
+Die Anleitung bezieht sich auf die tatsächlich ausgelieferte a15; keine
+neue APK-Version erforderlich. Keine öffentliche Weitergabe vorgesehen.
+

@@ -1,0 +1,65 @@
+SERKAL – MEINE RÜCKMELDUNG ALS ERSTNUTZER
+Bitte als Text per Antwortmail an Kurt; ab 26.10.2026 oder später.
+Kurze Antworten reichen. „Nicht getestet“ ist völlig in Ordnung.
+
+Name oder Kürzel:
+Gerät/Modell:
+Android-Version (falls bekannt):
+SerKal-Version:
+Datum/Uhrzeit des Tests:
+Verwendete Sprache:
+Darstellung hell/dunkel:
+Nur Android oder zusätzlich Windows/zweites Gerät?:
+
+1. Mein erster Eindruck
+Ich glaube, SerKal ist dafür da, dass ...
+War das aus den Unterlagen verständlich?:
+Was habe ich erwartet, was nicht passiert ist?:
+
+2. Einstieg – jeweils: geklappt / unklar / Fehler / nicht getestet
+APK finden und installieren:
+Eigenes Google-Konto verbinden:
+TMDB-Zugang einrichten oder übernehmen:
+Neues/leeres bzw. vorhandenes Archiv verstehen:
+
+3. Bedienung – jeweils: geklappt / unklar / Fehler / nicht getestet
+Serie suchen und Details/Poster sehen:
+Staffel aufnehmen:
+Lokales Speichern von Google-Bestätigung unterscheiden:
+Archiv öffnen und sortieren:
+Notiz ändern:
+Gesehen setzen UND wieder zurücknehmen:
+Google-Anmeldung abbrechen:
+Wartung und letztes Ergebnis:
+Anbieter und Länderwahl:
+Eigene Testserie löschen:
+Übernahme auf zweites Gerät (optional):
+
+4. Wo bin ich hängen geblieben?
+Was habe ich unmittelbar davor gemacht?:
+Welchen Knopf/Feldnamen habe ich benutzt?:
+Was habe ich erwartet?:
+Was ist tatsächlich passiert?:
+Genauer Meldungstext (ohne Schlüssel/Passwörter):
+Ungefähre Wartezeit:
+Kam ich durch Warten, Abbrechen oder Neustart weiter?:
+Habe ich Hilfe gebraucht? Wenn ja, wobei?:
+
+5. Lesbarkeit und Verständlichkeit
+Schrift und Kontrast:
+Knöpfe, Menüs und Begriffe:
+Zoomen/Verschieben:
+Welche Stelle in der Anleitung war falsch oder fehlte?:
+
+6. Mein Fazit
+Die drei Dinge, die mich am meisten gestört haben:
+1)
+2)
+3)
+Was fand ich gut?:
+Würde ich SerKal ohne weitere Erklärung wieder benutzen?:
+Sonst noch etwas?:
+
+Optional: Bildschirmfoto oder kurzer Logauszug. Vor dem Mitschicken persönliche
+Daten prüfen; keine Passwörter, TMDB-Schlüssel, Tokens oder ganzen Archive.
+
