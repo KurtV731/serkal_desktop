@@ -1754,6 +1754,32 @@
     body[data-theme="dark"] .skDialogText { color: #cbd5e1; }
     body[data-theme="dark"] .skDialogActions { border-color: #334155; background: rgba(15, 23, 42, .35); }
 
+
+    /* SerKal dialogs share the selected light/dark palette. */
+    body { --panel:#faf8f3; --text:#263247; --dialog-border:#d8d3c9; --dialog-hover:#eee9de; }
+    body[data-theme="dark"] { --panel:#202738; --text:#edf2fc; --dialog-border:#46516a; --dialog-hover:#303c54; color-scheme:dark; }
+    dialog, .skCalendarSetupBox, .skDialogBox {
+      background:var(--panel) !important; color:var(--text) !important;
+      border:1px solid var(--dialog-border); border-radius:18px;
+      padding:24px; box-shadow:0 20px 65px rgba(0,0,0,.35); box-sizing:border-box;
+    }
+    dialog { max-width:min(900px,94vw); max-height:85vh; overflow:auto; font:inherit; font-size:14px; }
+    dialog::backdrop { background:rgba(9,14,25,.56); }
+    dialog h2 { margin:0 0 18px; font-size:20px; }
+    dialog button { padding:10px 14px; border-radius:10px; cursor:pointer; }
+    dialog button:focus-visible { outline:3px solid #719bed; outline-offset:2px; }
+    dialog button:disabled { cursor:default; opacity:.45; }
+    dialog pre { font-family:inherit; line-height:1.65; overflow-wrap:anywhere; }
+    dialog input { background:var(--panel); color:var(--text); border:1px solid var(--dialog-border); border-radius:8px; padding:8px; margin:8px; }
+    #appMenuDialog { width:380px; }
+    .appMenuHeading { display:flex; align-items:center; justify-content:space-between; gap:20px; margin-bottom:14px; }
+    .appMenuHeading h2 { margin:0; }
+    .appMenuActions { display:flex; flex-direction:column; gap:7px; }
+    .appMenuActions button { width:100%; text-align:left; font-size:14px; min-height:40px; }
+    .appMenuActions button:hover:not(:disabled) { background:var(--dialog-hover); }
+    .appMenuDanger { margin-top:8px; padding-top:12px; border-top:1px solid var(--dialog-border); }
+    .appMenuDanger button { color:#b73240; }
+    body[data-theme="dark"] .appMenuDanger button { color:#ff9ca7; }
   </style>
 
 
@@ -1869,13 +1895,14 @@
 
           <div class="archivHeaderRight">
             <!-- Umschalter: Status ? A–Z -->
-            <button class="btnSmall" id="btnArchiveSync" type="button"></button>
-            <button class="btnSmall" id="btnArchiveReload" type="button" title=""></button>
+            
+            
             <button class="btnSmall" id="btnSortToggle" type="button" title="">Status</button>
 
+            <button class="btnSmall" id="btnAppMenu" type="button" aria-haspopup="dialog" aria-controls="appMenuDialog"></button>
             <span class="pillCount" id="archivCount" title="">0</span>
 
-            <button class="btnDanger btnSmall" id="btnDeleteFile" type="button" title=""></button>
+            
           </div>
         </div>
 
@@ -1916,18 +1943,22 @@
         </button>
       </div>
 
-      <button id="btnWartung" class="btnSmall" type="button" title=""></button>
-      <button id="btnSharedKeyDock" class="btnSmall" type="button">TMDB · Google</button>
-      <button id="btnCalendarDock" class="btnSmall" type="button" title=""></button>
-      <button id="btnThemeDock" class="btnSmall" type="button" title="">🌙 Dark</button>
+      
+      
+      
+      
       <!-- <button id="btnAnalyseDock" class="btnSmall" type="button" title="fanal / Analyse">🧠 Analyse</button> -->
-      <button id="btnLogDock" class="btnSmall" type="button" title="">📜 Log</button>
-      <button id="btnSaveDock" class="btnSmall btnPrimary" type="button" title="">💾 Speichern</button>
+      
+      
       <span id="saveLamp" style="width:16px;height:16px;border-radius:50%;display:inline-block;background:#2ecc71;border:1px solid rgba(0,0,0,0.25);"></span>
       <span id="dockStatus" class="dockStatus"></span>
     </div>
 
 
+<dialog id="appMenuDialog" aria-labelledby="appMenuTitle">
+  <div class="appMenuHeading"><h2 id="appMenuTitle"></h2><button id="btnAppMenuClose" type="button" class="btnSmall"></button></div>
+  <div class="appMenuActions"><button id="btnSaveDock" class="btnSmall btnPrimary" type="button" title="">💾 Speichern</button><button class="btnSmall" id="btnArchiveSync" type="button"></button><button class="btnSmall" id="btnArchiveReload" type="button" title=""></button><button id="btnWartung" class="btnSmall" type="button" title=""></button><button id="btnLogDock" class="btnSmall" type="button" title="">📜 Log</button><button id="btnCalendarDock" class="btnSmall" type="button" title=""></button><button id="btnSharedKeyDock" class="btnSmall" type="button">TMDB · Google</button><button id="btnThemeDock" class="btnSmall" type="button" title="">🌙 Dark</button><div class="appMenuDanger"><button class="btnDanger btnSmall" id="btnDeleteFile" type="button" title=""></button></div></div>
+</dialog>
     <div id="logPanel" class="logPanel" aria-label="">
       <div id="logPanelResizeHandle" class="logPanelResizeHandle" role="separator" aria-orientation="horizontal"
         aria-label="" title="" tabindex="0"></div>
@@ -3863,6 +3894,7 @@ const I18N = {
     MAINT_EXTRA_13: "Wartung starten",
     MAINT_EXTRA_14: "Abbrechen",
     MAINT_TITLE_CORRECTED:'Titel korrigiert',
+    APP_MENU:'☰ Menü', APP_MENU_TITLE:'SerKal · Menü', APP_MENU_CLOSE:'Schließen',
     MAINT_ANNOUNCED:'Staffel angekündigt', MAINT_ANNOUNCEMENT_CHANGED:'Angekündigter Start geändert',
     MAINT_PROVIDER_SUMMARY:'Anbieterangaben findest du direkt beim jeweiligen Archiveintrag.',
     BTN_MAINT: '🔧 Wartung',
@@ -4045,6 +4077,7 @@ const I18N = {
     MAINT_EXTRA_13: "Start maintenance",
     MAINT_EXTRA_14: "Cancel",
     MAINT_TITLE_CORRECTED:'Title corrected',
+    APP_MENU:'☰ Menu', APP_MENU_TITLE:'SerKal · Menu', APP_MENU_CLOSE:'Close',
     MAINT_ANNOUNCED:'Season announced', MAINT_ANNOUNCEMENT_CHANGED:'Announced start changed',
     MAINT_PROVIDER_SUMMARY:'Provider information is available in each archive entry.',
     BTN_MAINT: '🔧 Maintenance',
@@ -4294,6 +4327,7 @@ function setLang_(lang, force) {
   refreshTexts_();
   uiSetHitInfo_();
   refreshDynamicContentAfterLang_();
+  try { serkalApplyTheme_(document.body.getAttribute('data-theme') || 'light'); } catch (_eThemeLanguage) {}
   updateInfoFromPreview_(state.currentPreview);
   updateLangButtons_();
   try { refreshSortToggle_(); } catch (_e) {}
@@ -4532,6 +4566,7 @@ function updateSaveUi_() {
       dockStatus.textContent = state.saveBusy ? t('DIRTY_SAVING') : (state.isDirty ? t('DIRTY_PENDING', {n:String(state.dirtyCount || 0)}) : t('DIRTY_CLEAN'));
     }
     if (btnSaveDock) btnSaveDock.disabled = !!state.saveBusy;
+    document.getElementById('btnAppMenu')?.classList.toggle('btnPrimary',!!state.isDirty);
   } catch (_e) {}
 }
 /**
@@ -5199,6 +5234,10 @@ const I18N_MAP = [
   { sel: '#tmdbPreview',                       attr: { 'aria-label': 'ARIA_PREVIEW' } },
   { sel: '#hitCountText',                      attr: { 'aria-label': 'ARIA_RESULT_INFO' } },
   { sel: '#noteHelpBtn',                       attr: { title: 'NOTE_HELP', 'aria-label': 'NOTE_HELP' } },
+  { sel: '#btnAppMenu', text:'APP_MENU' },
+  { sel: '#appMenuTitle', text:'APP_MENU_TITLE' },
+  { sel: '#btnAppMenuClose', text:'APP_MENU_CLOSE' },
+  { sel: '#btnMaintenanceLast', text:'MAINT_EXTRA_0' },
   { sel: '#btnArchiveSync', text: 'BTN_ARCHIVE_SYNC' },
   { sel: '#btnArchiveReload', text: 'BTN_ARCHIVE_RELOAD', attr: { title: 'TT_ARCHIVE_RELOAD', 'aria-label': 'TT_ARCHIVE_RELOAD' } },
   { sel: '#btnSortToggle',                     attr: { title: 'TT_SORT_SWITCH' } },
@@ -8979,12 +9018,18 @@ function serkalFanalOverlayEscapeHtml_(text) {
     .replace(/"/g, '&quot;');
 }
 
+const appMenuDialog=document.getElementById('appMenuDialog');
+const appMenuButton=document.getElementById('btnAppMenu');
+appMenuButton.addEventListener('click',()=>appMenuDialog.showModal());
+document.getElementById('btnAppMenuClose').addEventListener('click',()=>appMenuDialog.close());
+appMenuDialog.addEventListener('click',ev=>{const button=ev.target.closest('button');if(button && !button.disabled)appMenuDialog.close();},true);
+
 if (btnLangDe) btnLangDe.addEventListener('click', function(){ setLang_('de', true); });
 if (btnLangEn) btnLangEn.addEventListener('click', function(){ setLang_('en', true); });
 if (langToggleTrack) langToggleTrack.addEventListener('click', function(){ toggleLang_(); });
 if (btnWartung) btnWartung.addEventListener('click', function(){ runMaintenance_(); });
 if(btnWartung && window.serkal && window.serkal.maintenance){
-  const last=document.createElement('button');last.className='btnSmall';last.textContent='☷';last.title=t('MAINT_EXTRA_0');last.setAttribute('aria-label',t('MAINT_EXTRA_0'));
+  const last=document.createElement('button');last.id='btnMaintenanceLast';last.className='btnSmall';last.textContent=t('MAINT_EXTRA_0');last.title=t('MAINT_EXTRA_0');last.setAttribute('aria-label',t('MAINT_EXTRA_0'));
   last.onclick=async()=>{const result=await window.serkal.maintenance.last();if(result)showMaintenanceReport_(result);};btnWartung.insertAdjacentElement('afterend',last);
 }
 
@@ -9274,8 +9319,9 @@ function serkalApplyTheme_(theme) {
 
     var btn = document.getElementById('btnThemeDock');
     if (btn) {
-      btn.textContent = (t === 'dark') ? '☀️ Light' : '🌙 Dark';
-      btn.title = (t === 'dark') ? 'Zum hellen Farbschema wechseln' : 'Zum dunklen Farbschema wechseln';
+      var en = typeof getLang_ === 'function' && getLang_() === 'en';
+      btn.textContent = (t === 'dark') ? (en ? '☀️ Light' : '☀️ Hell') : (en ? '🌙 Dark' : '🌙 Dunkel');
+      btn.title = (t === 'dark') ? (en ? 'Switch to light theme' : 'Zum hellen Farbschema wechseln') : (en ? 'Switch to dark theme' : 'Zum dunklen Farbschema wechseln');
     }
 
     try { localStorage.setItem('SERKAL_THEME', t); } catch (_e1) {}
