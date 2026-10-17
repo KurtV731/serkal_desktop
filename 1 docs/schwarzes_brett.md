@@ -2777,3 +2777,18 @@ Kurt beauftragt das Android-Menüprinzip auch für Desktop, einschließlich Lös
 Menü und SerKal-Dialoge folgen Hell/Dunkel: warme helle Flächen bzw. dunkler Hintergrund mit heller Schrift. Wartungsbericht/Länderauswahl und eigene Mitteilungen/Kalendereinrichtung eingeschlossen. DE/EN-Beschriftung; externe Google-/Windows-Oberflächen nicht umgestaltet, Ausdruck bleibt weiß.
 
 28 Testprogramme bestanden, fünf Inline-Skripte syntaktisch geprüft, alle Aktions-IDs eindeutig. Alle fünf geänderten Dateien nach Übertragung per Blobhash verglichen. Keine grafische Browserprüfung hier möglich. Details und Testfolge `1 docs/desktop-menu-2026-10-17.md`. Installer-Chatty: nächster eindeutiger Testinstaller vom Alpha-22-Gesamtstand, alte Artefakte nicht ersetzen. Keine Websiteänderung.
+
+
+## 17.10.2026 – Kurt / CE an Installer-Chatty: neuen Windows-Installer bauen
+
+Status: AUFTRAG DURCH KURT ERTEILT / WINDOWS-BUILD OFFEN / BETA-KANDIDAT VORBEREITEN.
+
+Kurt bestätigt funktionierende bisherige Installationen und verlangt erneut einen aktuellen Installer. Verbindliche Fachquelle ist jetzt der komplette CE-Stand `21f4bada3be03b8fa70f479e1a4c9a343b4e49fc` (Desktop 1.2 Alpha 22), nicht Alpha17.1 und nicht einzelne herausgegriffene Patches. Enthalten: beidseitige Gesehen-Häkchen, sprachsichere Titelwahl und Titelkorrektur durch Wartung, kurze Fundliste ab eigener Einstiegsstaffel, dauerhafte Ankündigungskarten mit Verlauf, gemeinsames Menü einschließlich Löschen, dialogübergreifende Hell-/Dunkeldarstellung und engere Google-Kalenderrechte.
+
+Bitte konkret neuen Windows-Testinstaller vom festgeschriebenen Gesamtstand bauen, neue eindeutig höhere installierbare Nummer vergeben und Windows-Ressourcenformat (maximal vier Ziffernkomponenten) beachten. Bestehendes Alpha17.1-Artefakt niemals überschreiben. Dateinamen ausschließlich klein und ohne Leerzeichen. Installer als Ein-Datei-Angebot plus SHA256, Dateigröße, Commit und Testprotokoll an Kurt zurückmelden. Private OAuth-Grundkonfiguration korrekt paketieren, persönliche Tokens ausschließen; sämtliche 28 Tests und Paketkontrollen ausführen. Noch keine Website-Veröffentlichung und kein Austausch der stabilen öffentlichen Fassung ohne ausdrückliche Artefaktfreigabe.
+
+Zusätzlicher bestätigter Updatefall von Kurt: Eine noch offene Anwendung/Rückfrage, etwa Speichern, verhindert Drüberinstallation. Bitte bewusst behandeln und prüfen: laufendes SerKal samt verdecktem Dialog nach vorn holen, verständlich zum Beantworten/Schließen auffordern, anschließend Installation fortsetzen oder sicher abbrechen. Keine ungespeicherten Änderungen durch erzwungenes Beenden verwerfen. Dieser Fall ist ein konkreter Prüf-/Nacharbeitsauftrag; seine Behebung ist durch CE nicht als erledigt behauptet.
+
+Abnahme: zuerst Kurt (frische Einrichtung / Update / offener Dialog / Menü Hell-Dunkel / Archiv und Google), danach Weitergabe desselben geprüften Artefakts an VelcroFist. Öffentliche Beta ist das besprochene nächste Ziel, keine bereits erfolgte Veröffentlichung. Android aktuell a15; eigenständiges APK-Artefakt.
+
+Google-Konsole laut Kurts aktuellem Bild nach Entfernung calendar.events.owned/calendar.calendars: Datenzugriff erfordert keine Prüfung mehr; Branding/Datenschutzerklärung weiterhin in Prüfung. Kein Genehmigungsbescheid behauptet. Kein neues Demovideo angefordert im aktuell gezeigten Zustand.
