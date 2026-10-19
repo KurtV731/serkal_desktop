@@ -2942,3 +2942,16 @@ Status: FERTIG / AN KURT GELIEFERT / KEINE E-MAIL VERSENDET. Kurt sendet selbst 
 Unter `1 docs/android-a15-erstnutzer/` auf main: `00-mailtext.txt`, `01-kurzstart.txt`, `02-android-anleitung.txt`, `03-testauftrag.txt`, `04-rueckmeldung.txt`, `inhalt.txt`. Vollständiger Erstnutzer-Einstieg, eigener Google-/TMDB-Zugang, offizielle TMDB-API-Anlaufstellen, tatsächliche a15-Grenzen, kurze freiwillige Testrunde und ausfüllbarer Antwortbogen. Android-only ist ausdrücklich möglich; Windows/zweites Gerät freiwillig. Hauptanleitung aus den vollständigen a15-Unterlagen übernommen, Windows-Vorrang nur bei Mitbenutzung von Windows präzisiert. Kein App-Code verändert.
 
 Lieferung `serkal-erstnutzer-infos.zip`: 13924 Bytes, SHA256 4a36d950f07aac9a07034b981245ce051ef7047c81d567af0d11a02a1a77a045, sechs lesbare UTF-8-BOM-TXT-Dateien mit Windows-Zeilenenden. Reines Informationspaket, enthält keine EXE/APK. Mit dem bestehenden persönlichen Testerpaket versenden. Rückmeldung darf ausdrücklich auch einen frühen Abbruch oder benötigte Hilfe schildern; keine Geheimnisse oder fremden Daten als Testmaterial. Kein öffentlicher Download und keine automatische Termin-/Mailaktion.
+
+
+## CE – 19.10.2026: Alpha 23 – vier Archivfarben gegen Theme-Überschreiben abgesichert
+
+Status: QUELLE KORRIGIERT UND GEPRÜFT / WINDOWS-SICHTPRÜFUNG OFFEN. CE `eceab948da10249560a6ebceb08d615776c6658b`, Version 1.2.0-alpha.23. Keine APK und kein Installer neu gebaut.
+
+Kurt zeigt installierte Alpha221: gelbe Zukunft sichtbar, andere Häkchen grau statt Blau/Rot/Grün. Ursache konkret im CSS: veraltete Farbzuordnung und allgemeiner Dunkelmodus `.liMeta` überschreibt vererbte Symbolfarbe. Nicht seine Gesehen-Daten zurückgesetzt. Jetzt zentrale Darstellung am Symbol selbst: Gelb Zukunft, Blau laufend, Rot vollständig erschienen/ungesehen, Grün manuell gesehen. Solide Farbflächen mit kontrastierender Schrift und direkter Priorität schützen vor allgemeinen Theme-Regeln. Fehler/unbekannt neutral mit eigenem Zeichen. Tastatur/Tooltips/aria-pressed/Dirty-Speichern erhalten.
+
+Blau kann bereits Grün werden. Rot/Grün bei abgeschlossenen Staffeln in beide Richtungen. Rücknahme von Grün berechnet wie bisher den Terminstatus; noch laufend wieder Blau, abgeschlossen Rot. Keine neue erzwungene Rot-Markierung als widersprüchliche Datenerweiterung eingeführt. CE hat Kurt diese bestehende Regel ausdrücklich erläutert.
+
+29 Testprogramme erfolgreich; zusätzliche Farbdarstellungs-/Prioritäts-/Renderpfad-Regression und 50 Rot/Grün-Rundläufe, Blau→Grün, Termine und Erhalt von ID/Notiz. Fünf UI-Skripte syntaktisch geprüft; alle sechs geänderten Dateien nach Übertragung per GitHub-Blobhash verglichen. Echter Windows-Theme-Sichttest steht aus. Details `1 docs/archive-status-contract-2026-10-19.md`.
+
+Installer-Chatty: nächsten eindeutigen Installer vom Alpha-23-Gesamtstand ableiten, aktuelle Alpha221-Testartefakte nicht still ersetzen. Bestehende Tests künftig 29 statt 28. Kurt kann CE per git pull / npm start prüfen; gesehen weiterhin Menü → Änderungen speichern und Google-Abgleich. Keine öffentliche Veröffentlichung durch diesen Fix.
