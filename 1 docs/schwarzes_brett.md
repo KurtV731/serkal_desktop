@@ -2955,3 +2955,61 @@ Blau kann bereits Grün werden. Rot/Grün bei abgeschlossenen Staffeln in beide 
 29 Testprogramme erfolgreich; zusätzliche Farbdarstellungs-/Prioritäts-/Renderpfad-Regression und 50 Rot/Grün-Rundläufe, Blau→Grün, Termine und Erhalt von ID/Notiz. Fünf UI-Skripte syntaktisch geprüft; alle sechs geänderten Dateien nach Übertragung per GitHub-Blobhash verglichen. Echter Windows-Theme-Sichttest steht aus. Details `1 docs/archive-status-contract-2026-10-19.md`.
 
 Installer-Chatty: nächsten eindeutigen Installer vom Alpha-23-Gesamtstand ableiten, aktuelle Alpha221-Testartefakte nicht still ersetzen. Bestehende Tests künftig 29 statt 28. Kurt kann CE per git pull / npm start prüfen; gesehen weiterhin Menü → Änderungen speichern und Google-Abgleich. Keine öffentliche Veröffentlichung durch diesen Fix.
+
+
+### 2026-10-19 – Website-Chatty – TMDB-Key-Anleitung an neuen Developer-Plan angepasst
+
+Status: **QUELLSTAND FERTIG / SERVER-UPLOAD UND SICHTPRÜFUNG DURCH KURT OFFEN**
+
+Kurt hat den seit Oktober 2026 geänderten TMDB-Beantragungsweg praktisch vollständig
+durchlaufen. Die bisherige Anleitung führte nach der Auswahl „Personal Use“ nicht mehr
+bis zum Schlüssel und war deshalb nicht mehr ausreichend.
+
+Deutsche und englische TMDB-Hilfe beschreiben jetzt vollständig:
+
+1. TMDB-Konto anmelden und API-Einstellungen öffnen;
+2. kostenlosen Developer-Zugang und „Personal Use“ auswählen;
+3. neue Seite „Manage API Services“, Plan „Developer Plan – Free – No monthly fee“;
+4. Application Details:
+   - Application Name: SerKal
+   - Application URL: https://serkal.de
+   - Type of Use: Desktop Application
+   - geprüfter englischer Application-Summary-Text;
+5. eigene Kontakt- und Adressdaten eintragen;
+6. TMDB-Übersetzungsfehler: Das erste deutsche Feld „Land“ bedeutet tatsächlich
+   Bundesland/Bundesstaat/Provinz/Region und ist Pflicht; das zweite Feld mit Flagge
+   ist das wirkliche Land;
+7. Bedingungen bestätigen und absenden;
+8. Erfolgsmeldung „You are currently on the Free Developer plan“;
+9. blauen Link „Access your API key details here“ öffnen;
+10. langen „API-Token für Lesezugriff“ vom kurzen „API-Schlüssel“ unterscheiden;
+11. für SerKal ausschließlich den kurzen API-Schlüssel verwenden;
+12. Token und Schlüssel niemals vollständig veröffentlichen.
+
+Drei neue datenschutzsichere Hilfebilder wurden eingebunden:
+- `icon/help/tmdb-application-details-2026.jpg`
+- `icon/help/tmdb-free-developer-plan-2026.jpg`
+- `icon/help/tmdb-api-key-choice-2026.jpg`
+
+Kurts sichtbare E-Mail-Adresse, Telefonnummer, Anschrift, Benutzername sowie sämtliche
+Originalzeichen aus Token und API-Schlüssel wurden nicht in die öffentlichen Bilder
+übernommen. Die Schlüsselabbildung enthält ausschließlich neutrale Platzhalter.
+
+Website-Commits:
+- deutsche Anleitung: `d0c11f213059297c3cdab482854c01d649b35095`
+- englische Anleitung: `c5e1e989570a5069c9a82069e3bd1c5f592e39ac`
+- datenschutzsichere Bilder: `5ccc33ef284b5035d80beb3c66adbe849a6ae1c7`
+- Bilder in deutsche Anleitung eingesetzt: `f6d274d37c073a4a11f64c576ae6c5752eb84f18`
+- Bilder in englische Anleitung eingesetzt: `d00033c672ef6b96c972778569e99336ce6c2e40`
+
+Alle fünf Dateien nach dem Commit von GitHub zurückgelesen. Beide HTML-Dateien
+referenzieren sämtliche drei Bilder; Bilddateien sind auf main vorhanden.
+
+Lokaler Abruf und Veröffentlichung:
+
+```bat
+cd /d C:\serkal-pages
+git fetch origin main
+git restore --source=origin/main -- up\tmdb-hilfe.html up\tmdb-help.html up\icon\help\tmdb-application-details-2026.jpg up\icon\help\tmdb-free-developer-plan-2026.jpg up\icon\help\tmdb-api-key-choice-2026.jpg
+NUR-WEBSITE-HOCHLADEN.BAT
+```
