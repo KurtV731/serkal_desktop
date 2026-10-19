@@ -888,19 +888,19 @@
 
     /* ===== Archiv: Statusfarben (zentral) ===== */
     .liMeta.stPlanned {
-      color: #2f7bd7;
+      color: #f2c94c;
       font-weight: 800;
     }
 
     /*🕒 erwartet / geplant */
     .liMeta.stRunning {
-      color: #2f9e44;
+      color: #2367b6;
       font-weight: 800;
     }
 
     /*▶️ läuft */
     .liMeta.stDone {
-      color: #6c757d;
+      color: #207b40;
       font-weight: 800;
     }
 
@@ -6712,6 +6712,25 @@ function formatDateShort_(dt){
  * @status aktiv
  * @loeschung nein
  */
+// Contract: 1 yellow future, 2 blue running, 3 red unwatched, 4 green watched.
+// Set the symbol itself, not its parent: theme rules must never hide status.
+function archiveStatusPresentation_(status) {
+  const n=Number(status);
+  return {color:({1:'#f2c94c',2:'#2367b6',3:'#bf293d',4:'#207b40'})[n]||'#6b7280',
+    icon:(n===2 || n===3 || n===4)?'✓':n===5?'!':n===0?'?':'',foreground:n===1?'#292515':'#ffffff'};
+}
+function applyArchiveStatusPresentation_(element,status) {
+  const view=archiveStatusPresentation_(status);
+  element.textContent=view.icon;
+  for(const [property,value] of Object.entries({background:view.color,color:view.foreground,
+    display:'inline-flex','align-items':'center','justify-content':'center',
+    width:'18px','min-width':'18px',height:'18px','line-height':'18px',
+    'font-size':'13px','font-weight':'800','font-family':'Arial, sans-serif',
+    'border-radius':'50%',border:'1px solid rgba(255,255,255,.25)',
+    'box-sizing':'border-box',opacity:'1','flex-shrink':'0'}))element.style.setProperty(property,value,'important');
+  element.setAttribute('data-serkal-status',String(status));
+}
+
 function toggleWatched_(it) {
   const seen=statusValueFromAny_(it)===4?0:1;
   it.buttonPressed=seen;it.seen=seen;
@@ -6808,7 +6827,7 @@ function renderArchivList() {
     if (st === 2 || st === 3 || st === 4) {
       const btnSeen = document.createElement('span');
       btnSeen.className = 'amSym';
-      btnSeen.textContent = '✓';
+      applyArchiveStatusPresentation_(btnSeen,st);
       btnSeen.title = statusToLabel_(st) + ' · ' + t(st === 4 ? 'UNSEEN_TITLE' : 'SEEN_TITLE');
       btnSeen.setAttribute('role','button');btnSeen.tabIndex=0;btnSeen.setAttribute('aria-label',btnSeen.title);btnSeen.setAttribute('aria-pressed',String(st===4));
       btnSeen.addEventListener('keydown',function(ev){if(ev.key==='Enter' || ev.key===' '){ev.preventDefault();ev.stopPropagation();btnSeen.click();}});
@@ -6835,7 +6854,7 @@ function renderArchivList() {
     } else {
       const symSpan = document.createElement('span');
       symSpan.className = 'amSym';
-      symSpan.textContent = statusToIcon_(st);
+      applyArchiveStatusPresentation_(symSpan,st);
       symSpan.title = statusToLabel_(st);
       meta.appendChild(symSpan);
     }
