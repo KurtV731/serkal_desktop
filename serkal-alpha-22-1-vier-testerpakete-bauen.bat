@@ -4,6 +4,7 @@ chcp 65001 >nul
 title SerKal Alpha 22.1 - vier Testerpakete bauen
 
 set "SERKAL_REPO=https://github.com/KurtV731/serkal_desktop.git"
+for %%I in ("%~dp0.") do set "SERKAL_LOCAL_REPO=%%~fI"
 set "SERKAL_COMMIT=544f559ab3d64ca2342b96f6ade2ab7266663449"
 set "SERKAL_VERSION=1.2.0-alpha.221"
 set "SERKAL_BUILD_DIR=C:\ppd\serkal\build\alpha-22-1"
