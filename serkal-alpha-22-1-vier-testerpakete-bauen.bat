@@ -10,15 +10,15 @@ set "SERKAL_VERSION=1.2.0-alpha.221"
 set "SERKAL_BUILD_DIR=C:\ppd\serkal\build\alpha-22-1"
 set "SERKAL_DEST_DIR=C:\ppd\serkal\testinstallationen\alpha-22-1"
 set "SERKAL_PACKAGES=%SERKAL_DEST_DIR%\testerpakete"
-set "SERKAL_SOURCE_ICON=C:\serkal_dev\serkal_desktop\4 assets\icon\serkal.ico"
+set "SERKAL_SOURCE_ICON=%SERKAL_LOCAL_REPO%\4 assets\icon\serkal.ico"
 set "SERKAL_BUILD_ICON=%SERKAL_BUILD_DIR%\4 assets\icon\serkal.ico"
 set "SERKAL_SETUP=%SERKAL_BUILD_DIR%\out\make\squirrel.windows\x64\serkal-alpha-22-1-setup.exe"
 set "SERKAL_DESKTOP=%SERKAL_DEST_DIR%\serkal-desktop-alpha-22-1-test.exe"
 set "SERKAL_DESKTOP_NEW=%SERKAL_DESKTOP%.neu"
 set "SERKAL_DESKTOP_SHA=%SERKAL_DESKTOP%.sha256"
-set "SERKAL_APK_FILE=G:\Meine Ablage\- - androidtrans\0.0.5a15-serkal-android.apk"
+if not defined SERKAL_APK_FILE set "SERKAL_APK_FILE=G:\Meine Ablage\- - androidtrans\0.0.5a15-serkal-android.apk"
 set "SERKAL_APK_SHA_EXPECTED=29fe514aba88ddfcc785c05ac33cf6dd4e853f9c045fd1c8b494e2ec9933f59b"
-if not defined SERKAL_GOOGLE_OAUTH_FILE set "SERKAL_GOOGLE_OAUTH_FILE=C:\serkal_dev\serkal_private\google_oauth_client.json"
+if not defined SERKAL_GOOGLE_OAUTH_FILE for %%I in ("%SERKAL_LOCAL_REPO%\..\serkal_private\google_oauth_client.json") do set "SERKAL_GOOGLE_OAUTH_FILE=%%~fI"
 
 echo.
 echo ============================================================
