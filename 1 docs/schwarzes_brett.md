@@ -3013,3 +3013,34 @@ git fetch origin main
 git restore --source=origin/main -- up\tmdb-hilfe.html up\tmdb-help.html up\icon\help\tmdb-application-details-2026.jpg up\icon\help\tmdb-free-developer-plan-2026.jpg up\icon\help\tmdb-api-key-choice-2026.jpg
 NUR-WEBSITE-HOCHLADEN.BAT
 ```
+
+
+## Website-Chatty – 20.10.2026: Trennung von SerKal und HASA / Umzug zu All-Inkl
+
+Status: **AUFTRAG ERFASST / BESTANDSAUFNAHME BEGONNEN / NOCH KEINE DATEIEN VERSCHOBEN ODER GELÖSCHT**
+
+Kurt legt fest, dass der künftige lokale Projektstamm unter `ppd/serkal` liegt und die Website zu All-Inkl.com umzieht. SerKal und HASA werden als getrennte Webauftritte geführt:
+
+- `serkal.de` bleibt ausschließlich SerKal;
+- `hasa.li` wird der eigenständige HASA-Auftritt;
+- Website-Chatty betreut zunächst beide Websites, solange Kurt HASA nicht ausdrücklich einem anderen Website-Chatty zuweist.
+
+Erste Bestandsaufnahme im Website-Repository `KurtV731/serkal-pages`:
+
+- `up/hasa.html` ist die gegenwärtige HASA-Seite;
+- `up/download.html` und `up/download-en.html` verlinken HASA;
+- `up/sitemap.xml` enthält `https://serkal.de/hasa.html`;
+- HASA-Artefakte liegen unter `up/download/others/hasa/`;
+- die aktuelle HASA-Seite beschreibt Anmeldung und Galaxiedatenbank auf `serkal.de`; diese technische Kopplung muss vor einer Domaintrennung mit CE/HASA-Verantwortlichem geklärt werden.
+
+Verbindlicher Ablauf:
+
+1. vollständige Inventur aller internen und externen URLs, Downloads, API-/Anmeldeziele, Canonicals, Sprachverweise, Sitemap- und robots-Angaben;
+2. Zielstruktur für `hasa.li`, eigenes Repository/Publish-Verfahren und lokale Ablage (vorgeschlagen `ppd/hasa`) festlegen;
+3. HASA-Seite und Downloads vollständig am neuen Ziel bereitstellen und praktisch prüfen;
+4. erst danach HASA aus Navigation, Downloadseiten und Sitemap von `serkal.de` herauslösen;
+5. alte öffentliche HASA-Adressen per dauerhafter 301-Weiterleitung auf passende neue `hasa.li`-Adressen führen, keine tote Löschung;
+6. beide Domains mit korrekten Canonicals, hreflang-Angaben, robots.txt, eigenen Sitemaps, erreichbaren Statuscodes und ohne interne Sackgassen prüfen;
+7. anschließend beide Properties in Google Search Console separat kontrollieren und Sitemaps einreichen.
+
+Noch offen und vor der eigentlichen Verschiebung zu entscheiden: Ziel-Repository beziehungsweise All-Inkl-Verzeichnis für `hasa.li`, endgültiger lokaler HASA-Ordner und neue Ziele der HASA-Anmeldung/Galaxiedatenbank. Bis diese Ziele feststehen, keine funktionierenden Downloads oder Backend-Adressen entfernen.
