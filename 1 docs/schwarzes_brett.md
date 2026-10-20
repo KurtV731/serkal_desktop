@@ -3023,7 +3023,8 @@ Kurt legt fest, dass der künftige lokale Projektstamm unter `ppd/serkal` liegt 
 
 - `serkal.de` bleibt ausschließlich SerKal;
 - `hasa.li` wird der eigenständige HASA-Auftritt;
-- Website-Chatty betreut zunächst beide Websites, solange Kurt HASA nicht ausdrücklich einem anderen Website-Chatty zuweist.
+- Website-Chatty betreut zunächst beide Websites, solange Kurt HASA nicht ausdrücklich einem anderen Website-Chatty zuweist;
+- sämtliche lokalen Projektordner liegen künftig unter dem von Kurt festgelegten Stamm `ppd/serkal`; getrennte SerKal-/HASA-Unterordner werden erst mit der Zielstruktur benannt.
 
 Erste Bestandsaufnahme im Website-Repository `KurtV731/serkal-pages`:
 
@@ -3036,11 +3037,11 @@ Erste Bestandsaufnahme im Website-Repository `KurtV731/serkal-pages`:
 Verbindlicher Ablauf:
 
 1. vollständige Inventur aller internen und externen URLs, Downloads, API-/Anmeldeziele, Canonicals, Sprachverweise, Sitemap- und robots-Angaben;
-2. Zielstruktur für `hasa.li`, eigenes Repository/Publish-Verfahren und lokale Ablage (vorgeschlagen `ppd/hasa`) festlegen;
+2. Zielstruktur für `hasa.li`, eigenes Repository/Publish-Verfahren und passende getrennte Unterordner innerhalb von `ppd/serkal` festlegen;
 3. HASA-Seite und Downloads vollständig am neuen Ziel bereitstellen und praktisch prüfen;
 4. erst danach HASA aus Navigation, Downloadseiten und Sitemap von `serkal.de` herauslösen;
 5. alte öffentliche HASA-Adressen per dauerhafter 301-Weiterleitung auf passende neue `hasa.li`-Adressen führen, keine tote Löschung;
 6. beide Domains mit korrekten Canonicals, hreflang-Angaben, robots.txt, eigenen Sitemaps, erreichbaren Statuscodes und ohne interne Sackgassen prüfen;
 7. anschließend beide Properties in Google Search Console separat kontrollieren und Sitemaps einreichen.
 
-Noch offen und vor der eigentlichen Verschiebung zu entscheiden: Ziel-Repository beziehungsweise All-Inkl-Verzeichnis für `hasa.li`, endgültiger lokaler HASA-Ordner und neue Ziele der HASA-Anmeldung/Galaxiedatenbank. Bis diese Ziele feststehen, keine funktionierenden Downloads oder Backend-Adressen entfernen.
+Noch offen und vor der eigentlichen Verschiebung zu entscheiden: Ziel-Repository beziehungsweise All-Inkl-Verzeichnis für `hasa.li`, endgültiger HASA-Unterordner innerhalb von `ppd/serkal` und neue Ziele der HASA-Anmeldung/Galaxiedatenbank. Bis diese Ziele feststehen, keine funktionierenden Downloads oder Backend-Adressen entfernen.
