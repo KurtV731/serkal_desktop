@@ -3045,3 +3045,49 @@ Verbindlicher Ablauf:
 7. anschließend beide Properties in Google Search Console separat kontrollieren und Sitemaps einreichen.
 
 Noch offen und vor der eigentlichen Verschiebung zu entscheiden: Ziel-Repository beziehungsweise All-Inkl-Verzeichnis für `hasa.li`, endgültiger HASA-Unterordner innerhalb von `ppd/serkal` und neue Ziele der HASA-Anmeldung/Galaxiedatenbank. Bis diese Ziele feststehen, keine funktionierenden Downloads oder Backend-Adressen entfernen.
+
+
+## Installer-Chatty – 20.10.2026: lokale Pfade auf ppd-Ordnung vorbereitet
+
+Status: **INSTALLER-/HILFSDATEIEN GEPRÜFT UND KORRIGIERT / KEIN NEUER BUILD ERFORDERLICH**
+
+Kurt ordnet die lokalen privaten Programmdateien künftig unter `C:\\ppd\\serkal` und
+trennt die Webauftritte: SerKal bleibt unter `serkal.de`, HASA wechselt vollständig zu
+`hasa.li`. Der Installer-Chatty hat den aktuellen Zweig `installer-alpha-22-1` auf feste
+alte Pfade, Weblinks und HASA-Kopplungen geprüft.
+
+Ergebnis:
+
+- In den 35 geprüften ausführbaren Konfigurations-, JavaScript-, HTML-, JSON-, Batch-, CMD-
+  und PowerShell-Dateien gibt es keine HASA-Weblinks und keine Verweise auf
+  `serkal.de/hasa` oder `download/others/hasa`.
+- Die SerKal-Hilfelinks unter `https://serkal.de/...` bleiben richtig und werden nicht auf
+  `hasa.li` umgestellt.
+- Vier Hilfsdateien enthielten noch den alten festen Stamm `C:\\serkal_dev`. Sie bestimmen
+  den Repositorypfad jetzt relativ zu ihrer eigenen Lage und funktionieren dadurch nach dem
+  Verschieben unter `C:\\ppd\\serkal\\...` unabhängig vom aktuellen CMD-Ordner.
+- Die Releaseablage liegt verbindlich unter `C:\\ppd\\serkal\\releases`.
+- Private OAuth-Grunddatei wird standardmäßig als Nachbarordner
+  `serkal_private\\google_oauth_client.json` neben dem lokalen Repository gesucht; die
+  Umgebungsvariable `SERKAL_GOOGLE_OAUTH_FILE` kann weiterhin einen abweichenden Ort vorgeben.
+- Der bestätigte signierte APK-Transferpfad auf Google Drive bleibt als Rückfall erhalten.
+  Neu kann `SERKAL_APK_FILE` vor dem Start gesetzt werden, falls Kurt die APK später ebenfalls
+  verlegt; kein unbestätigter neuer Android-Ordner wurde erfunden.
+- Laufzeitdaten unter `%APPDATA%\\SerKal` bleiben Windows-Benutzerdaten und werden nicht in
+  den Projektordner `ppd` verschoben.
+
+Geänderte Dateien auf `installer-alpha-22-1`:
+
+- `serkal-alpha-22-1-vier-testerpakete-bauen.bat`
+- `PULL-SD.BAT`
+- `5 tools/serkal_build_release.bat`
+- `5 tools/serkal_next_version.bat`
+
+Letzter geprüfter Commit des Zweigs: `dac94313d5b538903f5bfe88807f80639f113522`.
+Alle vier Dateien wurden anschließend von GitHub zurückgelesen; `C:\\serkal_dev` kommt darin
+nicht mehr vor. Bestehende Alpha-22.1-EXE/APK/Testerpakete wurden nicht verändert und müssen
+wegen dieser reinen lokalen Pfadkorrektur nicht neu gebaut werden.
+
+Website-Chatty bleibt für die gesonderte `serkal.de`-/`hasa.li`-Inventur, Weiterleitungen,
+Sitemaps und All-Inkl-Zielverzeichnisse zuständig. Noch offene endgültige Website-Unterordner
+werden vom Installer nicht eigenmächtig benannt.
