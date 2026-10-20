@@ -3,7 +3,8 @@ setlocal
 title SERKAL - Naechste Version
 
 cd /d "C:\serkal_dev\serkal_desktop" || (
-  echo FEHLER: Projektordner nicht gefunden.
+  echo FEHLER: Projektordner nicht gefunden:
+  echo %PROJECT%
   pause
   exit /b 1
 )
