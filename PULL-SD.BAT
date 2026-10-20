@@ -2,7 +2,7 @@
 setlocal EnableExtensions
 title SerKal Desktop - aktuellen Entwicklungsstand starten
 
-set "SERKAL_REPO=C:\serkal_dev\serkal_desktop"
+for %%I in ("%~dp0.") do set "SERKAL_REPO=%%~fI"
 set "SERKAL_BRANCH=serkal-0.0.5-archiv-start"
 
 echo.
@@ -59,7 +59,7 @@ if errorlevel 1 goto :npmfehler
 echo.
 echo Beende eine noch laufende alte SerKal-Instanz...
 taskkill /F /IM serkal_desktop.exe >nul 2>&1
-powershell -NoProfile -ExecutionPolicy Bypass -Command "Get-CimInstance Win32_Process -Filter \"Name='electron.exe'\" -ErrorAction SilentlyContinue | Where-Object { $_.CommandLine -like '*C:\serkal_dev\serkal_desktop*' } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }"
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$repo=$env:SERKAL_REPO; Get-CimInstance Win32_Process -Filter \"Name='electron.exe'\" -ErrorAction SilentlyContinue | Where-Object { $_.CommandLine -like ('*'+$repo+'*') } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }"
 timeout /t 1 /nobreak >nul
 
 echo.
