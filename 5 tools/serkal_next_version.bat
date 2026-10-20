@@ -2,7 +2,9 @@
 setlocal
 title SERKAL - Naechste Version
 
-cd /d "C:\serkal_dev\serkal_desktop" || (
+for %%I in ("%~dp0..\..") do set "PROJECT=%%~fI"
+
+cd /d "%PROJECT%" || (
   echo FEHLER: Projektordner nicht gefunden:
   echo %PROJECT%
   pause
