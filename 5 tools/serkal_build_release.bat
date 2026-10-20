@@ -2,8 +2,8 @@
 setlocal EnableExtensions EnableDelayedExpansion
 title SERKAL Desktop - Build & Release
 
-set "PROJECT=C:\serkal_dev\serkal_desktop"
-set "RELEASES=C:\serkal_dev\releases"
+for %%I in ("%~dp0..\..") do set "PROJECT=%%~fI"
+set "RELEASES=C:\ppd\serkal\releases"
 
 cd /d "%PROJECT%" || (
   echo FEHLER: Projektordner nicht gefunden:
