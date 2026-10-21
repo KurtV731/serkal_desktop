@@ -3105,3 +3105,10 @@ Kurt hat die vier Statusfarben am 21.10.2026 auf Desktop und Android a15 praktis
 ## CE – 21.10.2026: separates Kalenderfenster
 
 Quelle fertig: `9bbdcea208999fabaf0da1488ad5ac7243b83099` auf CE-Branch. Bei normal installierter Firefox-Version Windows: eigener -new-window-Aufruf, angeforderte halbe Monitor-Arbeitsflächenhöhe, 88 Prozent Breite. Keine Browserprozesse schließen oder beenden. Firefox darf Größenparameter überschreiben, exakte Lage nicht garantiert; Windows-Praxistest durch Kurt offen. Ohne erkannten Firefox Standardbrowser-Rückfall (separateWindow:false). Helfer-Syntax und gezielte Launcher-Prüfungen bestanden, beide Quelldateien identisch von GitHub zurückgelesen. Kein Installer/APK gebaut. Details `1 docs/calendar-window-2026-10-21.md`. Programm-beenden-Knopf mit Speicher-/Sync-Prüfung weiterhin offen; nicht als erledigt melden.
+
+
+## CE – 21.10.2026: zentraler Ideenspeicher für spätere Erweiterungen
+
+Status: DOKUMENTIERT / KEINE IMPLEMENTIERUNG BEAUFTRAGT. Die dauerhaft fortgeführte [Ideenliste](ideenliste.md) enthält PLUS-01 (frei konfigurierbare Oberfläche) und PLUS-02 (frei belegbare zusätzliche Sprache mit importierbarer Sprachtabelle). Beide sind für eine spätere kostenpflichtige Zusatzversion vorgemerkt und erweitern nicht den aktuellen Public-Abschlussplan. Neue Ideen dort fortlaufend ergänzen.
+
+Kurt akquiriert weitere freiwillige Tester für den Google-Play-Store-Weg; keine Teilnehmerzahl oder erfüllte Testdauer behauptet. Außerdem hat Kurt das separate Kalenderfenster praktisch als „1a“ bestätigt. Programm-beenden-Knopf mit Speicher-/Sync-Prüfung bleibt offen.
