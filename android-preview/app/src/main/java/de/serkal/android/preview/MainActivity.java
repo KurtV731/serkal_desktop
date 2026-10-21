@@ -44,15 +44,20 @@ public class MainActivity extends Activity {
     private int googleGeneration;
     private int pendingGoogleGeneration;
 
+    private AlertDialog.Builder dialogBuilder() {
+        return new AlertDialog.Builder(new android.view.ContextThemeWrapper(this,
+            dark ? android.R.style.Theme_Material_Dialog_Alert : android.R.style.Theme_Material_Light_Dialog_Alert));
+    }
+
     private void googleMenu() {
         if(googleBusy){
-            new AlertDialog.Builder(this).setTitle(english?"Google connection":"Google-Verbindung")
+            dialogBuilder().setTitle(english?"Google connection":"Google-Verbindung")
                 .setMessage(english?"Cancel the current connection attempt?":"Den laufenden Verbindungsversuch abbrechen?")
                 .setPositiveButton(english?"Cancel connection":"Verbindung abbrechen",(d,w)->cancelGoogleConnection())
                 .setNegativeButton(english?"Keep waiting":"Weiter warten",null).show();
             return;
         }
-        new AlertDialog.Builder(this).setTitle(english?"Google account":"Google-Konto")
+        dialogBuilder().setTitle(english?"Google account":"Google-Konto")
             .setMessage(googleUser==null?(english?"Connect Google to load your shared archive?":"Google verbinden, um dein gemeinsames Archiv zu laden?"):
                 googleUser.email+(english?"\nReconnect or choose another account?":"\nNeu verbinden oder ein anderes Konto auswählen?"))
             .setPositiveButton(english?"Continue":"Weiter",(d,w)->connectGoogle(true))
@@ -155,7 +160,7 @@ public class MainActivity extends Activity {
     private void confirmPublish(String key) {
         if (googleUser == null || googleAccessToken.isEmpty()) return;
         archiveDialogOpen=true;
-        new AlertDialog.Builder(this).setTitle(english ? "Share TMDB key" : "TMDB-Schlüssel bereitstellen")
+        dialogBuilder().setTitle(english ? "Share TMDB key" : "TMDB-Schlüssel bereitstellen")
             .setMessage(googleUser.email + (english ? "\nUse this key for your other SerKal installations?"
                 : "\nDiesen Schlüssel für deine weiteren SerKal-Installationen bereitstellen?"))
             .setPositiveButton(english ? "Share" : "Bereitstellen", (dialog, which) -> publishKey(key))
@@ -426,8 +431,8 @@ public class MainActivity extends Activity {
     }
     private void askMaintenanceCountry(){
         if(maintenanceBusy || !writeReady() || credential.isEmpty())return;
-        EditText input=new EditText(this);input.setTextColor(Color.BLACK);input.setSingleLine(true);input.setText(getPreferences(0).getString("watchCountry","DE"));
-        archiveDialogOpen=true;new AlertDialog.Builder(this).setTitle(english?"Streaming country (DE, AU, US, GB …)":"Streaming-Land (DE, AU, US, GB …)").setView(input)
+        EditText input=new EditText(new android.view.ContextThemeWrapper(this, dark ? android.R.style.Theme_Material : android.R.style.Theme_Material_Light));input.setTextColor(TEXT);input.setSingleLine(true);input.setText(getPreferences(0).getString("watchCountry","DE"));
+        archiveDialogOpen=true;dialogBuilder().setTitle(english?"Streaming country (DE, AU, US, GB …)":"Streaming-Land (DE, AU, US, GB …)").setView(input)
             .setPositiveButton(english?"Start":"Starten",(d,w)->{String country=input.getText().toString().trim().toUpperCase(java.util.Locale.ROOT);if(country.matches("[A-Z]{2}")){getPreferences(0).edit().putString("watchCountry",country).apply();runMaintenance(country);}})
             .setNegativeButton(english?"Cancel":"Abbrechen",null).setOnDismissListener(d->archiveDialogOpen=false).show();
     }
@@ -459,15 +464,15 @@ public class MainActivity extends Activity {
         if(rows==null || rows.length()==0)b.append(english?"\nNo new seasons or episode changes found.\n":"\nKeine neuen Staffeln oder Episodenänderungen gefunden.\n");
         b.append(english?"\nProvider information is available in each archive entry.\n":"\nAnbieterangaben findest du direkt beim jeweiligen Archiveintrag.\n");
         org.json.JSONArray errors=result.optJSONArray("errors");if(errors!=null && errors.length()>0)b.append(english?"\nIncomplete checks: ":"\nUnvollständige Prüfungen: ").append(errors.length());
-        TextView text=text(b.toString(),12,Color.BLACK);text.setTextIsSelectable(true);ScrollView scroll=new ScrollView(this);scroll.addView(text);
-        archiveDialogOpen=true;new AlertDialog.Builder(this).setTitle(english?"Maintenance results":"Wartungsergebnis").setView(scroll).setPositiveButton(english?"Close":"Schließen",null).setOnDismissListener(d->archiveDialogOpen=false).show();
+        TextView text=text(b.toString(),12,TEXT);text.setTextIsSelectable(true);ScrollView scroll=new ScrollView(this);scroll.addView(text);
+        archiveDialogOpen=true;dialogBuilder().setTitle(english?"Maintenance results":"Wartungsergebnis").setView(scroll).setPositiveButton(english?"Close":"Schließen",null).setOnDismissListener(d->archiveDialogOpen=false).show();
     }
 
     private void toggleArchiveSeen(JSONObject entry){
         try{sendRequest("seen",new JSONObject().put("tmdbId",entry.getInt("tmdbId")).put("seasonLabel",entry.getString("seasonLabel")).put("seen",entry.optInt("seen")!=1));}catch(Exception ignored){}
     }
     private void showArchiveMenu(){
-        archiveDialogOpen=true;new AlertDialog.Builder(this).setTitle(english?"Archive actions":"Archivaktionen")
+        archiveDialogOpen=true;dialogBuilder().setTitle(english?"Archive actions":"Archivaktionen")
             .setItems(english?new String[]{"Sync now","Reload archive","Maintenance","Last maintenance results","Log"}:new String[]{"Jetzt synchronisieren","Archiv neu laden","Wartung","Letztes Wartungsergebnis","Log"},(d,which)->handler.post(()->runArchiveMenuAction(which)))
             .setNegativeButton(english?"Close":"Schließen",null).setOnDismissListener(d->archiveDialogOpen=false).show();
     }
@@ -476,16 +481,16 @@ public class MainActivity extends Activity {
         if(which==1){loadArchive();checkPendingRequest();return;}
         if(which==2){askMaintenanceCountry();return;}
         if(which==3){try{String result=getPreferences(0).getString("maintenanceReport","");if(!result.isEmpty())showMaintenanceReport(new JSONObject(result));else statusText.setText(english?"No maintenance results yet.":"Noch kein Wartungsergebnis vorhanden.");}catch(Exception ignored){}return;}
-        try{TextView lines=text(archiveCopy==null?"":archiveCopy.readLog(),11,Color.BLACK);lines.setTextIsSelectable(true);ScrollView scroll=new ScrollView(this);scroll.addView(lines);
-            archiveDialogOpen=true;new AlertDialog.Builder(this).setTitle("SerKal Log").setView(scroll).setPositiveButton(english?"Close":"Schließen",null).setOnDismissListener(d->archiveDialogOpen=false).show();
+        try{TextView lines=text(archiveCopy==null?"":archiveCopy.readLog(),11,TEXT);lines.setTextIsSelectable(true);ScrollView scroll=new ScrollView(this);scroll.addView(lines);
+            archiveDialogOpen=true;dialogBuilder().setTitle("SerKal Log").setView(scroll).setPositiveButton(english?"Close":"Schließen",null).setOnDismissListener(d->archiveDialogOpen=false).show();
         }catch(Exception error){statusText.setText(english?"Log unavailable":"Log nicht verfügbar");}
     }
 
     private void askForSeason() {
         if(!writeReady() || selectedTmdbId<=0)return;
-        EditText input=new EditText(this);input.setText("1");input.setTextColor(Color.BLACK);input.setInputType(InputType.TYPE_CLASS_NUMBER);
+        EditText input=new EditText(new android.view.ContextThemeWrapper(this, dark ? android.R.style.Theme_Material : android.R.style.Theme_Material_Light));input.setText("1");input.setTextColor(TEXT);input.setInputType(InputType.TYPE_CLASS_NUMBER);
         archiveDialogOpen=true;
-        new AlertDialog.Builder(this).setTitle(english ? "Season number" : "Staffelnummer").setView(input)
+        dialogBuilder().setTitle(english ? "Season number" : "Staffelnummer").setView(input)
             .setPositiveButton(english ? "Prepare" : "Vorbereiten",(d,w)->{
                 int season;try{season=Integer.parseInt(input.getText().toString());}catch(Exception e){return;}
                 if(season<1 || season>999)return;
@@ -501,10 +506,11 @@ public class MainActivity extends Activity {
                         String first=detail.optString("first_air_date");if(first.length()<4)throw new Exception("YEAR");
                         JSONObject payload=new JSONObject().put("tmdbId",id).put("titel",detail.getString("name")).put("jahr",first.substring(0,4))
                             .put("staffelNummer",season).put("episoden",dates.length()).put("termindaten",dates)
-                            .put("descDE",de.optString("overview")).put("descEN",en.optString("overview"));
+                            .put("descDE",de.optString("overview")).put("descEN",en.optString("overview"))
+                            .put("titleDE",de.optString("name")).put("titleEN",en.optString("name")).put("calendarLanguage",language?"en":"de");
                         handler.post(() -> {if(generation!=googleGeneration || isFinishing())return;
                             archiveDialogOpen=true;
-        new AlertDialog.Builder(this).setTitle(english ? "Archive and calendar" : "Archiv und Kalender")
+        dialogBuilder().setTitle(english ? "Archive and calendar" : "Archiv und Kalender")
                                 .setMessage(detail.optString("name")+" · S"+season+" · "+dates.length()+(english ? " episodes. Save on this device?" : " Folgen. Auf diesem Gerät speichern?"))
                                 .setPositiveButton(english ? "Send" : "Senden",(dialog,which)->sendRequest("insert",payload))
                                 .setNegativeButton(english ? "Cancel" : "Abbrechen",null).setOnDismissListener(_closedDialog -> archiveDialogOpen=false).show();});
@@ -514,9 +520,9 @@ public class MainActivity extends Activity {
     }
     private void editArchiveNotes() {
         if(!writeReady() || selectedArchiveEntry==null)return;
-        final JSONObject entry=selectedArchiveEntry;EditText input=new EditText(this);input.setTextColor(Color.BLACK);input.setText(entry.optString("note"));
+        final JSONObject entry=selectedArchiveEntry;EditText input=new EditText(new android.view.ContextThemeWrapper(this, dark ? android.R.style.Theme_Material : android.R.style.Theme_Material_Light));input.setTextColor(TEXT);input.setText(entry.optString("note"));
         archiveDialogOpen=true;
-        new AlertDialog.Builder(this).setTitle(english ? "Notes: Provider: … / OffsetDE: +1D" : "Notiz: Anbieter: … / OffsetDE: +1D").setView(input)
+        dialogBuilder().setTitle(english ? "Notes: Provider: … / OffsetDE: +1D" : "Notiz: Anbieter: … / OffsetDE: +1D").setView(input)
             .setPositiveButton(english ? "Send" : "Senden",(d,w)->{try{sendRequest("notes",new JSONObject().put("tmdbId",entry.getInt("tmdbId")).put("seasonLabel",entry.getString("seasonLabel")).put("note",input.getText().toString()));}catch(Exception ignored){}})
             .setNegativeButton(english ? "Cancel" : "Abbrechen",null).setOnDismissListener(_closedDialog -> archiveDialogOpen=false).show();
     }
@@ -524,7 +530,7 @@ public class MainActivity extends Activity {
         if(!writeReady() || selectedArchiveEntry==null)return;
         final JSONObject entry=selectedArchiveEntry;
         archiveDialogOpen=true;
-        new AlertDialog.Builder(this).setTitle(english ? "Delete all archived seasons?" : "Alle archivierten Staffeln löschen?")
+        dialogBuilder().setTitle(english ? "Delete all archived seasons?" : "Alle archivierten Staffeln löschen?")
             .setMessage(entry.optString("title")+(english ? " – including its calendar events." : " – einschließlich ihrer Kalendertermine."))
             .setPositiveButton(english ? "Delete" : "Löschen",(d,w)->{try{sendRequest("delete",new JSONObject().put("tmdbId",entry.getInt("tmdbId")).put("seasonLabel",entry.getString("seasonLabel")));}catch(Exception ignored){}})
             .setNegativeButton(english ? "Cancel" : "Abbrechen",null).setOnDismissListener(_closedDialog -> archiveDialogOpen=false).show();
@@ -541,11 +547,11 @@ public class MainActivity extends Activity {
     }
 
     private void askForKey() {
-        EditText input = new EditText(this);
-        input.setTextColor(Color.BLACK);
+        EditText input = new EditText(new android.view.ContextThemeWrapper(this, dark ? android.R.style.Theme_Material : android.R.style.Theme_Material_Light));
+        input.setTextColor(TEXT);
         input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
         archiveDialogOpen=true;
-        new AlertDialog.Builder(this)
+        dialogBuilder()
             .setTitle(english ? "TMDB API key / read access token" : "TMDB API-Key / Lesezugriffstoken")
             .setView(input)
             .setPositiveButton(english ? "Check" : "Prüfen", (dialog, which) -> {
@@ -822,7 +828,7 @@ public class MainActivity extends Activity {
         LinearLayout left = panel(29);
         left.addView(heading(english ? "SEARCH / CALENDAR" : "SUCHE / KALENDER"));
         left.addView(text(english ? "Search for a series" : "Serie suchen", 8.5f, MUTED));
-        queryField = new EditText(this);
+        queryField = new EditText(new android.view.ContextThemeWrapper(this, dark ? android.R.style.Theme_Material : android.R.style.Theme_Material_Light));
         queryField.setSingleLine(true);
         queryField.setTextColor(TEXT);
         queryField.setHintTextColor(MUTED);
@@ -881,7 +887,7 @@ public class MainActivity extends Activity {
         LinearLayout editBar=new LinearLayout(this);editBar.setOrientation(LinearLayout.HORIZONTAL);
         Button add=button(english ? "Add to archive" : "Ins Archiv");add.setOnClickListener(v->askForSeason());editBar.addView(add);
         Button edit=button(english ? "Edit ▾" : "Bearbeiten ▾");
-        edit.setOnClickListener(v->{archiveDialogOpen=true;new AlertDialog.Builder(this).setTitle(english?"Selected series":"Ausgewählte Serie")
+        edit.setOnClickListener(v->{archiveDialogOpen=true;dialogBuilder().setTitle(english?"Selected series":"Ausgewählte Serie")
             .setItems(english?new String[]{"Edit notes / offset / provider","Toggle watched","Delete complete series"}:new String[]{"Notiz / Offset / Anbieter ändern","Gesehen umschalten","Ganze Serie löschen"},(d,which)->handler.post(()->{if(which==0)editArchiveNotes();else if(which==1 && selectedArchiveEntry!=null)toggleArchiveSeen(selectedArchiveEntry);else if(which==2)deleteArchiveSeries();}))
             .setNegativeButton(english?"Close":"Schließen",null).setOnDismissListener(d->archiveDialogOpen=false).show();});editBar.addView(edit);middle.addView(editBar);
         columns.addView(middle);
@@ -897,7 +903,7 @@ public class MainActivity extends Activity {
         archiveRows=new LinearLayout(this);archiveRows.setOrientation(LinearLayout.VERTICAL);
         ScrollView archiveScroll=new ScrollView(this);archiveScroll.addView(archiveRows);right.addView(archiveScroll,new LinearLayout.LayoutParams(-1,0,1));
         copySyncButton=null;copySyncStatus=text("",9,MUTED);copySyncStatus.setMaxLines(2);copySyncStatus.setEllipsize(android.text.TextUtils.TruncateAt.END);right.addView(copySyncStatus);
-        copySyncStatus.setOnClickListener(v->{archiveDialogOpen=true;new AlertDialog.Builder(this).setTitle(english?"Synchronization":"Synchronisation").setMessage(copySyncStatus.getText()).setPositiveButton(english?"Close":"Schließen",null).setOnDismissListener(d->archiveDialogOpen=false).show();});
+        copySyncStatus.setOnClickListener(v->{archiveDialogOpen=true;dialogBuilder().setTitle(english?"Synchronization":"Synchronisation").setMessage(copySyncStatus.getText()).setPositiveButton(english?"Close":"Schließen",null).setOnDismissListener(d->archiveDialogOpen=false).show();});
         renderArchive();
         columns.addView(right);
 
@@ -923,5 +929,6 @@ public class MainActivity extends Activity {
         button.setPadding(dp(2), 0, dp(2), 0);
     }
 }
+
 
 

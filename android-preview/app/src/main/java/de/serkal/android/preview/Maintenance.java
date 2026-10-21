@@ -15,14 +15,15 @@ final class Maintenance {
             if(Thread.currentThread().isInterrupted())throw new InterruptedException();
             int id=group.getKey();String language="language="+(english?"en-US":"de-DE");
             try{
-                JSONObject tv=source.get("tv/"+id,language),offers=null;String title=tv.optString("name",group.getValue().get(0).optString("title"));
+                JSONObject tv=source.get("tv/"+id,language+"&append_to_response=translations,alternative_titles"),offers=null;String title=TmdbTitle.resolve(tv,english);
                 try{offers=WatchProviders.normalize(source.get("tv/"+id+"/watch/providers",""),country,now);}catch(Exception error){errors.put(new JSONObject().put("tmdbId",id).put("kind","providers"));}
                 providers.put(new JSONObject().put("tmdbId",id).put("title",title).put("info",offers==null?JSONObject.NULL:offers));
                 Map<Integer,JSONObject> existing=new LinkedHashMap<>();for(JSONObject e:group.getValue()){
                     existing.put(ArchiveCodec.number(e.getString("seasonLabel").replaceAll("\\D","")),e);
                     JSONObject metadata=new JSONObject().put("tmdbId",id).put("seasonLabel",e.getString("seasonLabel"));
                     if(offers!=null)metadata.put("watchProviders",offers);
-                    if(!title.isEmpty())metadata.put(english?"titleEN":"titleDE",title);
+                    metadata.put("calendarLanguage",english?"en":"de");
+                    if(!title.isEmpty() && (e.optInt("manualFlags")&1)==0)metadata.put(english?"titleEN":"titleDE",title);
                     patches.put(metadata);
                 }
                 int max=tv.optInt("number_of_seasons");if(max<0 || max>999)throw new Exception("MAINT_INVALID_SEASONS");
@@ -49,3 +50,4 @@ final class Maintenance {
         return new JSONObject().put("country",country).put("checkedAt",now).put("patches",patches).put("report",report).put("providers",providers).put("errors",errors);
     }
 }
+

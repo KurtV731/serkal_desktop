@@ -1,6 +1,6 @@
 plugins { id 'com.android.application' }
 
-def previewVersion = '0.0.5a15'
+def previewVersion = '0.0.5a16'
 
 android {
     namespace 'de.serkal.android.preview'
@@ -11,7 +11,7 @@ android {
         applicationId 'de.serkal.android.preview.v005'
         minSdk 24
         targetSdk 35
-        versionCode 23
+        versionCode 24
         versionName previewVersion
         resValue 'string', 'app_name', previewVersion + ' - SerKal Android'
     }
@@ -25,5 +25,6 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.json:json:20240303'
 }
+
 
 

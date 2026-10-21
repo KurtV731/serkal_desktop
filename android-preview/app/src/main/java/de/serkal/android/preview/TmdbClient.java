@@ -42,7 +42,9 @@ class TmdbClient {
 
     void validate() throws Exception { get("configuration", ""); }
     JSONObject details(int id, boolean english) throws Exception {
-        return get("tv/" + id, "language=" + (english ? "en-US" : "de-DE"));
+        JSONObject detail=get("tv/" + id, "language=" + (english ? "en-US" : "de-DE") + "&append_to_response=translations,alternative_titles");
+        detail.put("name",TmdbTitle.resolve(detail,english));
+        return detail;
     }
 
     List<JSONObject> search(String query, boolean english) throws Exception {
@@ -85,4 +87,5 @@ class TmdbClient {
         return name.startsWith(query) || original.startsWith(query) ? 1 : 2;
     }
 }
+
 

@@ -75,6 +75,7 @@ final class ArchiveCodec {
                     .put("startOriginal",anchor).put("startDE",f.getOrDefault("startDE",""))
                     .put("descDE",decode(f.getOrDefault("descDE",f.getOrDefault("ov_de",""))))
                     .put("descEN",decode(f.getOrDefault("descEN",f.getOrDefault("ov_en",""))))
+                    .put("calendarLanguage",f.getOrDefault("calendarLanguage","de"))
                     .put("watchProviders",provider(f.getOrDefault("watchProviders","")))
                     .put("titleDE",decode(f.getOrDefault("titleDE",""))).put("titleEN",decode(f.getOrDefault("titleEN","")))
                     .put("note",decode(f.getOrDefault("note",""))).put("manualFlags",number(f.getOrDefault("manualFlags","0")))
@@ -112,7 +113,9 @@ final class ArchiveCodec {
                     if(action.equals("seen")){f.put("seen",payload.optBoolean("seen")?"1":"0");raw=line(f);}
                     if(action.equals("notes")){note(f,payload.getString("note"));raw=line(f);}
                     if(action.equals("insert")){f.put("eps",String.valueOf(payload.getInt("episoden")));f.put("dates",compact(payload.getJSONArray("termindaten")));f.put("startOriginal",payload.getJSONArray("termindaten").getString(0));
-                        f.put("descDE",encode(payload.optString("descDE")));f.put("descEN",encode(payload.optString("descEN")));note(f,decode(f.getOrDefault("note","")));raw=line(f);}
+                        f.put("descDE",encode(payload.optString("descDE")));f.put("descEN",encode(payload.optString("descEN")));
+                        for(String k:new String[]{"titleDE","titleEN"})if(payload.has(k) && (number(f.getOrDefault("manualFlags","0"))&1)==0)f.put(k,encode(payload.optString(k)));
+                        if(payload.has("calendarLanguage"))f.put("calendarLanguage",payload.optString("calendarLanguage"));note(f,decode(f.getOrDefault("note","")));raw=line(f);}
                 }
                 content.append(raw).append('\n');
             }
@@ -125,7 +128,9 @@ final class ArchiveCodec {
             if(!safeName(target))throw new Exception("COPY_INVALID");
             LinkedHashMap<String,String> f=new LinkedHashMap<>();f.put("season",season);f.put("startOriginal",payload.getJSONArray("termindaten").getString(0));
             f.put("eps",String.valueOf(payload.getInt("episoden")));f.put("tmdb",String.valueOf(id));f.put("titleOriginal",encode(payload.getString("titel")));
-            f.put("dates",compact(payload.getJSONArray("termindaten")));f.put("descDE",encode(payload.optString("descDE")));f.put("descEN",encode(payload.optString("descEN")));f.put("flags","32");
+            f.put("dates",compact(payload.getJSONArray("termindaten")));f.put("descDE",encode(payload.optString("descDE")));f.put("descEN",encode(payload.optString("descEN")));
+                        for(String k:new String[]{"titleDE","titleEN"})if(payload.has(k) && (number(f.getOrDefault("manualFlags","0"))&1)==0)f.put(k,encode(payload.optString(k)));
+                        if(payload.has("calendarLanguage"))f.put("calendarLanguage",payload.optString("calendarLanguage"));f.put("flags","32");
             boolean appended=false;for(int i=0;i<result.length();i++){JSONObject file=result.getJSONObject(i);if(file.getString("name").equals(target)){String text=file.getString("content")+line(f)+"\n";file.put("content",text).put("sha256",hash(text));appended=true;break;}}
             if(!appended){String text=line(f)+"\n";result.put(new JSONObject().put("name",target).put("content",text).put("sha256",hash(text)));}
         } else if(!found && !action.equals("delete"))throw new Exception("COPY_ENTRY_MISSING");
@@ -138,7 +143,8 @@ final class ArchiveCodec {
             for(int j=0;j<lines.length;j++){LinkedHashMap<String,String> f=fields(lines[j]);
                 for(int k=0;k<patches.length();k++){JSONObject p=patches.getJSONObject(k);if(number(f.getOrDefault("tmdb","0"))!=p.getInt("tmdbId") || !f.getOrDefault("season","").equals(p.getString("seasonLabel")))continue;
                     if(p.has("watchProviders"))f.put("watchProviders",encode(p.getJSONObject("watchProviders").toString()));
-                    for(String name:new String[]{"titleDE","titleEN"})if(p.has(name))f.put(name,encode(p.getString(name)));
+                    for(String name:new String[]{"titleDE","titleEN"})if(p.has(name) && (number(f.getOrDefault("manualFlags","0"))&1)==0)f.put(name,encode(p.getString(name)));
+                    if(p.has("calendarLanguage"))f.put("calendarLanguage",p.getString("calendarLanguage"));
                     if(p.has("termindaten") && (number(f.getOrDefault("manualFlags","0"))&56)==0){JSONArray dates=p.getJSONArray("termindaten");f.put("dates",compact(dates));f.put("startOriginal",dates.getString(0));f.put("eps",String.valueOf(p.getInt("episoden")));note(f,decode(f.getOrDefault("note","")));}
                     lines[j]=line(f);changed=true;
                 }
@@ -146,3 +152,4 @@ final class ArchiveCodec {
         }return record;
     }
 }
+
