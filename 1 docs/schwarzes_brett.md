@@ -3123,3 +3123,57 @@ Androidquelle `85f44c9f02924ba4368fcb3576f1521abcd69c3a`: a16/versionCode24, Dia
 Android-Ankündigungskarten mit Verlauf/(?) bleiben aus dem großen Public-Paritätsplan offen. Android-only-Quellprüfung: neuer Nutzer kann nach Google-Verbindung und eigenem TMDB-Key ein leeres Archiv ohne PC erstellen. Nur bestehendes altes v1-Archiv braucht einmalige Desktop-Migration. Vollständige Episodentermine weiterhin Voraussetzung für Staffelaufnahme. Echte Erstnutzer-Geräteprüfung offen.
 
 Ablauf, Prüfungen, Grenzen und Erstnutzer-Testreihe: [Abschlussstand und Android-only](abschluss-2026-10-21.md). Diese Dokumentation ersetzt keine reale Geräteabnahme.
+
+
+## Website-Chatty – 21.10.2026: ppd-Pfad- und Umzugsaudit ausgeführt
+
+Status: **DIREKTE KORREKTUREN FERTIG UND AUF GITHUB GEPRÜFT / ALL-INKL- UND HASA-ZIELDATEN NOCH OFFEN**
+
+Kurt hat den neuen verbindlichen lokalen Websitepfad festgelegt:
+`C:\\ppd\\serkal\\serkal-pages`. Der veröffentlichte Quellordner ist entsprechend
+`C:\\ppd\\serkal\\serkal-pages\\up`.
+
+Website-Commit: `91d0916dc517c994851789f084a3f55783b76f9e` auf `KurtV731/serkal-pages/main`.
+Commit und Stichprobendateien wurden nach der Übertragung direkt von GitHub zurückgelesen.
+
+Direkt erledigt:
+
+- `PULL-PD.BAT`, `SERKAL_pull_v2.bat` und die historische Release-Festschreibung leiten
+  die Repositorywurzel jetzt aus ihrem eigenen Speicherort ab, statt `C:\\serkal-pages`
+  fest einzubauen;
+- `support/elwms_website_check.bat` findet `up` relativ zum eigenen Standort;
+- Handbuch, Übergabe und Werkstattdokument nennen den neuen verbindlichen ppd-Pfad;
+- alle öffentlichen HTML-Seiten erhielten eindeutige Canonical-Angaben;
+- alle DE/EN-Paare erhielten passende `hreflang`-Angaben für Deutsch, Englisch und
+  `x-default`;
+- Sitemap entsprechend ergänzt;
+- reine Programmstart-Brücke `/start` auf `noindex,nofollow`, alte Datenschutzweiterleitung
+  auf `noindex,follow` gesetzt;
+- vollständiger Prüf- und Übergabebericht unter
+  `docs/website-umzug-audit-2026-10-21.md` angelegt.
+
+Prüfergebnis:
+
+- 25 HTML-Dateien, null fehlende lokale Ziele, null doppelte IDs;
+- jede öffentliche HTML-Datei besitzt genau einen Canonical-Link;
+- Sitemap syntaktisch gültig und alle 24 eingetragenen Live-Adressen antworteten am
+  21.10.2026 mit HTTP 200 ohne X-Robots-Sperre;
+- aktuelle Google-Abfrage zeigte weiterhin nur zwei Ergebnisse;
+- `serkal.de` und `www.serkal.de` liefern beide denselben Inhalt mit 200. Beim Umzug muss
+  `www` dauerhaft per 301 auf die Hauptdomain umgeleitet werden.
+
+Noch erforderliche Unterstützung/Entscheidungen:
+
+1. All-Inkl-WinSCP-Hostname, Benutzername, gespeicherte Sitzung und exaktes Zielverzeichnis
+   für `serkal.de`; erst danach vollständige neue Upload-Batch erstellen.
+2. Getrenntes All-Inkl-Ziel für `hasa.li`, HASA-Unterordner unter `C:\\ppd\\serkal` und
+   neue HASA-Anmelde-/Datenbankadressen; bis dahin keine funktionierenden HASA-Ziele löschen.
+3. Beim realen Providerwechsel Datenschutzerklärung von INWX auf die bestätigten All-Inkl-
+   Angaben umstellen und Cloudflare nur nennen, wenn es tatsächlich weiter verwendet wird.
+4. Nach Veröffentlichung Sitemap in Search Console neu einreichen und einzelne URLs prüfen;
+   sofortige vollständige Google-Aufnahme nicht versprechen.
+
+Kurts Windows-Test: `support\\elwms_website_check.bat` im neuen Repository ausführen. Als
+Website-Root muss `C:\\ppd\\serkal\\serkal-pages\\up` erscheinen. Die vorhandene
+Uploadbatch wegen des noch eingetragenen alten Hosts nicht als endgültigen All-Inkl-Umzug
+verwenden.
