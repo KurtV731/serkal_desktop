@@ -27,3 +27,10 @@ Hier werden Kurts Zukunftsideen dauerhaft gesammelt. Eine Aufnahme ist noch kein
 
 ## Organisatorischer Stand
 Kurt wirbt aktuell weitere freiwillige Tester für den späteren Google-Play-Store-Weg an. Dies ist keine bestätigte Teilnehmerzahl und kein Nachweis eines bereits gestarteten oder abgeschlossenen Play-Console-Testzeitraums. Testerkontakte und persönliche Daten gehören nicht in diesen Ideenspeicher.
+
+
+## PLUS-03 – Konfigurierbare Wartungsentscheidungen
+- Herkunft: Kurt, 21.10.2026; spätere kostenpflichtige Zusatzversion, vorgemerkt.
+- Nutzer bestimmt, welche neuen Staffeln automatisch aufgenommen und welche nur gemeldet werden: bereits verfolgte/gesehene Serien, noch ungesehene letzte Staffel, Lücken und weitere Entscheidungsfälle.
+- Aktuelle kostenlose Vorgabe: direkte Aufnahme neuer Folgestaffeln nach letzter gesehener Staffel, Ankündigungen für unvollständige Termine, kein automatisches Nachtragen vor dem eigenen Einstieg.
+- Schutzmarkierungen, Datenintegrität und verständliche Ergebnisse gelten unabhängig von einer späteren Bezahlfunktion weiter. Noch keine Konfigurationsoberfläche implementiert.
