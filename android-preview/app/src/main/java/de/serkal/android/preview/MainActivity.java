@@ -364,7 +364,8 @@ public class MainActivity extends Activity {
         for(JSONObject e:ArchiveOrder.sorted(entries,byDate,english)) {
             LinearLayout item=new LinearLayout(this);item.setOrientation(LinearLayout.HORIZONTAL);item.setGravity(Gravity.CENTER_VERTICAL);item.setBackgroundColor(CARD);item.setMinimumHeight(dp(38));
             LinearLayout.LayoutParams rowParams=new LinearLayout.LayoutParams(-1,-2);rowParams.setMargins(0,0,0,dp(2));item.setLayoutParams(rowParams);
-            TextView title=text(ArchiveOrder.label(e,english),10,TEXT);title.setMaxLines(2);title.setEllipsize(android.text.TextUtils.TruncateAt.END);item.addView(title,new LinearLayout.LayoutParams(0,-2,1));
+            String upcoming="";org.json.JSONArray anns=e.optJSONArray("announcements");if(anns!=null)for(int ai=0;ai<anns.length();ai++){JSONObject a=anns.optJSONObject(ai);if(a!=null && !SeasonAnnouncements.date(a,"date").isEmpty())upcoming+=" · S"+a.optInt("season")+": "+a.optString("date")+" (?)";}
+            TextView title=text(ArchiveOrder.label(e,english)+upcoming,10,TEXT);title.setMaxLines(2);title.setEllipsize(android.text.TextUtils.TruncateAt.END);item.addView(title,new LinearLayout.LayoutParams(0,-2,1));
             String iso=ArchiveOrder.start(e);String display=iso.isEmpty()?"—":iso.substring(8,10)+"."+iso.substring(5,7)+"."+iso.substring(0,4);
             TextView date=text(display,8,MUTED);date.setSingleLine(true);date.setGravity(Gravity.RIGHT);item.addView(date,new LinearLayout.LayoutParams(dp(59),-2));
             int status=ArchiveOrder.status(e,today);TextView mark=text(ArchiveOrder.icon(status),16,status==4?Color.rgb(40,170,110):status==3?RED:status==1?Color.rgb(210,160,30):BLUE);
@@ -446,7 +447,7 @@ public class MainActivity extends Activity {
                 JSONObject result=Maintenance.run(initial.getJSONArray("entries"),client::get,country,language,now);
                 if(Thread.currentThread().isInterrupted())return;
                 // This checks the local epoch under the same lock as every local edit.
-                try{target.maintenance(initial.getLong("epoch"),result.getJSONArray("patches"));result.put("applied",true);}catch(Exception changed){result.put("applied",false);}
+                try{target.maintenance(initial.getLong("epoch"),result.getJSONArray("patches"));result.put("applied",true);}catch(Exception changed){result.put("applied",false).put("applyError",String.valueOf(changed.getMessage()));}
                 result.remove("patches");
                 handler.post(()->{maintenanceBusy=false;if(generation!=googleGeneration || target!=archiveCopy || isFinishing())return;
                     getPreferences(0).edit().putString("maintenanceReport",result.toString()).apply();refreshLocalCopy();showMaintenanceReport(result);
@@ -456,11 +457,12 @@ public class MainActivity extends Activity {
     }
     private void showMaintenanceReport(JSONObject result){
         StringBuilder b=new StringBuilder();b.append(result.optString("checkedAt")).append(" · ").append(result.optString("country"));
-        b.append(english?"\nNew seasons are suggestions, never added automatically.\n":"\nNeue Staffeln sind Vorschläge und werden nicht automatisch eingetragen.\n");
-        if(result.has("applied") && !result.optBoolean("applied"))b.append(english?"\nNOT APPLIED: archive changed or currently read-only. Repeat maintenance.\n":"\nNICHT ÜBERNOMMEN: Archiv geändert oder derzeit nur lesbar. Wartung wiederholen.\n");
+        b.append(english?"\nNew seasons of watched series are added automatically; incomplete dates remain announcements.\n":"\nNeue Staffeln geschauter Serien werden automatisch übernommen; unvollständige Termine bleiben Ankündigungen.\n");
+        if(result.has("applied") && !result.optBoolean("applied"))b.append(english?"\nNOT APPLIED: archive changed or currently read-only. Nothing was overwritten. Reason: ":"\nNICHT ÜBERNOMMEN: Archiv geändert oder derzeit nur lesbar. Nichts wurde überschrieben. Grund: ");
+        if(result.has("applied") && !result.optBoolean("applied"))b.append(result.optString("applyError")).append("\n");
         org.json.JSONArray rows=result.optJSONArray("report");if(rows!=null)for(int i=0;i<rows.length();i++){JSONObject row=rows.optJSONObject(i);String kind=row.optString("kind");
-            String label=kind.equals("missing-season")?(english?"Missing season":"Fehlende Staffel"):kind.equals("upcoming-episode")?(english?"Upcoming episode":"Anstehende Episode"):kind.equals("new-episode")?(english?"New episode":"Neue Episode"):(english?"Changed date":"Termin geändert");
-            b.append("\n").append(row.optString("title")).append(" · S").append(row.optInt("season"));if(row.has("episode"))b.append("E").append(row.optInt("episode"));b.append(" · ").append(row.optString("date")).append(" · ").append(label).append('\n');}
+            String label=kind.equals("added-season")?(english?"Season added":"Staffel übernommen"):kind.equals("announced-season")?(english?"Announced season":"Angekündigte Staffel"):kind.equals("announcement-changed")?(english?"Announced start changed":"Angekündigter Start geändert"):kind.equals("missing-season")?(english?"Missing season":"Fehlende Staffel"):kind.equals("upcoming-episode")?(english?"Upcoming episode":"Anstehende Episode"):kind.equals("new-episode")?(english?"New episode":"Neue Episode"):(english?"Changed date":"Termin geändert");
+            b.append("\n").append(row.optString("title")).append(" · S").append(row.optInt("season"));if(row.has("episode"))b.append("E").append(row.optInt("episode"));b.append(" · ").append(row.optString("date").matches("\\d{4}-\\d{2}-\\d{2}")?row.optString("date"):(english?"Date unknown":"Termin unbekannt")).append(" · ").append(label).append('\n');}
         if(rows==null || rows.length()==0)b.append(english?"\nNo new seasons or episode changes found.\n":"\nKeine neuen Staffeln oder Episodenänderungen gefunden.\n");
         b.append(english?"\nProvider information is available in each archive entry.\n":"\nAnbieterangaben findest du direkt beim jeweiligen Archiveintrag.\n");
         org.json.JSONArray errors=result.optJSONArray("errors");if(errors!=null && errors.length()>0)b.append(english?"\nIncomplete checks: ":"\nUnvollständige Prüfungen: ").append(errors.length());

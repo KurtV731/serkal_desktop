@@ -63,7 +63,7 @@ final class AndroidArchiveCopy {
         return new JSONObject().put("epoch",state.optLong("epoch")).put("owner",owner).put("generatedAt",r.getString("generatedAt")).put("entries",ArchiveCodec.entries(r));
     }
     synchronized void maintenance(long epoch,JSONArray patches) throws Exception {
-        if(!writable())throw new Exception("COPY_LOADING");
+        if(!writable())throw new Exception(!space()?"COPY_LOW_SPACE":!error.isEmpty()?error:"COPY_LOADING");
         if(state.optLong("epoch")!=epoch)throw new Exception("COPY_LOCAL_CHANGED");
         JSONObject next=new JSONObject(state.toString());next.put("record",ArchiveCodec.maintenance(next.getJSONObject("record"),patches));
         if(next.getJSONObject("record").toString().equals(state.getJSONObject("record").toString()))return;
@@ -82,7 +82,7 @@ final class AndroidArchiveCopy {
     void close(){closed=true;listener=null;worker.shutdownNow();}
     private void ensureCalendar(ArchiveCopyClient client,JSONObject pending) throws Exception {
         JSONObject calendar=pending.getJSONObject("calendar");
-        if(!calendar.getString("mode").equals("google") || !calendar.getString("id").isEmpty() || CalendarCopy.desired(pending).isEmpty())return;
+        if(!calendar.getString("mode").equals("google") || !calendar.getString("id").isEmpty() || (CalendarCopy.desired(pending).isEmpty() && SeasonAnnouncements.desired(ArchiveCodec.entries(pending)).isEmpty()))return;
         String marker="SerKal archive "+pending.getString("revision"),page="",found="";
         do {JSONObject r=client.get("https://www.googleapis.com/calendar/v3/users/me/calendarList?maxResults=250&showHidden=true&pageToken="+ArchiveCopyClient.esc(page));JSONArray items=r.optJSONArray("items");
             if(items!=null)for(int i=0;i<items.length();i++){JSONObject item=items.getJSONObject(i);if(marker.equals(item.optString("description"))){if(!found.isEmpty())throw new Exception("COPY_CONFLICT");found=item.getString("id");}}
@@ -141,3 +141,4 @@ final class AndroidArchiveCopy {
         finally {synchronized(this){busy=false;if(state.has("record") && !fatal())loaded=true;log("SYNC_END",error);}notifyChange();}
     }
 }
+

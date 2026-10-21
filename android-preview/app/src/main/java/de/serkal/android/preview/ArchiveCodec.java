@@ -75,6 +75,7 @@ final class ArchiveCodec {
                     .put("startOriginal",anchor).put("startDE",f.getOrDefault("startDE",""))
                     .put("descDE",decode(f.getOrDefault("descDE",f.getOrDefault("ov_de",""))))
                     .put("descEN",decode(f.getOrDefault("descEN",f.getOrDefault("ov_en",""))))
+                    .put("announcements",announcements(f.getOrDefault("announcements","")))
                     .put("calendarLanguage",f.getOrDefault("calendarLanguage","de"))
                     .put("watchProviders",provider(f.getOrDefault("watchProviders","")))
                     .put("titleDE",decode(f.getOrDefault("titleDE",""))).put("titleEN",decode(f.getOrDefault("titleEN","")))
@@ -136,6 +137,7 @@ final class ArchiveCodec {
         } else if(!found && !action.equals("delete"))throw new Exception("COPY_ENTRY_MISSING");
         r.put("files",result);return r;
     }
+    static JSONArray announcements(String raw){try{return new JSONArray(decode(raw));}catch(Exception ignored){return new JSONArray();}}
     static JSONObject provider(String raw){try{return new JSONObject(decode(raw));}catch(Exception ignored){return null;}}
     static JSONObject maintenance(JSONObject original,JSONArray patches) throws Exception {
         JSONObject record=new JSONObject(original.toString());JSONArray files=record.getJSONArray("files");
@@ -144,12 +146,15 @@ final class ArchiveCodec {
                 for(int k=0;k<patches.length();k++){JSONObject p=patches.getJSONObject(k);if(number(f.getOrDefault("tmdb","0"))!=p.getInt("tmdbId") || !f.getOrDefault("season","").equals(p.getString("seasonLabel")))continue;
                     if(p.has("watchProviders"))f.put("watchProviders",encode(p.getJSONObject("watchProviders").toString()));
                     for(String name:new String[]{"titleDE","titleEN"})if(p.has(name) && (number(f.getOrDefault("manualFlags","0"))&1)==0)f.put(name,encode(p.getString(name)));
+                    if(p.has("announcements"))f.put("announcements",encode(p.getJSONArray("announcements").toString()));
                     if(p.has("calendarLanguage"))f.put("calendarLanguage",p.getString("calendarLanguage"));
                     if(p.has("termindaten") && (number(f.getOrDefault("manualFlags","0"))&56)==0){JSONArray dates=p.getJSONArray("termindaten");f.put("dates",compact(dates));f.put("startOriginal",dates.getString(0));f.put("eps",String.valueOf(p.getInt("episoden")));note(f,decode(f.getOrDefault("note","")));}
                     lines[j]=line(f);changed=true;
                 }
             }if(changed){String text=join("\n",lines);file.put("content",text).put("sha256",hash(text));}
-        }return record;
+        }
+        for(int k=0;k<patches.length();k++){JSONObject p=patches.getJSONObject(k);if(p.has("insertPayload"))record=edit(record,"insert",p.getJSONObject("insertPayload"));}
+        return record;
     }
 }
 

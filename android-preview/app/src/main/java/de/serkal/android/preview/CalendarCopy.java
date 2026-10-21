@@ -31,9 +31,10 @@ final class CalendarCopy {
     }
     static void synchronize(ArchiveCopyClient client,JSONObject record) throws Exception {
         JSONObject calendar=record.getJSONObject("calendar");if(!calendar.getString("mode").equals("google"))return;
-        String id=calendar.getString("id");List<JSONObject> wanted=desired(record);
-        if(id.isEmpty()){if(wanted.isEmpty())return;throw new Exception("COPY_CALENDAR_ID_MISSING");}
+        String id=calendar.getString("id");List<JSONObject> wanted=desired(record),announced=SeasonAnnouncements.desired(ArchiveCodec.entries(record));
+        if(id.isEmpty()){if(wanted.isEmpty() && announced.isEmpty())return;throw new Exception("COPY_CALENDAR_ID_MISSING");}
         String base="https://www.googleapis.com/calendar/v3/calendars/"+ArchiveCopyClient.esc(id)+"/events";
+        SeasonAnnouncements.synchronize(client,base,announced);
         List<JSONObject> remote=new ArrayList<>();String page="";
         do{JSONObject r=client.get(base+"?singleEvents=true&showDeleted=false&maxResults=2500&privateExtendedProperty=serkal%3D1&pageToken="+ArchiveCopyClient.esc(page));
             JSONArray events=r.optJSONArray("items");if(events!=null)for(int i=0;i<events.length();i++)remote.add(events.getJSONObject(i));page=r.optString("nextPageToken");

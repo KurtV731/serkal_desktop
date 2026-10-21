@@ -13,7 +13,7 @@ public class MaintenanceTest {
             return new JSONObject("{episodes:[{episode_number:1,air_date:'2026-11-01'}]}");
         },"DE",false,"2026-10-17T00:00:00Z");
         assertEquals(java.util.Arrays.asList(7,8,9),requested);
-        JSONArray rows=result.getJSONArray("report");assertEquals(1,rows.length());assertEquals("missing-season",rows.getJSONObject(0).getString("kind"));assertEquals(8,rows.getJSONObject(0).getInt("season"));
+        JSONArray rows=result.getJSONArray("report");assertEquals(1,rows.length());assertEquals("announced-season",rows.getJSONObject(0).getString("kind"));assertEquals(8,rows.getJSONObject(0).getInt("season"));
     }
     @Test public void missingOldSeasonsAreReportedNotInserted() throws Exception {
         JSONArray entries=new JSONArray().put(new JSONObject().put("tmdbId",1).put("title","Test").put("seasonLabel","S01").put("datesOriginal",new JSONArray().put("2026-01-01")));
@@ -45,3 +45,4 @@ public class MaintenanceTest {
         assertTrue(updated.getJSONArray("files").getJSONObject(0).getString("content").contains("futureField=keep%20me"));
     }
 }
+
