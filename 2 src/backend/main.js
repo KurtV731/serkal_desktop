@@ -14,7 +14,7 @@ const path = require("node:path");
 const fs = require("node:fs");
 const http = require("node:http");
 const crypto = require("node:crypto");
-const { app, BrowserWindow, ipcMain, shell, dialog } = require("electron");
+const { app, BrowserWindow, ipcMain, shell, dialog, screen } = require("electron");
 const backendI18n = require(path.join(__dirname, "../common/backend-i18n.js"));
 const tmdbTitle = require(path.join(__dirname, "../common/tmdb-title.js"));
 
@@ -3715,8 +3715,20 @@ function installIpc_() {
         if (mode === "ics") return { ok:false, action:"ics", message:bt_("CALENDAR_ICS_SELECTED") };
         if (mode === "google") {
             const url = googleCalendarUrl_(settings.calendar.googleCalendarId, lang);
-            await shell.openExternal(url);
-            return { ok:true, action:"google", url };
+            const { openCalendarWindow } = require("../common/calendar-window.js");
+            const { spawn } = require("node:child_process");
+            const owner=BrowserWindow.fromWebContents(_event.sender);
+            const workArea=screen.getDisplayMatching(owner ? owner.getBounds() : {x:0,y:0,width:1,height:1}).workArea;
+            const opened=await openCalendarWindow(url, {
+                exists:fs.existsSync, workArea,
+                openExternal:(target)=>shell.openExternal(target),
+                launch:(file,args)=>new Promise((resolve,reject)=>{
+                    const child=spawn(file,args,{detached:true,stdio:"ignore",windowsHide:true});
+                    child.once("error",reject);
+                    child.once("spawn",()=>{child.unref();resolve();});
+                })
+            });
+            return { ok:true, action:"google", url, ...opened };
         }
         return { ok:false, action:"setup", message:bt_("CALENDAR_NOT_CONFIGURED") };
     });

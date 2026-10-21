@@ -1,0 +1,5 @@
+# Kalenderfenster unter Windows
+
+21.10.2026: Kalenderaufruf verwendet bei gefundener normaler Firefox-Installation ein separates Fenster (-new-window) mit angeforderter halber Arbeitsflächenhöhe und 88 Prozent Breite. Bestehendes Profil und Google-Anmeldung bleiben nutzbar. Kein privates Profil, kein Prozess-Beenden und keine Schließaktion auf andere Fenster. Firefox kann Größenparameter bei laufender Sitzung überschreiben; exakte Größe und Position sind damit nicht garantiert. Bei fehlendem Firefox bleibt der normale Standardbrowser-Aufruf als ausdrücklich gekennzeichneter Rückfall erhalten. Kein neuer Installer gebaut.
+
+Geprüft: Helfer-Syntax, Aufrufargumente bei 1920x1040 (520 Höhe), eigene Fensteranforderung, unveränderte URL, Rückfall ohne Firefox, Zurückweisung fremder Hosts. Windows-Praxistest offen. Native Firefox-Sitzung, Fenstergröße und Abmeldung lassen sich hier nicht prüfen. Noch kein zusätzlicher Kalender-Schließen-Knopf; keine allgemeine Browser-Schließfunktion eingebaut. Der separat besprochene Programm-beenden-Knopf mit Speicherprüfung ist weiterhin offen und gehört nicht zu dieser Änderung.
