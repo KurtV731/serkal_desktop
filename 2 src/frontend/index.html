@@ -1951,6 +1951,7 @@
       
       
       <button id="btnCalendarDock" class="btnSmall" type="button" title=""></button>
+      <button id="btnQuitDock" class="btnSmall" type="button"></button>
       <span id="saveLamp" style="width:16px;height:16px;border-radius:50%;display:inline-block;background:#2ecc71;border:1px solid rgba(0,0,0,0.25);"></span>
       <span id="dockStatus" class="dockStatus"></span>
     </div>
@@ -3947,6 +3948,7 @@ const I18N = {
     NO_PIC_AVAILABLE: 'Kein Bild verfügbar',
     ARIA_ACTIONS: 'Aktionen', ARIA_RESULT_NAV: 'Treffersteuerung', TT_RESULT_NAV: 'Treffer wechseln', ARIA_PREVIEW: 'Vorschau', ARIA_RESULT_INFO: 'Trefferinfo', ARIA_TITLE_SUGGESTIONS: 'Serienvorschläge',
     NOTE_HELP: 'Hilfe zu auswertbaren Notizzeilen', TT_SORT_SWITCH: 'Sortierung umschalten (Status / A–Z)', TT_ARCHIVE_COUNT: 'Anzahl Archiv-Einträge', TT_DELETE_FILE: 'Archivdatei löschen', ARIA_ARCHIVE_LIST: 'Archivliste',
+    BTN_QUIT_DOCK: 'Programm beenden',
     TT_GERMAN: 'Deutsch', TT_LANGUAGE_SWITCH: 'Sprache umschalten', TT_CALENDAR_OPEN: 'Google Kalender öffnen', TT_THEME_SWITCH: 'Farbschema umschalten', TT_LOG_OPEN: 'Log ansehen',
     ARIA_LOG: 'Loganzeige', ARIA_LOG_RESIZE: 'Logfensterhöhe ändern', TT_LOG_RESIZE: 'Ziehen: Höhe des Logfensters ändern', ARIA_LOG_DAY: 'Logtag wählen', PH_LOG_SEARCH: 'Im Log suchen …',
     TT_LOG_FIND: 'Nächsten Treffer suchen', LOG_FIND: '🔎 Weiter', TT_LOG_SELECT_ALL: 'Den gesamten sichtbaren Logtext markieren', LOG_SELECT_ALL: '☑ Alles markieren', TT_LOG_COPY: 'Log oder Auswahl kopieren', LOG_COPY: '📋 Kopieren',
@@ -4130,6 +4132,7 @@ const I18N = {
     NO_PIC_AVAILABLE: 'No picture available',
     ARIA_ACTIONS: 'Actions', ARIA_RESULT_NAV: 'Result navigation', TT_RESULT_NAV: 'Change result', ARIA_PREVIEW: 'Preview', ARIA_RESULT_INFO: 'Result information', ARIA_TITLE_SUGGESTIONS: 'Series suggestions',
     NOTE_HELP: 'Help for evaluable note lines', TT_SORT_SWITCH: 'Change sorting (status / A–Z)', TT_ARCHIVE_COUNT: 'Number of archive entries', TT_DELETE_FILE: 'Delete archive file', ARIA_ARCHIVE_LIST: 'Archive list',
+    BTN_QUIT_DOCK: 'Exit program',
     TT_GERMAN: 'German', TT_LANGUAGE_SWITCH: 'Change language', TT_CALENDAR_OPEN: 'Open Google Calendar', TT_THEME_SWITCH: 'Change color scheme', TT_LOG_OPEN: 'View log',
     ARIA_LOG: 'Log display', ARIA_LOG_RESIZE: 'Resize log window', TT_LOG_RESIZE: 'Drag to resize the log window', ARIA_LOG_DAY: 'Choose log day', PH_LOG_SEARCH: 'Search log …',
     TT_LOG_FIND: 'Find next result', LOG_FIND: '🔎 Next', TT_LOG_SELECT_ALL: 'Select all visible log text', LOG_SELECT_ALL: '☑ Select all', TT_LOG_COPY: 'Copy log or selection', LOG_COPY: '📋 Copy',
@@ -4907,14 +4910,15 @@ function applyNoteAutofill_(ta, it) {
  * @status aktiv
  * @loeschung nein
  */
-function saveDirtyChanges_() {
+function saveDirtyChanges_(onComplete) {
+  const finish = ok => { if (typeof onComplete === "function") onComplete(ok); };
   try {
     try { uiLogAction_('Speichern angefordert', { dirtyCount: state && state.dirtyCount || 0 }); } catch (_eAction) {}
-    if (state.saveBusy) return;
+    if (state.saveBusy) { finish(false); return; }
     if (!state.isDirty || !Object.keys(state.dirtyMap || {}).length) {
       uiStatus(t('SAVE_NOTHING'), { spinner:false, kind:'info' });
       updateSaveUi_();
-      return;
+      finish(true); return;
     }
 
     var dirtyKeys = Object.keys(state.dirtyMap || {});
@@ -4927,7 +4931,7 @@ function saveDirtyChanges_() {
           var bad = checked.problems[0] || {};
           uiStatus('Speichern gestoppt: unbekanntes Steuerwort "' + String(bad.word || '?') + '" in Zeile ' + String(bad.line || '?') + '.', { spinner:false, kind:'error', sound:true });
           updateSaveUi_();
-          return;
+          finish(false); return;
         }
         patch.note = String(checked.canonical || '');
       }
@@ -4943,7 +4947,7 @@ function saveDirtyChanges_() {
         if (!(res && res.ok)) {
           uiStatus((res && res.message) ? String(res.message) : t('SAVE_FAILED'), { spinner:false, kind:'error', sound:true });
           updateSaveUi_();
-          return;
+          finish(false); return;
         }
         if (res && res.daten && Array.isArray(res.daten.entries)) {
           state.archivEntries = res.daten.entries;
@@ -4961,17 +4965,20 @@ function saveDirtyChanges_() {
           } catch (_eFind) {}
         }
         uiStatus(t('SAVE_DONE', {n:String((res && res.savedCount) || 0)}), { spinner:false, kind:'info' });
+        finish(true);
       })
       .withFailureHandler(function(err){
         state.saveBusy = false;
         uiStatus(t('SAVE_FAILED'), { spinner:false, kind:'error', sound:true });
         updateSaveUi_();
+        finish(false);
       })
       .apiSpeichereArchivAenderungen(state.dirtyMap);
   } catch (_e) {
     state.saveBusy = false;
     uiStatus(t('SAVE_FAILED'), { spinner:false, kind:'error', sound:true });
     updateSaveUi_();
+    finish(false);
   }
 }
 /**
@@ -5366,6 +5373,7 @@ function refreshTexts_() {
             btnStartDock.title = t('BTN_START_DOCK');
           }
           if (btnCalendarDock) {
+            document.getElementById('btnQuitDock').textContent = t('BTN_QUIT_DOCK');
             btnCalendarDock.textContent = t('BTN_CALENDAR_DOCK');
             btnCalendarDock.title = t('BTN_CALENDAR_DOCK');
           }
@@ -9078,6 +9086,9 @@ if (logDayButtons && logDayButtons.length) {
   });
 }
 if (btnSaveDock) btnSaveDock.addEventListener('click', function(){ saveDirtyChanges_(); });
+window.serkalCloseState = () => ({dirty:!!state.isDirty,busy:!!(state.busy || state.saveBusy),lang:getLang_()});
+window.serkalSaveBeforeClose = () => new Promise(resolve => saveDirtyChanges_(resolve));
+document.getElementById('btnQuitDock').addEventListener('click',()=>window.serkal?.lifecycle?.close());
 
 
 
@@ -9441,4 +9452,5 @@ try {
 </body>
 
 </html>
+
 

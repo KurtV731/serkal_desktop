@@ -35,6 +35,7 @@ contextBridge.exposeInMainWorld("serkal", {
     version:SERKAL_VERSION,
     build:SERKAL_VERSION,
     channel:SERKAL_CHANNEL,
+    lifecycle:{close:()=>ipcRenderer.invoke("serkal:app:close")},
     settings:{
         get:()=>ipcRenderer.invoke("serkal:settings:get"),
         save:(settings)=>ipcRenderer.invoke("serkal:settings:save",settings),
@@ -84,4 +85,5 @@ contextBridge.exposeInMainWorld("serkal", {
         run:options=>ipcRenderer.invoke("serkal:maintenance:run",options||{})
     }
 });
+
 

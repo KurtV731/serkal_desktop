@@ -3590,6 +3590,7 @@ function archiveWriteHandler_(channel, handler) {
 }
 
 function installIpc_() {
+    ipcMain.handle("serkal:app:close", event => { const win=BrowserWindow.fromWebContents(event.sender); if(win && win===serkalMainWindow_)win.close(); });
     ipcMain.handle("serkal:settings:get", () => readSettings_());
     ipcMain.handle("serkal:settings:save", (_event, settings) => saveSettingsPatch_(settings));
     ipcMain.handle("serkal:language:set", (_event, language) => {
@@ -4032,6 +4033,40 @@ function erstelleHauptfenster() {
         }
     });
     serkalMainWindow_ = hauptfenster;
+    let closeApproved=false, closeChecking=false;
+    hauptfenster.on("close", event => {
+        if(closeApproved)return;
+        event.preventDefault();
+        if(closeChecking)return;
+        closeChecking=true;
+        const en=()=>activeLanguage_==="en";
+        const message=k=>bt_(({dirty:'EXIT_DIRTY',sync:'EXIT_SYNC',busy:'EXIT_BUSY',saveFailed:'EXIT_SAVE_FAILED',syncFailed:'EXIT_SYNC_FAILED'})[k]);
+        const read=async()=>{
+            const ui=await hauptfenster.webContents.executeJavaScript("window.serkalCloseState ? window.serkalCloseState() : ({busy:true})");
+            if(ui.lang)activeLanguage_=ui.lang==="en"?"en":"de";
+            return {...ui,busy:ui.busy || maintenanceRunning_};
+        };
+        require("../common/close-guard").prepareClose({read,
+            save:()=>hauptfenster.webContents.executeJavaScript("window.serkalSaveBeforeClose()"),
+            status:async()=>copyLocalMode_?copyManager_().view():{dirty:false,busy:false},
+            sync:async()=>{
+                const manager=copyManager_();
+                const until=Date.now()+60000;
+                while(manager.busy && Date.now()<until)await new Promise(resolve=>setTimeout(resolve,200));
+                if(manager.busy)return manager.view();
+                return manager.sync();
+            },
+            choose:async kind=>{
+                const options=(kind==="dirty" ? ['EXIT_SAVE','EXIT_DISCARD','EXIT_CANCEL'] : ['EXIT_UPLOAD','EXIT_LOCAL','EXIT_CANCEL']).map(key=>bt_(key));
+                const result=await dialog.showMessageBox(hauptfenster,{type:"question",title:bt_('EXIT_TITLE'),message:message(kind),buttons:options,defaultId:0,cancelId:2,noLink:true});
+                return (kind==="dirty"?["save","discard","cancel"]:["sync","local","cancel"])[result.response];
+            },
+            notify:kind=>dialog.showMessageBox(hauptfenster,{type:"warning",title:bt_("EXIT_TITLE"),message:message(kind),buttons:["OK"]})
+        }).then(ok=>{if(ok && !hauptfenster.isDestroyed()){closeApproved=true;hauptfenster.close();}})
+          .catch(error=>{logWrite_("ERROR","EXIT","Close check failed",{message:String(error.message||error)});})
+          .finally(()=>{closeChecking=false;});
+    });
+
     hauptfenster.on("closed", () => {
         if (serkalMainWindow_ === hauptfenster) serkalMainWindow_ = null;
     });
@@ -4092,4 +4127,5 @@ if (!serkalHasSingleInstanceLock_) {
 
     app.on("window-all-closed",()=>{ if (process.platform!=="darwin") app.quit(); });
 }
+
 

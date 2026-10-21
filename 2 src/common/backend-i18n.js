@@ -3,6 +3,18 @@
 // Central language catalogue for every text created by the Electron backend.
 // No user-visible backend message may be written directly at its call site.
 const PAIRS = {
+  EXIT_TITLE:["SerKal beenden", "Exit SerKal"],
+  EXIT_DIRTY:["Es gibt ungespeicherte Änderungen.", "There are unsaved changes."],
+  EXIT_SYNC:["Lokal gespeichert; die Google-Übertragung ist noch offen.", "Saved locally; transfer to Google is still pending."],
+  EXIT_BUSY:["Ein Vorgang läuft noch. Bitte danach erneut beenden.", "An operation is still running. Please try exiting afterwards."],
+  EXIT_SAVE_FAILED:["Speichern nicht abgeschlossen. SerKal bleibt geöffnet.", "Saving did not complete. SerKal stays open."],
+  EXIT_SYNC_FAILED:["Google hat den Stand noch nicht bestätigt. SerKal bleibt geöffnet; lokale Daten bleiben erhalten.", "Google has not confirmed the archive yet. SerKal stays open; local data is retained."],
+  EXIT_SAVE:["Speichern und beenden", "Save and exit"],
+  EXIT_DISCARD:["Ohne Speichern beenden", "Exit without saving"],
+  EXIT_CANCEL:["Abbrechen", "Cancel"],
+  EXIT_UPLOAD:["Synchronisieren und beenden", "Synchronize and exit"],
+  EXIT_LOCAL:["Lokal gesichert beenden", "Exit with local copy"],
+
   COPY_CALENDAR_CHECK_LOG:["Archivtransfer prüft Kalenderziel", "Archive transfer checking calendar target"],
   COPY_CALENDAR_RECOVERED:["Vorhandenen App-Kalender für ausstehende Übertragung wiedergefunden", "Existing app calendar recovered for pending transfer"],
   COPY_CALENDAR_READ_LOG:["Kalendertermine für Archivtransfer konnten nicht gelesen werden", "Calendar events for archive transfer could not be read"],
@@ -143,4 +155,5 @@ function text(language, key, values) {
 }
 
 module.exports = { PAIRS, text };
+
 
