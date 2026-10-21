@@ -2830,7 +2830,7 @@ function maintenanceAnalyse_(groups, snapshot) {
             let action = "observe";
             let reason = episodeCount === 1 ? bt_("MAINT_REASON_PRELIMINARY") : bt_("MAINT_REASON_ANNOUNCED");
 
-            if (complete && previousRunning) {
+            if (complete && previousRunning && !require(path.join(__dirname,"../common/maintenance-follow")).eligible(group.entries,maxTmdbSeason)) {
                 type = "NEW_SEASON_REVIEW";
                 action = "review";
                 reason = bt_("MAINT_REASON_PREVIOUS_RUNNING");
@@ -2930,7 +2930,8 @@ function maintenanceBuildOperations_(groups, snapshot, findings) {
         if (!maintenanceSeasonIsComplete_(analysed)) continue;
         const existing = group.entries.find(entry => maintenanceSeasonNumber_(entry) === seasonNumber) || null;
         const base = existing || group.entries[0];
-        if (!base || !existing) continue;
+        if (!base) continue;
+        if(!existing && !require(path.join(__dirname,"../common/maintenance-follow")).eligible(group.entries,seasonNumber))continue;
 
         const key = maintenanceOperationKey_(tmdbId, seasonNumber);
         if (operations.has(key)) continue;
@@ -3471,6 +3472,11 @@ async function maintenanceRun_(options={}) {
             const operations = maintenanceBuildOperations_(groups, snapshot, findings);
             maintenanceSetStatus_("uebernahme", bt_("MAINT_APPLY"), null, 0, operations.length);
             applied = await maintenanceApplyOperations_(operations);
+            for(const op of operations)if(op.isNew && !applied.errors.some(e=>e.fileName===op.fileName && e.seasonNumber===op.payload.staffelNummer)){
+                const row=report.find(r=>r.tmdbId===op.payload.tmdbId && r.season===op.payload.staffelNummer && r.kind==='missing-season');
+                if(row)row.kind='added-season';
+                else report.push({kind:'added-season',tmdbId:op.payload.tmdbId,title:op.payload.titel,season:op.payload.staffelNummer,date:op.payload.termindaten[0]});
+            }
             applied.changedFileCount=new Set([...Array.from(applied.changedFiles||[]),...titleCorrections.map(item=>item.fileName).filter(Boolean)]).size;
         } else {
             logWrite_("WARN", "WARTUNG", bt_("MAINT_APPLY_SUSPENDED"), {

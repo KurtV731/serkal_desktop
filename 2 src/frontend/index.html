@@ -3948,7 +3948,7 @@ const I18N = {
     NO_PIC_AVAILABLE: 'Kein Bild verfügbar',
     ARIA_ACTIONS: 'Aktionen', ARIA_RESULT_NAV: 'Treffersteuerung', TT_RESULT_NAV: 'Treffer wechseln', ARIA_PREVIEW: 'Vorschau', ARIA_RESULT_INFO: 'Trefferinfo', ARIA_TITLE_SUGGESTIONS: 'Serienvorschläge',
     NOTE_HELP: 'Hilfe zu auswertbaren Notizzeilen', TT_SORT_SWITCH: 'Sortierung umschalten (Status / A–Z)', TT_ARCHIVE_COUNT: 'Anzahl Archiv-Einträge', TT_DELETE_FILE: 'Archivdatei löschen', ARIA_ARCHIVE_LIST: 'Archivliste',
-    BTN_QUIT_DOCK: 'Programm beenden',
+    BTN_QUIT_DOCK: 'Programm beenden', MAINT_SEASON_ADDED:'Staffel übernommen',
     TT_GERMAN: 'Deutsch', TT_LANGUAGE_SWITCH: 'Sprache umschalten', TT_CALENDAR_OPEN: 'Google Kalender öffnen', TT_THEME_SWITCH: 'Farbschema umschalten', TT_LOG_OPEN: 'Log ansehen',
     ARIA_LOG: 'Loganzeige', ARIA_LOG_RESIZE: 'Logfensterhöhe ändern', TT_LOG_RESIZE: 'Ziehen: Höhe des Logfensters ändern', ARIA_LOG_DAY: 'Logtag wählen', PH_LOG_SEARCH: 'Im Log suchen …',
     TT_LOG_FIND: 'Nächsten Treffer suchen', LOG_FIND: '🔎 Weiter', TT_LOG_SELECT_ALL: 'Den gesamten sichtbaren Logtext markieren', LOG_SELECT_ALL: '☑ Alles markieren', TT_LOG_COPY: 'Log oder Auswahl kopieren', LOG_COPY: '📋 Kopieren',
@@ -4132,7 +4132,7 @@ const I18N = {
     NO_PIC_AVAILABLE: 'No picture available',
     ARIA_ACTIONS: 'Actions', ARIA_RESULT_NAV: 'Result navigation', TT_RESULT_NAV: 'Change result', ARIA_PREVIEW: 'Preview', ARIA_RESULT_INFO: 'Result information', ARIA_TITLE_SUGGESTIONS: 'Series suggestions',
     NOTE_HELP: 'Help for evaluable note lines', TT_SORT_SWITCH: 'Change sorting (status / A–Z)', TT_ARCHIVE_COUNT: 'Number of archive entries', TT_DELETE_FILE: 'Delete archive file', ARIA_ARCHIVE_LIST: 'Archive list',
-    BTN_QUIT_DOCK: 'Exit program',
+    BTN_QUIT_DOCK: 'Exit program', MAINT_SEASON_ADDED:'Season added',
     TT_GERMAN: 'German', TT_LANGUAGE_SWITCH: 'Change language', TT_CALENDAR_OPEN: 'Open Google Calendar', TT_THEME_SWITCH: 'Change color scheme', TT_LOG_OPEN: 'View log',
     ARIA_LOG: 'Log display', ARIA_LOG_RESIZE: 'Resize log window', TT_LOG_RESIZE: 'Drag to resize the log window', ARIA_LOG_DAY: 'Choose log day', PH_LOG_SEARCH: 'Search log …',
     TT_LOG_FIND: 'Find next result', LOG_FIND: '🔎 Next', TT_LOG_SELECT_ALL: 'Select all visible log text', LOG_SELECT_ALL: '☑ Select all', TT_LOG_COPY: 'Copy log or selection', LOG_COPY: '📋 Copy',
@@ -5653,7 +5653,7 @@ function showMaintenanceReport_(res){
   const en=LANG==='en',dialog=document.createElement('dialog');dialog.style.cssText='width:80vw;max-height:80vh;overflow:auto';
   const title=document.createElement('h2');title.textContent=t('MAINT_EXTRA_0');dialog.append(title);
   const lines=[res.message||'',t('MAINT_EXTRA_1')];
-  for(const item of res.report||[])lines.push([(item.previousTitle?item.previousTitle+' → ':'')+item.title,'S'+String(item.season).padStart(2,'0')+(item.episode?'E'+String(item.episode).padStart(2,'0'):''),(item.previousDate?item.previousDate+' → ':'')+(item.date||'—'),({ 'title-correction':t('MAINT_TITLE_CORRECTED'),'announced-season':t('MAINT_ANNOUNCED'),'announcement-changed':t('MAINT_ANNOUNCEMENT_CHANGED'),'missing-season':t('MAINT_EXTRA_2'),'upcoming-episode':t('MAINT_EXTRA_3'),'new-episode':t('MAINT_EXTRA_4'),'changed-episode':t('MAINT_EXTRA_5')})[item.kind]||item.kind].join(' · '));
+  for(const item of res.report||[])lines.push([(item.previousTitle?item.previousTitle+' → ':'')+item.title,'S'+String(item.season).padStart(2,'0')+(item.episode?'E'+String(item.episode).padStart(2,'0'):''),(item.previousDate?item.previousDate+' → ':'')+(item.date||'—'),({ 'title-correction':t('MAINT_TITLE_CORRECTED'),'announced-season':t('MAINT_ANNOUNCED'),'announcement-changed':t('MAINT_ANNOUNCEMENT_CHANGED'),'added-season':t('MAINT_SEASON_ADDED'),'missing-season':t('MAINT_EXTRA_2'),'upcoming-episode':t('MAINT_EXTRA_3'),'new-episode':t('MAINT_EXTRA_4'),'changed-episode':t('MAINT_EXTRA_5')})[item.kind]||item.kind].join(' · '));
   if(!(res.report||[]).length)lines.push(t('MAINT_EXTRA_6'));
   if((res.providers||[]).length)lines.push(t('MAINT_PROVIDER_SUMMARY'));
   const pre=document.createElement('pre');pre.style.whiteSpace='pre-wrap';pre.textContent=lines.join('\n\n');dialog.append(pre);
