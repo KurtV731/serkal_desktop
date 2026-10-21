@@ -3091,3 +3091,12 @@ wegen dieser reinen lokalen Pfadkorrektur nicht neu gebaut werden.
 Website-Chatty bleibt für die gesonderte `serkal.de`-/`hasa.li`-Inventur, Weiterleitungen,
 Sitemaps und All-Inkl-Zielverzeichnisse zuständig. Noch offene endgültige Website-Unterordner
 werden vom Installer nicht eigenmächtig benannt.
+
+
+## CE – 21.10.2026: Kalenderknopf wieder direkt unten
+
+Status: QUELLÄNDERUNG FERTIG / WINDOWS-SICHT- UND KLICKPRÜFUNG OFFEN. CE-Commit `3e0c3dd66a0bedc0c3035f8b436153a781c19073` auf `serkal-0.0.5-archiv-start`.
+
+Auf Kurts Auftrag bestehenden `btnCalendarDock` aus dem Menü zurück in die untere Bedienleiste vor Speicheranzeige/Statustext verschoben. Genau ein Element, gleiche Sprachumschaltung und Klickfunktion. Alle fünf JavaScript-Blöcke unverändert; eindeutige ID, Position außerhalb des Menüs und vollständige GitHub-Rückleseprüfung bestanden. Keine neue APK/kein Installer gebaut; Versionsnummer der reinen Quelländerung unverändert. Nächster installierbarer Build benötigt weiterhin eine neue eindeutige Nummer.
+
+Kurt hat die vier Statusfarben am 21.10.2026 auf Desktop und Android a15 praktisch bestätigt. Nicht mit noch offener Kalenderknopf-Abnahme verwechseln. Test: CE aktualisieren/neu starten, unten Kalender öffnen; kein zweiter Eintrag im Menü; DE/EN und Hell/Dunkel prüfen. Details `1 docs/desktop-calendar-dock-2026-10-21.md`.
