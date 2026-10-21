@@ -3112,3 +3112,14 @@ Quelle fertig: `9bbdcea208999fabaf0da1488ad5ac7243b83099` auf CE-Branch. Bei nor
 Status: DOKUMENTIERT / KEINE IMPLEMENTIERUNG BEAUFTRAGT. Die dauerhaft fortgeführte [Ideenliste](ideenliste.md) enthält PLUS-01 (frei konfigurierbare Oberfläche) und PLUS-02 (frei belegbare zusätzliche Sprache mit importierbarer Sprachtabelle). Beide sind für eine spätere kostenpflichtige Zusatzversion vorgemerkt und erweitern nicht den aktuellen Public-Abschlussplan. Neue Ideen dort fortlaufend ergänzen.
 
 Kurt akquiriert weitere freiwillige Tester für den Google-Play-Store-Weg; keine Teilnehmerzahl oder erfüllte Testdauer behauptet. Außerdem hat Kurt das separate Kalenderfenster praktisch als „1a“ bestätigt. Programm-beenden-Knopf mit Speicher-/Sync-Prüfung bleibt offen.
+
+
+## CE – 21.10.2026: Desktop-Beenden, Android a16 und Android-only geprüft
+
+Desktopquelle `45c9ca48f8600893525e03f1aa64795fbbd73ed1`: unterer Beenden-Knopf und gemeinsamer Schließweg für X/Alt+F4. Speichern/Verwerfen/Abbrechen, laufende Wartung blockiert Schließen, separate Rückfrage bei ausstehendem Google-Abgleich, Fehler lässt App offen. 30 Desktop-Testprogramme und alle fünf UI-Skriptblöcke bestanden. Windows-Geräteabnahme offen; kein neuer Installer gebaut.
+
+Androidquelle `85f44c9f02924ba4368fcb3576f1521abcd69c3a`: a16/versionCode24, Dialoge Dark/Light, sprachabhängige Titelwahl für Detail/Wartung, manuell geschützte Titel erhalten, Titel DE/EN und Kalender-Sprachmetadaten bei Aufnahme/Wartung, Anbietertexte im Kalender sprachabhängig. Actions 39588562930 erfolgreich; 30 JUnit-Tests, null Fehler. Artefakt 12339593813 unsigned; keine installierbare APK geliefert. Der bisherige private JKS-Schlüssel fehlt im aktuellen Workspace. Kein Ersatzschlüssel erzeugt; gleicher Signierschlüssel erforderlich, damit Update über a15 möglich bleibt. Installer/Website dürfen unsigned nicht verteilen.
+
+Android-Ankündigungskarten mit Verlauf/(?) bleiben aus dem großen Public-Paritätsplan offen. Android-only-Quellprüfung: neuer Nutzer kann nach Google-Verbindung und eigenem TMDB-Key ein leeres Archiv ohne PC erstellen. Nur bestehendes altes v1-Archiv braucht einmalige Desktop-Migration. Vollständige Episodentermine weiterhin Voraussetzung für Staffelaufnahme. Echte Erstnutzer-Geräteprüfung offen.
+
+Ablauf, Prüfungen, Grenzen und Erstnutzer-Testreihe: [Abschlussstand und Android-only](abschluss-2026-10-21.md). Diese Dokumentation ersetzt keine reale Geräteabnahme.
