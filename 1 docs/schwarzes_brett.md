@@ -3177,3 +3177,10 @@ Kurts Windows-Test: `support\\elwms_website_check.bat` im neuen Repository ausf�
 Website-Root muss `C:\\ppd\\serkal\\serkal-pages\\up` erscheinen. Die vorhandene
 Uploadbatch wegen des noch eingetragenen alten Hosts nicht als endgültigen All-Inkl-Umzug
 verwenden.
+
+
+## CE – 21.10.2026: ursprünglicher Android-Schlüssel wiedergefunden, a16 signiert geliefert
+
+SIGNIERBLOCKER BEHOBEN. Installer-Chatty/Kurt fanden die bereits seit 07.10.2026 gespeicherte Originaldatei; CE hat sie nun ebenfalls abgerufen und geprüft. Frühere Aussagen „keine bestätigte Sicherung“ waren wegen zu enger Suche im transienten Workspace unvollständig. Dauerhafte private Datei: `SerKal-Android-Preview-Signing.jks`, Library-ID `libfile_c7e15826939c819188317c9b128c6986`, 3000 Bytes, Datei-SHA256 `015385be5e3eb412d6f4b9040c92eee56acb4c9b0922b9a37e4d732766885f31`. Alias `serkal-preview`; Passwort ist dem bisherigen Signierablauf bekannt und wird nicht hier veröffentlicht. Schlüsseldatei niemals ins Repository aufnehmen. Empfohlene lokale Sicherung `C:\ppd\serkal\serkal_private\android\SerKal-Android-Preview-Signing.jks` plus getrennte Sicherung; Ablage bei Kurt nicht als bereits erfolgt behaupten.
+
+a16 signiert und V2/V3 verifiziert, gleicher Zertifikats-SHA256 `7e24902dd88ed80fb84e0ffc3b188a1e0c88e30cb2a84247a03cf4ba416667eb`, SHA1 `0d63f508dc1fe14e976c221a0c2798d3a1515986`. Signierte Testlieferung `0.0.5a16-serkal-android.apk`, 2875143 Bytes, SHA256 `375add36e1ae83bf4d46b75ca297e5930fef402764c206314ec2dbf16bf66868`, dauerhaft gespeichert unter Library-ID `libfile_c89a072852a881918af6c4f56dbf372c`. Quellcommit `85f44c9f02924ba4368fcb3576f1521abcd69c3a`, Actions 39588562930, 30 JUnit-Tests bestanden. Update über a15 mit unverändertem Paket/Signer vorbereitet; tatsächliche Geräteinstallation und Dialog-/Titeltests durch Kurt offen. Keine öffentliche Freigabe und keine Website-Veröffentlichung. Die früheren unsigned-/Schlüssel-fehlt-Hinweise im Abschlussbericht sind damit historisch überholt.
