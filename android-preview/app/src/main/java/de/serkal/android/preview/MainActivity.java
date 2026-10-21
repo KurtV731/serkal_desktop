@@ -670,6 +670,7 @@ public class MainActivity extends Activity {
 
     private void configureFullscreen_() {
         Window window = getWindow();
+        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
         window.setStatusBarColor(BG);
         window.setNavigationBarColor(BG);
         hideSystemBars_();
@@ -830,11 +831,17 @@ public class MainActivity extends Activity {
         left.addView(text(english ? "Search for a series" : "Serie suchen", 8.5f, MUTED));
         queryField = new EditText(new android.view.ContextThemeWrapper(this, dark ? android.R.style.Theme_Material : android.R.style.Theme_Material_Light));
         queryField.setSingleLine(true);
+        // Keep the real title field and suggestions visible in landscape.
+        queryField.setImeOptions(android.view.inputmethod.EditorInfo.IME_FLAG_NO_EXTRACT_UI
+            | android.view.inputmethod.EditorInfo.IME_FLAG_NO_FULLSCREEN
+            | android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH);
+        queryField.setTextSize(14);
+        queryField.setPadding(dp(8),dp(2),dp(8),dp(2));
         queryField.setTextColor(TEXT);
         queryField.setHintTextColor(MUTED);
         queryField.setHint(english ? "Series title" : "Serientitel");
         queryField.setText(previousQuery);
-        left.addView(queryField);
+        left.addView(queryField,new LinearLayout.LayoutParams(-1,dp(44)));
         suggestions = new LinearLayout(this);
         suggestions.setOrientation(LinearLayout.VERTICAL);
         ScrollView resultsScroll = new ScrollView(this);
