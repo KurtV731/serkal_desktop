@@ -3100,3 +3100,8 @@ Status: QUELLÄNDERUNG FERTIG / WINDOWS-SICHT- UND KLICKPRÜFUNG OFFEN. CE-Commi
 Auf Kurts Auftrag bestehenden `btnCalendarDock` aus dem Menü zurück in die untere Bedienleiste vor Speicheranzeige/Statustext verschoben. Genau ein Element, gleiche Sprachumschaltung und Klickfunktion. Alle fünf JavaScript-Blöcke unverändert; eindeutige ID, Position außerhalb des Menüs und vollständige GitHub-Rückleseprüfung bestanden. Keine neue APK/kein Installer gebaut; Versionsnummer der reinen Quelländerung unverändert. Nächster installierbarer Build benötigt weiterhin eine neue eindeutige Nummer.
 
 Kurt hat die vier Statusfarben am 21.10.2026 auf Desktop und Android a15 praktisch bestätigt. Nicht mit noch offener Kalenderknopf-Abnahme verwechseln. Test: CE aktualisieren/neu starten, unten Kalender öffnen; kein zweiter Eintrag im Menü; DE/EN und Hell/Dunkel prüfen. Details `1 docs/desktop-calendar-dock-2026-10-21.md`.
+
+
+## CE – 21.10.2026: separates Kalenderfenster
+
+Quelle fertig: `9bbdcea208999fabaf0da1488ad5ac7243b83099` auf CE-Branch. Bei normal installierter Firefox-Version Windows: eigener -new-window-Aufruf, angeforderte halbe Monitor-Arbeitsflächenhöhe, 88 Prozent Breite. Keine Browserprozesse schließen oder beenden. Firefox darf Größenparameter überschreiben, exakte Lage nicht garantiert; Windows-Praxistest durch Kurt offen. Ohne erkannten Firefox Standardbrowser-Rückfall (separateWindow:false). Helfer-Syntax und gezielte Launcher-Prüfungen bestanden, beide Quelldateien identisch von GitHub zurückgelesen. Kein Installer/APK gebaut. Details `1 docs/calendar-window-2026-10-21.md`. Programm-beenden-Knopf mit Speicher-/Sync-Prüfung weiterhin offen; nicht als erledigt melden.
