@@ -448,6 +448,8 @@ public class MainActivity extends Activity {
                 if(Thread.currentThread().isInterrupted())return;
                 // This checks the local epoch under the same lock as every local edit.
                 try{target.maintenance(initial.getLong("epoch"),result.getJSONArray("patches"));result.put("applied",true);}catch(Exception changed){result.put("applied",false).put("applyError",String.valueOf(changed.getMessage()));}
+                org.json.JSONArray datePatches=result.getJSONArray("patches");
+                for(int pi=0;pi<datePatches.length();pi++){JSONObject patch=datePatches.getJSONObject(pi);if(patch.has("applyError"))result.getJSONArray("errors").put(new JSONObject().put("kind","date-preserved").put("fileName",patch.optString("fileName")).put("seasonLabel",patch.optString("seasonLabel")).put("code",patch.optString("applyError")));}
                 result.remove("patches");
                 handler.post(()->{maintenanceBusy=false;if(generation!=googleGeneration || target!=archiveCopy || isFinishing())return;
                     getPreferences(0).edit().putString("maintenanceReport",result.toString()).apply();refreshLocalCopy();showMaintenanceReport(result);
@@ -466,6 +468,7 @@ public class MainActivity extends Activity {
         if(rows==null || rows.length()==0)b.append(english?"\nNo new seasons or episode changes found.\n":"\nKeine neuen Staffeln oder Episodenänderungen gefunden.\n");
         b.append(english?"\nProvider information is available in each archive entry.\n":"\nAnbieterangaben findest du direkt beim jeweiligen Archiveintrag.\n");
         org.json.JSONArray errors=result.optJSONArray("errors");if(errors!=null && errors.length()>0)b.append(english?"\nIncomplete checks: ":"\nUnvollständige Prüfungen: ").append(errors.length());
+        if(errors!=null)for(int ei=0;ei<errors.length();ei++){JSONObject problem=errors.optJSONObject(ei);if(problem!=null && problem.optString("kind").equals("date-preserved"))b.append("\n").append(problem.optString("fileName")).append(" · ").append(problem.optString("seasonLabel")).append(english?" · Dates preserved; note/date format needs review: ":" · Termine unverändert; Notiz-/Datumsformat prüfen: ").append(problem.optString("code"));}
         TextView text=text(b.toString(),12,TEXT);text.setTextIsSelectable(true);ScrollView scroll=new ScrollView(this);scroll.addView(text);
         archiveDialogOpen=true;dialogBuilder().setTitle(english?"Maintenance results":"Wartungsergebnis").setView(scroll).setPositiveButton(english?"Close":"Schließen",null).setOnDismissListener(d->archiveDialogOpen=false).show();
     }
