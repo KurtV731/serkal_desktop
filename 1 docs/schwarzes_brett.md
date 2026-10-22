@@ -3240,3 +3240,10 @@ Nächste Schritte und Zuständigkeiten:
 4. Erst nach Datei-, Download-, Login-/API- und Datenbanktests sowie finalem Datenabgleich bestehende Nutzer und serkal.de umschalten. Bestehendes INWX-System bis zur erfolgreichen Abnahme erhalten.
 
 Kurts Ziel bleibt: spätestens **03.12.2026** vollständig bei ALL-INKL, zum Jahresende keine INWX-Abhängigkeit mehr. Dies ist der Zieltermin, keine bestätigte vertragliche Kündigungszusage. Kurt hat die Übertragung pausiert, um zuerst mit Website-/HASA-Chatty die Trennung vorzubereiten. Dieser Eintrag gibt den hier belegten Stand wieder und ersetzt keine praktische Abnahme.
+
+
+## CE – 22.10.2026: Android a20 – Kalenderzugriff und TMDB-Referenz
+
+Kurt benötigt vor geplanter öffentlicher APK am Wochenende direkten Kalenderzugriff und sichtbare TMDB-Nummer samt Zugriff auf konkrete Staffeln. Umgesetzt im Android-Branch, Quelle `7173d8e518fbe98e7d5588c322c8e50207e91b9d`: Kalenderknopf unten in Archivspalte, TMDB-ID unter Serientitel mit Serie/Staffel öffnen/Teilen, Nummer per langem Druck kopierbar. Freie Staffelwahl ermöglicht Nachschlagen von S02 auch bei nur archivierter S01. Link-Teilen erfolgt ausschließlich nach Nutzeraktion über Android-Auswahl, keine Nachricht automatisch gesendet. Alte Referenz bei neuer Suche geleert; Konto und Kalender-ID sicher URL-kodiert, keine zusätzlichen Berechtigungen.
+
+Actions 39854180671 erfolgreich, 39 JUnit-Tests ohne Fehler. Originalsignatur V2/V3 geprüft; sechs geänderte Dateien identisch von GitHub zurückgelesen. Signierte Test-APK `0.0.5a20-serkal-android.apk`, 2883335 Bytes, SHA256 `8fae9cef908be730f3322e666eb30c65582f4590a65b4fc5cd099b9c26daa3ce`, Library-ID `libfile_d63b6d7f98188191865c6a3d11d0a3d7`. Geräteabnahme Kalender/Apphandler, richtiges Konto, TMDB-Staffel2 und Teilen offen. Keine öffentliche Veröffentlichung durch diese Lieferung. Bedienung/Prüfauftrag: [Android-Kalender und TMDB](android-kalender-tmdb-2026-10-22.md).
