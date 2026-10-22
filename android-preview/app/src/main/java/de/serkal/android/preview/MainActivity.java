@@ -133,7 +133,7 @@ public class MainActivity extends Activity {
                     if(accountChanged){
                         requestGeneration++; clearPoster(); selectedDetail=null; selectedArchiveEntry=null; displayedResults.clear();
                         credential=""; archiveSnapshot=null; archiveGeneration++; archiveBusy=false; archiveError="";
-                        selectedTmdbId=0; selectedInfo.setText(""); selectedName.setText(english ? "Select a series" : "Serie auswählen"); suggestions.removeAllViews();
+                        selectedTmdbId=0;updateTmdbReference(); selectedInfo.setText(""); selectedName.setText(english ? "Select a series" : "Serie auswählen"); suggestions.removeAllViews();
                     }
                     googleAccessToken=accessToken; archiveObserver=new SharedArchiveClient(accessToken);
                     googleUser = user;
@@ -292,7 +292,7 @@ public class MainActivity extends Activity {
     private String credential = "";
     private EditText queryField;
     private LinearLayout suggestions;
-    private TextView statusText, selectedName, selectedInfo;
+    private TextView statusText, selectedName, selectedInfo, tmdbReference;
     private Runnable pendingSearch;
     private int selectedTmdbId;
     private JSONObject selectedArchiveEntry;
@@ -378,10 +378,45 @@ public class MainActivity extends Activity {
 
 
 
+    private void openPublicLink(String url) {
+        try { startActivity(new android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(url))); }
+        catch (android.content.ActivityNotFoundException error) { statusText.setText(english?"No browser or calendar app available.":"Kein Browser oder Kalenderprogramm verfügbar."); }
+    }
+    private void openCalendar() {
+        String id=archiveCopy==null?"":archiveCopy.calendarId();
+        String encoded=id.isEmpty()?"":android.util.Base64.encodeToString(id.getBytes(java.nio.charset.StandardCharsets.UTF_8),android.util.Base64.NO_WRAP);
+        openPublicLink(PublicLinks.calendar(encoded,googleUser==null?"":googleUser.email,english));
+    }
+    private void updateTmdbReference() {
+        if(tmdbReference==null)return;
+        tmdbReference.setText(selectedTmdbId>0?"TMDB #"+selectedTmdbId+" ↗":(english?"TMDB: select a series":"TMDB: Serie auswählen"));
+        tmdbReference.setEnabled(selectedTmdbId>0);
+    }
+    private void showTmdbLinks() {
+        if(selectedTmdbId<=0)return;
+        final int id=selectedTmdbId; final boolean lang=english;
+        archiveDialogOpen=true;
+        dialogBuilder().setTitle("TMDB #"+id)
+            .setItems(lang?new String[]{"Open series on TMDB","Open season…","Share series link…"}:new String[]{"Serie auf TMDB öffnen","Staffel öffnen…","Serienlink teilen…"},(d,which)->{
+                if(which==0)openPublicLink(PublicLinks.series(id,0,lang));
+                else if(which==1)handler.post(()->askTmdbSeason(id,lang));
+                else {android.content.Intent share=new android.content.Intent(android.content.Intent.ACTION_SEND);share.setType("text/plain");share.putExtra(android.content.Intent.EXTRA_TEXT,PublicLinks.series(id,0,lang));startActivity(android.content.Intent.createChooser(share,lang?"Share TMDB link":"TMDB-Link teilen"));}
+            }).setNegativeButton(lang?"Close":"Schließen",null).setOnDismissListener(d->archiveDialogOpen=false).show();
+    }
+    private void askTmdbSeason(int id,boolean lang) {
+        EditText input=new EditText(new android.view.ContextThemeWrapper(this,dark?android.R.style.Theme_Material:android.R.style.Theme_Material_Light));
+        input.setInputType(InputType.TYPE_CLASS_NUMBER);input.setSingleLine(true);
+        String season=selectedArchiveEntry==null?"1":selectedArchiveEntry.optString("seasonLabel").replaceAll("[^0-9]","");input.setText(season);
+        archiveDialogOpen=true;
+        dialogBuilder().setTitle(lang?"TMDB season number":"TMDB-Staffelnummer").setView(input)
+            .setPositiveButton(lang?"Open":"Öffnen",(d,w)->{try{int n=Integer.parseInt(input.getText().toString());if(n<1 || n>999)throw new IllegalArgumentException();openPublicLink(PublicLinks.series(id,n,lang));}catch(Exception error){statusText.setText(lang?"Enter a season number from 1 to 999.":"Bitte Staffelnummer von 1 bis 999 eingeben.");}})
+            .setNegativeButton(lang?"Cancel":"Abbrechen",null).setOnDismissListener(d->archiveDialogOpen=false).show();
+    }
+
     private void showArchiveEntry(JSONObject e) {
 
                 requestGeneration++; if(pendingSearch!=null) handler.removeCallbacks(pendingSearch);
-                selectedArchiveEntry=e; selectedTmdbId=e.optInt("tmdbId"); selectedName.setText(archiveTitle(e));
+                selectedArchiveEntry=e; selectedTmdbId=e.optInt("tmdbId"); updateTmdbReference(); selectedName.setText(archiveTitle(e));
                 String description=e.optString((english ? "descEN" : "descDE"));
                 org.json.JSONArray dates=e.optJSONArray("dates");
                 StringBuilder detail=new StringBuilder(archiveStatusLabel(e)+" · "+e.optString("seasonLabel"));
@@ -415,7 +450,7 @@ public class MainActivity extends Activity {
                 org.json.JSONArray entries=archiveSnapshot.getJSONArray("entries");
                 for(int i=0;i<entries.length();i++){JSONObject entry=entries.getJSONObject(i);if(entry.optInt("tmdbId")==payload.getInt("tmdbId") && entry.optString("seasonLabel").equals(payload.getString("seasonLabel"))){showArchiveEntry(entry);break;}}
             } else if(action.equals("delete")){
-                selectedArchiveEntry=null;selectedTmdbId=0;selectedName.setText(english ? "Select a series" : "Serie auswählen");selectedInfo.setText("");clearPoster();
+                selectedArchiveEntry=null;selectedTmdbId=0;updateTmdbReference();selectedName.setText(english ? "Select a series" : "Serie auswählen");selectedInfo.setText("");clearPoster();
             }
             statusText.setText(english ? "Saved locally. Google transfer runs in the background." : "Lokal gespeichert. Google-Übertragung läuft im Hintergrund.");
         }catch(Exception error){statusText.setText(english ? "Could not save locally. Nothing confirmed." : "Lokal konnte nicht gespeichert werden. Nichts bestätigt.");}
@@ -595,7 +630,7 @@ public class MainActivity extends Activity {
         final String query = queryField.getText().toString().trim();
         final int generation = ++requestGeneration;
         final boolean language = english;
-        suggestions.removeAllViews(); displayedResults.clear(); selectedDetail=null; clearPoster();
+        suggestions.removeAllViews(); displayedResults.clear(); selectedDetail=null; selectedArchiveEntry=null; selectedTmdbId=0; updateTmdbReference(); clearPoster();
         selectedTmdbId = 0; selectedArchiveEntry=null;
         selectedName.setText(english ? "Select a series" : "Serie auswählen");
         selectedInfo.setText("");
@@ -634,7 +669,7 @@ public class MainActivity extends Activity {
     private void selectSeries(JSONObject entry, String key, boolean language) {
         final int generation = ++requestGeneration;
         final int id = entry.optInt("id");
-        clearPoster(); selectedDetail=null; selectedArchiveEntry=null; selectedTmdbId=0;
+        clearPoster(); selectedDetail=null; selectedArchiveEntry=null; selectedTmdbId=0;updateTmdbReference();
         selectedName.setText(entry.optString("name"));
         statusText.setText(english ? "Loading series…" : "Serie wird geladen…");
         network.execute(() -> {
@@ -642,7 +677,7 @@ public class MainActivity extends Activity {
                 JSONObject detail = new TmdbClient(key).details(id, language);
                 handler.post(() -> {
                     if (generation != requestGeneration) return;
-                    selectedTmdbId = id; selectedArchiveEntry=null; selectedDetail=detail;
+                    selectedTmdbId = id; updateTmdbReference(); selectedArchiveEntry=null; selectedDetail=detail;
                     showPoster(id,detail.optString("poster_path"));
                     // Name is display text; the immutable TMDB ID is the identity.
                     selectedName.setText(detail.optString("name", entry.optString("name")));
@@ -884,6 +919,10 @@ public class MainActivity extends Activity {
         selectedName = text(english ? "Select a series" : "Serie auswählen", 14, TEXT);
         selectedName.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
         middle.addView(selectedName);
+        tmdbReference=text("",11,BLUE);tmdbReference.setPadding(0,dp(6),0,dp(6));
+        tmdbReference.setOnClickListener(v->showTmdbLinks());
+        tmdbReference.setOnLongClickListener(v->{if(selectedTmdbId<=0)return false;android.content.ClipboardManager clip=(android.content.ClipboardManager)getSystemService(CLIPBOARD_SERVICE);clip.setPrimaryClip(android.content.ClipData.newPlainText("TMDB",String.valueOf(selectedTmdbId)));statusText.setText(english?"TMDB number copied":"TMDB-Nummer kopiert");return true;});
+        middle.addView(tmdbReference);updateTmdbReference();
         selectedInfo = text("", 11, TEXT);
         ScrollView detailScroll = new ScrollView(this);
         LinearLayout detailBody=new LinearLayout(this);detailBody.setOrientation(LinearLayout.HORIZONTAL);
@@ -914,6 +953,7 @@ public class MainActivity extends Activity {
         archiveStatus=text("",9,MUTED);archiveStatus.setMaxLines(1);right.addView(archiveStatus);
         archiveRows=new LinearLayout(this);archiveRows.setOrientation(LinearLayout.VERTICAL);
         ScrollView archiveScroll=new ScrollView(this);archiveScroll.addView(archiveRows);right.addView(archiveScroll,new LinearLayout.LayoutParams(-1,0,1));
+        Button calendarButton=button(english?"Open calendar":"Kalender öffnen");calendarButton.setOnClickListener(v->openCalendar());right.addView(calendarButton);
         copySyncButton=null;copySyncStatus=text("",9,MUTED);copySyncStatus.setMaxLines(2);copySyncStatus.setEllipsize(android.text.TextUtils.TruncateAt.END);right.addView(copySyncStatus);
         copySyncStatus.setOnClickListener(v->{archiveDialogOpen=true;dialogBuilder().setTitle(english?"Synchronization":"Synchronisation").setMessage(copySyncStatus.getText()).setPositiveButton(english?"Close":"Schließen",null).setOnDismissListener(d->archiveDialogOpen=false).show();});
         renderArchive();
@@ -941,6 +981,7 @@ public class MainActivity extends Activity {
         button.setPadding(dp(2), 0, dp(2), 0);
     }
 }
+
 
 
 

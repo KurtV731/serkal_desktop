@@ -58,6 +58,11 @@ final class AndroidArchiveCopy {
     private boolean fatal(){return error.matches("COPY_(CONFLICT|ACCOUNT_CHANGED|LOCAL_STATE_INVALID|INVALID|HISTORY_MISSING|NEEDS_SOURCE|LEGACY_PENDING)");}
     synchronized String status(){if(!space())return "COPY_LOW_SPACE";if(!error.isEmpty())return error;return status;}
     boolean busy(){return busy;}
+    synchronized String calendarId() {
+        JSONObject record=readOnlyRecord!=null?readOnlyRecord:state.optJSONObject("record");
+        JSONObject calendar=record==null?null:record.optJSONObject("calendar");
+        return calendar==null?"":calendar.optString("id");
+    }
     synchronized JSONObject snapshot() throws Exception {
         if(readOnlyRecord==null && !state.has("record"))return null;JSONObject r=readOnlyRecord!=null?readOnlyRecord:state.getJSONObject("record");
         return new JSONObject().put("epoch",state.optLong("epoch")).put("owner",owner).put("generatedAt",r.getString("generatedAt")).put("entries",ArchiveCodec.entries(r));
@@ -141,4 +146,5 @@ final class AndroidArchiveCopy {
         finally {synchronized(this){busy=false;if(state.has("record") && !fatal())loaded=true;log("SYNC_END",error);}notifyChange();}
     }
 }
+
 
