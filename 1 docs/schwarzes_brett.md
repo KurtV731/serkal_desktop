@@ -3209,3 +3209,34 @@ Kurt meldet konkreten applyError COPY_INVALID_DATE. Keine weitere Screenshotanfo
 Quelle `9196e2e3464fe2f6dc62d81119d2efebc741ae3f`: deutsches Vollformat TT.MM.JJJJ zusätzlich zu ISO/TT.MM. unterstützt. Pro bestehender Staffel wird bei ungültiger Datums-/TermineDE-Angabe nur die Terminänderung verworfen, Originaltermine und Notiz bleiben unverändert. Andere gültige Metadaten/Ankündigungen können gespeichert werden. Ergebnis nennt betroffene Datei/Staffel und COPY_INVALID_DATE. Andere Fehlerklassen werden nicht als Datum maskiert. Neue Tests: explizite Jahre/Jahreswechsel, ungültige TermineDE-Notiz bei gleichzeitig erfolgreicher Ankündigungsübernahme und unbekannte TXT-Felder erhalten.
 
 Actions 39636183133 erfolgreich, 35 JUnit-Tests ohne Fehler. Alle fünf Änderungen identisch von GitHub zurückgelesen. Signierte APK `0.0.5a19-serkal-android.apk`, 2879239 Bytes, SHA256 `fa5afc9f4269b689e8e559bbd35d055918828ca8cabc29251da8cc0a77b17ad1`, Library-ID `libfile_67c3d431792c8191bf61a7a1bdfe0436`. Manifest geprüft: 0.0.5a19/code27, Paket de.serkal.android.preview.v005; V2/V3 und ursprünglicher Zertifikatsfingerabdruck geprüft. Über a18 installieren, Wartung einmal ausführen, Google-Bestätigung abwarten. Falls eine Staffel weiterhin nicht auswertbar ist, nennt Bericht sie; nicht pauschal volle Reparatur der noch unbekannten Eingabe behaupten. Keine öffentliche Freigabe.
+
+
+## Umzugs-Chatty – 22.10.2026: ALL-INKL eingerichtet, hasa.li registriert
+
+Absender: Umzugs-Chatty, auf Kurts Auftrag. Empfänger: Website-Chatty, HASA-Verantwortlicher, CE und Installer.
+Status: **HOSTING UND DATEIZUGANG VORBEREITET / WEBSITE- UND BACKEND-ÜBERTRAGUNG NOCH OFFEN**.
+Zugehöriger Commit: der Commit dieses Brett-Eintrags (Dokumentation, keine Quellcodeänderung).
+
+Bestätigter Stand aus Kurts KAS-/MembersArea-Ansichten und Verbindungstest:
+
+- ALL-INKL Premium ist freigeschaltet. MembersArea verwaltet Vertrag/Domains, KAS die Technik.
+- `hasa.li` zeigt am 22.10.2026 „Registrierung erfolgreich“ und liefert die ALL-INKL-Platzhalterseite.
+- Let's-Encrypt-Zertifikat für `hasa.li` und `www.hasa.li` wurde eingerichtet; KAS: SSL aktivieren = Ja, automatische Verlängerung, aktuelle Gültigkeit 22.10.2026 bis 20.01.2027. Nach Einrichtung sind einige Minuten Aktivierungszeit angekündigt. Browserprüfung ohne Zertifikatswarnung noch offen; SSL erzwingen steht bislang auf Nein, HSTS auf Nein.
+- Ein vorheriger 502-Fehler im KAS ist kein fortbestehender Zertifikatsblocker: anschließend wurde die erfolgreiche Einrichtung angezeigt.
+- `serkal.de` zeigt weiterhin „Transfer Auth-Code fehlt“. Transfer bewusst zurückgestellt; erst nach vollständiger Vorbereitung und erfolgreichen Tests umschalten.
+- FTP-Hauptnutzer eingerichtet; WebFTP und WinSCP konnten die Verzeichnisse auf dem neuen Server anzeigen.
+- Hostname: `w0223f39.kasserver.com`; FTP-Benutzer: `w0223f39`; für den FTP-Zugang in WinSCP FTP mit explizitem TLS/SSL und Port 21 verwenden. Keine Passwörter ins Repository schreiben.
+- KAS-Stammverzeichnis: `/www/htdocs/w0223f39/`.
+- SerKal-Ziel: relativ zur FTP-Wurzel `/serkal.de/`, absolut `/www/htdocs/w0223f39/serkal.de/`.
+- HASA-Ziel: relativ zur FTP-Wurzel `/hasa.li/`, absolut `/www/htdocs/w0223f39/hasa.li/`.
+- Für beide Domains sind damit getrennte Serververzeichnisse vorhanden. Beim geprüften SerKal-Ziel lag nur die Providerdatei `index.htm`; keine vollständige Websiteübertragung erfolgt. Gespeicherter WinSCP-Sitzungsname noch nicht verbindlich dokumentiert.
+- Die frühere lokale Ablage `C:\serkal-pages\up` ist überholt. Verbindlich laut Website-Übergabe: `C:\ppd\serkal\serkal-pages\up`. Vor Upload aktuellen GitHub-Stand in dieser Ablage sicherstellen.
+
+Nächste Schritte und Zuständigkeiten:
+
+1. Umzugs-Chatty/Kurt: HTTPS für hasa.li ohne Warnung prüfen, danach SSL erzwingen aktivieren. INWX-Vertragslaufzeit und konkrete Kündigungsfrist anhand des tatsächlichen Vertrags prüfen; noch keine geprüfte Kündigungsfrist oder erfolgte Kündigung behaupten.
+2. Website-Chatty: bestätigte Host-/Verzeichnisdaten für getrennte Uploadziele verwenden; gespeicherte Sitzung abgleichen. Website-Trennung, funktionierende Downloads, alte HASA-Weiterleitungen, Canonicals/Sitemaps und Datenschutzerklärung gemäß eigenem Audit fertigstellen. Private Zugangsdaten separat halten.
+3. HASA-Verantwortlicher: neues Reich unter `/hasa.li/` vorbereiten; benötigte Datenbank im KAS anlegen, vorhandene Daten sichern/importieren und neue API-/Loginziele festlegen. Eine fertige Backendmigration oder bereits angelegte Datenbank ist hiermit nicht bestätigt. Den endgültigen lokalen HASA-Unterordner weiterhin abstimmen.
+4. Erst nach Datei-, Download-, Login-/API- und Datenbanktests sowie finalem Datenabgleich bestehende Nutzer und serkal.de umschalten. Bestehendes INWX-System bis zur erfolgreichen Abnahme erhalten.
+
+Kurts Ziel bleibt: spätestens **03.12.2026** vollständig bei ALL-INKL, zum Jahresende keine INWX-Abhängigkeit mehr. Dies ist der Zieltermin, keine bestätigte vertragliche Kündigungszusage. Kurt hat die Übertragung pausiert, um zuerst mit Website-/HASA-Chatty die Trennung vorzubereiten. Dieser Eintrag gibt den hier belegten Stand wieder und ersetzt keine praktische Abnahme.
