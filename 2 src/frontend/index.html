@@ -6452,6 +6452,13 @@ function setArchivCount_(n){
  * @status aktiv
  * @loeschung nein
  */
+function archiveAnnouncementForSeason_(it){
+  return (it.announcements||[]).find(a=>Number(a.season)===Number(String(it.seasonLabel||it.staffelLabel||'').replace(/\D/g,'')) && a.date);
+}
+function archiveDateCaption_(it,ds){
+  return ds + (it.deRule?' • DE':'')+(it.announcementOnly?' (?)':'');
+}
+
 function getStartEnd_(it){
   const startRaw = it && (it.start || it.startDate || it.startdatum || it.firstAirDate || it.first_air_date) || '';
   const endRaw   = it && (it.end || it.endDate || it.enddatum || it.lastAirDate  || it.last_air_date)  || '';
@@ -6827,10 +6834,10 @@ function renderArchivList() {
 
     const dateSpan = document.createElement('span');
     dateSpan.className = 'amDate';
-    const upcoming=(it.announcements||[]).filter(a=>a.date).map(a=>'S'+String(a.season).padStart(2,'0')+': '+formatDateShort_(a.date)+' (?)');
-    dateSpan.textContent = ds + ((it && it.deRule) ? ' • DE' : '')+(upcoming.length?' · '+upcoming.join(' · '):'');
-    dateSpan.title=upcoming.join(' · ');
-    if(upcoming.length){dateSpan.style.maxWidth='190px';dateSpan.style.whiteSpace='normal';}
+    // Announcements belong to their own season, never to every row of the series.
+    const ownAnnouncement=archiveAnnouncementForSeason_(it);
+    dateSpan.textContent = archiveDateCaption_(it,ds);
+    dateSpan.title=ownAnnouncement ? formatDateShort_(ownAnnouncement.date)+' (?)' : '';
     meta.appendChild(dateSpan);
 
     if (st === 2 || st === 3 || st === 4) {
@@ -9452,5 +9459,6 @@ try {
 </body>
 
 </html>
+
 
 

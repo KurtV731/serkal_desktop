@@ -16,3 +16,19 @@ const undated=structuredClone(shifted);undated.seasons[8].data.air_date=null;con
 console.log('season announcements: tracked range, deduplication, history, permanent cards, manual deletion and shifted dates passed');
 
 const withdrawnEntry={...entry,announcements:withdrawn.announcements};const withdrawnOps=calendar.plan([withdrawnEntry],ops.map(o=>({...o.body,id:o.id})),"r7",2026);assert.equal(withdrawnOps[0].body.start.date,"2027-01-07");assert.match(withdrawnOps[0].body.description,/date unknown/);
+
+
+// Shared Android announcement rows do not become fictitious episode appointments on Desktop.
+const placeholder={tmdbId:42,title:'Ahsoka',year:2023,seasonLabel:'S02',activeDates:['2027-01-19'],announcementOnly:true,announcements:[{season:2,date:'2027-01-19',title:'Ahsoka',language:'en',episodeCount:8,history:[]}]};
+const pending=calendar.plan([placeholder],[],'pending',2026);
+assert.equal(pending.length,1);assert.equal(pending[0].body.extendedProperties.private.serkal,'announcement');assert.match(pending[0].body.description,/Expected episodes: 8/);
+const full={...placeholder,announcementOnly:false,activeDates:['2027-01-19','2027-01-26']};
+assert.equal(calendar.plan([full],[pending[0].body],'complete',2026).filter(o=>o.body?.extendedProperties?.private?.serkal==='1').length,2);
+const fs=require('node:fs'),vm=require('node:vm');
+const html=fs.readFileSync(require('node:path').join(__dirname,'../2 src/frontend/index.html'),'utf8');
+const ui={};vm.runInNewContext(html.slice(html.indexOf('function archiveAnnouncementForSeason_'),html.indexOf('function getStartEnd_')),ui);
+const s1={seasonLabel:'S01',announcements:placeholder.announcements};
+assert.equal(ui.archiveAnnouncementForSeason_(s1),undefined);
+assert.equal(ui.archiveDateCaption_(s1,'22.08.2023'),'22.08.2023');
+assert.equal(ui.archiveAnnouncementForSeason_(placeholder).date,'2027-01-19');
+assert.equal(ui.archiveDateCaption_(placeholder,'19.01.2027'),'19.01.2027 (?)');

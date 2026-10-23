@@ -632,7 +632,8 @@ function archiveEntryFromLine_(fileName, stats, line) {
     const seen = Number(archiveField_(line,"seen") || archiveField_(line,"buttonPressed") || 0) || 0;
     const noteText = archiveDecode_(archiveField_(line,"note"));
     const manualFlags = archiveManualFlags_(line, noteText, startOriginal, datesOriginal);
-    const status = archiveStatus_(activeDates,seen);
+    const announcementOnly=archiveField_(line,"announcementOnly")==="1";
+    const status = announcementOnly && !seen ? 1 : archiveStatus_(activeDates,seen);
     const updated = stats && stats.mtime ? stats.mtime : new Date(0);
     return {
         fileName, name:fileName, id:fileName, url:"", titel:title, title, jahr:year, year,
@@ -645,6 +646,7 @@ function archiveEntryFromLine_(fileName, stats, line) {
         descDE:archiveDecode_(archiveField_(line,"descDE") || archiveField_(line,"ov_de")),
         descEN:archiveDecode_(archiveField_(line,"descEN") || archiveField_(line,"ov_en")),
         announcements:require(path.join(__dirname,"../common/watch-providers")).parse(archiveDecode_(archiveField_(line,"announcements")))||[],
+        announcementOnly,
         calendarLanguage:archiveField_(line,"calendarLanguage")||"de",
         watchProviders:require(path.join(__dirname,"../common/watch-providers")).parse(archiveDecode_(archiveField_(line,"watchProviders"))),
         providerText:require(path.join(__dirname,"../common/watch-providers")).text(require(path.join(__dirname,"../common/watch-providers")).parse(archiveDecode_(archiveField_(line,"watchProviders"))),noteText,activeLanguage_==="en"),
@@ -3008,6 +3010,7 @@ function maintenanceWriteArchive_(operation) {
     if(!(flags & SERKAL_MANUAL_CALENDAR)) {
         line = archiveSetField_(line, "startOriginal", String(operation.payload.termindaten[0] || ""));
         line = archiveSetField_(line, "dates", archiveCompactDates_(operation.payload.termindaten).join(","));
+        line = archiveSetField_(line, "announcementOnly", "0");
     }
     lines[index] = line;
     const tempPath = snapshot.fullPath + ".serkal-maint-tmp";
@@ -3377,6 +3380,10 @@ function maintenanceWriteProviders_(groups,snapshot) {
             const lines=text.split(/\r?\n/).map(line=>{
                 if(Number(archiveField_(line,"tmdb"))!==group.tmdbId)return line;
                 line=archiveSetField_(line,"announcements",archiveEncode_(JSON.stringify(announcementUpdate.announcements)));
+                if(archiveField_(line,"announcementOnly")==="1"){
+                    const own=announcementUpdate.announcements.find(a=>Number(a.season)===Number((line.match(/^S(\d+)/i)||[])[1]||0) && a.date);
+                    if(own)line=archiveSetField_(line,"startOriginal",own.date);
+                }
                 line=archiveSetField_(line,"calendarLanguage",activeLanguage_);
                 if(record.watchProviders)line=archiveSetField_(line,"watchProviders",archiveEncode_(JSON.stringify(record.watchProviders)));
                 if(Number(archiveField_(line,"manualFlags")||0)&SERKAL_MANUAL_TITLE)return line;
@@ -4133,5 +4140,6 @@ if (!serkalHasSingleInstanceLock_) {
 
     app.on("window-all-closed",()=>{ if (process.platform!=="darwin") app.quit(); });
 }
+
 
 
