@@ -17,7 +17,7 @@ class DesktopCopy {
         progress:this.progress||null,lastSynced:this.state.lastSynced||'',revision:this.state.base||''};}
     report(phase,current=0,total=0){this.progress={phase,current,total};this.onStatus(this.view());}
     fatal(){return /^(COPY_(CONFLICT|ACCOUNT_CHANGED|LOW_SPACE|LOCAL_STATE_INVALID|INVALID|HISTORY_MISSING|NEEDS_SOURCE|LEGACY_PENDING|CALENDAR_TARGET_MISSING|CALENDAR_AMBIGUOUS|CALENDAR_ACCESS_DENIED))$/.test(this.error);}
-    assertWrite(){if(!this.initialized)copyError('COPY_LOADING');if(this.fatal())copyError(this.error);if(!this.available())copyError('COPY_LOW_SPACE');}
+    assertWrite(){if(this.fatal())copyError(this.error);if(!this.initialized)copyError('COPY_LOADING');if(!this.available())copyError('COPY_LOW_SPACE');}
     changed(){
         if(!this.initialized)return;
         const local=this.local();

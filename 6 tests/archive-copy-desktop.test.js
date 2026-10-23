@@ -14,7 +14,7 @@ const copy=require('../2 src/common/archive-copy'),{DesktopCopy}=require('../2 s
  };
  const options={folder:()=>folder,stateFile:path.join(root,'state.json'),calendar:()=>({mode:'',id:''}),selectCalendar:()=>{},token:async()=>'test',bootstrap:async()=>{},calendarSync:async()=>{},lock:async fn=>fn()};
  try {
-  const manager=new DesktopCopy(options);assert.throws(()=>manager.assertWrite(),/COPY_LOADING/);await manager.sync();assert.equal(manager.view().status,'saved');assert.equal(records.length,1);manager.assertWrite();
+  const manager=new DesktopCopy(options);assert.throws(()=>manager.assertWrite(),/COPY_LOADING/);manager.error='COPY_CONFLICT';assert.throws(()=>manager.assertWrite(),/COPY_CONFLICT/);manager.error='';await manager.sync();assert.equal(manager.view().status,'saved');assert.equal(records.length,1);manager.assertWrite();
   fs.appendFileSync(path.join(folder,'Test (2026).txt'),'S02; tmdb=42; eps=2\n');manager.changed();clearTimeout(manager.timer);assert(manager.state.dirty);await manager.sync();assert.equal(records.length,2);assert(!manager.state.dirty);
   const otherFolder=path.join(root,'reader');fs.mkdirSync(otherFolder);fs.writeFileSync(path.join(otherFolder,'old.txt'),'S01; tmdb=99\n');
   const second=new DesktopCopy({...options,folder:()=>otherFolder,stateFile:path.join(root,'second.json')});await second.sync();assert.equal(second.view().status,'saved');assert(!fs.existsSync(path.join(otherFolder,'old.txt')));assert(fs.existsSync(path.join(otherFolder,'Test (2026).txt')));
