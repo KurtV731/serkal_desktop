@@ -129,7 +129,7 @@ function client(accessToken, fetchImpl=fetch) {
             if(!Array.isArray(r.files))fail('COPY_INVALID');files.push(...r.files);if(files.length>20000)fail('COPY_TOO_LARGE');page=r.nextPageToken||'';
         }while(page);return files;},
         async load(file,owner){const r=validate(await request('https://www.googleapis.com/drive/v3/files/'+encodeURIComponent(file.id)+'?alt=media'),owner);
-            if(r.revision!==file.appProperties.revision || r.parent!==file.appProperties.parent)fail('COPY_INVALID');return r;},
+            if(r.revision!==file.appProperties.revision || (r.parent||'')!==(file.appProperties.parent==='root'?'':(file.appProperties.parent||'')))fail('COPY_INVALID');return r;},
         async archiveActive(files){
             for(const file of files) {
                 const name='serkal-history-v2-'+String(file.appProperties.revision)+'-'+String(file.id)+'.json';
