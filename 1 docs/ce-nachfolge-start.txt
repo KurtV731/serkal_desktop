@@ -20,3 +20,5 @@ Nicht neu anfangen, nicht Archiv/Tokens/Kalender zurücksetzen. Keine weiteren S
 Setze den bestehenden Auftrag anhand des Testergebnisses fort. Bestätige kurz, dass die Übergabe gelesen ist, und benenne konkret den nächsten Arbeitsschritt.
 
 Präzisierung: UI-Fehler betrifft beide Listen links/rechts auf Android, etwa halbe Bildschirmhöhe; Tablet länger, Smartphone kürzer. Gerätefrage ist beantwortet, Ursache/Reparatur noch offen.
+
+DRINGEND NEU: Desktop Alpha24 zeigt COPY_CONFLICT (77 lokale Einträge), Löschen blockiert. Kurt bestätigt nur Desktop aktiv und manuelle Ahsoka-Löschung. Kein blindes Löschen von JSON/Token/Kalender! Zuerst lokale Dateien+Syncmetadaten und Cloudstände sichern, Ursache prüfen, verständlichen Konfliktlösungsweg bauen. Details in Übergabe/Brett. Exit bietet bei offenem Upload „Lokal gesichert beenden“; ungespeicherte UI-Daten separat behandeln.
