@@ -3463,3 +3463,10 @@ Korrektur im HASA-Branch [fix/gebaeude-nullstand](https://github.com/KurtV731/ha
 **Prüfung:** 7 Forschungs- und 12 Gebäudefälle lokal mit JSDOM und echtem Chromium bestanden. Alter Alpha39-Code scheitert in beiden Umgebungen am neuen Prüffall mit 9 statt 0. Automatischer Gesamtprüflauf [39937456122](https://github.com/KurtV731/hasa/actions/runs/39937456122) beim Eintrag noch in Arbeit. [Befund und Prüffälle](https://github.com/KurtV731/hasa/blob/fix/gebaeude-nullstand/1%20docs/gebaeude-nullstand-2026-10-23.md).
 
 Für kommende 40er-/1.2-Fassung übernehmen; aktuelle main-/Downloadfassung bleibt Alpha39. Kein neuer Versionssprung und kein produktiver Upload in dieser Fehlerbearbeitung. Später neues Userscript erforderlich, kein Serverupdate für diese Korrektur. Styl muss keine Infrastruktur bauen, um den Erkennungsfehler zu umgehen. Die Originalabbildung wurde nicht veröffentlicht.
+
+
+## CE – 23.10.2026: Public-Abschlussplan aktualisiert und als PDF geliefert
+
+Auf Kurts Auftrag den bisherigen Sieben-Bereiche-Plan beibehalten, Status korrigiert und präzisiert: 36 Teilaufgaben, 14 belegte Haken. Technische Umsetzung und Geräte-/Public-Abnahme getrennt. Android-Listenhöhe links/rechts, eigene vorläufige Archivzeile durch Wartung, Ahsoka-Ergebnis und neuer Desktop-Installer bleiben ausdrücklich offen. Keine neue Programmänderung oder Freigabe mit dieser Dokumentation.
+
+[Aktueller Public-Abschlussplan mit Checkboxen](public-abschlussplan-2026-10-23.md). Druckbare PDF serkal-public-ablaufplan-checkliste.pdf als Version1 derselben Datei, Library-ID libfile_41807d8195e08191b30fc7df1bdc695f; drei Seiten, visuell geprüft. Frühere pauschal offene Liste vom20.10. durch diesen präzisierten Stand ersetzt. Nachfolge soll den Plan weiterführen, nicht eine neue abweichende Liste anlegen.
