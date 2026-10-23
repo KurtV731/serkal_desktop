@@ -55,7 +55,7 @@ contextBridge.exposeInMainWorld("serkal", {
         poster:(id,lang)=>ipcRenderer.invoke("serkal:tmdb:poster",id,lang||"de")
     },
     archive:{
-        sync:()=>ipcRenderer.invoke("serkal:archive:sync"),
+        sync:()=>ipcRenderer.invoke("serkal:archive:sync"),adoptLocal:()=>ipcRenderer.invoke("serkal:archive:adoptLocal"),\n        adoptLocal:()=>ipcRenderer.invoke("serkal:archive:adoptLocal"),
         syncStatus:()=>ipcRenderer.invoke("serkal:archive:syncStatus"),
         revision:()=>ipcRenderer.invoke("serkal:archive:revision"),
         load:()=>ipcRenderer.invoke("serkal:archive:load"),

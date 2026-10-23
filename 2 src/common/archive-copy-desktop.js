@@ -15,6 +15,14 @@ class DesktopCopy {
     }
     view(){const available=this.available();return {status:this.status,code:available?this.error:"COPY_LOW_SPACE",busy:this.busy,writable:this.initialized && !this.fatal() && available,dirty:!!this.state.dirty,
         progress:this.progress||null,lastSynced:this.state.lastSynced||'',revision:this.state.base||''};}
+    async adoptLocal(){
+        if(this.busy)copyError('COPY_BUSY');
+        const current=this.local();
+        this.state.adoption=copy.validate({schema:2,owner:this.state.owner||'pending',revision:crypto.randomUUID(),parent:'',
+            generatedAt:new Date().toISOString(),files:current.files,calendar:current.calendar},this.state.owner||'pending');
+        this.save();this.error='';this.initialized=true;
+        return this.sync();
+    }
     report(phase,current=0,total=0){this.progress={phase,current,total};this.onStatus(this.view());}
     fatal(){return /^(COPY_(CONFLICT|ACCOUNT_CHANGED|LOW_SPACE|LOCAL_STATE_INVALID|INVALID|HISTORY_MISSING|NEEDS_SOURCE|LEGACY_PENDING|CALENDAR_TARGET_MISSING|CALENDAR_AMBIGUOUS|CALENDAR_ACCESS_DENIED))$/.test(this.error);}
     assertWrite(){if(this.fatal())copyError(this.error);if(!this.initialized)copyError('COPY_LOADING');if(!this.available())copyError('COPY_LOW_SPACE');}

@@ -1913,7 +1913,7 @@
             <!-- Einträge werden per apiLadeArchivDaten gefüllt -->
           </div>
 
-          <div class="hint" id="archiveSyncStatus" role="status" aria-live="polite"></div>
+          <div class="hint" id="archiveSyncStatus" role="status" aria-live="polite"></div>\n          <button id="btnArchiveAdoptLocal" type="button" style="display:none;background:#b91c1c;color:#fff;border:0;border-radius:8px;padding:8px 12px;font-weight:800;cursor:pointer">Diesen Archivstand als maßgeblich festlegen</button>
           <div class="hint" id="archivHint"></div>
         </div>
       </section>
@@ -3921,7 +3921,7 @@ const I18N = {
     COPY_LOCAL_COUNT:"{count} Archiveinträge lokal geladen",
     COPY_UI_ERROR: "Übertragung ausstehend · lokale Kopie bleibt erhalten",
     COPY_UI_LOW_SPACE: "Zu wenig freier Speicher · nur Lesen möglich",
-    COPY_UI_CONFLICT: "Neuerer Archivstand bei Google · lokale Kopie bleibt erhalten",
+    COPY_UI_CONFLICT: "Neuerer Archivstand bei Google · lokale Kopie bleibt erhalten",\n    COPY_UI_ADOPT_LOCAL: "Diesen Archivstand als maßgeblich festlegen",\n    COPY_UI_ADOPTING: "Lokaler Archivstand wird übernommen …",
     COPY_UI_CONNECT: "Google verbinden · vorhandene lokale Kopie bleibt erhalten",
     COPY_UI_SOURCE: "Erste Übernahme: bitte am bisherigen Quell-PC starten",
     COPY_UI_CALENDAR: "Kalenderabgleich ausstehend · Log prüfen",
@@ -4105,7 +4105,7 @@ const I18N = {
     COPY_LOCAL_COUNT:"{count} archive entries loaded locally",
     COPY_UI_ERROR: "Transfer pending \u00b7 local copy preserved",
     COPY_UI_LOW_SPACE: "Not enough free storage \u00b7 reading only",
-    COPY_UI_CONFLICT: "Newer archive on Google \u00b7 local copy preserved",
+    COPY_UI_CONFLICT: "Newer archive on Google \u00b7 local copy preserved",\n    COPY_UI_ADOPT_LOCAL: "Make this archive the authoritative version",\n    COPY_UI_ADOPTING: "Adopting local archive …",
     COPY_UI_CONNECT: "Connect Google \u00b7 existing local copy preserved",
     COPY_UI_SOURCE: "First transfer: start on the previous source PC",
     COPY_UI_CALENDAR: "Calendar synchronization pending \u00b7 check log",
@@ -5197,7 +5197,7 @@ async function archiveCopyStatus_() {
     button.disabled=info.busy||archiveSyncButtonBusy_;
   }catch(_e){}
 }
-document.getElementById('btnArchiveSync')?.addEventListener('click',async()=>{
+document.getElementById('btnArchiveAdoptLocal')?.addEventListener('click',async()=>{\n  if(archiveSyncButtonBusy_||state.isDirty)return;\n  archiveSyncButtonBusy_=true;archiveCopyStatus_();\n  try{await window.serkal.archive.adoptLocal();}catch(error){console.error('Archivübernahme fehlgeschlagen',error);}finally{archiveSyncButtonBusy_=false;archiveCopyStatus_();}\n});\ndocument.getElementById('btnArchiveSync')?.addEventListener('click',async()=>{
   if(archiveSyncButtonBusy_ || guardDirtyBeforeAction_())return;
   archiveSyncButtonBusy_=true;archiveCopyStatus_();
   try{await window.serkal.archive.sync();}finally{archiveSyncButtonBusy_=false;archiveCopyStatus_();}

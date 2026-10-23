@@ -130,6 +130,12 @@ function client(accessToken, fetchImpl=fetch) {
         }while(page);return files;},
         async load(file,owner){const r=validate(await request('https://www.googleapis.com/drive/v3/files/'+encodeURIComponent(file.id)+'?alt=media'),owner);
             if(r.revision!==file.appProperties.revision || r.parent!==file.appProperties.parent)fail('COPY_INVALID');return r;},
+        async archiveActive(files){
+            for(const file of files) {
+                const name='serkal-history-v2-'+String(file.appProperties.revision)+'-'+String(file.id)+'.json';
+                await request('https://www.googleapis.com/drive/v3/files/'+encodeURIComponent(file.id)+'?fields=id,name','PATCH',JSON.stringify({name}));
+            }
+        },
         async upload(record){validate(record,record.owner);const json=JSON.stringify(record);if(Buffer.byteLength(json)>LIMIT)fail('COPY_TOO_LARGE');
             const boundary='serkal-'+crypto.randomUUID();const meta={name:PREFIX+record.revision+'.json',mimeType:'application/json',parents:['appDataFolder'],
                 appProperties:{owner:record.owner,revision:record.revision,parent:record.parent||'root'}};
@@ -143,7 +149,26 @@ async function synchronize({state, local, client:remote, save, apply, calendarSy
     const owner=await remote.identify();
     const current=typeof local==='function' ? local() : local;
     if(state.owner && state.owner!==owner)fail('COPY_ACCOUNT_CHANGED');
-    const remoteFiles=await remote.list();const tip=head(remoteFiles,owner), revision=tip ? tip.appProperties.revision : '';
+    let remoteFiles=await remote.list();
+    if(state.adoption) {
+        state.adoption.owner=owner;
+        validate(state.adoption,owner);
+        save();
+        await remote.archiveActive(remoteFiles.filter(file=>file.appProperties?.owner===owner));
+        remoteFiles=await remote.list();
+        const existing=remoteFiles.find(f=>f.appProperties.revision===state.adoption.revision);
+        if(!existing) await remote.upload(state.adoption);
+        remoteFiles=await remote.list();
+        const adopted=remoteFiles.find(f=>f.appProperties.revision===state.adoption.revision);
+        if(!adopted)fail('COPY_CONFLICT');
+        const confirmed=await remote.load(adopted,owner);
+        if(digest(confirmed.files,confirmed.calendar)!==digest(state.adoption.files,state.adoption.calendar))fail('COPY_CONFLICT');
+        const same=digest(current.files,current.calendar)===digest(state.adoption.files,state.adoption.calendar);
+        state.owner=owner;state.base=state.adoption.revision;state.clean=digest(state.adoption.files,state.adoption.calendar);
+        state.dirty=!same;delete state.pending;delete state.pendingFileId;delete state.adoption;save();
+        return {status:same?'saved':'pending'};
+    }
+    const tip=head(remoteFiles,owner), revision=tip ? tip.appProperties.revision : '';
     if(state.dirty) {
         // A lost response must be checked before a second upload; the same frozen body is reused.
         if(state.pending && (revision===state.pending.revision || state.pendingFileId)) {

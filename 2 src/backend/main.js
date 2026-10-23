@@ -3654,7 +3654,7 @@ function installIpc_() {
         if(copyLocalMode_)return archiveLoad_();
         scheduleSharedArchive_(); await sharedArchiveObserve_(); return archiveUiView_();
     });
-    ipcMain.handle("serkal:archive:sync", () => copyManager_().sync());
+    ipcMain.handle("serkal:archive:sync", () => copyManager_().sync());\n    ipcMain.handle("serkal:archive:adoptLocal", () => copyManager_().adoptLocal());
     ipcMain.handle("serkal:archive:syncStatus", () => {const view=copyManager_().view();return {...view,message:view.code?bt_(view.code):""};});
     ipcMain.handle("serkal:archive:revision", () => ({revision:sharedArchiveRevision_,shared:copyLocalMode_ || !!sharedArchiveView_}));
     archiveWriteHandler_("serkal:archive:insert", (_event, payload) => {
