@@ -3438,3 +3438,12 @@ Kurts Test bestätigte zwei echte Lücken: Kalenderknopf unten im verschiebbaren
 Desktop Alpha24 Quelle `4a3179a800413a07767291e8007878ba5ed5685b`, 31 Testprogramme bestanden. **Installer-Chatty: daraus neuen Alpha24-Installer bauen; bisheriger Installer enthält diese Korrektur noch nicht.** Android a21/code29 Quelle `63faec7cebfda4a5a1e311323bf96af09279b7d3`, Actions 39919433453, 47 Tests bestanden, Originalsignatur/Manifest geprüft. Test-APK `0.0.5a21-serkal-android.apk`, 2887431 Bytes, SHA256 `9798819e8adda27a0e55bbf348590ea5763fbd926069c645694c9c61e02421d6`, Library-ID `libfile_68c5ee876b1c8191bfd660cf0c3676bb`. Über bestehende App installieren; keine öffentliche Freigabe oder reale Geräteabnahme behauptet.
 
 Der vorhandene S02-Zeilenstart 20.01.2027 gegenüber Ankündigung 19.01.2027 wird ohne Originaldaten nicht pauschal umgeschrieben. S01 behält sein ursprüngliches Datum. Details/Prüfreihenfolge: [Kalender und vorläufige Staffeln](kalender-vorlaeufige-staffeln-2026-10-23.md).
+
+
+## CE – 23.10.2026: vollständige Nachfolgeübergabe gesichert
+
+Auf Kurts ausdrücklichen Auftrag: [CE-Nachfolge, Stand 23.10.2026](ce-nachfolge-2026-10-23.md), mit Code-/Build-/APK-Kennungen, Tests, Signierdatei-Identität ohne Passwort, Architektur, Regeln, offenen Fehlern, öffentlicher Abnahme und konkretem laufendem Ahsoka-Test. [Kurze Startanweisung zum Kopieren](ce-nachfolge-start.txt).
+
+**Wichtige Präzisierung:** Manuelle Android-Aufnahme erzeugt eine eigene vorläufige Staffelzeile; Wartung speichert unvollständige neue Staffel bisher als Ankündigung/Kalenderkarte und erzeugt eigene Staffelzeile erst mit vollständigem Episodenplan. Diese Gleichheit ist noch offen, nicht als erfolgreiche automatische vorläufige Archivaufnahme behaupten. Kurts aktuelles Testergebnis fehlt. Löschung aller Ahsoka-Staffeln ist von ihm ausdrücklich beabsichtigt.
+
+Neue UI-Meldung: Liste endet nach etwa 4–6 Einträgen, große schwarze Fläche unten. Gerät/Liste noch zu klären; kein belegtes fixes Android-Zeilenlimit, keine Codekorrektur dafür behauptet. Nachfolge soll diesen Punkt übernehmen. Keine weitere Programmmutation mit dieser Dokumentationsübergabe.

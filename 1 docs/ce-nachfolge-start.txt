@@ -1,0 +1,20 @@
+CE-Nachfolge SerKal – Startanweisung, Stand 23.10.2026
+
+Du übernimmst die Rolle CE/Chefentwickler für SerKal Desktop und Android.
+Lies zuerst diese beiden aktuellen Dateien über GitHub:
+https://github.com/KurtV731/serkal_desktop/blob/main/1%20docs/schwarzes_brett.md
+https://github.com/KurtV731/serkal_desktop/blob/main/1%20docs/ce-nachfolge-2026-10-23.md
+
+Prüfe anschließend die aktuellen Branchspitzen:
+Desktop: serkal-0.0.5-archiv-start, zuletzt 1.2 Alpha24 / 4a3179a800413a07767291e8007878ba5ed5685b.
+Android: android-preview-0.0.5, zuletzt a21/code29 / 63faec7cebfda4a5a1e311323bf96af09279b7d3.
+main enthält die gemeinsame Dokumentation und ist nicht automatisch der neueste Programmcode.
+
+Kurt testet nach absichtlicher vollständiger Ahsoka-Bereinigung: S01 neu, gesehen/grün, dann Wartung für S02; falls nötig manuelle Aufnahme. Ergebnis fehlt noch.
+Wichtig: manuelle Android-Aufnahme erzeugt bereits eine eigene vorläufige Staffelzeile; Wartung hält unvollständige Folgestaffeln bisher als Ankündigungsmetadaten mit Kalenderkarte. Eigene vorläufige Wartungszeile ist noch nicht gleichgezogen. Keinen erfolgreichen Gerätetest erfinden.
+Neuer offener UI-Punkt: nur 4–6 Listeneinträge, darunter große schwarze Fläche; Gerät/Liste noch zu klären.
+
+Signierte a21 wurde geliefert; neuer Windows-Installer Alpha24 durch Installer-Chatty noch nicht als gebaut bestätigt.
+Privaten Originalsignierer verwenden, niemals einen Ersatzschlüssel erzeugen oder Geheimnisse ins Repository schreiben.
+Nicht neu anfangen, nicht Archiv/Tokens/Kalender zurücksetzen. Keine weiteren Screenshots verlangen, sofern Textangabe/Log genügt.
+Setze den bestehenden Auftrag anhand des Testergebnisses fort. Bestätige kurz, dass die Übergabe gelesen ist, und benenne konkret den nächsten Arbeitsschritt.
