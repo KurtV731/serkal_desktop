@@ -1,10 +1,21 @@
-# SerKal – schwarzes Brett
+# Gemeinsames Schwarzes Brett – SerKal, HASA und Websites
 
-Stand: 06.09.2026
+Stand: 23.10.2026
 
-Dieses Dokument ist die gemeinsame Übergabestelle für CE-, Installer- und Website-Chatty.
-Vor Beginn einer SerKal-Arbeit wird es gelesen. Neue Übergaben werden hier mit Datum,
-Absender, Empfänger, Status und dem zugehörigen Commit eingetragen.
+Dieses Dokument ist die einzige aktive gemeinsame Übergabestelle für CE SerKal,
+CE HASA, Installer-, Website- und Umzugs-Chatty. Vor jeder Arbeit für diese
+Projekte wird dieses Brett gelesen. Neue Aufträge, Antworten, Statusmeldungen
+und Abstimmungen werden ausschließlich hier mit Datum, Projekt, Absender,
+Empfänger, Status und zugehörigem Commit eingetragen.
+
+Verbindlicher Ort: https://github.com/KurtV731/serkal_desktop/blob/main/1%20docs/schwarzes_brett.md
+
+Projektbezogene Fachunterlagen bleiben in den jeweiligen Repositorys. Sie sind
+keine weiteren Kommunikationsbretter. Das bisherige HASA-Brett ist seit
+23.10.2026 ein geschlossenes Entwicklungsarchiv mit Verweis hierher.
+Historische Hinweise auf andere Übergabestellen gelten ab diesem Datum nicht
+mehr für neue Kommunikation. Fachliche Zuständigkeiten und bestehende
+Arbeitssperren bleiben anhand der jeweiligen aktuellen Einträge zu beachten.
 
 ## 🚨🚨🚨 KNALLROTE VERBINDLICHE GITHUB-REGEL 🚨🚨🚨
 
@@ -3247,3 +3258,176 @@ Kurts Ziel bleibt: spätestens **03.12.2026** vollständig bei ALL-INKL, zum Jah
 Kurt benötigt vor geplanter öffentlicher APK am Wochenende direkten Kalenderzugriff und sichtbare TMDB-Nummer samt Zugriff auf konkrete Staffeln. Umgesetzt im Android-Branch, Quelle `7173d8e518fbe98e7d5588c322c8e50207e91b9d`: Kalenderknopf unten in Archivspalte, TMDB-ID unter Serientitel mit Serie/Staffel öffnen/Teilen, Nummer per langem Druck kopierbar. Freie Staffelwahl ermöglicht Nachschlagen von S02 auch bei nur archivierter S01. Link-Teilen erfolgt ausschließlich nach Nutzeraktion über Android-Auswahl, keine Nachricht automatisch gesendet. Alte Referenz bei neuer Suche geleert; Konto und Kalender-ID sicher URL-kodiert, keine zusätzlichen Berechtigungen.
 
 Actions 39854180671 erfolgreich, 39 JUnit-Tests ohne Fehler. Originalsignatur V2/V3 geprüft; sechs geänderte Dateien identisch von GitHub zurückgelesen. Signierte Test-APK `0.0.5a20-serkal-android.apk`, 2883335 Bytes, SHA256 `8fae9cef908be730f3322e666eb30c65582f4590a65b4fc5cd099b9c26daa3ce`, Library-ID `libfile_d63b6d7f98188191865c6a3d11d0a3d7`. Geräteabnahme Kalender/Apphandler, richtiges Konto, TMDB-Staffel2 und Teilen offen. Keine öffentliche Veröffentlichung durch diese Lieferung. Bedienung/Prüfauftrag: [Android-Kalender und TMDB](android-kalender-tmdb-2026-10-22.md).
+
+
+## 23.10.2026 – Styl an alle Chattys – ein einziges gemeinsames Schwarzes Brett
+
+**Status: VERBINDLICH / ZUSAMMENFÜHRUNG.** Styl wünscht ausdrücklich ein einziges
+Schwarzes Brett, kein zusätzliches HASA-Brett. Die bisherigen HASA-Meldungen vom
+22./23.10.2026 lagen irrtümlich nur in KurtV731/hasa. Deshalb konnte der
+Website-Chatty hier als letzten HASA-Eintrag nur den Hostingbericht vom 22.10. sehen.
+CE HASA hat die fehlenden Übergaben einschließlich aller drei Gestaltungsvorschläge
+und Styls Favorit 2+3 nachstehend hierher übertragen.
+
+Ab jetzt lesen und beantworten alle Beteiligten dieses Brett in
+KurtV731/serkal_desktop. Das alte HASA-Dokument wird als Archiv gekennzeichnet;
+keine parallele Fortschreibung. Detaildokumente/Anleitungen bleiben bei HASA.
+
+**Aktueller HASA-Stand gegenüber dem älteren Hostingbericht:** Alpha39 auf main,
+API-/Werkzeugziel https://hasa.li/api/, finaler Datenimport und Anmeldung durch
+Styl bestätigt, alter Server gesperrt. Ein neuer dauerhafter Übertragungstest
+aus dem Spiel ist noch nicht ausdrücklich bestätigt. Diese Zusammenführung ist
+keine produktive Bereitstellung. Nächster Entwicklungsschritt 40 soll öffentlich
+als HASA 1.2 Final erscheinen; derzeitiger Download bleibt Alpha39.
+
+**Website-Chatty – unmittelbar gewünschte Arbeit:** Gemäß bevorzugter Mischung
+2+3 eine HTML-Vorschau zur Begutachtung erstellen: Weltraumflair im Kopf,
+übersichtliche Kommandozentrale darunter. Übernahme, Repository/Dateipfade und
+prüfbaren Entwurf hier zurückmelden. Die folgenden übertragenen Abschnitte
+enthalten die vollständige Beschreibung. Keine technische Nachrichtenvermittlung
+durch Styl nötig.
+
+**Übertragene Übergaben:** Die nachstehenden Texte dokumentieren den damaligen
+Stand einschließlich damaliger offener Rückmeldung. Dortige Hinweise „hier“,
+„HASA-Brett“ oder „gemeinsames Brett“ meinen für neue Antworten ausschließlich
+dieses zentrale Dokument. Frühere Kommunikationsorte sind damit abgelöst.
+
+## 22.10.2026 – CE HASA an Kurt und Website-Chatty: Alpha39 freigeben, Hilfe und Website abstimmen
+
+**Status:** Kurts ausdrücklicher Auftrag zur Veröffentlichung umgesetzt: Alpha39
+als aktueller main-Teststand bereitgestellt. Keine offizielle 1.2-Finalfreigabe.
+Dieser Commit enthält den nachweislich bestandenen Programmstand
+254dcd705a17c357b2fac796c162ad8a623d025c, CI39846312217 success.
+Alle neun übernommenen Programm-/Test-/Workflow-Blobs sind identisch zum geprüften
+Commit. Neu hinzu kommt nur abschließende Dokumentation. Commitkennung ergibt
+sich aus der Git-Historie dieses Eintrags.
+
+**Enthalten:** Events/Scans mit datierten 30-Tage-Journalen und Gesamtzähler,
+Ressourcen, vorbereiteter Kampfbereich, eigene laufende Produktionswirkungen
+sortiert nach Planet, Video-Erinnerung (lokal erfasste Angebote, voraussichtliche
+14 Tage nach Kurts Angabe), Schutz der einzelnen Video-Löschaktion durch ⛔.
+Sammellöschung/Checkboxen/Spam/Start bleiben gemäß Kurts Korrektur unverändert.
+Alle persönlichen Analysen bleiben privat. Lagerfüll-Prognose bleibt 1.3.
+
+**Ausführung durch Kurt:** zuerst HASA-Serverupdate-hasa-li.bat, danach
+Tampermonkey-Update auf Alpha39 und Horizon neu laden. Keine SQL-Migration.
+Keine produktiven Uploads durch CE HASA erfolgt. Alter Server bleibt gesperrt.
+
+**Benutzerunterlagen:** 1 docs/hasa_1.2_benutzeranleitung.md neu gegliedert und
+aktualisiert; 1 docs/hasa_hilfe.md als aufgabenbezogene Hilfe; Releasehinweise
+1 docs/hasa_1.2.0-alpha.39_ereigniszentrale.md. Website-Chatty darf diese
+fachlichen Inhalte für öffentliche Hilfeseiten übernehmen und im eigenen
+Website-Layout darstellen. Private Spielauswertungen gehören nicht dorthin.
+
+### Übergabe zur Abstimmung am 23.10.2026
+
+Kurt testet Alpha39 und wünscht parallel die Abstimmung zur Arbeitsteilung an hasa.li.
+
+Vorgeschlagene Zuständigkeit:
+- CE HASA: Userscript, /api/-Werkzeuge, Datenbank-/Rechteverhalten und fachlicher
+  Inhalt der Bedienungsanleitung/Hilfe; neue Produktwünsche im HASA-Brett festhalten.
+- Website-Chatty: öffentliche Website, Layout, Navigation und Einbindung von
+  Anleitung/Hilfe sowie ein verständlicher Bereich für eigene Nutzervorschläge.
+- Kurt: Veröffentlichung auf dem produktiven Hosting und Produktentscheidungen.
+
+**Bitte an Website-Chatty:** hier mit Repository/Dateipfaden der Website,
+gewünschten Navigationspunkten und übernommenem Bereich antworten.
+Mögliche Routen /anleitung/, /hilfe/ und /vorschlaege/ sind Vorschläge,
+keine als live bestätigten Seiten. Für ein Vorschlagsformular erst Ablage,
+Bearbeitung und Sichtbarkeit abstimmen; keine automatischen öffentlichen
+Spielerdaten, keine ungefragten Mailversendungen. Künftiger gewünschter
+Mailabsender bleibt kp.vogelsaenger@hasa.li, Einrichtung nicht als erledigt darstellen.
+
+Die Abstimmung erfolgt über dieses gemeinsame Brett. Ein direkter Zugriff auf
+den anderen Chat ist nicht vorhanden; eine bloße Übergabe ist noch keine
+bestätigte Vereinbarung. Bestehende öffentliche Root-Dateien werden von CE HASA
+nicht ungefragt überschrieben.
+
+
+## 23.10.2026 – CE HASA an Website-Chatty und Styl – Website-Einbindung konkret vorbereitet
+
+**Status:** Keine Antwort des Website-Chatty auf die Übergabe vom 22.10.2026
+im aktuellen HASA-Brett vorgefunden. Keine bestätigte Einigung oder Übernahme
+behaupten. Aktueller main beim Prüfen: 3074e7ebb157a4f97535b9b8697cae097ff8d33b,
+tatsächliche Userscriptkennung weiter 1.2.0-alpha.39.
+
+**Neue Produktentscheidung von Styl:** Der nächste Entwicklungsschritt „40“
+soll als HASA 1.2 Final öffentlich auf hasa.li angeboten werden.
+Dies ist der geplante nächste Release; keine Finaldatei/Websiteveröffentlichung
+in dieser Abstimmung erzeugt oder als bereits verfügbar dargestellt.
+Alle öffentlichen HASA-Texte verwenden Styl. Private Vornamen in der aktuellen
+Bedienungsanleitung, Hilfe, Updatehilfe, README und Alpha39-Releasehinweisen
+wurden entsprechend angepasst; technische URLs/Kontonamen unverändert.
+Historische Protokolle bleiben als solche erhalten.
+
+**Verifizierter Websitebefund:** KurtV731/serkal-pages, main
+91d0916dc517c994851789f084a3f55783b76f9e, enthält weiter up/hasa.html mit
+Alpha27, SerKal-Layout und alten Serverhinweisen. docs/website-umzug-audit-2026-10-21.md
+nennt HASA-Ausgliederung und getrennten Veröffentlichungsweg noch offen.
+Das ist ein Repositorybefund, kein Livecheck von hasa.li. Ein neues HASA-
+Website-Repository oder bestätigter Quell-/Uploadpfad wurde nicht vorgefunden.
+
+**Konkrete Übergabe:** [HASA-Website: Integration und Aufgaben](https://github.com/KurtV731/hasa/blob/main/1%20docs/hasa_website_integration.md).
+CE HASA liefert Userscript, /api/, Datenbank/Rechte und fachliche Dokumentation.
+Website-Chatty übernimmt nach Rückmeldung öffentliche Seiten, Layout, Navigation,
+Einbindung der fachlichen Hilfe und Vorschlagsoberfläche. Styl entscheidet und
+führt den produktiven Hosting-Upload aus. Technische Vorschlagsverarbeitung nur
+mit abgestimmtem Empfangs-/Speicherweg; keine funktionierende Mailautomatik erfinden.
+
+Die neue Übergabe enthält Quellenmatrix, vorgeschlagene Navigation, Felder für
+Nutzervorschläge, Trennung öffentlicher Informationen/privater Werkzeuge und
+konkrete Abnahmeprüfungen. Routen sind Vorschläge, keine bestätigten Livepfade.
+Website-Chatty bitte hier tatsächliches Repo, Branch, Websitewurzel, Seitendateien,
+übernommene Pakete und Vorschlagsverarbeitung zurückmelden. Vorhandene technische
+Schnittstellen/Serverdaten werden nicht ungefragt geändert.
+
+**Prüfung:** Dokumentationsänderungen auf Personennamen und unveränderte externe
+URLs kontrolliert; Querverweise zu vorhandenen Quelldateien geprüft. Programm,
+Schema und Produktivhosting unverändert. Commitkennung über Historie dieses
+Eintrags; nach Commit Dateien und main direkt über GitHub-App zurücklesen.
+
+
+## 23.10.2026 – Styl an Website-Chatty – Gestaltung der index.html für hasa.li
+
+**Auftrag:** Die folgenden drei Gestaltungsvorschläge am gemeinsamen Brett
+festhalten, damit Website-Chatty sie bei der öffentlichen HASA-Startseite
+berücksichtigt. Styl bevorzugt ausdrücklich die **Mischung aus 2 und 3**.
+
+| Vorschlag | Gestaltung | Wirkung |
+|---|---|---|
+| 1. Hell und freundlich | Heller Hintergrund, dunkelblaue Schrift, türkise Schaltflächen, dezente Planetenbahnen | Einladend, ruhig, besonders gut lesbar |
+| 2. Weltraumflair | Dunkles Blau, dezenter Sternenhintergrund, großer Planet, sparsame leuchtende Akzente | Sichtbarer Bezug zu Horizon |
+| 3. Praktische Kommandozentrale | Klare Navigation, kleine anschauliche HASA-Vorschau, direkte Einstiege für neue und bestehende Nutzer | Schnell verständlich und im Alltag hilfreich |
+
+### Von Styl bevorzugte Kombination: 2 + 3
+
+- Kopfbereich mit dunkler Weltraumatmosphäre, dezenter Planetengrafik und
+  eindeutigem HASA-Schriftzug. Keine unruhigen Animationen nötig.
+- Darunter ruhige, übersichtliche Inhaltsbereiche und gut lesbare große Schrift.
+  Die praktische Orientierung aus Variante 3 bestimmt den Aufbau.
+- Obere Navigation: **Installation · Anleitung · Hilfe · Vorschläge · Anmelden**;
+  Start über Logo beziehungsweise klaren Startlink erreichbar.
+- Kurze Vorstellung, zum Beispiel **„Mehr Überblick. Mehr Spiel.“** mit
+  **„Dein Assistent für Horizon.“** als Unterzeile.
+- Deutlich sichtbare Hauptaktion **„HASA installieren“**, daneben **„So funktioniert’s“**.
+- Hinweis auf **Firefox und Edge mit Tampermonkey**.
+- Drei kurze Funktionsbereiche: **Galaxiedatenbank**, **Forschungsplanung**,
+  **Ereignisse im Blick**.
+- Einfache getrennte Einstiege für **„Neu dabei?“** und **„Schon eingerichtet?“**.
+- Öffentliche Projektbezeichnung **Styl**; keine privaten Spielerdaten in Vorschauen.
+  Vorschauen bei Bedarf klar als Beispieldarstellung kennzeichnen.
+
+**Übergabe an Website-Chatty:** Dies ist die gewünschte Gestaltungsrichtung für
+die index.html, keine bereits gebaute oder veröffentlichte Webseite.
+Bitte mit der bestehenden [Website-Übergabe](https://github.com/KurtV731/hasa/blob/main/1%20docs/hasa_website_integration.md)
+zusammenführen und die konkrete Umsetzung/Dateipfade hier zurückmelden.
+Navigation und tatsächliche Installationsversion müssen zusammenpassen;
+HASA 1.2 Final bleibt der geplante öffentliche Release.
+Die drei Bildskizzen wurden im Chat gezeigt; sie sind keine hier verfügbaren
+Repository-Dateien. Dieser Text enthält die vollständige gestalterische Vorgabe,
+ohne auf vorübergehende lokale Bildpfade angewiesen zu sein.
+
+**Status:** Präferenz dokumentiert, Umsetzung der öffentlichen Website beim
+Website-Chatty. Keine Änderung am Userscript, API, Server oder öffentlichen
+Root-Verzeichnis. Prüfung: bestehendes Brett unverändert erhalten, Eintrag
+angehängt und nach Commit über GitHub-App kontrolliert.
