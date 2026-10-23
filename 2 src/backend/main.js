@@ -2863,7 +2863,7 @@ function maintenanceAnalyse_(groups, snapshot) {
             if (!season || season.ok === false || !season.data) continue;
 
             const analysed = analyseSeason_(season.data);
-            const seasonComplete = maintenanceSeasonIsComplete_(analysed);
+            const seasonComplete = maintenanceSeasonIsComplete_(analysed) && (!entry.announcementOnly || analysed.episodeCount>=Number(entry.episoden||entry.eps||0));
             const flags = Number(entry.manualFlags || 0);
             const archiveEpisodes = Number(entry && (entry.episoden || entry.eps) || 0);
 
@@ -2931,6 +2931,7 @@ function maintenanceBuildOperations_(groups, snapshot, findings) {
         const analysed = analyseSeason_(seasonRecord.data);
         if (!maintenanceSeasonIsComplete_(analysed)) continue;
         const existing = group.entries.find(entry => maintenanceSeasonNumber_(entry) === seasonNumber) || null;
+        if(existing && existing.announcementOnly && analysed.episodeCount<Number(existing.episoden||existing.eps||0))continue;
         const base = existing || group.entries[0];
         if (!base) continue;
         if(!existing && !require(path.join(__dirname,"../common/maintenance-follow")).eligible(group.entries,seasonNumber))continue;

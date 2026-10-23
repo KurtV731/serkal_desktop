@@ -148,3 +148,15 @@ assert.equal(announcementGroup.entries[0].calendarLanguage,'de');
 assert.equal(api.maintenanceWriteProviders_([announcementGroup],announcementSnapshot).filter(r=>r.kind==='announced-season'||r.kind==='announcement-changed').length,0);
 assert.equal(announcementGroup.entries[0].note,'Meine Notiz');
 console.log('Maintenance announcement TXT round trip and second-run silence: OK');
+
+
+// An announcement with eight expected episodes cannot become a complete one-episode season.
+const provisionalFile=path.join(archivePath,'Ahsoka (2023).txt');
+fs.writeFileSync(provisionalFile,'S02; tmdb=42; eps=8; startOriginal=2027-01-19; announcementOnly=1; dates=; announcements='+encodeURIComponent(JSON.stringify([{season:2,date:'2027-01-19',title:'Ahsoka',history:[]}]))+'\n');
+const provisionalEntry=api.archiveLoad_().daten.entries.find(e=>e.tmdbId===42);
+assert.equal(provisionalEntry.announcementOnly,true);assert.equal(provisionalEntry.status,1);
+const provisionalGroup={tmdbId:42,entries:[provisionalEntry]};
+const oneEpisode=new Map([['42',{ok:true,tv:{name:'Ahsoka',number_of_seasons:2},seasons:{2:{ok:true,data:{episodes:[{air_date:'2027-01-19'}]}}}}]]);
+const provisionalFindings=api.maintenanceAnalyse_([provisionalGroup],oneEpisode);
+assert.equal(provisionalFindings.filter(f=>f.action==='apply').length,0);
+assert.equal(api.maintenanceBuildOperations_([provisionalGroup],oneEpisode,[{action:'apply',tmdbId:42,seasonNumber:2,type:'DATES_READY'}]).length,0);
