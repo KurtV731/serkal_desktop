@@ -3447,3 +3447,8 @@ Auf Kurts ausdrücklichen Auftrag: [CE-Nachfolge, Stand 23.10.2026](ce-nachfolge
 **Wichtige Präzisierung:** Manuelle Android-Aufnahme erzeugt eine eigene vorläufige Staffelzeile; Wartung speichert unvollständige neue Staffel bisher als Ankündigung/Kalenderkarte und erzeugt eigene Staffelzeile erst mit vollständigem Episodenplan. Diese Gleichheit ist noch offen, nicht als erfolgreiche automatische vorläufige Archivaufnahme behaupten. Kurts aktuelles Testergebnis fehlt. Löschung aller Ahsoka-Staffeln ist von ihm ausdrücklich beabsichtigt.
 
 Neue UI-Meldung: Liste endet nach etwa 4–6 Einträgen, große schwarze Fläche unten. Gerät/Liste noch zu klären; kein belegtes fixes Android-Zeilenlimit, keine Codekorrektur dafür behauptet. Nachfolge soll diesen Punkt übernehmen. Keine weitere Programmmutation mit dieser Dokumentationsübergabe.
+
+
+### Präzisierung von Kurt: Android-Listen links UND rechts
+
+Kurt bestätigt: Suchvorschläge links und Archivliste rechts betroffen, ausschließlich Android. Auf dem Tablet etwas längerer, auf dem Smartphone kürzerer Listenbereich; ungefähr bei 50 Prozent der Bildschirmhöhe endet die Liste, darunter große schwarze Fläche. Die frühere Frage Desktop/Android ist damit beantwortet und darf nicht erneut gestellt werden. Gemeinsame Höhen-/Scrollaufteilung sowie Zustand nach Tastatur/Zoom prüfen. Aktuelle Quell-Vorprüfung: beide ScrollViews Höhe0/Gewicht1, Panels MATCH_PARENT; kein ausdrücklich auf 50 Prozent begrenzender Wert gefunden. Laufzeitursache und Reparatur bleiben offen; keinen Datenverlust oder erfolgreiche Korrektur behaupten.

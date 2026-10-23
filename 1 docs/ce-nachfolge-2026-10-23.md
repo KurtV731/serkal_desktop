@@ -313,3 +313,8 @@ Kurt meldet nach dem bisherigen Test: Liste zeigt nur ungefähr vier bis sechs E
 Quell-Vorprüfung: Android-Archiv nutzt ScrollView mit Höhe0/Gewicht1 im rechten Panel; kein belegtes fixes Sechs-Zeilen-Limit gefunden. Nicht bereits „Ursache gefunden“ behaupten. Desktop hat mehrere responsive/feste Höhenregeln, deren tatsächliche Wirkung am betroffenen Listencontainer zu prüfen ist. Erst Zielgerät/Liste bestimmen, dann Höhen-/Flex-/Scroll-Aufteilung und Zoom/Tastaturzustand prüfen. Gewünschtes Verhalten: verfügbare Höhe sinnvoll nutzen, verbleibende Einträge erreichbar, keine großen leeren Flächen durch künstliche Begrenzung.
 
 Dieser neue Punkt wurde noch nicht im Code verändert und ist vor einer öffentlichen Abnahme offen.
+
+
+### Präzisierung von Kurt: Android-Listen links UND rechts
+
+Kurt bestätigt: Suchvorschläge links und Archivliste rechts betroffen, ausschließlich Android. Auf dem Tablet etwas längerer, auf dem Smartphone kürzerer Listenbereich; ungefähr bei 50 Prozent der Bildschirmhöhe endet die Liste, darunter große schwarze Fläche. Die frühere Frage Desktop/Android ist damit beantwortet und darf nicht erneut gestellt werden. Gemeinsame Höhen-/Scrollaufteilung sowie Zustand nach Tastatur/Zoom prüfen. Aktuelle Quell-Vorprüfung: beide ScrollViews Höhe0/Gewicht1, Panels MATCH_PARENT; kein ausdrücklich auf 50 Prozent begrenzender Wert gefunden. Laufzeitursache und Reparatur bleiben offen; keinen Datenverlust oder erfolgreiche Korrektur behaupten.

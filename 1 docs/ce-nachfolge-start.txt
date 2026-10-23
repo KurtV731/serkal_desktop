@@ -18,3 +18,5 @@ Signierte a21 wurde geliefert; neuer Windows-Installer Alpha24 durch Installer-C
 Privaten Originalsignierer verwenden, niemals einen Ersatzschlüssel erzeugen oder Geheimnisse ins Repository schreiben.
 Nicht neu anfangen, nicht Archiv/Tokens/Kalender zurücksetzen. Keine weiteren Screenshots verlangen, sofern Textangabe/Log genügt.
 Setze den bestehenden Auftrag anhand des Testergebnisses fort. Bestätige kurz, dass die Übergabe gelesen ist, und benenne konkret den nächsten Arbeitsschritt.
+
+Präzisierung: UI-Fehler betrifft beide Listen links/rechts auf Android, etwa halbe Bildschirmhöhe; Tablet länger, Smartphone kürzer. Gerätefrage ist beantwortet, Ursache/Reparatur noch offen.
