@@ -10,12 +10,10 @@ Empfänger, Status und zugehörigem Commit eingetragen.
 
 Verbindlicher Ort: https://github.com/KurtV731/serkal_desktop/blob/main/1%20docs/schwarzes_brett.md
 
-Projektbezogene Fachunterlagen bleiben in den jeweiligen Repositorys. Sie sind
-keine weiteren Kommunikationsbretter. Die frühere HASA-Brettdatei wurde aus dem aktuellen HASA-Projektstand entfernt;
-ihre Entwicklungshistorie bleibt in Git nachvollziehbar. Es gibt keine zweite
-Brettdatei. Fachunterlagen bleiben in ihren Projekt-Repositorys, sind aber keine
-Kommunikationsbretter. Fachliche Zuständigkeiten und bestehende Arbeitssperren
-stehen in diesem gemeinsamen Brett.
+Projektbezogene Fachunterlagen bleiben in ihren Repositorys; sie sind keine
+weiteren Kommunikationsbretter. Die frühere HASA-Brettdatei wurde aus dem
+aktuellen HASA-Projektstand entfernt. Ihre Geschichte bleibt in Git erhalten.
+Alle laufenden Übergaben und Zuständigkeiten stehen auf diesem einen Brett.
 
 ## 🚨🚨🚨 KNALLROTE VERBINDLICHE GITHUB-REGEL 🚨🚨🚨
 
