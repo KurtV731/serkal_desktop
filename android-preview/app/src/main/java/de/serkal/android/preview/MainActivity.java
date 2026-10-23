@@ -364,9 +364,9 @@ public class MainActivity extends Activity {
         for(JSONObject e:ArchiveOrder.sorted(entries,byDate,english)) {
             LinearLayout item=new LinearLayout(this);item.setOrientation(LinearLayout.HORIZONTAL);item.setGravity(Gravity.CENTER_VERTICAL);item.setBackgroundColor(CARD);item.setMinimumHeight(dp(38));
             LinearLayout.LayoutParams rowParams=new LinearLayout.LayoutParams(-1,-2);rowParams.setMargins(0,0,0,dp(2));item.setLayoutParams(rowParams);
-            String upcoming="";org.json.JSONArray anns=e.optJSONArray("announcements");if(anns!=null)for(int ai=0;ai<anns.length();ai++){JSONObject a=anns.optJSONObject(ai);if(a!=null && !SeasonAnnouncements.date(a,"date").isEmpty())upcoming+=" · S"+a.optInt("season")+": "+a.optString("date")+" (?)";}
-            TextView title=text(ArchiveOrder.label(e,english)+upcoming,10,TEXT);title.setMaxLines(2);title.setEllipsize(android.text.TextUtils.TruncateAt.END);item.addView(title,new LinearLayout.LayoutParams(0,-2,1));
+            TextView title=text(ArchiveOrder.label(e,english),10,TEXT);title.setMaxLines(2);title.setEllipsize(android.text.TextUtils.TruncateAt.END);item.addView(title,new LinearLayout.LayoutParams(0,-2,1));
             String iso=ArchiveOrder.start(e);String display=iso.isEmpty()?"—":iso.substring(8,10)+"."+iso.substring(5,7)+"."+iso.substring(0,4);
+            if(e.optBoolean("announcementOnly"))display+=" (?)";
             TextView date=text(display,8,MUTED);date.setSingleLine(true);date.setGravity(Gravity.RIGHT);item.addView(date,new LinearLayout.LayoutParams(dp(59),-2));
             int status=ArchiveOrder.status(e,today);TextView mark=text(ArchiveOrder.icon(status),16,status==4?Color.rgb(40,170,110):status==3?RED:status==1?Color.rgb(210,160,30):BLUE);
             mark.setGravity(Gravity.CENTER);mark.setContentDescription(archiveStatusLabel(e));item.addView(mark,new LinearLayout.LayoutParams(dp(32),dp(38)));
@@ -422,6 +422,7 @@ public class MainActivity extends Activity {
                 StringBuilder detail=new StringBuilder(archiveStatusLabel(e)+" · "+e.optString("seasonLabel"));
                 String providers=WatchProviders.text(e.optJSONObject("watchProviders"),e.optString("note"),english);
                 detail.append(archiveText("EPISODES")).append(e.optInt("eps"));
+            if(e.optBoolean("announcementOnly"))detail.append(english?"\nAnnounced start; episode dates are not confirmed.":"\nAngekündigter Start; Folgentermine sind noch nicht bestätigt.");
                 if(!description.isEmpty()) detail.append("\n\n").append(description);
                 if(!providers.isEmpty())detail.append("\n\n").append(providers);
                 detail.append(archiveText("DATES"));
@@ -540,18 +541,16 @@ public class MainActivity extends Activity {
                         TmdbClient tmdb=new TmdbClient(key);JSONObject de=tmdb.details(id,false),en=tmdb.details(id,true);
                         JSONObject detail=language?en:de;
                         JSONObject episodeData=tmdb.get("tv/"+id+"/season/"+season,"language="+(language?"en-US":"de-DE"));
-                        org.json.JSONArray episodes=episodeData.getJSONArray("episodes"),dates=new org.json.JSONArray();
-                        for(int i=0;i<episodes.length();i++){String date=episodes.getJSONObject(i).optString("air_date");if(!date.matches("\\d{4}-\\d{2}-\\d{2}"))throw new Exception("DATES");dates.put(date);}
-                        if(dates.length()==0)throw new Exception("DATES");
+                        JSONObject payload=SeasonInput.schedule(detail,episodeData,season);
                         String first=detail.optString("first_air_date");if(first.length()<4)throw new Exception("YEAR");
-                        JSONObject payload=new JSONObject().put("tmdbId",id).put("titel",detail.getString("name")).put("jahr",first.substring(0,4))
-                            .put("staffelNummer",season).put("episoden",dates.length()).put("termindaten",dates)
+                        payload.put("tmdbId",id).put("titel",detail.getString("name")).put("jahr",first.substring(0,4))
+                            .put("staffelNummer",season)
                             .put("descDE",de.optString("overview")).put("descEN",en.optString("overview"))
                             .put("titleDE",de.optString("name")).put("titleEN",en.optString("name")).put("calendarLanguage",language?"en":"de");
                         handler.post(() -> {if(generation!=googleGeneration || isFinishing())return;
                             archiveDialogOpen=true;
         dialogBuilder().setTitle(english ? "Archive and calendar" : "Archiv und Kalender")
-                                .setMessage(detail.optString("name")+" · S"+season+" · "+dates.length()+(english ? " episodes. Save on this device?" : " Folgen. Auf diesem Gerät speichern?"))
+                                .setMessage(detail.optString("name")+" · S"+season+" · "+payload.optInt("episoden")+(english ? " episodes. " : " Folgen. ")+(payload.optBoolean("announcementOnly")?(english?"Announced start: ":"Angekündigter Start: ")+payload.optString("announcedStart")+(english?". Episode dates remain unknown. ":". Folgentermine sind noch unbekannt. "):"")+(english?"Save on this device?":"Auf diesem Gerät speichern?"))
                                 .setPositiveButton(english ? "Send" : "Senden",(dialog,which)->sendRequest("insert",payload))
                                 .setNegativeButton(english ? "Cancel" : "Abbrechen",null).setOnDismissListener(_closedDialog -> archiveDialogOpen=false).show();});
                     }catch(Exception e){handler.post(()->{if(generation==googleGeneration)statusText.setText(english ? "Season unavailable or episode dates incomplete. Nothing sent." : "Staffel nicht verfügbar oder Folgentermine unvollständig. Nichts gesendet.");});}
@@ -819,7 +818,7 @@ public class MainActivity extends Activity {
         TextView title = text("SerKal", 13, TEXT);
         title.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
         top.addView(title, new LinearLayout.LayoutParams(0, dp(31), 1));
-        TextView preview = text(BuildConfig.VERSION_NAME + (english ? " · zoom / move" : " · zoomen / bewegen"), 7.5f, MUTED);
+        TextView preview = text(BuildConfig.VERSION_NAME, 7.5f, MUTED);
         preview.setGravity(Gravity.CENTER_VERTICAL | Gravity.RIGHT);
         top.addView(preview, new LinearLayout.LayoutParams(-2, dp(31)));
         Button zoomOut = new Button(this);
@@ -855,6 +854,9 @@ public class MainActivity extends Activity {
         styleTopButton_(theme);
         theme.setOnClickListener(v -> { dark=!dark;getPreferences(0).edit().putBoolean("dark",dark).apply();setPalette();configureFullscreen_();buildScreen(); });
         top.addView(theme,new LinearLayout.LayoutParams(dp(58),dp(28)));
+        Button calendarShortcut=new Button(this);calendarShortcut.setText(english?"Calendar":"Kalender");
+        styleTopButton_(calendarShortcut);calendarShortcut.setContentDescription(english?"Open Google calendar":"Google-Kalender öffnen");
+        calendarShortcut.setOnClickListener(v->openCalendar());top.addView(calendarShortcut,new LinearLayout.LayoutParams(dp(76),dp(28)));
         root.addView(top);
 
         zoomSurface = new ZoomPanLayout(this);
@@ -981,6 +983,7 @@ public class MainActivity extends Activity {
         button.setPadding(dp(2), 0, dp(2), 0);
     }
 }
+
 
 
 

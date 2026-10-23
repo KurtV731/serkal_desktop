@@ -78,6 +78,7 @@ final class ArchiveCodec {
                     .put("descDE",decode(f.getOrDefault("descDE",f.getOrDefault("ov_de",""))))
                     .put("descEN",decode(f.getOrDefault("descEN",f.getOrDefault("ov_en",""))))
                     .put("announcements",announcements(f.getOrDefault("announcements","")))
+                    .put("announcementOnly",f.getOrDefault("announcementOnly","0").equals("1"))
                     .put("calendarLanguage",f.getOrDefault("calendarLanguage","de"))
                     .put("watchProviders",provider(f.getOrDefault("watchProviders","")))
                     .put("titleDE",decode(f.getOrDefault("titleDE",""))).put("titleEN",decode(f.getOrDefault("titleEN","")))
@@ -104,18 +105,33 @@ final class ArchiveCodec {
         JSONObject r=new JSONObject(original.toString());JSONArray files=r.getJSONArray("files");int id=payload.getInt("tmdbId");
         if(id<=0)throw new Exception("COPY_INVALID");String season=action.equals("insert")?String.format(Locale.ROOT,"S%02d",payload.getInt("staffelNummer")):payload.getString("seasonLabel");
         if(!Arrays.asList("insert","notes","delete","seen").contains(action))throw new Exception("COPY_INVALID");
+        boolean provisional=action.equals("insert") && payload.optBoolean("announcementOnly");
+        JSONArray announcementList=new JSONArray();
+        if(provisional){
+            for(int i=0;i<files.length();i++)for(String raw:files.getJSONObject(i).getString("content").split("\\r?\\n")){
+                Map<String,String> f=fields(raw);if(number(f.getOrDefault("tmdb","0"))!=id)continue;
+                JSONArray list=announcements(f.getOrDefault("announcements",""));for(int j=0;j<list.length();j++){
+                    JSONObject a=list.getJSONObject(j);boolean exists=false;for(int k=0;k<announcementList.length();k++)if(announcementList.getJSONObject(k).optInt("season")==a.optInt("season"))exists=true;
+                    if(!exists)announcementList.put(a);
+                }
+            }
+            String today=new SimpleDateFormat("yyyy-MM-dd",Locale.ROOT).format(new Date());
+            SeasonAnnouncements.update(announcementList,payload.getInt("staffelNummer"),payload.getString("announcedStart"),payload.getString("titel"),payload.optString("calendarLanguage").equals("en"),today);
+            for(int i=0;i<announcementList.length();i++)if(announcementList.getJSONObject(i).optInt("season")==payload.getInt("staffelNummer"))announcementList.getJSONObject(i).put("episodeCount",payload.optInt("episoden"));
+        }
         boolean found=false;JSONArray result=new JSONArray();String target="";
         for(int i=0;i<files.length();i++){
             JSONObject file=files.getJSONObject(i);StringBuilder content=new StringBuilder();boolean fileHas=false;
             for(String raw:file.getString("content").split("\\r?\\n",-1)) {
                 LinkedHashMap<String,String> f=fields(raw);boolean matches=number(f.getOrDefault("tmdb","0"))==id;
-                if(matches)fileHas=true;
+                if(matches){fileHas=true;if(provisional){f.put("announcements",encode(announcementList.toString()));raw=line(f);}}
                 if(matches && action.equals("delete")){found=true;continue;}
                 if(matches && f.getOrDefault("season","").equalsIgnoreCase(season)) {
                     found=true;
                     if(action.equals("seen")){f.put("seen",payload.optBoolean("seen")?"1":"0");raw=line(f);}
                     if(action.equals("notes")){note(f,payload.getString("note"));raw=line(f);}
-                    if(action.equals("insert")){f.put("eps",String.valueOf(payload.getInt("episoden")));f.put("dates",compact(payload.getJSONArray("termindaten")));f.put("startOriginal",payload.getJSONArray("termindaten").getString(0));
+                    if(action.equals("insert") && (!provisional || f.getOrDefault("announcementOnly","0").equals("1"))){
+                        f.put("announcementOnly",provisional?"1":"0");f.put("eps",String.valueOf(payload.getInt("episoden")));f.put("dates",compact(payload.getJSONArray("termindaten")));f.put("startOriginal",provisional?payload.getString("announcedStart"):payload.getJSONArray("termindaten").getString(0));
                         f.put("descDE",encode(payload.optString("descDE")));f.put("descEN",encode(payload.optString("descEN")));
                         for(String k:new String[]{"titleDE","titleEN"})if(payload.has(k) && (number(f.getOrDefault("manualFlags","0"))&1)==0)f.put(k,encode(payload.optString(k)));
                         if(payload.has("calendarLanguage"))f.put("calendarLanguage",payload.optString("calendarLanguage"));note(f,decode(f.getOrDefault("note","")));raw=line(f);}
@@ -129,7 +145,7 @@ final class ArchiveCodec {
         if(action.equals("insert") && !found) {
             if(target.isEmpty())target=payload.getString("titel").replaceAll("[\\\\/:*?\"<>|]","").trim()+" ("+payload.getString("jahr")+").txt";
             if(!safeName(target))throw new Exception("COPY_INVALID");
-            LinkedHashMap<String,String> f=new LinkedHashMap<>();f.put("season",season);f.put("startOriginal",payload.getJSONArray("termindaten").getString(0));
+            LinkedHashMap<String,String> f=new LinkedHashMap<>();f.put("season",season);f.put("startOriginal",provisional?payload.getString("announcedStart"):payload.getJSONArray("termindaten").getString(0));f.put("announcementOnly",provisional?"1":"0");if(provisional)f.put("announcements",encode(announcementList.toString()));
             f.put("eps",String.valueOf(payload.getInt("episoden")));f.put("tmdb",String.valueOf(id));f.put("titleOriginal",encode(payload.getString("titel")));
             f.put("dates",compact(payload.getJSONArray("termindaten")));f.put("descDE",encode(payload.optString("descDE")));f.put("descEN",encode(payload.optString("descEN")));
                         for(String k:new String[]{"titleDE","titleEN"})if(payload.has(k) && (number(f.getOrDefault("manualFlags","0"))&1)==0)f.put(k,encode(payload.optString(k)));
@@ -148,11 +164,16 @@ final class ArchiveCodec {
                 for(int k=0;k<patches.length();k++){JSONObject p=patches.getJSONObject(k);if(number(f.getOrDefault("tmdb","0"))!=p.getInt("tmdbId") || !f.getOrDefault("season","").equals(p.getString("seasonLabel")))continue;
                     if(p.has("watchProviders"))f.put("watchProviders",encode(p.getJSONObject("watchProviders").toString()));
                     for(String name:new String[]{"titleDE","titleEN"})if(p.has(name) && (number(f.getOrDefault("manualFlags","0"))&1)==0)f.put(name,encode(p.getString(name)));
-                    if(p.has("announcements"))f.put("announcements",encode(p.getJSONArray("announcements").toString()));
+                    if(p.has("announcements")){
+                        JSONArray list=p.getJSONArray("announcements");f.put("announcements",encode(list.toString()));
+                        if(f.getOrDefault("announcementOnly","0").equals("1"))for(int ai=0;ai<list.length();ai++){
+                            JSONObject a=list.getJSONObject(ai);if(a.optInt("season")==number(f.getOrDefault("season","").replaceAll("\\D","")) && !SeasonAnnouncements.date(a,"date").isEmpty())f.put("startOriginal",a.getString("date"));
+                        }
+                    }
                     if(p.has("calendarLanguage"))f.put("calendarLanguage",p.getString("calendarLanguage"));
                     if(p.has("termindaten") && (number(f.getOrDefault("manualFlags","0"))&56)==0){
                         LinkedHashMap<String,String> beforeDates=new LinkedHashMap<>(f);
-                        try{JSONArray dates=p.getJSONArray("termindaten");f.put("dates",compact(dates));f.put("startOriginal",dates.getString(0));f.put("eps",String.valueOf(p.getInt("episoden")));note(f,decode(f.getOrDefault("note","")));}
+                        try{JSONArray dates=p.getJSONArray("termindaten");f.put("announcementOnly","0");f.put("dates",compact(dates));f.put("startOriginal",dates.getString(0));f.put("eps",String.valueOf(p.getInt("episoden")));note(f,decode(f.getOrDefault("note","")));}
                         catch(Exception invalid){if(!(invalid instanceof java.text.ParseException) && !"COPY_INVALID_DATE".equals(invalid.getMessage()))throw invalid;f=beforeDates;p.put("applyError","COPY_INVALID_DATE").put("fileName",file.getString("name"));}
                     }
                     lines[j]=line(f);changed=true;
@@ -163,4 +184,5 @@ final class ArchiveCodec {
         return record;
     }
 }
+
 

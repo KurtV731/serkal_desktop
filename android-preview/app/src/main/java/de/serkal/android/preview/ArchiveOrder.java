@@ -21,9 +21,11 @@ final class ArchiveOrder {
     }
     static int status(JSONObject e,String today){
         if(e.optInt("seen")==1)return 4;
+        if(e.optBoolean("announcementOnly"))return 1;
         JSONArray dates=e.optJSONArray("dates");if(dates==null || dates.length()==0)return 0;
         if(dates.optString(0).compareTo(today)>0)return 1;
         return dates.optString(dates.length()-1).compareTo(today)>=0?2:3;
     }
     static String icon(int status){return status==4?"✓":status==3?"✓":status==1?"◷":status==2?"●":"○";}
 }
+

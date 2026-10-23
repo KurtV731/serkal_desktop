@@ -19,6 +19,7 @@ final class SeasonAnnouncements {
     if(d.isEmpty() && history!=null)for(int k=history.length()-1;k>=0;k--){d=date(history.getJSONObject(k),"to");if(!d.isEmpty())break;}if(d.isEmpty())continue;
     boolean en=a.optString("language").equals("en");String key=e.getInt("tmdbId")+String.format(Locale.ROOT,":S%02d",a.getInt("season"));
     StringBuilder desc=new StringBuilder(en?"Provisional start date. This card remains until you delete it.":"Vorläufiges Startdatum. Diese Karte bleibt bis zur manuellen Löschung bestehen.");
+    if(a.optInt("episodeCount")>0)desc.append("\n").append(en?"Expected episodes: ":"Erwartete Folgen: ").append(a.optInt("episodeCount"));
     if(history!=null)for(int k=0;k<history.length();k++){JSONObject h=history.getJSONObject(k);String from=date(h,"from"),to=date(h,"to");desc.append('\n').append(en?"Recorded on ":"Erfasst am ").append(h.optString("capturedAt")).append(": ").append(from.isEmpty()?(en?"announced for ":"angekündigt für "):(en?"from ":"von ")+from+" → ").append(to.isEmpty()?(en?"date unknown":"Termin unbekannt"):to);}
     wanted.put(key,new JSONObject().put("id","serkal"+ArchiveCodec.hash("SHA-1","announcement:"+key)).put("summary",(en?"Announced season start: ":"Angekündigter Staffelstart: ")+a.optString("title")+String.format(Locale.ROOT," S%02d",a.getInt("season"))).put("description",desc.toString()).put("start",new JSONObject().put("date",d)).put("end",new JSONObject().put("date",ArchiveCodec.dateShift(d,1))).put("transparency","transparent").put("extendedProperties",new JSONObject().put("private",new JSONObject().put("serkal","announcement").put("announcementKey",key))));
    }
@@ -35,3 +36,4 @@ final class SeasonAnnouncements {
   for(JSONObject e:wanted.values())try{client.request(base,"POST",e.toString(),"application/json");}catch(Exception error){if(!"GOOGLE_HTTP_409".equals(error.getMessage()))throw error;JSONObject old=client.get(base+"/"+ArchiveCopyClient.esc(e.getString("id")));if(!old.optString("status").equals("cancelled"))throw error;}
  }
 }
+

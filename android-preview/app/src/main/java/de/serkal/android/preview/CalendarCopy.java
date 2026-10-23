@@ -15,7 +15,7 @@ final class CalendarCopy {
     static List<JSONObject> desired(JSONObject record) throws Exception {
         List<JSONObject> events=new ArrayList<>();JSONArray entries=ArchiveCodec.entries(record);String year=String.valueOf(Calendar.getInstance().get(Calendar.YEAR));
         for(int n=0;n<entries.length();n++){
-            JSONObject e=entries.getJSONObject(n);JSONArray dates=e.getJSONArray("dates");boolean current=false;
+            JSONObject e=entries.getJSONObject(n);if(e.optBoolean("announcementOnly"))continue;JSONArray dates=e.getJSONArray("dates");boolean current=false;
             for(int i=0;i<dates.length();i++)if(dates.getString(i).substring(0,4).compareTo(year)>=0)current=true;
             if(!current || e.optInt("tmdbId")<=0)continue;
             for(int i=0;i<dates.length();){int last=i;while(last+1<dates.length() && dates.getString(last+1).equals(dates.getString(i)))last++;
@@ -57,4 +57,5 @@ final class CalendarCopy {
         }
     }
 }
+
 
