@@ -43,4 +43,11 @@ public class SeasonInputTest {
   JSONObject old=ArchiveCodec.entries(r).getJSONObject(1);r=ArchiveCodec.edit(r,"insert",payload(false));JSONObject e=ArchiveCodec.entries(r).getJSONObject(1);
   assertFalse(e.getBoolean("announcementOnly"));assertEquals(old.getJSONArray("dates").toString(),e.getJSONArray("dates").toString());
  }
+ @Test public void maintenanceDoesNotPromoteOneKnownEpisodeToEightConfirmedEpisodes()throws Exception{
+  JSONObject r=ArchiveCodec.edit(new ArchiveCopyTest().record(),"insert",payload(false));
+  JSONObject one=new JSONObject().put("air_date","2027-01-19").put("episodes",new JSONArray().put(new JSONObject().put("episode_number",1).put("air_date","2027-01-19")));
+  JSONObject result=Maintenance.run(ArchiveCodec.entries(r),(path,query)->path.contains("/watch/providers")?new JSONObject():path.contains("/season/")?one:tv().put("name","Ahsoka").put("number_of_seasons",2),"DE",true,"2026-10-23T12:00:00Z");
+  JSONArray patches=result.getJSONArray("patches");for(int i=0;i<patches.length();i++){JSONObject p=patches.getJSONObject(i);if(p.optString("seasonLabel").equals("S02"))assertFalse(p.has("termindaten"));}
+  JSONObject after=ArchiveCodec.entries(ArchiveCodec.maintenance(r,patches)).getJSONObject(1);assertTrue(after.getBoolean("announcementOnly"));assertEquals(8,after.getInt("eps"));
+ }
 }

@@ -47,6 +47,8 @@ final class Maintenance {
                         JSONArray old=e==null?null:e.optJSONArray("datesOriginal");String previous=old==null?"":old.optString(number-1);
                         if(e!=null && !previous.equals(date))report.put(new JSONObject().put("kind",previous.isEmpty()?"new-episode":"changed-episode").put("title",title).put("season",n).put("episode",number).put("date",date));
                     }
+                    try{complete=complete && !SeasonInput.schedule(tv,season,n).optBoolean("announcementOnly");}catch(Exception noStart){complete=false;}
+                    if(e!=null && e.optBoolean("announcementOnly") && episodes.length()<e.optInt("eps"))complete=false;
                     if(e==null && n>last && follow && complete && episodes.length()>1){
                         JSONObject payload=new JSONObject().put("tmdbId",id).put("titel",title).put("jahr",group.getValue().get(0).getString("year")).put("staffelNummer",n).put("episoden",episodes.length()).put("termindaten",dates).put(english?"titleEN":"titleDE",title).put("calendarLanguage",english?"en":"de");
                         patches.put(new JSONObject().put("tmdbId",id).put("seasonLabel",String.format(Locale.ROOT,"S%02d",n)).put("insertPayload",payload));
@@ -64,4 +66,5 @@ final class Maintenance {
         return new JSONObject().put("country",country).put("checkedAt",now).put("patches",patches).put("report",report).put("providers",providers).put("errors",errors);
     }
 }
+
 
