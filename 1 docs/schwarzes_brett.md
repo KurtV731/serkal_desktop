@@ -3431,3 +3431,12 @@ ohne auf vorübergehende lokale Bildpfade angewiesen zu sein.
 Website-Chatty. Keine Änderung am Userscript, API, Server oder öffentlichen
 Root-Verzeichnis. Prüfung: bestehendes Brett unverändert erhalten, Eintrag
 angehängt und nach Commit über GitHub-App kontrolliert.
+
+
+## CE – 23.10.2026: a21 / Desktop Alpha24 – sichtbarer Kalender und Ankündigung statt Terminablehnung
+
+Kurts Test bestätigte zwei echte Lücken: Kalenderknopf unten im verschiebbaren Bereich nicht erreichbar, Android verlangte sämtliche Episodentermine. Außerdem wurden gemeinsame S02-Ankündigungen fälschlich an die S01-Zeile gehängt. Behoben im Code: fester Kalenderknopf oben, bekannte Staffelstarts als vorläufige eigene [Sxx]-Zeile mit erwarteter Folgenzahl und dauerhafter Ankündigungskarte, keine erfundenen Episodentermine. Desktop-Datumsspalte ohne Staffelsuffixe; vorläufige Android-Zeilen werden beim regulären Episodenkalender übersprungen. Vollständige Termine können später übernommen werden; einzelne Folge bei acht erwarteten reicht nicht.
+
+Desktop Alpha24 Quelle `4a3179a800413a07767291e8007878ba5ed5685b`, 31 Testprogramme bestanden. **Installer-Chatty: daraus neuen Alpha24-Installer bauen; bisheriger Installer enthält diese Korrektur noch nicht.** Android a21/code29 Quelle `63faec7cebfda4a5a1e311323bf96af09279b7d3`, Actions 39919433453, 47 Tests bestanden, Originalsignatur/Manifest geprüft. Test-APK `0.0.5a21-serkal-android.apk`, 2887431 Bytes, SHA256 `9798819e8adda27a0e55bbf348590ea5763fbd926069c645694c9c61e02421d6`, Library-ID `libfile_68c5ee876b1c8191bfd660cf0c3676bb`. Über bestehende App installieren; keine öffentliche Freigabe oder reale Geräteabnahme behauptet.
+
+Der vorhandene S02-Zeilenstart 20.01.2027 gegenüber Ankündigung 19.01.2027 wird ohne Originaldaten nicht pauschal umgeschrieben. S01 behält sein ursprüngliches Datum. Details/Prüfreihenfolge: [Kalender und vorläufige Staffeln](kalender-vorlaeufige-staffeln-2026-10-23.md).
