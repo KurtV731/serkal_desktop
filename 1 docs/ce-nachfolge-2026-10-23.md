@@ -334,3 +334,19 @@ Nächster Reparaturschritt: vor jeder Zustandsänderung lokalen Archivbestand UN
 ### Konkreter Folgefehler: Löschversuch meldet endloses Vorbereiten statt Konflikt
 
 Neuer Screenshot von Kurt: „Nicht gelöscht: Archiv wird vorbereitet. Lesen ist möglich; bitte vor Änderungen das Laden abwarten.“ Zusammen mit der vorherigen sichtbaren Konfliktmeldung ergibt sich ein konkreter Quellbefund: DesktopCopy.assertWrite prüft !initialized VOR fatal(). Wenn die erste Synchronisation mit COPY_CONFLICT scheitert, bleibt initialized=false; spätere Löschversuche maskieren den gespeicherten Konflikt als COPY_LOADING. Einfach länger zu warten behebt diesen Zustand nicht. Nutzer nicht wieder auf bloßes Warten vertrösten. Fehlermeldungspriorität ist zu korrigieren und der eigentliche sichere Konfliktlösungsweg bleibt dringend zu bauen. Keine Änderung am Nutzerarchiv mit dieser Diagnose; keine erfolgreiche Reparatur behaupten. Nutzer kann bei ausstehender Übertragung über den vorhandenen Exit-Dialog „Lokal gesichert beenden“, sofern keine separate ungespeicherte UI-Änderung vorausgeht.
+
+
+## Kurt-Entscheidung – Konflikt-Notausgang per ausdrücklicher Nutzerwahl (23.10.2026)
+
+Kurt entscheidet verbindlich: Bei einem blockierten Abschluss/Schreibvorgang soll eine deutlich rote Aktion verfügbar sein. Mit ihr erklärt Kurt den aktuell geöffneten lokalen Archivstand ausdrücklich zum maßgeblichen Ausgangsstand. Die Auswahl trifft immer der Mensch, nie eine automatische Regel zur Wahl zwischen konkurrierenden Dateiständen.
+
+### Verbindliches Verhalten
+- Die Aktion muss aus dem Konflikt heraus den Abschluss ermöglichen; kein endloses „wird vorbereitet“ und kein dauerhaft ausgesperrtes eigenes Archiv.
+- Die explizite Nutzerwahl setzt den vollständigen aktuellen Archivstand dieses Geräts als neue maßgebliche Version. Keine Zusammenführung mit abweichenden Ständen und kein stilles „neuester Zeitstempel gewinnt“.
+- Vor der Umstellung lokalen Inhalt sichern. Bisherige konkurrierende Cloud-Stände bleiben als wiederherstellbare Historie erhalten, werden aber aus der aktiven Versionskette genommen; nichts blind endgültig löschen.
+- Lokal gespeicherte Entscheidung/Übertragung darf das Beenden nicht wieder blockieren. UI muss „lokal festgelegt/noch nicht bei Google bestätigt“ von „Google bestätigt“ unterscheiden; erst nach Quittung ist die Cloud-Übernahme bestätigt.
+- Ein anderes Gerät mit altem Stand darf den neu festgelegten Stand nicht still überschreiben. Bei dessen Abweichung kann Kurt wiederum ausdrücklich das dort geöffnete Archiv zum maßgeblichen Stand erklären.
+- Die rote Aktion ist eine bewusste Vollarchiv-Entscheidung, keine gewöhnliche Retry-/Speichern-Schaltfläche. Sie darf nicht automatisch ausgelöst werden.
+
+### Umsetzung offen
+Noch nicht implementiert. Vor Codeänderung Architektur und Tests für Zwischenabbruch, doppelte/konkurrierende Auflösungen, Backup/Wiederherstellung und offline beendetes Gerät definieren. Keine Archivdaten auf Basis dieser Produktentscheidung jetzt verändern.
