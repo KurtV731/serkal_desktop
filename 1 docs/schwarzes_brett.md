@@ -3452,3 +3452,14 @@ Neue UI-Meldung: Liste endet nach etwa 4–6 Einträgen, große schwarze Fläche
 ### Präzisierung von Kurt: Android-Listen links UND rechts
 
 Kurt bestätigt: Suchvorschläge links und Archivliste rechts betroffen, ausschließlich Android. Auf dem Tablet etwas längerer, auf dem Smartphone kürzerer Listenbereich; ungefähr bei 50 Prozent der Bildschirmhöhe endet die Liste, darunter große schwarze Fläche. Die frühere Frage Desktop/Android ist damit beantwortet und darf nicht erneut gestellt werden. Gemeinsame Höhen-/Scrollaufteilung sowie Zustand nach Tastatur/Zoom prüfen. Aktuelle Quell-Vorprüfung: beide ScrollViews Höhe0/Gewicht1, Panels MATCH_PARENT; kein ausdrücklich auf 50 Prozent begrenzender Wert gefunden. Laufzeitursache und Reparatur bleiben offen; keinen Datenverlust oder erfolgreiche Korrektur behaupten.
+
+
+## CE HASA – 23.10.2026: Infrastruktur Stufe 0 – Gebäudefall für 40 korrigiert
+
+**Status: KORREKTUR GESICHERT / NOCH KEIN NEUER RELEASE.** Styl meldet Infrastruktur 0, Planer dagegen vorhanden 9; nach Ausbau auf 1 korrekt. Die frühere Nullstandreparatur schützt Forschungen. Gebäude wurden weiterhin aus Körper/Umfeld gelesen; ein Nachbar mit Ausbaustufe 9 reproduziert den Fehler exakt. Die konkrete Zahlquelle in Styls echter Seite bleibt ohne HTML unbestätigt.
+
+Korrektur im HASA-Branch [fix/gebaeude-nullstand](https://github.com/KurtV731/hasa/tree/fix/gebaeude-nullstand), Codecommit [d2b5779](https://github.com/KurtV731/hasa/commit/d2b5779630b0ffc16153ebb9237023d035a852c8): eigene Gebäudestufe nur aus eigener Überschrift, noch nicht gebauter interner Titel mit Bauaktion ergibt 0; keine Kosten/Nachbarstufen als Ersatz. Falsche Altwerte werden beim erneuten Besuch korrigiert. Laufende Bauten bleiben bis Fertigstellung auf vorheriger Stufe, unklare Angaben bleiben unbekannt/bekannt wie zuvor, Forschungs-/Planetenbestände bleiben getrennt.
+
+**Prüfung:** 7 Forschungs- und 12 Gebäudefälle lokal mit JSDOM und echtem Chromium bestanden. Alter Alpha39-Code scheitert in beiden Umgebungen am neuen Prüffall mit 9 statt 0. Automatischer Gesamtprüflauf [39937456122](https://github.com/KurtV731/hasa/actions/runs/39937456122) beim Eintrag noch in Arbeit. [Befund und Prüffälle](https://github.com/KurtV731/hasa/blob/fix/gebaeude-nullstand/1%20docs/gebaeude-nullstand-2026-10-23.md).
+
+Für kommende 40er-/1.2-Fassung übernehmen; aktuelle main-/Downloadfassung bleibt Alpha39. Kein neuer Versionssprung und kein produktiver Upload in dieser Fehlerbearbeitung. Später neues Userscript erforderlich, kein Serverupdate für diese Korrektur. Styl muss keine Infrastruktur bauen, um den Erkennungsfehler zu umgehen. Die Originalabbildung wurde nicht veröffentlicht.
