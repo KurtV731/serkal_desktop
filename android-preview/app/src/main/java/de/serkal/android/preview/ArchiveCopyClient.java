@@ -56,4 +56,18 @@ final class ArchiveCopyClient {
         String body="--"+boundary+"\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n"+meta+"\r\n--"+boundary+"\r\nContent-Type: application/json\r\n\r\n"+record+"\r\n--"+boundary+"--\r\n";
         return request("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id","POST",body,"multipart/related; boundary="+boundary).getString("id");
     }
+
+    void archiveActiveRevisions(List<JSONObject> files) throws Exception {
+        for(JSONObject file:files) {
+            JSONObject meta=new JSONObject().put("name","serkal-backup-v2-"+file.getString("id")+".json");
+            URL url=new URL("https://www.googleapis.com/drive/v3/files/"+esc(file.getString("id"))+"?fields=id,name");
+            HttpURLConnection c=(HttpURLConnection)url.openConnection();c.setConnectTimeout(10000);c.setReadTimeout(45000);
+            c.setRequestMethod("POST");c.setRequestProperty("X-HTTP-Method-Override","PATCH");
+            c.setRequestProperty("Authorization","Bearer "+token);c.setRequestProperty("Content-Type","application/json");c.setDoOutput(true);
+            byte[] body=meta.toString().getBytes(StandardCharsets.UTF_8);c.setFixedLengthStreamingMode(body.length);
+            try(OutputStream out=c.getOutputStream()){out.write(body);}
+            try {int status=c.getResponseCode();if(status<200||status>299)throw new Exception("GOOGLE_HTTP_"+status);}
+            finally {c.disconnect();}
+        }
+    }
 }

@@ -80,6 +80,28 @@ final class AndroidArchiveCopy {
         next.put("dirty",true).put("epoch",next.getLong("epoch")+1);save(next);status="pending";error="";log("LOCAL_SAVED","");notifyChange();schedule(1);
     }
     synchronized boolean useOfflineCache(){loaded=state.has("record") && !fatal();if(loaded){status=state.optBoolean("dirty")?"pending":"offline";error="COPY_CONNECT";}return loaded;}
+    synchronized boolean canMakeAuthoritative(){return state.has("record") && !closed && !busy &&
+        (error.equals("COPY_CONFLICT") || error.equals("COPY_HISTORY_MISSING") || state.optBoolean("authorityPending"));}
+    void makeAuthoritative(){
+        synchronized(this){if(!canMakeAuthoritative())return;busy=true;status="syncing";}
+        notifyChange();worker.execute(()->{
+            try {
+                JSONObject chosen;
+                synchronized(this){chosen=ArchiveAuthority.select(state.getJSONObject("record"),owner,now());}
+                synchronized(this){JSONObject next=new JSONObject(state.toString());next.put("authorityPending",true);save(next);}
+                if(token==null || token.isEmpty())throw new Exception("COPY_CONNECT");
+                ArchiveCopyClient client=new ArchiveCopyClient(token);if(!owner.equals(client.owner()))throw new Exception("COPY_ACCOUNT_CHANGED");
+                List<JSONObject> active=client.list(ArchiveCodec.PREFIX);
+                client.archiveActiveRevisions(active);
+                if(!client.list(ArchiveCodec.PREFIX).isEmpty())throw new Exception("COPY_CONFLICT");
+                client.upload(chosen);
+                JSONObject check=ArchiveCopyClient.head(client.list(ArchiveCodec.PREFIX),owner);
+                if(check==null || !check.getJSONObject("appProperties").getString("revision").equals(chosen.getString("revision")))throw new Exception("COPY_CONFLICT");
+                synchronized(this){JSONObject next=new JSONObject(state.toString());next.put("record",chosen).put("base",chosen.getString("revision")).put("dirty",false).put("lastSynced",now()).remove("authorityPending");save(next);error="";status="saved";loaded=true;log("LOCAL_AUTHORITY_PUBLISHED","");}
+            } catch(Exception failure){synchronized(this){error=String.valueOf(failure.getMessage());status="error";log("LOCAL_AUTHORITY_FAILED",error);}}
+            finally{synchronized(this){busy=false;}notifyChange();}
+        });
+    }
     void updateToken(String token){this.token=token;}
     void setListener(Listener listener){this.listener=listener;}
     synchronized void schedule(int seconds){if(closed)return;if(scheduled!=null)scheduled.cancel(false);scheduled=worker.schedule(this::synchronize,seconds,TimeUnit.SECONDS);}

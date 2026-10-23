@@ -29,6 +29,14 @@ public class ArchiveCopyTest {
         JSONObject changed=ArchiveCodec.edit(r,"notes",new JSONObject().put("tmdbId",42).put("seasonLabel","S01").put("note","Test"));
         assertEquals(text,changed.getJSONArray("files").getJSONObject(1).getString("content"));
     }
+    @Test public void authoritySelectionChangesMetadataOnlyAndPreservesAhsokaBytes() throws Exception {
+        JSONObject local=record();String ahsoka="S04; tmdb=321; seen=1; note=unchanged\n";
+        local.getJSONArray("files").put(new JSONObject().put("name","Ahsoka (2023).txt").put("content",ahsoka).put("sha256",ArchiveCodec.hash(ahsoka)));
+        JSONObject selected=ArchiveAuthority.select(local,"123","2026-10-23T18:00:00.000Z");
+        assertEquals("",selected.getString("parent"));assertNotEquals(local.getString("revision"),selected.getString("revision"));
+        assertEquals(local.getJSONArray("files").toString(),selected.getJSONArray("files").toString());
+        assertEquals(ahsoka,selected.getJSONArray("files").getJSONObject(1).getString("content"));
+    }
     @Test public void badHashPathAndWrongAccountAreRejected() throws Exception {
         JSONObject r=record();try{ArchiveCodec.validate(r,"other");fail();}catch(Exception expected){assertEquals("COPY_INVALID",expected.getMessage());}
         r.getJSONArray("files").getJSONObject(0).put("name","../settings.txt");try{ArchiveCodec.validate(r,"123");fail();}catch(Exception expected){assertEquals("COPY_INVALID",expected.getMessage());}

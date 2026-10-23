@@ -306,7 +306,7 @@ public class MainActivity extends Activity {
     private boolean archiveBusy;
     private LinearLayout archiveRows;
     private TextView archiveStatus,copySyncStatus;
-    private Button copySyncButton;
+    private Button copySyncButton,authorityButton;
     private AndroidArchiveCopy archiveCopy;
 
     private void refreshLocalCopy() {
@@ -326,6 +326,20 @@ public class MainActivity extends Activity {
         else label=english ? "Transfer pending · local copy preserved · retry Sync now" : "Übertragung ausstehend · lokale Kopie bleibt erhalten · Jetzt synchronisieren versuchen";
         if(copySyncStatus!=null){copySyncStatus.setText(label);copySyncStatus.setContentDescription(label);}
         if(copySyncButton!=null)copySyncButton.setEnabled(!archiveCopy.busy());
+        if(authorityButton!=null){boolean available=archiveCopy.canMakeAuthoritative();authorityButton.setVisibility(available?View.VISIBLE:View.GONE);authorityButton.setEnabled(available);}
+    }
+
+    private void confirmMakeLocalAuthoritative(){
+        if(archiveCopy==null || !archiveCopy.canMakeAuthoritative())return;
+        String message=english
+            ? "The archive currently stored on this Android device will become the shared Google archive, including its current entries. Existing Google archive files will be retained as backups. No archive entry will be edited or deleted. Continue?"
+            : "Das Archiv, das gerade auf diesem Android-Gerät liegt, wird zum gemeinsamen Google-Archiv – einschließlich aller darin enthaltenen Einträge. Die bisherigen Google-Archivdateien bleiben als Sicherungen erhalten. Kein Archiveintrag wird bearbeitet oder gelöscht. Fortfahren?";
+        archiveDialogOpen=true;
+        dialogBuilder().setTitle(english?"Make this archive authoritative":"Diesen Archivstand festlegen")
+            .setMessage(message)
+            .setPositiveButton(english?"Set as shared archive":"Diesen Stand übernehmen",(d,w)->archiveCopy.makeAuthoritative())
+            .setNegativeButton(english?"Cancel":"Abbrechen",null)
+            .setOnDismissListener(d->archiveDialogOpen=false).show();
     }
 
     private String archiveText(String key) { return ArchiveTexts.text(english,key); }
@@ -953,6 +967,9 @@ public class MainActivity extends Activity {
         sort.setOnClickListener(v->{boolean date=getPreferences(0).getString("archiveSort","date").equals("date");getPreferences(0).edit().putString("archiveSort",date?"alpha":"date").apply();sort.setText(date?"A–Z":(english?"Date ↓":"Datum ↓"));renderArchive();});archiveBar.addView(sort);
         Button menu=button(english?"Menu ▾":"Menü ▾");menu.setOnClickListener(v->showArchiveMenu());archiveBar.addView(menu);right.addView(archiveBar);
         archiveStatus=text("",9,MUTED);archiveStatus.setMaxLines(1);right.addView(archiveStatus);
+        authorityButton=verticalButton(english?"Make this archive authoritative":"Diesen Stand festlegen");
+        authorityButton.setTextColor(Color.WHITE);authorityButton.setBackgroundColor(RED);
+        authorityButton.setOnClickListener(v->confirmMakeLocalAuthoritative());authorityButton.setVisibility(View.GONE);right.addView(authorityButton);
         archiveRows=new LinearLayout(this);archiveRows.setOrientation(LinearLayout.VERTICAL);
         ScrollView archiveScroll=new ScrollView(this);archiveScroll.addView(archiveRows);right.addView(archiveScroll,new LinearLayout.LayoutParams(-1,0,1));
         Button calendarButton=button(english?"Open calendar":"Kalender öffnen");calendarButton.setOnClickListener(v->openCalendar());right.addView(calendarButton);
