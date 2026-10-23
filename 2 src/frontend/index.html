@@ -5200,12 +5200,14 @@ async function archiveCopyStatus_() {
     label.textContent=text;label.style.whiteSpace='normal';label.style.fontSize='14px';label.style.fontWeight='600';
     const button=document.getElementById('btnArchiveSync');
     button.disabled=info.busy||archiveSyncButtonBusy_;
+    const adoptButton=document.getElementById('btnArchiveAdoptLocal');
+    if(adoptButton){adoptButton.textContent=t(archiveSyncButtonBusy_?'COPY_UI_ADOPTING':'COPY_UI_ADOPT_LOCAL');adoptButton.style.display=info.code==='COPY_CONFLICT'?'inline-block':'none';adoptButton.disabled=info.busy||archiveSyncButtonBusy_;}
   }catch(_e){}
 }
 document.getElementById('btnArchiveAdoptLocal')?.addEventListener('click',async()=>{
-  if(archiveSyncButtonBusy_||state.isDirty)return;
+  if(archiveSyncButtonBusy_)return;
   archiveSyncButtonBusy_=true;archiveCopyStatus_();
-  try{await window.serkal.archive.adoptLocal();}catch(error){console.error('Archivübernahme fehlgeschlagen',error);}finally{archiveSyncButtonBusy_=false;archiveCopyStatus_();}
+  try{await window.serkal.archive.adoptLocal();if(state.isDirty)await window.serkalSaveBeforeClose();}catch(error){console.error('Archivübernahme fehlgeschlagen',error);}finally{archiveSyncButtonBusy_=false;archiveCopyStatus_();}
 });
 document.getElementById('btnArchiveSync')?.addEventListener('click',async()=>{
   if(archiveSyncButtonBusy_ || guardDirtyBeforeAction_())return;
