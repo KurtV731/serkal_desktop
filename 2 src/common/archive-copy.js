@@ -156,6 +156,7 @@ async function synchronize({state, local, client:remote, save, apply, calendarSy
         save();
         await remote.archiveActive(remoteFiles.filter(file=>file.appProperties?.owner===owner));
         remoteFiles=await remote.list();
+        if(remoteFiles.some(file=>file.appProperties?.owner===owner && file.appProperties.revision!==state.adoption.revision))fail('COPY_CONFLICT');
         const existing=remoteFiles.find(f=>f.appProperties.revision===state.adoption.revision);
         if(!existing) await remote.upload(state.adoption);
         remoteFiles=await remote.list();
