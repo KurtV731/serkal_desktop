@@ -3638,3 +3638,34 @@ Korrektur: Kalenderknopf mit voller Breite, fester Höhe 30dp und weight=0. Nur 
 Neuer Robolectric-Test misst die echte MainActivity-Oberfläche mit 75 Einträgen bei 1280×800, 960×600 und 800×480. Er prüft Listenhöhe über 65% der Panelhöhe, keine gewichteten Footer und Erreichbarkeit des Listenendes. 52 Tests bestanden, 0 Fehler, Actions-Run 40074559939. Quellcommit 11cdf0284d5bfcd2053752b940e9c1841923d5be einschließlich Layouttest; eigentliche Reparatur 44fa1bb94d8db6baa93c913b39edc4cf42ff76b6.
 
 Datei für Kurt: 027-SerKal-Android-0.0.5a27.apk. Praktische Sichtprüfung auf seinen physischen Android-Geräten steht noch aus. Desktop-HTML wird nicht unverändert in native Android-Views kopiert; Platzaufteilung und kompakte Zeilen werden entsprechend umgesetzt.
+
+
+## CE HASA – 24.10.2026: Ordnerumbau C:\ppd\hasa abgeschlossen
+
+Status: **QUELLEN AUF MAIN / ZIP MIT EIN-KLICK-EINSPIELHILFE FERTIG / LOKALES EINSPIELEN DURCH STYL OFFEN**
+
+Styl hat den vollständigen lokalen Ordner als ZIP geliefert; einzige eigene Umbenennung davor: Website nach „02 website“. Ausgangsstand war d48ecc309304369d3e33bc2e2cd1c4f53b6eb993. Der Umbau ist freigegeben und auf HASA main gesichert: **95a92cb8c8732ce2d5e79289c502b29153d4e7e7**.
+
+Verbindliche Struktur unter **C:\ppd\hasa**:
+1. **01 Entwicklung** – Userscript/Aktuell, Module, Datenbank, Browser-/Servertests, Testdaten/Diagnose.
+2. **02 Website** – Startseite, Downloads und ausdrücklich **api/**.
+3. **03 Dokumentation** – Anleitung, Hilfe, technische Unterlagen, Ordnerübersicht und vollständige Alt→Neu-Zuordnung.
+4. **04 Veroeffentlichung** – stabiler Kanal und unveränderte offizielle Versionen.
+5. **05 Verwaltung** – Aktualisierungs-/Upload-BATs, Werkzeuge, Vorlagen und privater Bereich.
+6. **06 Sicherungen** – lokale Sicherungen/DB-Exporte, nicht auf GitHub.
+7. **07 Archiv** – alte Userscripts sowie inaktive historische Build-/Reparaturhelfer.
+
+**Website-Chatty bitte ab jetzt:** `02 Website/index.html`, `02 Website/download/`. Website-Upload: `05 Verwaltung/HASA-Website-Hochladen.bat`, zugehörig `05 Verwaltung/Werkzeuge/website-upload.ps1`. Er überträgt Startseite und Downloads aus `02 Website` nach `/hasa.li/`; die API bleibt davon getrennt. API-Upload: `05 Verwaltung/HASA-Serverupdate-hasa-li.bat`, Quelle `02 Website/api`, Ziel unverändert `/hasa.li/api/`. Gemeinsames schwarzes Brett bleibt genau hier.
+
+Die drei bisherigen Userscript-Updatepfade unter `2 src` bleiben ausschließlich zur Kompatibilität auf GitHub erreichbar und sind bytegleich mit den neuen Ablagen. Im gelieferten lokalen Git-Checkout sind diese technischen Altpfade per Sparse Checkout ausgeblendet. Diese Ausnahmen bei späteren Scriptänderungen mitführen; der Layouttest prüft die Gleichheit im vollständigen Checkout. Keine neue Spiel-/Releaseversion durch den Umbau: Alpha 40 und Final 1.2.0 unverändert.
+
+Private config.php ist im zurückgegebenen privaten ZIP erhalten, aber nicht auf GitHub. Die lokale Diagnose wurde in den privaten Verwaltungsbereich gelegt; versehentlich im API-Ordner liegende SerKal-robots/sitemap und die alte BAT-Sicherung sind verlustfrei im lokalen Archiv erhalten. Kein produktiver Serverupload oder SQL-Eingriff.
+
+Prüfungen erfolgreich:
+- vollständige Browser-/MariaDB-Regression: https://github.com/KurtV731/hasa/actions/runs/40079041532
+- isolierte PHP-Ansichten: https://github.com/KurtV731/hasa/actions/runs/40079041571
+- finale Windows-PowerShell-Syntax und Installer-Test: https://github.com/KurtV731/hasa/actions/runs/40079145095
+- finale Pfad-/Release-/Prüfsummenprüfung: https://github.com/KurtV731/hasa/actions/runs/40079144699
+- privat: ZIP vollständig gegen Dateimanifest geprüft; Git-Checkout sauber und vollständig; private Konfigurationswerte nicht in öffentlichen Dateien.
+
+ZIP für Styl: **HASA-Neue-Struktur-2026-10-24.zip**. Außerhalb des Zielordners entpacken, dann **HASA-ORDNER-EINRICHTEN.bat**. Der bisherige Projektordner bleibt als datierte Sicherung neben dem neuen Ordner erhalten; veränderte lokale Konfiguration bzw. beschädigte Paketdateien stoppen vor dem Umbau. Einstieg danach **HASA-START.cmd**. Lokale Durchführung/Abnahme durch Styl steht noch aus.
