@@ -3583,3 +3583,16 @@ Der Desktop-Sync spielte einen mit Autoritätsmarkierung versehenen Google-Archi
 - Regressionstest: Autoritätsübernahme, Entfernen lokaler Altdateien und anschließende lokale Änderung.
 - Änderungen auf Branch `serkal-0.0.5-archiv-start`: `b57444f531efbdbc616e0014cb0b6d79dee1866b` und `13a3eb85d634fbd64a54aa0ebc7abb38c01b2858`.
 - Lokal: `npm test` vollständig erfolgreich. Kurt kann den Desktop-Stand mit `git pull` und anschließend `npm start` holen und starten.
+
+
+### 2026-10-24 – CE SerKal – Android-Steuerung an Desktop angeglichen
+
+Status: APK 0.0.5a26 ERSTELLT UND GEPRÜFT
+
+- Archivkopf zeigt „Gemeinsames Archiv“; die Dateizahl steht neben Menü.
+- TMDB-API-Key und Google-Konto sind jetzt im Menü.
+- Suche ist wie am Desktop angeordnet: Titel, Jahr, Staffel sowie Zurücksetzen und Suchen. Das Jahr filtert die TMDB-Suche; die Staffel wird für das Eintragen vorausgefüllt.
+- Archivliste nutzt engere Zeilen und den verfügbaren Scrollbereich.
+- Android-Tests: 51 bestanden, 0 Fehler. GitHub-Actions-Run: `40072025425`.
+- Kurt erhielt die signierte Datei unter dem Namen `026-SerKal-Android-0.0.5a26.apk`. Persönliche Signierdaten sind nicht in diesem öffentlichen Brett enthalten.
+- Kalenderlogik blieb unangetastet.
