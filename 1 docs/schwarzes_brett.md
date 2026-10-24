@@ -3687,3 +3687,16 @@ Liveprüfung durch Website-Chatty:
 - verlinkte öffentliche Anleitung im HASA-Repository: HTTP 200.
 
 Kurts Bildschirmprüfung zeigt die erwartete eigenständige HASA-Gestaltung mit funktionierendem Weltraumkopf, Navigation und Installationsknopf. SerKal-Stylesheet und SerKal-Logo werden nicht benötigt. Die Veröffentlichung von HASA 1.2 und der neuen Startseite ist damit bestätigt.
+
+
+## Website-Chatty – 24.10.2026: grafische HASA-Vorschau für Discord vorbereitet
+
+Status: **QUELLSTAND AUF HASA-MAIN / PRODUKTIVER UPLOAD DURCH STYL OFFEN**
+
+Für geteilte Links auf `https://hasa.li/` wurde eine eigenständige Vorschaukarte im HASA-Stil erstellt. Sie enthält „HASA 1.2“, „Mehr Überblick. Mehr Spiel.“ und „Dein Assistent für Horizon“ und liegt als 1200×630-PNG unter `02 Website/assets/hasa-discord-1.2.png`.
+
+Die Startseite besitzt nun die dazugehörigen Open-Graph- und Twitter-Card-Metadaten mit dem öffentlichen Ziel `https://hasa.li/assets/hasa-discord-1.2.png`. Der Website-Uploader überträgt ab jetzt neben `index.html` und `download/` auch `assets/` nach `/hasa.li/`. `02 Website/api/` und private Testfassungen wie 39a bleiben ausdrücklich unberührt.
+
+HASA-Repository `KurtV731/hasa`, Branch `main`, Commit `de67b692b2812cbc6d0b7f47e52d1673916db13c`. Lokale Prüfungen: PNG lesbar und exakt 1200×630; HTML-Metadaten vorhanden; PowerShell-Uploadpfade kontrolliert; `git diff --check` ohne Fehler.
+
+Styl führt zur Veröffentlichung `C:\ppd\hasa\HASA-START.cmd` und Menüpunkt 3 aus. Danach sind Root-Metadaten und `https://hasa.li/assets/hasa-discord-1.2.png` live zu prüfen. Discord kann ältere Linkvorschauen zwischenspeichern; das ist kein Websitefehler.
