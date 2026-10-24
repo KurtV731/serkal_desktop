@@ -54,9 +54,9 @@ final class AndroidArchiveCopy {
     }
     private boolean spaceFor(JSONObject value){long bytes=value.toString().getBytes(StandardCharsets.UTF_8).length;return directory.getUsableSpace()>=Math.max(10*1024*1024L,bytes*3+1024*1024L);}
     private synchronized boolean space(){return spaceFor(state);}
-    synchronized boolean writable(){return loaded && state.has("record") && space() && !fatal() && !closed;}
+    synchronized boolean writable(){return loaded && state.has("record") && space() && !fatal() && !closed && !busy;}
     private boolean fatal(){return error.matches("COPY_(CONFLICT|ACCOUNT_CHANGED|LOCAL_STATE_INVALID|INVALID|HISTORY_MISSING|NEEDS_SOURCE|LEGACY_PENDING)");}
-    synchronized String status(){if(!space())return "COPY_LOW_SPACE";if(!error.isEmpty())return error;return status;}
+    synchronized String status(){if(!space())return "COPY_LOW_SPACE";if(state.optBoolean("authorityPending")&&!error.matches("COPY_(ACCOUNT_CHANGED|LOCAL_STATE_INVALID)"))return "authority-pending";if(!error.isEmpty())return error;return status;}
     boolean busy(){return busy;}
     synchronized String calendarId() {
         JSONObject record=readOnlyRecord!=null?readOnlyRecord:state.optJSONObject("record");
@@ -87,20 +87,28 @@ final class AndroidArchiveCopy {
         notifyChange();worker.execute(()->{
             try {
                 JSONObject chosen;
-                synchronized(this){chosen=ArchiveAuthority.select(state.getJSONObject("record"),owner,now());}
-                synchronized(this){JSONObject next=new JSONObject(state.toString());next.put("authorityPending",true);save(next);}
+                synchronized(this){
+                    String revision=state.optString("authorityRevision"),generatedAt=state.optString("authorityGeneratedAt");
+                    if(state.optBoolean("authorityPending") && !revision.isEmpty() && !generatedAt.isEmpty())chosen=ArchiveAuthority.select(state.getJSONObject("record"),owner,generatedAt,revision);
+                    else {generatedAt=now();chosen=ArchiveAuthority.select(state.getJSONObject("record"),owner,generatedAt);
+                        JSONObject next=new JSONObject(state.toString());next.put("authorityPending",true).put("authorityRevision",chosen.getString("revision")).put("authorityGeneratedAt",generatedAt);save(next);}
+                }
                 if(token==null || token.isEmpty())throw new Exception("COPY_CONNECT");
                 ArchiveCopyClient client=new ArchiveCopyClient(token);if(!owner.equals(client.owner()))throw new Exception("COPY_ACCOUNT_CHANGED");
-                List<JSONObject> active=client.list(ArchiveCodec.PREFIX);
-                client.archiveActiveRevisions(active);
-                if(!client.list(ArchiveCodec.PREFIX).isEmpty())throw new Exception("COPY_CONFLICT");
-                client.upload(chosen);
-                JSONObject check=ArchiveCopyClient.head(client.list(ArchiveCodec.PREFIX),owner);
-                if(check==null || !check.getJSONObject("appProperties").getString("revision").equals(chosen.getString("revision")))throw new Exception("COPY_CONFLICT");
-                synchronized(this){JSONObject next=new JSONObject(state.toString());next.put("record",chosen).put("base",chosen.getString("revision")).put("dirty",false).put("lastSynced",now()).remove("authorityPending");save(next);error="";status="saved";loaded=true;log("LOCAL_AUTHORITY_PUBLISHED","");}
+                publishAuthority(client,chosen,client.list(ArchiveCodec.PREFIX));
             } catch(Exception failure){synchronized(this){error=String.valueOf(failure.getMessage());status="error";log("LOCAL_AUTHORITY_FAILED",error);}}
             finally{synchronized(this){busy=false;}notifyChange();}
         });
+    }
+    private void publishAuthority(ArchiveCopyClient client,JSONObject chosen,List<JSONObject> active) throws Exception {
+        client.archiveActiveRevisions(active);
+        if(!client.list(ArchiveCodec.PREFIX).isEmpty())throw new Exception("COPY_CONFLICT");
+        client.upload(chosen);
+        JSONObject check=ArchiveCopyClient.head(client.list(ArchiveCodec.PREFIX),owner);
+        if(check==null || !check.getJSONObject("appProperties").getString("revision").equals(chosen.getString("revision")))throw new Exception("COPY_CONFLICT");
+        synchronized(this){JSONObject next=new JSONObject(state.toString());next.put("record",chosen).put("base",chosen.getString("revision")).put("dirty",false).put("lastSynced",now());
+            next.remove("authorityPending");next.remove("authorityRevision");next.remove("authorityGeneratedAt");next.remove("pending");next.remove("pendingFileId");next.remove("pendingEpoch");
+            save(next);error="";status="saved";loaded=true;log("LOCAL_AUTHORITY_PUBLISHED","");}
     }
     void updateToken(String token){this.token=token;}
     void setListener(Listener listener){this.listener=listener;}
@@ -131,7 +139,20 @@ final class AndroidArchiveCopy {
             List<JSONObject> remoteFiles=client.list(ArchiveCodec.PREFIX);JSONObject tip=ArchiveCopyClient.head(remoteFiles,owner);String revision=tip==null?"":tip.getJSONObject("appProperties").getString("revision");
             JSONObject pending;String base;boolean dirty;
             synchronized(this){dirty=state.optBoolean("dirty");base=state.optString("base");pending=state.has("pending")?new JSONObject(state.getJSONObject("pending").toString()):null;}
-            if(dirty) {
+            boolean authorityPending;String authorityRevision,authorityGeneratedAt;
+            synchronized(this){authorityPending=state.optBoolean("authorityPending");authorityRevision=state.optString("authorityRevision");authorityGeneratedAt=state.optString("authorityGeneratedAt");}
+            String authorityId=tip==null?"":tip.getJSONObject("appProperties").optString("authorityId");
+            if(authorityPending) {
+                if(authorityRevision.isEmpty()||authorityGeneratedAt.isEmpty())throw new Exception("COPY_LOCAL_STATE_INVALID");
+                JSONObject chosen; synchronized(this){chosen=ArchiveAuthority.select(state.getJSONObject("record"),owner,authorityGeneratedAt,authorityRevision);}
+                publishAuthority(client,chosen,remoteFiles);
+            } else if(tip!=null && !authorityId.isEmpty()) {
+                JSONObject authoritative=client.load(tip,owner);
+                boolean changed=dirty || !revision.equals(base);
+                synchronized(this){JSONObject next=new JSONObject(state.toString());next.put("record",authoritative).put("base",revision).put("dirty",false).put("lastSynced",now());
+                    next.remove("pending");next.remove("pendingFileId");next.remove("pendingEpoch");next.remove("authorityPending");next.put("authorityId",authorityId);
+                    if(!spaceFor(next))throw new Exception("COPY_LOW_SPACE");save(next);readOnlyRecord=null;loaded=true;status=changed?"authority-applied":"saved";error="";}
+            } else if(dirty) {
                 if(pending!=null && (revision.equals(pending.getString("revision")) || state.has("pendingFileId"))) {
                     if(!revision.isEmpty() && !revision.equals(base) && !revision.equals(pending.getString("revision")))throw new Exception("COPY_CONFLICT");
                     JSONObject proof=revision.equals(pending.getString("revision"))?tip:new JSONObject().put("id",state.getString("pendingFileId")).put("appProperties",new JSONObject().put("revision",pending.getString("revision")).put("parent",pending.getString("parent")));

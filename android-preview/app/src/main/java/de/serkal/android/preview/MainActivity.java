@@ -314,10 +314,13 @@ public class MainActivity extends Activity {
         try {JSONObject local=archiveCopy.snapshot();if(local!=null){archiveSnapshot=local;archiveError="";renderArchive();}}catch(Exception error){archiveError=String.valueOf(error.getMessage());renderArchive();}
         String code=archiveCopy.status();String label;
         if(code.equals("saved"))label=english ? "Saved on Google · available on other devices" : "Bei Google gespeichert · auf anderen Geräten verfügbar";
+        else if(code.equals("authority-pending"))label=english ? "This device is locally set as authoritative · Google confirmation is pending" : "Dieser Rechner ist lokal als maßgeblich festgelegt · Google-Bestätigung steht aus";
+        else if(code.equals("authority-applied"))label=english ? "The authoritative Google archive was applied. Local differences were replaced." : "Der verbindliche Google-Archivstand wurde übernommen. Abweichende lokale Einträge wurden ersetzt.";
         else if(code.equals("syncing"))label=english ? "Transferring · you can keep working" : "Übertragung läuft · du kannst weiterarbeiten";
         else if(code.equals("pending"))label=english ? "Saved locally · transfer pending" : "Lokal gespeichert · Übertragung ausstehend";
         else if(code.equals("COPY_LOW_SPACE"))label=english ? "Not enough storage · reading only" : "Zu wenig freier Speicher · nur Lesen möglich";
         else if(code.equals("COPY_CONFLICT"))label=english ? "Newer archive on Google · local copy preserved" : "Neuerer Archivstand bei Google · lokale Kopie bleibt erhalten";
+        else if(code.equals("COPY_HISTORY_MISSING"))label=english ? "Google archive history is incomplete · choose this local archive or sync the authoritative version" : "Google-Archivhistorie unvollständig · diesen lokalen Stand festlegen oder verbindlichen Stand synchronisieren";
         else if(code.equals("COPY_NEEDS_SOURCE"))label=english ? "First transfer: start the new desktop version on the previous source PC" : "Erste Übernahme: neue Desktop-Version am bisherigen Quell-PC starten";
         else if(code.equals("COPY_CALENDAR_PROTECTED"))label=english ? "Manual Calendar changes protected · synchronization paused" : "Manuelle Kalenderänderungen geschützt · Abgleich angehalten";
         else if(code.equals("COPY_CONNECT"))label=english ? "Local copy · connect Google to transfer" : "Lokale Kopie · zum Übertragen Google verbinden";

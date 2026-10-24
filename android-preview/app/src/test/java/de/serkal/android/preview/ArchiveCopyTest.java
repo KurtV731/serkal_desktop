@@ -34,6 +34,7 @@ public class ArchiveCopyTest {
         local.getJSONArray("files").put(new JSONObject().put("name","Ahsoka (2023).txt").put("content",ahsoka).put("sha256",ArchiveCodec.hash(ahsoka)));
         JSONObject selected=ArchiveAuthority.select(local,"123","2026-10-23T18:00:00.000Z");
         assertEquals("",selected.getString("parent"));assertNotEquals(local.getString("revision"),selected.getString("revision"));
+        assertEquals(selected.getString("revision"),selected.getString("authorityId"));
         assertEquals(local.getJSONArray("files").toString(),selected.getJSONArray("files").toString());
         assertEquals(ahsoka,selected.getJSONArray("files").getJSONObject(1).getString("content"));
     }
@@ -42,12 +43,20 @@ public class ArchiveCopyTest {
         r.getJSONArray("files").getJSONObject(0).put("name","../settings.txt");try{ArchiveCodec.validate(r,"123");fail();}catch(Exception expected){assertEquals("COPY_INVALID",expected.getMessage());}
         assertFalse(ArchiveCodec.safeName("!!SERKAL_LOG_today.txt"));assertFalse(ArchiveCodec.safeName("C:\\secret.txt"));
     }
-    JSONObject metadata(JSONObject r) throws Exception {return new JSONObject().put("id",r.getString("revision")).put("name",ArchiveCodec.PREFIX+r.getString("revision")+".json").put("md5Checksum","same")
-        .put("appProperties",new JSONObject().put("owner","123").put("revision",r.getString("revision")).put("parent",r.getString("parent").isEmpty()?"root":r.getString("parent")));}
+    JSONObject metadata(JSONObject r) throws Exception {JSONObject p=new JSONObject().put("owner","123").put("revision",r.getString("revision")).put("parent",r.getString("parent").isEmpty()?"root":r.getString("parent"));
+        if(r.has("authorityId"))p.put("authorityId",r.getString("authorityId"));
+        return new JSONObject().put("id",r.getString("revision")).put("name",ArchiveCodec.PREFIX+r.getString("revision")+".json").put("md5Checksum","same").put("appProperties",p);}
     @Test public void concurrentChildrenAreRetainedAndRejected() throws Exception {
         JSONObject a=record(),b=new JSONObject(a.toString()).put("parent",a.getString("revision")).put("revision",UUID.randomUUID().toString()),c=new JSONObject(b.toString()).put("revision",UUID.randomUUID().toString());
         assertEquals(b.getString("revision"),ArchiveCopyClient.head(Arrays.asList(metadata(a),metadata(b)),"123").getString("id"));
         try{ArchiveCopyClient.head(Arrays.asList(metadata(a),metadata(b),metadata(c)),"123");fail();}catch(Exception expected){assertEquals("COPY_CONFLICT",expected.getMessage());}
+    }
+    @Test public void authoritativeLineageMarkerIsRequiredOnEveryActiveRevision() throws Exception {
+        JSONObject a=record().put("authorityId","aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
+        JSONObject b=new JSONObject(a.toString()).put("revision",UUID.randomUUID().toString()).put("parent",a.getString("revision"));
+        assertEquals(b.getString("revision"),ArchiveCopyClient.head(Arrays.asList(metadata(a),metadata(b)),"123").getJSONObject("appProperties").getString("revision"));
+        JSONObject child=new JSONObject(b.toString()).put("authorityId","");
+        try{ArchiveCopyClient.head(Arrays.asList(metadata(a),metadata(child)),"123");fail();}catch(Exception expected){assertEquals("COPY_CONFLICT",expected.getMessage());}
     }
     @Test public void groupedEpisodesHaveStableCalendarIdentity() throws Exception {
         JSONObject r=record();List<JSONObject> events=CalendarCopy.desired(r);assertEquals(2,events.size());

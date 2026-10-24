@@ -7,8 +7,12 @@ import java.util.UUID;
 final class ArchiveAuthority {
     private ArchiveAuthority() {}
     static JSONObject select(JSONObject local, String owner, String generatedAt) throws Exception {
+        return select(local,owner,generatedAt,UUID.randomUUID().toString());
+    }
+    static JSONObject select(JSONObject local, String owner, String generatedAt, String revision) throws Exception {
         JSONObject chosen=new JSONObject(local.toString());
-        chosen.put("revision",UUID.randomUUID().toString()).put("parent","").put("generatedAt",generatedAt);
+        chosen.put("revision",revision).put("parent","").put("generatedAt",generatedAt);
+        chosen.put("authorityId",chosen.getString("revision"));
         ArchiveCodec.validate(chosen,owner);
         if(!chosen.getJSONArray("files").toString().equals(local.getJSONArray("files").toString()))
             throw new Exception("COPY_INVALID");

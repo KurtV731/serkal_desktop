@@ -27,6 +27,7 @@ final class ArchiveCodec {
     static JSONObject validate(JSONObject r,String owner) throws Exception {
         if(r.optInt("schema")!=2 || !owner.equals(r.optString("owner")) || !r.optString("revision").matches(UUID) ||
             !(r.optString("parent").isEmpty() || r.optString("parent").matches(UUID)) || r.optString("parent").equals(r.optString("revision")) ||
+            (!r.optString("authorityId").isEmpty() && !r.optString("authorityId").matches(UUID)) ||
             !r.optString("generatedAt").matches("\\d{4}-\\d{2}-\\d{2}T.*Z") || r.optJSONArray("files")==null || r.getJSONArray("files").length()>20000)throw new Exception("COPY_INVALID");
         Set<String> names=new HashSet<>();long size=0;
         for(int i=0;i<r.getJSONArray("files").length();i++){

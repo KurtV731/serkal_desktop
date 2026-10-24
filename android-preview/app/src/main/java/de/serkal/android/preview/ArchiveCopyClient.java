@@ -32,12 +32,14 @@ final class ArchiveCopyClient {
         }while(!page.isEmpty());return files;
     }
     static JSONObject head(List<JSONObject> files,String owner) throws Exception {
-        Map<String,JSONObject> revisions=new HashMap<>();Set<String> parents=new HashSet<>();int roots=0;
+        Map<String,JSONObject> revisions=new HashMap<>();Set<String> parents=new HashSet<>(),authorityIds=new HashSet<>();int roots=0,unmarked=0;
         for(JSONObject file:files){JSONObject p=file.getJSONObject("appProperties");if(p.optString("parent").equals("root"))p.put("parent","");String rev=p.getString("revision"),parent=p.getString("parent");
             if(!p.getString("owner").equals(owner) || !rev.matches(ArchiveCodec.UUID) || !(parent.isEmpty()||parent.matches(ArchiveCodec.UUID)) || !file.getString("name").equals(ArchiveCodec.PREFIX+rev+".json"))throw new Exception("COPY_INVALID");
-            JSONObject old=revisions.get(rev);if(old!=null && (!old.optString("md5Checksum").equals(file.optString("md5Checksum")) || !old.getJSONObject("appProperties").getString("parent").equals(parent)))throw new Exception("COPY_CONFLICT");
+            if(p.optString("authorityId").isEmpty())unmarked++;else if(p.optString("authorityId").matches(ArchiveCodec.UUID))authorityIds.add(p.getString("authorityId"));else throw new Exception("COPY_INVALID");
+            JSONObject old=revisions.get(rev);if(old!=null && (!old.optString("md5Checksum").equals(file.optString("md5Checksum")) || !old.getJSONObject("appProperties").getString("parent").equals(parent) || !old.getJSONObject("appProperties").optString("authorityId").equals(p.optString("authorityId"))))throw new Exception("COPY_CONFLICT");
             revisions.put(rev,file);
         }
+        if(authorityIds.size()>1 || (authorityIds.size()==1&&unmarked>0))throw new Exception("COPY_CONFLICT");
         if(revisions.isEmpty())return null;
         for(JSONObject f:revisions.values()){String parent=f.getJSONObject("appProperties").getString("parent");if(parent.isEmpty())roots++;else{if(!revisions.containsKey(parent))throw new Exception("COPY_HISTORY_MISSING");parents.add(parent);}}
         List<JSONObject> tips=new ArrayList<>();for(Map.Entry<String,JSONObject> e:revisions.entrySet())if(!parents.contains(e.getKey()))tips.add(e.getValue());
@@ -47,12 +49,14 @@ final class ArchiveCopyClient {
     }
     JSONObject load(JSONObject file,String owner) throws Exception {
         JSONObject r=ArchiveCodec.validate(get("https://www.googleapis.com/drive/v3/files/"+esc(file.getString("id"))+"?alt=media"),owner);
-        if(!r.getString("revision").equals(file.getJSONObject("appProperties").getString("revision")) || !r.getString("parent").equals(file.getJSONObject("appProperties").getString("parent")))throw new Exception("COPY_INVALID");return r;
+        if(!r.getString("revision").equals(file.getJSONObject("appProperties").getString("revision")) || !r.getString("parent").equals(file.getJSONObject("appProperties").getString("parent")) || !r.optString("authorityId").equals(file.getJSONObject("appProperties").optString("authorityId")))throw new Exception("COPY_INVALID");return r;
     }
     String upload(JSONObject record) throws Exception {
         ArchiveCodec.validate(record,record.getString("owner"));String id=record.getString("revision"),boundary="serkal-"+id;
+        JSONObject properties=new JSONObject().put("owner",record.getString("owner")).put("revision",id).put("parent",record.getString("parent").isEmpty()?"root":record.getString("parent"));
+        if(!record.optString("authorityId").isEmpty())properties.put("authorityId",record.getString("authorityId"));
         JSONObject meta=new JSONObject().put("name",ArchiveCodec.PREFIX+id+".json").put("mimeType","application/json").put("parents",new JSONArray().put("appDataFolder"))
-            .put("appProperties",new JSONObject().put("owner",record.getString("owner")).put("revision",id).put("parent",record.getString("parent").isEmpty()?"root":record.getString("parent")));
+            .put("appProperties",properties);
         String body="--"+boundary+"\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n"+meta+"\r\n--"+boundary+"\r\nContent-Type: application/json\r\n\r\n"+record+"\r\n--"+boundary+"--\r\n";
         return request("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id","POST",body,"multipart/related; boundary="+boundary).getString("id");
     }
