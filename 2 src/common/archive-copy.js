@@ -178,7 +178,7 @@ async function synchronize({state, local, client:remote, save, apply, calendarSy
     }
     const tip=head(remoteFiles,owner), revision=tip ? tip.appProperties.revision : '';
     const authorityId=tip?.appProperties?.authorityId||'';
-    if(tip && authorityId) {
+    if(tip && authorityId && state.authorityId!==authorityId) {
         const record=await remote.load(tip,owner);
         const same=digest(current.files,current.calendar)===digest(record.files,record.calendar);
         const changed=state.base!==revision||!same||!!state.dirty;
