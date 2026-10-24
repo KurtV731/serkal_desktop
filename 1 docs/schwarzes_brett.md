@@ -3547,3 +3547,18 @@ Styl bestätigt: konkret gemeldete Fehler der 39a behoben; Statistikgestaltung i
 - Uploadhilfe `6 website/HASA-1.2-Hochladen.bat` und `.ps1` nutzt vorhandene lokale WinSCP-Verbindung **HASA-li**, Ziel **/hasa.li/**. Nur der Downloadordner wird übertragen. **Noch kein produktiver Upload ausgeführt:** diese Umgebung hat keinen Zugriff auf Styls lokale WinSCP-Verbindung; Styl erhält das fertige ZIP zum Entpacken/Ausführen. Eine bereits erfolgte Veröffentlichung auf hasa.li wird nicht behauptet.
 - Kein neues API-Serverupdate oder SQL für den TechTree-Knopf erforderlich; Backend ist die bereits installierte/getestete 39a.
 
+
+
+## CE SerKal – 24.10.2026: maßgeblichen Archivstand geräteübergreifend anwenden
+
+Status: DESKTOP- UND ANDROID-QUELLEN AKTUALISIERT / TESTS BESTANDEN / GERÄTEABNAHME OFFEN
+
+Kurts verbindliche Entscheidung: Die am ausdrücklich ausgewählten Rechner geöffnete Archivkopie wird zum aktiven Google-Archiv. Nicht enthaltene Einträge werden aus dem aktiven Bestand der anderen Geräte entfernt. Die Auswahl erfolgt ausschließlich nach der roten, bestätigten Aktion; es gibt keine automatische Auswahl.
+
+Desktop-Branch `serkal-0.0.5-archiv-start`, Commit `8989022baa1dbcd646ecc58a44539a507e46d7f6`: Die rote Aktion erscheint bei `COPY_CONFLICT` und `COPY_HISTORY_MISSING`. Die Bestätigung benennt das Ersetzen aktiver Einträge. Die Festlegung bleibt bei Abbruch/Offline lokal gespeichert und kann nach Neustart fortgesetzt werden. `npm test` erfolgreich.
+
+Android-Branch `android-preview-0.0.5`, Commit `39e59783c67185ebcfb4cc4ecec235d17201b2b1`, Version `0.0.5a24` / Code 32: Die manuelle Festlegung erhält eine über Folgeversionen weitergegebene Authority-Kennung. Aktualisierte Desktop- und Android-Clients übernehmen diesen Stand beim nächsten Google-Abgleich und ersetzen lokale Abweichungen. Der Fehler „Google-Archivhistorie unvollständig“ bietet ebenfalls die rote Aktion.
+
+Alte Cloudrevisionen werden aus dem aktiven Revisionsverlauf herausgenommen; die Dateien bleiben als inaktive Wiederherstellungsstände liegen. Geräte mit älteren Programmständen können den neuen Marker nicht automatisch verarbeiten und bleiben bei einem abweichenden Stand schreibgesperrt, bis sie aktualisiert sind. Android Actions `40061886783` erfolgreich; APK mit vorhandenem privaten Zertifikat erstellt und Signatur lokal geprüft. Passwort/Schlüsselcode nicht in diesem Brett dokumentiert.
+
+Offen: praktische Geräteabnahme auf PC und Tablet, insbesondere Anzeige der vollständigen Listenhöhe und Übernahme des ausgewählten Bestands. Keine echten Archivdaten aus diesem Test verändert.
