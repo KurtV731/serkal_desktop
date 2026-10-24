@@ -3758,3 +3758,26 @@ Keine neue Userscriptfassung, kein API-/SQL-Update für diese Webseiten nötig.
 Geprüft: alle drei Quellen auf öffentliche 1.2.0, aktuellen Installationslink, veraltete Alpha-/PDF-Seitenbezüge und gegenseitige Markdownverweise. Commit auf main kontrolliert; die neue Anleitung beginnt mit **HASA 1.2 – Benutzeranleitung** und **Öffentliche Version HASA 1.2.0**.
 
 Offen bei Website-Chatty: HTML-Umsetzung, Navigation, Uploadhelfer-Erweiterung und Prüfung auf Desktop/Mobilgerät/Druckansicht. Nach Styls Upload müssen die drei öffentlichen Adressen HTTP 200 liefern und die Start-/Downloadlinks tatsächlich dorthin führen. Bitte Fortschritt und Ergebnis hier zurückmelden. **Noch keine Veröffentlichung dieser Hilfeseiten erfolgt; keine Einigung oder erfolgte Bearbeitung durch Website-Chatty behauptet.**
+
+
+## Website-Chatty – 24.10.2026: drei HASA-1.2-Hilfeseiten fertig eingebunden
+
+Status: **HTML, NAVIGATION UND UPLOADHELFER AUF HASA-MAIN GEPRÜFT / PRODUKTIVER UPLOAD DURCH STYL OFFEN**
+
+Der Auftrag aus der CE-HASA-Übergabe von 15:03 Uhr ist vollständig umgesetzt. Die drei fertigen Fachquellen wurden ohne inhaltliche Verkürzung in eigenständige HASA-Webseiten überführt:
+
+- `02 Website/anleitung/index.html` → `https://hasa.li/anleitung/`;
+- `02 Website/hilfe/index.html` → `https://hasa.li/hilfe/`;
+- `02 Website/aktualisieren/index.html` → `https://hasa.li/aktualisieren/`.
+
+Alle Seiten verwenden den eigenständigen HASA-Stil, besitzen Kapitel-Inhaltsverzeichnis und Sprungmarken, direkte Querverweise, mobile Darstellung und eine störungsarme Druckansicht. Öffentlicher Autor ist Styl. Die vollständige Anleitung reicht bis Kapitel 15; schnelle Hilfe und Updatehilfe enthalten jeweils den gesamten freigegebenen Fachtext für die öffentliche Version 1.2.0.
+
+Startseite und Downloadseite verweisen bei Anleitung, Hilfe und Aktualisieren jetzt auf hasa.li statt auf GitHub. Installation bleibt `/download/HASA-1.2.0.user.js`. Es wird weder Selbstregistrierung noch fertige Vorschlags- oder E-Mail-Automatik behauptet.
+
+Der Uploadhelfer `05 Verwaltung/Werkzeuge/website-upload.ps1` prüft und überträgt nun ausdrücklich `index.html`, `assets/`, `download/`, `anleitung/`, `hilfe/` und `aktualisieren/`. Er lädt weiterhin nicht den gesamten Websiteordner; `02 Website/api/`, private `config.php`, Datenbank und 39a bleiben unberührt. Bedienweg bleibt `C:\ppd\hasa\HASA-START.cmd` → Menüpunkt 3.
+
+HASA-Repository `KurtV731/hasa`, Branch `main`, geprüfter Commit **bcff23cee2e7692d5be535797dade7526aaa0684**.
+
+Prüfungen: alle internen Dateien und Anker auflösbar; keine verbleibenden GitHub-/Markdown-Leseziele in Start-, Download- oder Hilfeseiten; Quelltexte vollständig bis zu ihren letzten Kapiteln enthalten; CSS-Klammern und Uploadumfang statisch geprüft; `git diff --check` ohne Fehler. Ein Browserlauf in dieser Umgebung war mangels installiertem Headless-Browser nicht ausführbar; responsive und Druckregeln wurden im Quellstand geprüft.
+
+Styl führt nach lokaler Aktualisierung `HASA-START.cmd` und Menüpunkt 3 aus. Erst danach sind die drei öffentlichen URLs, Start-/Downloadnavigation, Mobilansicht und Druckvorschau live abzunehmen. Eine bereits erfolgte Veröffentlichung wird nicht behauptet.
