@@ -31,6 +31,11 @@ public class TmdbClientTest {
         assertEquals(2, client.search("Star Trek", true).get(0).getInt("id"));
         assertTrue(client.requests.get(0).contains("language=en-US"));
     }
+    @Test public void optionalYearIsSentAsFirstAirDateFilter() throws Exception {
+        FakeClient client = new FakeClient("{\"total_pages\":1,\"results\":[]}");
+        client.search("The Testaments", false, "2026");
+        assertTrue(client.requests.get(0).contains("first_air_date_year=2026"));
+    }
     @Test public void scarceMultiwordResultsTriggerCompactedQuery() throws Exception {
         FakeClient client = new FakeClient("{\"total_pages\":1,\"results\":[]}");
         client.search("Star Wars", false);
