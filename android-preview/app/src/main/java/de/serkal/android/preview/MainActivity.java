@@ -993,7 +993,9 @@ public class MainActivity extends Activity {
         authorityButton.setOnClickListener(v->confirmMakeLocalAuthoritative());authorityButton.setVisibility(View.GONE);right.addView(authorityButton);
         archiveRows=new LinearLayout(this);archiveRows.setOrientation(LinearLayout.VERTICAL);
         ScrollView archiveScroll=new ScrollView(this);archiveScroll.setFillViewport(true);archiveScroll.setVerticalScrollBarEnabled(true);archiveScroll.addView(archiveRows);right.addView(archiveScroll,new LinearLayout.LayoutParams(-1,0,1));
-        Button calendarButton=button(english?"Open calendar":"Kalender öffnen");calendarButton.setOnClickListener(v->openCalendar());right.addView(calendarButton);
+        Button calendarButton=button(english?"Open calendar":"Kalender öffnen");calendarButton.setOnClickListener(v->openCalendar());
+        // Fixed footer: only archiveScroll may consume the remaining panel height.
+        calendarButton.setLayoutParams(new LinearLayout.LayoutParams(-1,dp(30)));right.addView(calendarButton);
         Button quitButton=button(english?"Exit SerKal":"SerKal beenden");quitButton.setLayoutParams(new LinearLayout.LayoutParams(-1,dp(30)));
         quitButton.setContentDescription(english?"Exit SerKal":"SerKal beenden");
         quitButton.setOnClickListener(v->onBackPressed());
