@@ -3721,3 +3721,40 @@ Einmalige Lieferung **HASA-Downloads-Aufraeumen.zip**: entpacken, **HASA-DOWNLOA
 Prüfungen bestanden: Windows-Syntax und Paket-Fehlerfälle https://github.com/KurtV731/hasa/actions/runs/40088306620 ; Pfad-/Releaseprüfung https://github.com/KurtV731/hasa/actions/runs/40088306584 . Paket gegen sämtliche Originaldateien und Prüfsummen geprüft.
 
 **Produktive Bereinigung durch Styl noch auszuführen.** Website-Chatty bitte Altversionen nicht erneut in `02 Website/download` ablegen; vollständig erhaltene historische Downloads gehören ins lokale Archiv.
+
+
+## CE HASA → Website-Chatty – 24.10.2026, 15:03 Uhr: Anleitung und Hilfe sofort einbinden
+
+**Priorität: nächster Website-Schritt, ausdrücklich von Styl erbeten. Status: FACHLICH FERTIG UND AUF MAIN / HTML UND UPLOAD OFFEN.**
+
+Anlass: Der Webseitenlink öffnet noch die GitHub-Anleitung mit „Testversion / Alpha39“ und einem Verweis auf die stabile 1.1. Styl möchte die ausführliche Anleitung und die leicht verständliche Hilfe direkt auf hasa.li lesen können. Er hat eine sofortige Vorbereitung und diesen genauen Bericht angefordert.
+
+**Jetzt erledigt, nicht nur vorgemerkt:** HASA main, Commit **f688dd30cd4d6bf33d4e0f07911727ff021f0775**:
+- `03 Dokumentation/hasa_1.2_benutzeranleitung.md`: öffentliche **1.2.0**, 24.10.2026; kein Alpha39-/Testspieler-Vorspann mehr, öffentlicher Installationslink auf hasa.li, keine Betreiber-Uploadschritte im normalen Einstieg. TechTree-Knopf, Fenstergröße/Popup-Hinweis, Gebäudestufe 0 bei eindeutiger Erkennung, Video-Restzeit, private Video-/Durchbruchlisten und Ressourcenverläufe ergänzt.
+- `03 Dokumentation/hasa_hilfe.md`: schnelle Wege nach Aufgabe, tatsächliche Menübezeichnung **Technologische Durchbrüche**, Videoanzeige, TechTree-/Grafikhilfe und klare Trennung von öffentlicher Version/Testkanal.
+- `03 Dokumentation/hasa_updates_ganz_in_ruhe.md`: vollständig für öffentliche 1.2 aufbereitet; ruhige Schritte ohne alte PDF-Seitenverweise oder Alpha34/35-Beispiele. Öffentlicher Installationsweg, normales Update, einmaliger Wechsel, kein zusätzliches Strg+S nach Dialoginstallation, Browser getrennt behandeln.
+- `03 Dokumentation/website-hilfe-uebergabe-2026-10-24.md`: vollständiger Integrationsauftrag, Zielpfade, Veröffentlichungsweg und Abnahmepunkte.
+
+### Verbindlicher nächster Arbeitsschritt für Website-Chatty
+
+| Fachquelle | HTML-Zieldatei | Öffentliche Adresse |
+|---|---|---|
+| `hasa_1.2_benutzeranleitung.md` | `02 Website/anleitung/index.html` | `https://hasa.li/anleitung/` |
+| `hasa_hilfe.md` | `02 Website/hilfe/index.html` | `https://hasa.li/hilfe/` |
+| `hasa_updates_ganz_in_ruhe.md` | `02 Website/aktualisieren/index.html` | `https://hasa.li/aktualisieren/` |
+
+Bitte **jetzt** die fertigen Fachtexte in den vorhandenen HASA-Webstil einbinden: lesbare Schrift/Zeilenbreite, Kapitel-Inhaltsverzeichnis und Sprungmarken, klare Schrittnummern, direkte Querverweise, mobile Lesbarkeit und brauchbare Druckansicht. Die Anleitung bleibt ausführlich; die schnelle Hilfe führt nach Aufgaben/Problemen. Autorenname öffentlich **Styl**.
+
+Startseite und Downloadseite sollen bei Anleitung/Hilfe auf diese eigenen Seiten führen, nicht mehr auf die GitHub-Ansicht. Relative Markdownverweise in den Texten müssen entsprechend auf die drei öffentlichen Ziele umgesetzt werden. Installation bleibt `/download/HASA-1.2.0.user.js`. Kein fertiges Vorschlagsformular, keine Selbstregistrierung oder E-Mail-Automatik behaupten.
+
+### Uploadhelfer unbedingt ergänzen
+
+`05 Verwaltung/Werkzeuge/website-upload.ps1` lädt derzeit nur Startseite, Assets und Downloads. Er muss die drei neuen Ordner **anleitung**, **hilfe**, **aktualisieren** ausdrücklich mit übertragen. **Nicht den gesamten Websiteordner hochladen**: `api/` und die private `config.php` bleiben ausgeschlossen. Lokale Wurzel `C:\ppd\hasa`, Website `02 Website`, Ziel `/hasa.li/`; für Styl weiterhin Menüpunkt **3** von `HASA-START.cmd`.
+
+Keine neue Userscriptfassung, kein API-/SQL-Update für diese Webseiten nötig.
+
+### Geprüft / noch offen
+
+Geprüft: alle drei Quellen auf öffentliche 1.2.0, aktuellen Installationslink, veraltete Alpha-/PDF-Seitenbezüge und gegenseitige Markdownverweise. Commit auf main kontrolliert; die neue Anleitung beginnt mit **HASA 1.2 – Benutzeranleitung** und **Öffentliche Version HASA 1.2.0**.
+
+Offen bei Website-Chatty: HTML-Umsetzung, Navigation, Uploadhelfer-Erweiterung und Prüfung auf Desktop/Mobilgerät/Druckansicht. Nach Styls Upload müssen die drei öffentlichen Adressen HTTP 200 liefern und die Start-/Downloadlinks tatsächlich dorthin führen. Bitte Fortschritt und Ergebnis hier zurückmelden. **Noch keine Veröffentlichung dieser Hilfeseiten erfolgt; keine Einigung oder erfolgte Bearbeitung durch Website-Chatty behauptet.**
