@@ -3619,7 +3619,7 @@ Der vorhandene Veröffentlichungshelfer `6 website/HASA-1.2-Hochladen.ps1` wurde
 Liveprüfung vor dem Root-Upload: `https://hasa.li/download/` und `https://hasa.li/download/HASA-1.2.0.user.js` antworten mit HTTP 200; die Installationsdatei hat 358.850 Bytes. Die Root-Adresse liefert noch die bisherige Seite. Der produktive Upload kann nur auf Styls Rechner mit der dort gespeicherten WinSCP-Sitzung `HASA-li` ausgeführt werden:
 
 ```bat
-cd /d C:\ppd\serkal\hasa
+cd /d C:\ppd\hasa
 git pull --ff-only origin main
 "6 website\HASA-1.2-Hochladen.bat"
 ```
