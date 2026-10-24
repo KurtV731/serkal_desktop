@@ -3570,3 +3570,16 @@ Offen: praktische Geräteabnahme auf PC und Tablet, insbesondere Anzeige der vol
 - Nach einmaliger Übernahme des maßgeblichen Google-Archivs bleiben spätere Änderungen wie „gesehen“ normale Änderungen und werden zu Google übertragen. Der kanonische Stand wird nicht bei jedem Abgleich erneut über lokale Änderungen gelegt.
 - GitHub Actions Build und Android-Unit-Tests erfolgreich, Run `40065915911`. Die APK wurde mit dem bereits verwendeten privaten Zertifikat signiert und Kurt bereitgestellt. Schlüssel und Passwort sind nicht in diesem öffentlichen Brett dokumentiert.
 - Noch offen: praktische Geräteprüfung auf Tablet und Smartphone, einschließlich Änderung eines Gesehen-Status und der vollständigen Archivlistenhöhe.
+
+
+### 2026-10-24 – CE SerKal – Desktop übernimmt verbindliches Archiv
+
+Status: URSACHE GEFUNDEN / DESKTOP-FIX AUF DEM FACHBRANCH
+
+Der Desktop-Sync spielte einen mit Autoritätsmarkierung versehenen Google-Archivstand bei jedem Abgleich erneut ein. Dadurch wurde die Laptop-Kopie nicht als bereits übernommen erkannt; lokale Anzeige und Änderungen konnten wieder zurückspringen.
+
+- Korrektur: Der markierte Archivstand wird nur übernommen, wenn die lokale Installation diese Autoritätsmarkierung noch nicht bestätigt hat.
+- Danach werden spätere Änderungen als normale Folgeversionen synchronisiert.
+- Regressionstest: Autoritätsübernahme, Entfernen lokaler Altdateien und anschließende lokale Änderung.
+- Änderungen auf Branch `serkal-0.0.5-archiv-start`: `b57444f531efbdbc616e0014cb0b6d79dee1866b` und `13a3eb85d634fbd64a54aa0ebc7abb38c01b2858`.
+- Lokal: `npm test` vollständig erfolgreich. Kurt kann den Desktop-Stand mit `git pull` und anschließend `npm start` holen und starten.
