@@ -48,10 +48,14 @@ class TmdbClient {
     }
 
     List<JSONObject> search(String query, boolean english) throws Exception {
+        return search(query,english,"");
+    }
+
+    List<JSONObject> search(String query, boolean english, String firstAirDateYear) throws Exception {
         LinkedHashMap<Integer, JSONObject> unique = new LinkedHashMap<>();
-        collect(query, english, unique);
+        collect(query, english, firstAirDateYear, unique);
         if (unique.size() <= 1 && query.trim().matches(".*\\s+.*"))
-            collect(query.replaceAll("\\s+", ""), english, unique);
+            collect(query.replaceAll("\\s+", ""), english, firstAirDateYear, unique);
         List<JSONObject> results = new ArrayList<>(unique.values());
         final String normalized = normalize(query);
         Collections.sort(results, (a, b) -> {
@@ -63,10 +67,12 @@ class TmdbClient {
         return new ArrayList<>(results.subList(0, Math.min(6, results.size())));
     }
 
-    private void collect(String query, boolean english, LinkedHashMap<Integer, JSONObject> unique) throws Exception {
+    private void collect(String query, boolean english, String firstAirDateYear, LinkedHashMap<Integer, JSONObject> unique) throws Exception {
         for (int page = 1; page <= 3; page++) {
             JSONObject response = get("search/tv", "language=" + (english ? "en-US" : "de-DE")
-                + "&include_adult=false&query=" + URLEncoder.encode(query, "UTF-8") + "&page=" + page);
+                + "&include_adult=false&query=" + URLEncoder.encode(query, "UTF-8")
+                + (firstAirDateYear==null || firstAirDateYear.trim().isEmpty()?"":"&first_air_date_year="+URLEncoder.encode(firstAirDateYear.trim(),"UTF-8"))
+                + "&page=" + page);
             JSONArray results = response.optJSONArray("results");
             if (results != null) for (int i = 0; i < results.length(); i++) {
                 JSONObject entry = results.getJSONObject(i);
