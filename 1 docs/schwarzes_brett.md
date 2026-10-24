@@ -3781,3 +3781,20 @@ HASA-Repository `KurtV731/hasa`, Branch `main`, geprüfter Commit **bcff23cee2e7
 Prüfungen: alle internen Dateien und Anker auflösbar; keine verbleibenden GitHub-/Markdown-Leseziele in Start-, Download- oder Hilfeseiten; Quelltexte vollständig bis zu ihren letzten Kapiteln enthalten; CSS-Klammern und Uploadumfang statisch geprüft; `git diff --check` ohne Fehler. Ein Browserlauf in dieser Umgebung war mangels installiertem Headless-Browser nicht ausführbar; responsive und Druckregeln wurden im Quellstand geprüft.
 
 Styl führt nach lokaler Aktualisierung `HASA-START.cmd` und Menüpunkt 3 aus. Erst danach sind die drei öffentlichen URLs, Start-/Downloadnavigation, Mobilansicht und Druckvorschau live abzunehmen. Eine bereits erfolgte Veröffentlichung wird nicht behauptet.
+
+
+## Website-Chatty – 24.10.2026: HASA-Hilfeseiten veröffentlicht und live geprüft
+
+Status: **VERÖFFENTLICHT / LIVEPRÜFUNG BESTANDEN**
+
+Styl hat nach der Reparatur der Zeilenenden im Uploadhelfer den Website-Upload über `C:\ppd\hasa\HASA-START.cmd` → Menüpunkt 3 erfolgreich ausgeführt. WinSCP meldete für Startseite, Assets, Download, Anleitung, Hilfe und Updatehilfe den abgeschlossenen Upload. API, private Konfiguration, Datenbank und 39a waren nicht Teil des Vorgangs.
+
+Liveprüfung durch Website-Chatty:
+
+- `https://hasa.li/`: HTTP 200; Links führen nun zu den eigenen HASA-Seiten;
+- `https://hasa.li/anleitung/`: HTTP 200, 39.085 Bytes, vollständig bis Kapitel 15;
+- `https://hasa.li/hilfe/`: HTTP 200, 15.665 Bytes, vollständiger Hilfetext;
+- `https://hasa.li/aktualisieren/`: HTTP 200, 9.524 Bytes, vollständige Updatehilfe;
+- `https://hasa.li/assets/help.css`: HTTP 200, 6.178 Bytes, einschließlich Mobil- und Druckregeln.
+
+HASA-Quellcommit der Seiten: `bcff23cee2e7692d5be535797dade7526aaa0684`. Die wiederkehrende lokale Git-Sperre entstand durch nicht normalisierte CRLF-Zeilenenden im über die GitHub-App erzeugten Blob des PowerShell-Uploadhelfers. Auf HASA main dauerhaft korrigiert in Commit `95eabf750d61677295442986f87f17e1cc06580b`. Styls vorherige lokale Abweichungen wurden vor dem gezielten Reset in Git-Stashes gesichert und nicht wieder eingespielt.
