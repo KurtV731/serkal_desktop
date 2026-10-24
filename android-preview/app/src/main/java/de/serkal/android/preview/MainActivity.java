@@ -963,25 +963,26 @@ public class MainActivity extends Activity {
         columns.addView(middle);
 
         LinearLayout right = panel(28);
-        right.addView(heading(english ? "SHARED ARCHIVE" : "GEMEINSAMES ARCHIV"));
-        LinearLayout archiveBar=new LinearLayout(this);archiveBar.setOrientation(LinearLayout.HORIZONTAL);
+        LinearLayout archiveBar=new LinearLayout(this);archiveBar.setOrientation(LinearLayout.HORIZONTAL);archiveBar.setGravity(Gravity.CENTER_VERTICAL);
+        archiveBar.addView(heading(english ? "SHARED ARCHIVE" : "GEMEINSAMES ARCHIV"),new LinearLayout.LayoutParams(0,dp(26),1));
         Button sort=button(getPreferences(0).getString("archiveSort","date").equals("date")?(english?"Date ↓":"Datum ↓"):"A–Z");
         sort.setContentDescription(english?"Switch archive sorting between date and alphabet":"Archivsortierung zwischen Datum und Alphabet wechseln");
+        sort.setTextSize(TypedValue.COMPLEX_UNIT_DIP,8);sort.setLayoutParams(new LinearLayout.LayoutParams(-2,dp(26)));sort.setPadding(dp(4),0,dp(4),0);
         sort.setOnClickListener(v->{boolean date=getPreferences(0).getString("archiveSort","date").equals("date");getPreferences(0).edit().putString("archiveSort",date?"alpha":"date").apply();sort.setText(date?"A–Z":(english?"Date ↓":"Datum ↓"));renderArchive();});archiveBar.addView(sort);
-        Button menu=button(english?"Menu ▾":"Menü ▾");menu.setOnClickListener(v->showArchiveMenu());archiveBar.addView(menu);right.addView(archiveBar);
+        Button menu=button(english?"Menu ▾":"Menü ▾");menu.setTextSize(TypedValue.COMPLEX_UNIT_DIP,8);menu.setLayoutParams(new LinearLayout.LayoutParams(-2,dp(26)));menu.setPadding(dp(4),0,dp(4),0);menu.setOnClickListener(v->showArchiveMenu());archiveBar.addView(menu);right.addView(archiveBar);
         archiveStatus=text("",9,MUTED);archiveStatus.setMaxLines(1);right.addView(archiveStatus);
-        authorityButton=verticalButton(english?"Make this archive authoritative":"Diesen Stand festlegen");
+        authorityButton=button(english?"Make archive authoritative":"Diesen Stand festlegen");authorityButton.setLayoutParams(new LinearLayout.LayoutParams(-1,dp(30)));
         authorityButton.setTextColor(Color.WHITE);authorityButton.setBackgroundColor(RED);
         authorityButton.setOnClickListener(v->confirmMakeLocalAuthoritative());authorityButton.setVisibility(View.GONE);right.addView(authorityButton);
         archiveRows=new LinearLayout(this);archiveRows.setOrientation(LinearLayout.VERTICAL);
         ScrollView archiveScroll=new ScrollView(this);archiveScroll.addView(archiveRows);right.addView(archiveScroll,new LinearLayout.LayoutParams(-1,0,1));
         Button calendarButton=button(english?"Open calendar":"Kalender öffnen");calendarButton.setOnClickListener(v->openCalendar());right.addView(calendarButton);
-        Button quitButton=verticalButton(english?"Exit SerKal":"SerKal beenden");
+        Button quitButton=button(english?"Exit SerKal":"SerKal beenden");quitButton.setLayoutParams(new LinearLayout.LayoutParams(-1,dp(30)));
         quitButton.setContentDescription(english?"Exit SerKal":"SerKal beenden");
         quitButton.setOnClickListener(v->onBackPressed());
-        right.addView(quitButton);
         copySyncButton=null;copySyncStatus=text("",9,MUTED);copySyncStatus.setMaxLines(2);copySyncStatus.setEllipsize(android.text.TextUtils.TruncateAt.END);right.addView(copySyncStatus);
         copySyncStatus.setOnClickListener(v->{archiveDialogOpen=true;dialogBuilder().setTitle(english?"Synchronization":"Synchronisation").setMessage(copySyncStatus.getText()).setPositiveButton(english?"Close":"Schließen",null).setOnDismissListener(d->archiveDialogOpen=false).show();});
+        right.addView(quitButton);
         renderArchive();
         columns.addView(right);
 
