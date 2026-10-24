@@ -3562,3 +3562,11 @@ Android-Branch `android-preview-0.0.5`, Commit `39e59783c67185ebcfb4cc4ecec235d1
 Alte Cloudrevisionen werden aus dem aktiven Revisionsverlauf herausgenommen; die Dateien bleiben als inaktive Wiederherstellungsstände liegen. Geräte mit älteren Programmständen können den neuen Marker nicht automatisch verarbeiten und bleiben bei einem abweichenden Stand schreibgesperrt, bis sie aktualisiert sind. Android Actions `40061886783` erfolgreich; APK mit vorhandenem privaten Zertifikat erstellt und Signatur lokal geprüft. Passwort/Schlüsselcode nicht in diesem Brett dokumentiert.
 
 Offen: praktische Geräteabnahme auf PC und Tablet, insbesondere Anzeige der vollständigen Listenhöhe und Übernahme des ausgewählten Bestands. Keine echten Archivdaten aus diesem Test verändert.
+
+
+### Android 0.0.5a25 (24.10.2026)
+
+- Im Archivbereich stehen Überschrift, Sortierknopf und Menüknopf jetzt in einer schmalen Zeile. Die verkleinerten Knöpfe und der Beenden-Knopf geben der Archivliste mehr Platz; „SerKal beenden“ steht unter dem Synchronisationshinweis und hat dieselbe Höhe wie „Bearbeiten“.
+- Nach einmaliger Übernahme des maßgeblichen Google-Archivs bleiben spätere Änderungen wie „gesehen“ normale Änderungen und werden zu Google übertragen. Der kanonische Stand wird nicht bei jedem Abgleich erneut über lokale Änderungen gelegt.
+- GitHub Actions Build und Android-Unit-Tests erfolgreich, Run `40065915911`. Die APK wurde mit dem bereits verwendeten privaten Zertifikat signiert und Kurt bereitgestellt. Schlüssel und Passwort sind nicht in diesem öffentlichen Brett dokumentiert.
+- Noch offen: praktische Geräteprüfung auf Tablet und Smartphone, einschließlich Änderung eines Gesehen-Status und der vollständigen Archivlistenhöhe.
