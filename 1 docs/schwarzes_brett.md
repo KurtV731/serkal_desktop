@@ -3625,3 +3625,16 @@ git pull --ff-only origin main
 ```
 
 Nach dem Upload sind `https://hasa.li/`, Installation, Anleitung/Hilfe, Anmeldung und mobile Navigation praktisch zu prüfen. Keine bereits erfolgte Root-Veröffentlichung behaupten, bevor diese Liveprüfung bestanden ist.
+
+
+### 2026-10-24 – CE SerKal – Ursache der halben Android-Archivliste behoben
+
+Status: APK 027 / 0.0.5a27 SIGNIERT / AUTOMATISCHE LAYOUTPRÜFUNG BESTANDEN
+
+Die Aussage bei APK 026, der verfügbare Scrollbereich werde vollständig genutzt, war nicht ausreichend geprüft. Die eigentliche Ursache lag im Kalenderknopf unter der Liste: Die gemeinsame Button-Hilfsfunktion liefert LayoutParams mit weight=1 für horizontale Buttonreihen. Direkt im vertikalen Archivpanel eingesetzt, beanspruchte der Kalenderknopf damit etwa die Hälfte der Resthöhe; seine Breite war zugleich 0. Die Liste teilte ihren Platz mit diesem praktisch unsichtbaren Knopf.
+
+Korrektur: Kalenderknopf mit voller Breite, fester Höhe 30dp und weight=0. Nur archiveScroll erhält Resthöhe. Kalenderfachlogik und Archivdaten werden dadurch nicht verändert.
+
+Neuer Robolectric-Test misst die echte MainActivity-Oberfläche mit 75 Einträgen bei 1280×800, 960×600 und 800×480. Er prüft Listenhöhe über 65% der Panelhöhe, keine gewichteten Footer und Erreichbarkeit des Listenendes. 52 Tests bestanden, 0 Fehler, Actions-Run 40074559939. Quellcommit 11cdf0284d5bfcd2053752b940e9c1841923d5be einschließlich Layouttest; eigentliche Reparatur 44fa1bb94d8db6baa93c913b39edc4cf42ff76b6.
+
+Datei für Kurt: 027-SerKal-Android-0.0.5a27.apk. Praktische Sichtprüfung auf seinen physischen Android-Geräten steht noch aus. Desktop-HTML wird nicht unverändert in native Android-Views kopiert; Platzaufteilung und kompakte Zeilen werden entsprechend umgesetzt.
