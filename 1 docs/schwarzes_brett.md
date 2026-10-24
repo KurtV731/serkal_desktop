@@ -3700,3 +3700,24 @@ Die Startseite besitzt nun die dazugehörigen Open-Graph- und Twitter-Card-Metad
 HASA-Repository `KurtV731/hasa`, Branch `main`, Commit `de67b692b2812cbc6d0b7f47e52d1673916db13c`. Lokale Prüfungen: PNG lesbar und exakt 1200×630; HTML-Metadaten vorhanden; PowerShell-Uploadpfade kontrolliert; `git diff --check` ohne Fehler.
 
 Styl führt zur Veröffentlichung `C:\ppd\hasa\HASA-START.cmd` und Menüpunkt 3 aus. Danach sind Root-Metadaten und `https://hasa.li/assets/hasa-discord-1.2.png` live zu prüfen. Discord kann ältere Linkvorschauen zwischenspeichern; das ist kein Websitefehler.
+
+
+## CE HASA – 24.10.2026: Altdateien im öffentlichen Download geprüft, Bereinigung vorbereitet
+
+Styl hat den vollständigen Web-Downloadordner geliefert. Öffentlich benötigt: **HASA-1.2.0.user.js**, **index.html**, **SHA256SUMS.txt**.
+
+Acht alte Dateien werden im gelieferten privaten Aufräumpaket vollständig erhalten: `hasa-user.js.txt`, `hasa.zip`, `hasa_1.1.2_ui-korrektur.user.js.txt`, `hasa_1.1_benutzeranleitung.pdf`, `hasa_1.1_forschungsmodul-komplett.user.js.txt`, `hasa_1.1_forschungsmodul.zip`, `hasa_1_0_public_preview.user.js.txt`, `HASA_Alpha20_geschlossene-Testphase.user.js.txt`.
+
+Befund: die unklaren Namen hasa.zip/hasa-user.js.txt sind 1.0-Vorschauen. Das 1.1-ZIP enthält die separate PDF und das separate Skript byteidentisch. 1.1.2 entspricht nach Zeilenumbruch-Normalisierung dem bestehenden GitHub-Archiv; andere Vorschau-/Testvarianten sind teilweise abweichend und werden ebenfalls erhalten. **Keine Originale endgültig verworfen.**
+
+Liveprüfung: öffentliche 1.2 hat **358850 Bytes**, SHA-256 **75b6a3544bb041a01a32417137339b3912fcc581ca691eefe3b05a84a149cf07**, stimmt mit veröffentlichter Prüfsumme überein. Die gelieferte lokale ZIP-Kopie unterscheidet sich ausschließlich durch CRLF-Zeilenumbrüche. Kein Versions-/Manipulationsbefund.
+
+Die beiden alten Dokumentationslinks auf der Downloadseite wurden bereits in Commit **106954e19aa0a50f8f9e3394044db23ed32d7ce4** auf `03 Dokumentation` korrigiert.
+
+Aufräumhilfe und Bericht auf HASA main: **a55afc0a46b17918363a774ae17a0126ee7fa20e**. Quellcode: `05 Verwaltung/Werkzeuge/downloads-bereinigen.ps1`, Bericht: `03 Dokumentation/downloads-bereinigen-2026-10-24.md`. Private Archive unter `07 Archiv/Alte Downloads/` sind von GitHub ausgeschlossen.
+
+Einmalige Lieferung **HASA-Downloads-Aufraeumen.zip**: entpacken, **HASA-DOWNLOADS-BEREINIGEN.bat** starten. Prüft das Paket und den aktuellen Git-Stand, sichert zuerst alle acht alten Dateien binär vom Server, gleicht ihre Inhalte ab, veröffentlicht/prüft die drei aktuellen Dateien und entfernt erst danach genau diese acht alten Serverdateien. Sicherung unter `C:\ppd\hasa\07 Archiv\Alte Downloads\<Zeitpunkt>`. Kein breites Löschen/Synchronisieren, keine API-/Startseiten-/Asset-/DB-Änderungen. Schutz vor veraltetem Paket, unbekanntem Serverinhalt und beschädigten Dateien.
+
+Prüfungen bestanden: Windows-Syntax und Paket-Fehlerfälle https://github.com/KurtV731/hasa/actions/runs/40088306620 ; Pfad-/Releaseprüfung https://github.com/KurtV731/hasa/actions/runs/40088306584 . Paket gegen sämtliche Originaldateien und Prüfsummen geprüft.
+
+**Produktive Bereinigung durch Styl noch auszuführen.** Website-Chatty bitte Altversionen nicht erneut in `02 Website/download` ablegen; vollständig erhaltene historische Downloads gehören ins lokale Archiv.
