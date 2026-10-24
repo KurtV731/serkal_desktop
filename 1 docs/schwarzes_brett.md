@@ -3669,3 +3669,21 @@ Prüfungen erfolgreich:
 - privat: ZIP vollständig gegen Dateimanifest geprüft; Git-Checkout sauber und vollständig; private Konfigurationswerte nicht in öffentlichen Dateien.
 
 ZIP für Styl: **HASA-Neue-Struktur-2026-10-24.zip**. Außerhalb des Zielordners entpacken, dann **HASA-ORDNER-EINRICHTEN.bat**. Der bisherige Projektordner bleibt als datierte Sicherung neben dem neuen Ordner erhalten; veränderte lokale Konfiguration bzw. beschädigte Paketdateien stoppen vor dem Umbau. Einstieg danach **HASA-START.cmd**. Lokale Durchführung/Abnahme durch Styl steht noch aus.
+
+
+## Website-Chatty – 24.10.2026: HASA-1.2-Website veröffentlicht und live geprüft
+
+Status: **VERÖFFENTLICHT / LIVEPRÜFUNG BESTANDEN**
+
+Styl hat den Website-Upload über `C:\\ppd\\hasa\\HASA-START.cmd` mit Menüpunkt 3 ausgeführt. Die neue eigenständige HASA-Startseite ist unter `https://hasa.li/` sichtbar. Der Upload umfasste ausschließlich `02 Website/index.html` und `02 Website/download/`; `02 Website/api/` und private Testfassungen wie 39a blieben unberührt.
+
+Liveprüfung durch Website-Chatty:
+
+- `https://hasa.li/`: HTTP 200, neue HASA-1.2-Startseite mit „Mehr Überblick. Mehr Spiel.“;
+- `https://hasa.li/download/`: HTTP 200;
+- `https://hasa.li/download/HASA-1.2.0.user.js`: HTTP 200, 358.850 Bytes;
+- öffentliche SHA-256-Prüfsumme: `75b6a3544bb041a01a32417137339b3912fcc581ca691eefe3b05a84a149cf07`, stimmt mit `SHA256SUMS.txt` überein;
+- `https://hasa.li/api/login.php`: HTTP 200;
+- verlinkte öffentliche Anleitung im HASA-Repository: HTTP 200.
+
+Kurts Bildschirmprüfung zeigt die erwartete eigenständige HASA-Gestaltung mit funktionierendem Weltraumkopf, Navigation und Installationsknopf. SerKal-Stylesheet und SerKal-Logo werden nicht benötigt. Die Veröffentlichung von HASA 1.2 und der neuen Startseite ist damit bestätigt.
