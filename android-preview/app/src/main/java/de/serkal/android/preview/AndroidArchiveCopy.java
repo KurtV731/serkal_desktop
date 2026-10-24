@@ -146,7 +146,10 @@ final class AndroidArchiveCopy {
                 if(authorityRevision.isEmpty()||authorityGeneratedAt.isEmpty())throw new Exception("COPY_LOCAL_STATE_INVALID");
                 JSONObject chosen; synchronized(this){chosen=ArchiveAuthority.select(state.getJSONObject("record"),owner,authorityGeneratedAt,authorityRevision);}
                 publishAuthority(client,chosen,remoteFiles);
-            } else if(tip!=null && !authorityId.isEmpty()) {
+            // Apply the chosen snapshot once per device. Devices that already
+            // acknowledged this authority marker may create ordinary revisions;
+            // otherwise every edit would be replaced by the same Google head.
+            } else if(tip!=null && shouldInstallAuthority(state.optString("authorityId"),authorityId)) {
                 JSONObject authoritative=client.load(tip,owner);
                 boolean changed=dirty || !revision.equals(base);
                 synchronized(this){JSONObject next=new JSONObject(state.toString());next.put("record",authoritative).put("base",revision).put("dirty",false).put("lastSynced",now());
@@ -187,6 +190,9 @@ final class AndroidArchiveCopy {
             }
         }catch(Exception failure){synchronized(this){if(!closed){error=String.valueOf(failure.getMessage());status="error";if(state.optBoolean("dirty") && !fatal())schedule(30);}}}
         finally {synchronized(this){busy=false;if(state.has("record") && !fatal())loaded=true;log("SYNC_END",error);}notifyChange();}
+    }
+    static boolean shouldInstallAuthority(String localAuthorityId,String remoteAuthorityId){
+        return remoteAuthorityId!=null && !remoteAuthorityId.isEmpty() && !remoteAuthorityId.equals(localAuthorityId);
     }
 }
 
