@@ -58,6 +58,12 @@ public class ArchiveCopyTest {
         JSONObject child=new JSONObject(b.toString()).put("authorityId","");
         try{ArchiveCopyClient.head(Arrays.asList(metadata(a),metadata(child)),"123");fail();}catch(Exception expected){assertEquals("COPY_CONFLICT",expected.getMessage());}
     }
+    @Test public void authorityIsAppliedOnceThenLocalEditsMaySync() {
+        String authority="aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";
+        assertTrue(AndroidArchiveCopy.shouldInstallAuthority("",authority));
+        assertFalse(AndroidArchiveCopy.shouldInstallAuthority(authority,authority));
+        assertFalse(AndroidArchiveCopy.shouldInstallAuthority(authority,""));
+    }
     @Test public void groupedEpisodesHaveStableCalendarIdentity() throws Exception {
         JSONObject r=record();List<JSONObject> events=CalendarCopy.desired(r);assertEquals(2,events.size());
         JSONObject first=events.get(0);assertEquals("Serie (2026) S01E01",first.getString("summary"));
