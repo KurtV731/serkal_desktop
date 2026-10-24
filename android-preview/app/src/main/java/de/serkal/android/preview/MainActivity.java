@@ -291,6 +291,8 @@ public class MainActivity extends Activity {
     private int requestGeneration = 0;
     private String credential = "";
     private EditText queryField;
+    private EditText yearField;
+    private EditText seasonField;
     private LinearLayout suggestions;
     private TextView statusText, selectedName, selectedInfo, tmdbReference;
     private Runnable pendingSearch;
@@ -305,7 +307,7 @@ public class MainActivity extends Activity {
     private int archiveGeneration;
     private boolean archiveBusy;
     private LinearLayout archiveRows;
-    private TextView archiveStatus,copySyncStatus;
+    private TextView archiveStatus,archiveCount,copySyncStatus;
     private Button copySyncButton,authorityButton;
     private AndroidArchiveCopy archiveCopy;
 
@@ -363,30 +365,30 @@ public class MainActivity extends Activity {
     private void renderArchive() {
         if(archiveRows==null || archiveStatus==null) return;
         archiveRows.removeAllViews();
-        if(archiveBusy) { archiveStatus.setText(archiveText("LOADING")); return; }
+        if(archiveBusy) { archiveStatus.setVisibility(View.VISIBLE);archiveStatus.setText(archiveText("LOADING"));if(archiveCount!=null)archiveCount.setText("…");return; }
         if(!archiveError.isEmpty()) {
             String message;
             if(archiveError.contains("MISSING")) message=archiveText("MISSING");
             else if(archiveError.contains("CONFLICT")) message=archiveText("CONFLICT");
             else if(archiveError.contains("401") || archiveError.equals("connect")) message=archiveText("CONNECT");
             else message=archiveText("FAILED");
-            archiveStatus.setText(message); return;
+            archiveStatus.setVisibility(View.VISIBLE);archiveStatus.setText(message);if(archiveCount!=null)archiveCount.setText("!");return;
         }
-        if(archiveSnapshot==null) { archiveStatus.setText(archiveText("INITIAL")); return; }
+        if(archiveSnapshot==null) { archiveStatus.setVisibility(View.VISIBLE);archiveStatus.setText(archiveText("INITIAL"));if(archiveCount!=null)archiveCount.setText("—");return; }
         org.json.JSONArray entries=archiveSnapshot.optJSONArray("entries");
-        archiveStatus.setText((english ? "Archive: " : "Archiv: ")+entries.length());
+        archiveStatus.setText("");archiveStatus.setVisibility(View.GONE);if(archiveCount!=null)archiveCount.setText(String.valueOf(entries.length()));
         if(entries.length()==0) archiveRows.addView(text(archiveText("EMPTY_ARCHIVE"),10,MUTED));
         final boolean byDate=getPreferences(0).getString("archiveSort","date").equals("date");
         String today=new java.text.SimpleDateFormat("yyyy-MM-dd",java.util.Locale.ROOT).format(new java.util.Date());
         for(JSONObject e:ArchiveOrder.sorted(entries,byDate,english)) {
-            LinearLayout item=new LinearLayout(this);item.setOrientation(LinearLayout.HORIZONTAL);item.setGravity(Gravity.CENTER_VERTICAL);item.setBackgroundColor(CARD);item.setMinimumHeight(dp(38));
-            LinearLayout.LayoutParams rowParams=new LinearLayout.LayoutParams(-1,-2);rowParams.setMargins(0,0,0,dp(2));item.setLayoutParams(rowParams);
-            TextView title=text(ArchiveOrder.label(e,english),10,TEXT);title.setMaxLines(2);title.setEllipsize(android.text.TextUtils.TruncateAt.END);item.addView(title,new LinearLayout.LayoutParams(0,-2,1));
+            LinearLayout item=new LinearLayout(this);item.setOrientation(LinearLayout.HORIZONTAL);item.setGravity(Gravity.CENTER_VERTICAL);item.setBackgroundColor(CARD);item.setMinimumHeight(dp(32));
+            LinearLayout.LayoutParams rowParams=new LinearLayout.LayoutParams(-1,-2);rowParams.setMargins(0,0,0,dp(1));item.setLayoutParams(rowParams);
+            TextView title=text(ArchiveOrder.label(e,english),9.5f,TEXT);title.setMaxLines(2);title.setEllipsize(android.text.TextUtils.TruncateAt.END);item.addView(title,new LinearLayout.LayoutParams(0,-2,1));
             String iso=ArchiveOrder.start(e);String display=iso.isEmpty()?"—":iso.substring(8,10)+"."+iso.substring(5,7)+"."+iso.substring(0,4);
             if(e.optBoolean("announcementOnly"))display+=" (?)";
-            TextView date=text(display,8,MUTED);date.setSingleLine(true);date.setGravity(Gravity.RIGHT);item.addView(date,new LinearLayout.LayoutParams(dp(59),-2));
-            int status=ArchiveOrder.status(e,today);TextView mark=text(ArchiveOrder.icon(status),16,status==4?Color.rgb(40,170,110):status==3?RED:status==1?Color.rgb(210,160,30):BLUE);
-            mark.setGravity(Gravity.CENTER);mark.setContentDescription(archiveStatusLabel(e));item.addView(mark,new LinearLayout.LayoutParams(dp(32),dp(38)));
+            TextView date=text(display,7.5f,MUTED);date.setSingleLine(true);date.setGravity(Gravity.RIGHT);item.addView(date,new LinearLayout.LayoutParams(dp(55),-2));
+            int status=ArchiveOrder.status(e,today);TextView mark=text(ArchiveOrder.icon(status),14,status==4?Color.rgb(40,170,110):status==3?RED:status==1?Color.rgb(210,160,30):BLUE);
+            mark.setGravity(Gravity.CENTER);mark.setContentDescription(archiveStatusLabel(e));item.addView(mark,new LinearLayout.LayoutParams(dp(27),dp(32)));
             item.setContentDescription(ArchiveOrder.label(e,english)+" · "+display+" · "+archiveStatusLabel(e));item.setOnClickListener(v->showArchiveEntry(e));
             if(status==3 || status==4)mark.setOnClickListener(v->toggleArchiveSeen(e));
             archiveRows.addView(item);
@@ -531,14 +533,16 @@ public class MainActivity extends Activity {
     }
     private void showArchiveMenu(){
         archiveDialogOpen=true;dialogBuilder().setTitle(english?"Archive actions":"Archivaktionen")
-            .setItems(english?new String[]{"Sync now","Reload archive","Maintenance","Last maintenance results","Log"}:new String[]{"Jetzt synchronisieren","Archiv neu laden","Wartung","Letztes Wartungsergebnis","Log"},(d,which)->handler.post(()->runArchiveMenuAction(which)))
+            .setItems(english?new String[]{"TMDB API key","Google account","Sync now","Reload archive","Maintenance","Last maintenance results","Log"}:new String[]{"TMDB API-Key","Google-Konto","Jetzt synchronisieren","Archiv neu laden","Wartung","Letztes Wartungsergebnis","Log"},(d,which)->handler.post(()->runArchiveMenuAction(which)))
             .setNegativeButton(english?"Close":"Schließen",null).setOnDismissListener(d->archiveDialogOpen=false).show();
     }
     private void runArchiveMenuAction(int which){
-        if(which==0){if(archiveCopy!=null && !archiveCopy.busy())archiveCopy.schedule(0);return;}
-        if(which==1){loadArchive();checkPendingRequest();return;}
-        if(which==2){askMaintenanceCountry();return;}
-        if(which==3){try{String result=getPreferences(0).getString("maintenanceReport","");if(!result.isEmpty())showMaintenanceReport(new JSONObject(result));else statusText.setText(english?"No maintenance results yet.":"Noch kein Wartungsergebnis vorhanden.");}catch(Exception ignored){}return;}
+        if(which==0){askForKey();return;}
+        if(which==1){googleMenu();return;}
+        if(which==2){if(archiveCopy!=null && !archiveCopy.busy())archiveCopy.schedule(0);return;}
+        if(which==3){loadArchive();checkPendingRequest();return;}
+        if(which==4){askMaintenanceCountry();return;}
+        if(which==5){try{String result=getPreferences(0).getString("maintenanceReport","");if(!result.isEmpty())showMaintenanceReport(new JSONObject(result));else statusText.setText(english?"No maintenance results yet.":"Noch kein Wartungsergebnis vorhanden.");}catch(Exception ignored){}return;}
         try{TextView lines=text(archiveCopy==null?"":archiveCopy.readLog(),11,TEXT);lines.setTextIsSelectable(true);ScrollView scroll=new ScrollView(this);scroll.addView(lines);
             archiveDialogOpen=true;dialogBuilder().setTitle("SerKal Log").setView(scroll).setPositiveButton(english?"Close":"Schließen",null).setOnDismissListener(d->archiveDialogOpen=false).show();
         }catch(Exception error){statusText.setText(english?"Log unavailable":"Log nicht verfügbar");}
@@ -546,7 +550,8 @@ public class MainActivity extends Activity {
 
     private void askForSeason() {
         if(!writeReady() || selectedTmdbId<=0)return;
-        EditText input=new EditText(new android.view.ContextThemeWrapper(this, dark ? android.R.style.Theme_Material : android.R.style.Theme_Material_Light));input.setText("1");input.setTextColor(TEXT);input.setInputType(InputType.TYPE_CLASS_NUMBER);
+        EditText input=new EditText(new android.view.ContextThemeWrapper(this, dark ? android.R.style.Theme_Material : android.R.style.Theme_Material_Light));
+        String preferred=seasonField==null?"":seasonField.getText().toString().trim();input.setText(preferred.isEmpty()?"1":preferred);input.setTextColor(TEXT);input.setInputType(InputType.TYPE_CLASS_NUMBER);
         archiveDialogOpen=true;
         dialogBuilder().setTitle(english ? "Season number" : "Staffelnummer").setView(input)
             .setPositiveButton(english ? "Prepare" : "Vorbereiten",(d,w)->{
@@ -644,6 +649,7 @@ public class MainActivity extends Activity {
     private void searchNow() {
         if (pendingSearch != null) handler.removeCallbacks(pendingSearch);
         final String query = queryField.getText().toString().trim();
+        final String year = yearField==null?"":yearField.getText().toString().trim();
         final int generation = ++requestGeneration;
         final boolean language = english;
         suggestions.removeAllViews(); displayedResults.clear(); selectedDetail=null; selectedArchiveEntry=null; selectedTmdbId=0; updateTmdbReference(); clearPoster();
@@ -651,12 +657,13 @@ public class MainActivity extends Activity {
         selectedName.setText(english ? "Select a series" : "Serie auswählen");
         selectedInfo.setText("");
         if (query.length() < 2) return;
+        if(!year.isEmpty() && !year.matches("\\d{4}")){statusText.setText(english?"Enter a four-digit year or leave it blank.":"Bitte ein vierstelliges Jahr eingeben oder das Feld leeren.");return;}
         if (credential.isEmpty()) { askForKey(); return; }
         final String key = credential;
         statusText.setText(english ? "Searching…" : "Suche läuft…");
         network.execute(() -> {
             try {
-                List<JSONObject> results = new TmdbClient(key).search(query, language);
+                List<JSONObject> results = new TmdbClient(key).search(query, language, year);
                 handler.post(() -> {
                     if (generation != requestGeneration) return;
                     statusText.setText(results.isEmpty()
@@ -818,6 +825,8 @@ public class MainActivity extends Activity {
 
     private void buildScreen() {
         String previousQuery = queryField == null ? "" : queryField.getText().toString();
+        String previousYear = yearField == null ? "" : yearField.getText().toString();
+        String previousSeason = seasonField == null ? "" : seasonField.getText().toString();
         CharSequence previousStatus = statusText == null ? "" : statusText.getText();
         CharSequence previousName = selectedName == null ? "" : selectedName.getText();
         CharSequence previousInfo = selectedInfo == null ? "" : selectedInfo.getText();
@@ -887,7 +896,8 @@ public class MainActivity extends Activity {
         // Verbindliche Reihenfolge wie am Desktop: Suche – Anzeige/Bearbeitung – Archiv.
         LinearLayout left = panel(29);
         left.addView(heading(english ? "SEARCH / CALENDAR" : "SUCHE / KALENDER"));
-        left.addView(text(english ? "Search for a series" : "Serie suchen", 8.5f, MUTED));
+        left.addView(text(english ? "Search for a series" : "Seriensuche", 8.5f, MUTED));
+        LinearLayout searchFields=new LinearLayout(this);searchFields.setOrientation(LinearLayout.HORIZONTAL);searchFields.setGravity(Gravity.CENTER_VERTICAL);
         queryField = new EditText(new android.view.ContextThemeWrapper(this, dark ? android.R.style.Theme_Material : android.R.style.Theme_Material_Light));
         queryField.setSingleLine(true);
         // Keep the real title field and suggestions visible in landscape.
@@ -895,12 +905,21 @@ public class MainActivity extends Activity {
             | android.view.inputmethod.EditorInfo.IME_FLAG_NO_FULLSCREEN
             | android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH);
         queryField.setTextSize(14);
-        queryField.setPadding(dp(8),dp(2),dp(8),dp(2));
+        queryField.setPadding(dp(5),dp(2),dp(4),dp(2));
         queryField.setTextColor(TEXT);
         queryField.setHintTextColor(MUTED);
         queryField.setHint(english ? "Series title" : "Serientitel");
         queryField.setText(previousQuery);
-        left.addView(queryField,new LinearLayout.LayoutParams(-1,dp(44)));
+        searchFields.addView(queryField,new LinearLayout.LayoutParams(0,dp(34),1));
+        yearField=new EditText(new android.view.ContextThemeWrapper(this,dark?android.R.style.Theme_Material:android.R.style.Theme_Material_Light));
+        yearField.setSingleLine(true);yearField.setInputType(InputType.TYPE_CLASS_NUMBER);yearField.setTextSize(TypedValue.COMPLEX_UNIT_DIP,9);
+        yearField.setTextColor(TEXT);yearField.setHintTextColor(MUTED);yearField.setHint(english?"Year":"Jahr");yearField.setGravity(Gravity.CENTER);
+        yearField.setPadding(dp(2),0,dp(2),0);yearField.setText(previousYear);searchFields.addView(yearField,new LinearLayout.LayoutParams(dp(44),dp(34)));
+        seasonField=new EditText(new android.view.ContextThemeWrapper(this,dark?android.R.style.Theme_Material:android.R.style.Theme_Material_Light));
+        seasonField.setSingleLine(true);seasonField.setInputType(InputType.TYPE_CLASS_NUMBER);seasonField.setTextSize(TypedValue.COMPLEX_UNIT_DIP,9);
+        seasonField.setTextColor(TEXT);seasonField.setHintTextColor(MUTED);seasonField.setHint("S");seasonField.setGravity(Gravity.CENTER);
+        seasonField.setPadding(dp(2),0,dp(2),0);seasonField.setText(previousSeason);searchFields.addView(seasonField,new LinearLayout.LayoutParams(dp(32),dp(34)));
+        left.addView(searchFields);
         suggestions = new LinearLayout(this);
         suggestions.setOrientation(LinearLayout.VERTICAL);
         ScrollView resultsScroll = new ScrollView(this);
@@ -920,16 +939,13 @@ public class MainActivity extends Activity {
             }
             public void afterTextChanged(Editable value) {}
         });
-        LinearLayout leftButtons = new LinearLayout(this);
-        Button search = button(english ? "Search" : "Suchen");
+        LinearLayout leftButtons = new LinearLayout(this);leftButtons.setOrientation(LinearLayout.HORIZONTAL);
+        Button reset=verticalButton("✕ Reset");
+        reset.setOnClickListener(v->{queryField.setText("");yearField.setText("");seasonField.setText("");suggestions.removeAllViews();displayedResults.clear();selectedDetail=null;selectedArchiveEntry=null;selectedTmdbId=0;updateTmdbReference();clearPoster();selectedName.setText(english?"Select a series":"Serie auswählen");selectedInfo.setText("");statusText.setText(english?"Ready.":"Bereit.");});
+        leftButtons.addView(reset);
+        Button search = verticalButton(english ? "Search" : "Suchen");
         search.setOnClickListener(v -> searchNow());
         leftButtons.addView(search);
-        Button keyButton = button(english ? "API key" : "API-Key");
-        keyButton.setOnClickListener(v -> askForKey());
-        leftButtons.addView(keyButton);
-        Button google = button("Google");
-        google.setOnClickListener(v -> googleMenu());
-        leftButtons.addView(google);
         left.addView(leftButtons);
         columns.addView(left);
 
@@ -969,13 +985,14 @@ public class MainActivity extends Activity {
         sort.setContentDescription(english?"Switch archive sorting between date and alphabet":"Archivsortierung zwischen Datum und Alphabet wechseln");
         sort.setTextSize(TypedValue.COMPLEX_UNIT_DIP,8);sort.setLayoutParams(new LinearLayout.LayoutParams(-2,dp(26)));sort.setPadding(dp(4),0,dp(4),0);
         sort.setOnClickListener(v->{boolean date=getPreferences(0).getString("archiveSort","date").equals("date");getPreferences(0).edit().putString("archiveSort",date?"alpha":"date").apply();sort.setText(date?"A–Z":(english?"Date ↓":"Datum ↓"));renderArchive();});archiveBar.addView(sort);
-        Button menu=button(english?"Menu ▾":"Menü ▾");menu.setTextSize(TypedValue.COMPLEX_UNIT_DIP,8);menu.setLayoutParams(new LinearLayout.LayoutParams(-2,dp(26)));menu.setPadding(dp(4),0,dp(4),0);menu.setOnClickListener(v->showArchiveMenu());archiveBar.addView(menu);right.addView(archiveBar);
+        Button menu=button(english?"Menu ▾":"Menü ▾");menu.setTextSize(TypedValue.COMPLEX_UNIT_DIP,8);menu.setLayoutParams(new LinearLayout.LayoutParams(-2,dp(26)));menu.setPadding(dp(4),0,dp(4),0);menu.setOnClickListener(v->showArchiveMenu());archiveBar.addView(menu);
+        archiveCount=text("—",8,TEXT);archiveCount.setGravity(Gravity.CENTER);archiveCount.setBackgroundColor(CARD);archiveCount.setMinWidth(dp(28));archiveCount.setPadding(dp(4),0,dp(4),0);archiveBar.addView(archiveCount,new LinearLayout.LayoutParams(-2,dp(26)));right.addView(archiveBar);
         archiveStatus=text("",9,MUTED);archiveStatus.setMaxLines(1);right.addView(archiveStatus);
         authorityButton=button(english?"Make archive authoritative":"Diesen Stand festlegen");authorityButton.setLayoutParams(new LinearLayout.LayoutParams(-1,dp(30)));
         authorityButton.setTextColor(Color.WHITE);authorityButton.setBackgroundColor(RED);
         authorityButton.setOnClickListener(v->confirmMakeLocalAuthoritative());authorityButton.setVisibility(View.GONE);right.addView(authorityButton);
         archiveRows=new LinearLayout(this);archiveRows.setOrientation(LinearLayout.VERTICAL);
-        ScrollView archiveScroll=new ScrollView(this);archiveScroll.addView(archiveRows);right.addView(archiveScroll,new LinearLayout.LayoutParams(-1,0,1));
+        ScrollView archiveScroll=new ScrollView(this);archiveScroll.setFillViewport(true);archiveScroll.setVerticalScrollBarEnabled(true);archiveScroll.addView(archiveRows);right.addView(archiveScroll,new LinearLayout.LayoutParams(-1,0,1));
         Button calendarButton=button(english?"Open calendar":"Kalender öffnen");calendarButton.setOnClickListener(v->openCalendar());right.addView(calendarButton);
         Button quitButton=button(english?"Exit SerKal":"SerKal beenden");quitButton.setLayoutParams(new LinearLayout.LayoutParams(-1,dp(30)));
         quitButton.setContentDescription(english?"Exit SerKal":"SerKal beenden");
