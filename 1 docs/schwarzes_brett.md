@@ -3596,3 +3596,32 @@ Status: APK 0.0.5a26 ERSTELLT UND GEPRÜFT
 - Android-Tests: 51 bestanden, 0 Fehler. GitHub-Actions-Run: `40072025425`.
 - Kurt erhielt die signierte Datei unter dem Namen `026-SerKal-Android-0.0.5a26.apk`. Persönliche Signierdaten sind nicht in diesem öffentlichen Brett enthalten.
 - Kalenderlogik blieb unangetastet.
+
+
+## Website-Chatty – 24.10.2026: HASA-1.2-Startseite veröffentlichungsfertig
+
+Status: **STARTSEITE UND UPLOADHELFER AUF GITHUB GEPRÜFT / PRODUKTIVER UPLOAD DURCH STYL NOCH AUSZUFÜHREN**
+
+Auf Grundlage von Styls ausdrücklich gewählter Mischung aus Weltraumflair und praktischer Kommandozentrale wurde die begutachtete Gestaltungsvorschau als öffentliche HASA-1.2-Startseite fertiggestellt. Das Erscheinungsbild bleibt erhalten; reine Vorschauhinweise und funktionslose Demoaktionen wurden durch die freigegebenen echten Ziele ersetzt.
+
+HASA-Repository: `KurtV731/hasa`, Branch `main`.
+
+- neue Startseite: `6 website/index.html`, GitHub-Commit `8edc17a36ebd50e0d8ddab489d86704b50492e7b`;
+- Installationsziel: `/download/HASA-1.2.0.user.js`;
+- Anmeldung: `/api/login.php`;
+- Anleitung und Hilfe: geprüfte Fachtexte im HASA-Repository;
+- eigenständige, eingebettete Gestaltung ohne Abhängigkeit von SerKal-Stylesheet oder SerKal-Logo;
+- keine privaten Spielerdaten; sichtbare Vorschauwerte ausdrücklich als Beispieldaten gekennzeichnet;
+- kein vorgetäuschtes Vorschlagsformular: Der vorgesehene Bereich erklärt den noch offenen Übertragungsweg.
+
+Der vorhandene Veröffentlichungshelfer `6 website/HASA-1.2-Hochladen.ps1` wurde im Commit `d48ecc309304369d3e33bc2e2cd1c4f53b6eb993` korrigiert. Er findet den Downloadordner jetzt tatsächlich relativ zu seinem Speicherort und lädt sowohl `index.html` als auch `download/` in die bestätigte Webwurzel `/hasa.li/`. Das vorhandene Verzeichnis `/api/` wird nicht bearbeitet.
+
+Liveprüfung vor dem Root-Upload: `https://hasa.li/download/` und `https://hasa.li/download/HASA-1.2.0.user.js` antworten mit HTTP 200; die Installationsdatei hat 358.850 Bytes. Die Root-Adresse liefert noch die bisherige Seite. Der produktive Upload kann nur auf Styls Rechner mit der dort gespeicherten WinSCP-Sitzung `HASA-li` ausgeführt werden:
+
+```bat
+cd /d C:\ppd\serkal\hasa
+git pull --ff-only origin main
+"6 website\HASA-1.2-Hochladen.bat"
+```
+
+Nach dem Upload sind `https://hasa.li/`, Installation, Anleitung/Hilfe, Anmeldung und mobile Navigation praktisch zu prüfen. Keine bereits erfolgte Root-Veröffentlichung behaupten, bevor diese Liveprüfung bestanden ist.
