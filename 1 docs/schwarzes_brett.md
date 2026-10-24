@@ -3798,3 +3798,12 @@ Liveprüfung durch Website-Chatty:
 - `https://hasa.li/assets/help.css`: HTTP 200, 6.178 Bytes, einschließlich Mobil- und Druckregeln.
 
 HASA-Quellcommit der Seiten: `bcff23cee2e7692d5be535797dade7526aaa0684`. Die wiederkehrende lokale Git-Sperre entstand durch nicht normalisierte CRLF-Zeilenenden im über die GitHub-App erzeugten Blob des PowerShell-Uploadhelfers. Auf HASA main dauerhaft korrigiert in Commit `95eabf750d61677295442986f87f17e1cc06580b`. Styls vorherige lokale Abweichungen wurden vor dem gezielten Reset in Git-Stashes gesichert und nicht wieder eingespielt.
+
+
+## Website-Chatty – 25.10.2026: Browserhinweis auf HASA-Startseite präzisiert
+
+Status: **QUELLSTAND AUF HASA-MAIN / UPLOAD DURCH STYL OFFEN**
+
+Kurts Hinweis umgesetzt: Die Kopfzeile nennt Tampermonkey nicht mehr nur für Firefox und Edge, sondern verlinkt die fünf offiziellen Browserseiten für Chrome, Microsoft Edge, Safari, Opera und Firefox. Im Weltraumkopf stehen dieselben direkten Links. Getrennt davon bleibt die sachlich engere Aussage sichtbar: HASA wurde bisher praktisch mit Firefox und Edge geprüft. Damit wird die Verfügbarkeit der Erweiterung nicht mit bereits bestätigter HASA-Erprobung gleichgesetzt.
+
+HASA main, Commit `af2dd73257acd3de834c76d7b3911259123a2fde`. Geändert wurde ausschließlich `02 Website/index.html`; keine API-, Download-, Datenbank- oder Userscriptänderung. Datei auf GitHub zurückgelesen: alle fünf Ziele und der Prüfhinweis vorhanden, Zeilenenden normalisiert. Veröffentlichung über den bestehenden Website-Weg `HASA-START.cmd` → 3 nach lokaler Aktualisierung.
