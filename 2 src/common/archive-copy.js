@@ -15,6 +15,7 @@ function safeName(name) {
 function validate(record, owner) {
     if (!record || record.schema !== 2 || record.owner !== owner || !UUID.test(record.revision) ||
         !(record.parent === '' || UUID.test(record.parent)) || record.parent === record.revision ||
+        (record.authorityId!==undefined && record.authorityId!=='' && !UUID.test(record.authorityId)) ||
         !Number.isFinite(Date.parse(record.generatedAt)) || !Array.isArray(record.files) || record.files.length > 20000)
         fail('COPY_INVALID');
     const names = new Set(); let bytes = 0;
@@ -88,14 +89,17 @@ function recover(folder) {
 }
 function head(files, owner) {
     const revisions = new Map();
+    const authorityIds=new Set();let unmarked=0;
     for (const f of files) {
         const p = f.appProperties || {};if(p.parent==='root')p.parent='';
         if (p.owner !== owner || !UUID.test(p.revision) || !(p.parent === '' || UUID.test(p.parent)) ||
             f.name !== PREFIX+p.revision+'.json') fail('COPY_INVALID');
+        if(p.authorityId){if(!UUID.test(p.authorityId))fail('COPY_INVALID');authorityIds.add(p.authorityId);}else unmarked++;
         const duplicate = revisions.get(p.revision);
         if (duplicate && (duplicate.md5Checksum !== f.md5Checksum || duplicate.appProperties.parent !== p.parent)) fail('COPY_CONFLICT');
         if (!duplicate) revisions.set(p.revision,f);
     }
+    if(authorityIds.size>1||(authorityIds.size===1&&unmarked))fail('COPY_CONFLICT');
     if (!revisions.size) return null;
     const parents = new Set(); let roots = 0;
     for (const f of revisions.values()) {
@@ -129,7 +133,8 @@ function client(accessToken, fetchImpl=fetch) {
             if(!Array.isArray(r.files))fail('COPY_INVALID');files.push(...r.files);if(files.length>20000)fail('COPY_TOO_LARGE');page=r.nextPageToken||'';
         }while(page);return files;},
         async load(file,owner){const r=validate(await request('https://www.googleapis.com/drive/v3/files/'+encodeURIComponent(file.id)+'?alt=media'),owner);
-            if(r.revision!==file.appProperties.revision || (r.parent||'')!==(file.appProperties.parent==='root'?'':(file.appProperties.parent||'')))fail('COPY_INVALID');return r;},
+            if(r.revision!==file.appProperties.revision || (r.parent||'')!==(file.appProperties.parent==='root'?'':(file.appProperties.parent||'')) ||
+                (file.appProperties.authorityId||'')!==(r.authorityId||''))fail('COPY_INVALID');return r;},
         async archiveActive(files){
             for(const file of files) {
                 const name='serkal-history-v2-'+String(file.appProperties.revision)+'-'+String(file.id)+'.json';
@@ -138,7 +143,7 @@ function client(accessToken, fetchImpl=fetch) {
         },
         async upload(record){validate(record,record.owner);const json=JSON.stringify(record);if(Buffer.byteLength(json)>LIMIT)fail('COPY_TOO_LARGE');
             const boundary='serkal-'+crypto.randomUUID();const meta={name:PREFIX+record.revision+'.json',mimeType:'application/json',parents:['appDataFolder'],
-                appProperties:{owner:record.owner,revision:record.revision,parent:record.parent||'root'}};
+                appProperties:{owner:record.owner,revision:record.revision,parent:record.parent||'root',...(record.authorityId?{authorityId:record.authorityId}:{})}};
             const body='--'+boundary+'\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n'+JSON.stringify(meta)+
                 '\r\n--'+boundary+'\r\nContent-Type: application/json\r\n\r\n'+json+'\r\n--'+boundary+'--\r\n';
             return request('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id','POST',body,'multipart/related; boundary='+boundary);
@@ -152,6 +157,7 @@ async function synchronize({state, local, client:remote, save, apply, calendarSy
     let remoteFiles=await remote.list();
     if(state.adoption) {
         state.adoption.owner=owner;
+        state.adoption.authorityId=state.adoption.authorityId||state.adoption.revision;
         validate(state.adoption,owner);
         save();
         await remote.archiveActive(remoteFiles.filter(file=>file.appProperties?.owner===owner));
@@ -166,10 +172,22 @@ async function synchronize({state, local, client:remote, save, apply, calendarSy
         if(digest(confirmed.files,confirmed.calendar)!==digest(state.adoption.files,state.adoption.calendar))fail('COPY_CONFLICT');
         const same=digest(current.files,current.calendar)===digest(state.adoption.files,state.adoption.calendar);
         state.owner=owner;state.base=state.adoption.revision;state.clean=digest(state.adoption.files,state.adoption.calendar);
+        state.authorityId=state.adoption.authorityId;
         state.dirty=!same;delete state.pending;delete state.pendingFileId;delete state.adoption;save();
         return {status:same?'saved':'pending'};
     }
     const tip=head(remoteFiles,owner), revision=tip ? tip.appProperties.revision : '';
+    const authorityId=tip?.appProperties?.authorityId||'';
+    if(tip && authorityId) {
+        const record=await remote.load(tip,owner);
+        const same=digest(current.files,current.calendar)===digest(record.files,record.calendar);
+        const changed=state.base!==revision||!same||!!state.dirty;
+        if(!same)await apply(record,true);
+        state.owner=owner;state.base=revision;state.authorityId=authorityId;
+        state.clean=digest(record.files,record.calendar);state.dirty=false;
+        delete state.pending;delete state.pendingFileId;delete state.adoption;save();
+        return {status:changed?'authority-applied':'saved'};
+    }
     if(state.dirty) {
         // A lost response must be checked before a second upload; the same frozen body is reused.
         if(state.pending && (revision===state.pending.revision || state.pendingFileId)) {
@@ -178,13 +196,14 @@ async function synchronize({state, local, client:remote, save, apply, calendarSy
             const confirmed=await remote.load(proof,owner);
             if(digest(confirmed.files,confirmed.calendar)!==digest(state.pending.files,state.pending.calendar))fail('COPY_CONFLICT');
             state.base=state.pending.revision;state.owner=owner;
+            state.authorityId=confirmed.authorityId||state.authorityId||'';
             const same=digest(current.files,current.calendar)===digest(state.pending.files,state.pending.calendar);
             state.clean=digest(state.pending.files,state.pending.calendar);
             state.dirty=!same;delete state.pending;delete state.pendingFileId;save();
             return {status:same?'saved':'pending'};
         }
         if(revision!==(state.base||''))fail('COPY_CONFLICT');
-        if(!state.pending) {state.pending=validate({schema:2,owner,revision:crypto.randomUUID(),parent:revision,
+        if(!state.pending) {state.pending=validate({schema:2,owner,revision:crypto.randomUUID(),parent:revision,authorityId:state.authorityId||'',
             generatedAt:new Date().toISOString(),files:current.files,calendar:current.calendar},owner);state.owner=owner;save();}
         await calendarSync(state.pending);
         // Check again after network calendar work. Never publish onto an unseen new parent.

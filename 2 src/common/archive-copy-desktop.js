@@ -13,19 +13,20 @@ class DesktopCopy {
         try{const folder=this.folder();fs.mkdirSync(folder,{recursive:true});const stat=fs.statfsSync(folder),bytes=Buffer.byteLength(JSON.stringify(this.local()));
             return copy.writable(Number(stat.bavail)*Number(stat.bsize),bytes);}catch(_){return false;}
     }
-    view(){const available=this.available();return {status:this.status,code:available?this.error:"COPY_LOW_SPACE",busy:this.busy,writable:this.initialized && !this.fatal() && available,dirty:!!this.state.dirty,
+    view(){const available=this.available();return {status:this.status,code:available?this.error:"COPY_LOW_SPACE",busy:this.busy,writable:this.initialized && !this.fatal() && available,dirty:!!this.state.dirty,authorityPending:!!this.state.adoption,
         progress:this.progress||null,lastSynced:this.state.lastSynced||'',revision:this.state.base||''};}
     async adoptLocal(){
         if(this.busy)copyError('COPY_BUSY');
         const current=this.local();
         this.state.adoption=copy.validate({schema:2,owner:this.state.owner||'pending',revision:crypto.randomUUID(),parent:'',
-            generatedAt:new Date().toISOString(),files:current.files,calendar:current.calendar},this.state.owner||'pending');
+            authorityId:'',generatedAt:new Date().toISOString(),files:current.files,calendar:current.calendar},this.state.owner||'pending');
+        this.state.adoption.authorityId=this.state.adoption.revision;
         this.save();this.error='';this.initialized=true;
         return this.sync();
     }
     report(phase,current=0,total=0){this.progress={phase,current,total};this.onStatus(this.view());}
     fatal(){return /^(COPY_(CONFLICT|ACCOUNT_CHANGED|LOW_SPACE|LOCAL_STATE_INVALID|INVALID|HISTORY_MISSING|NEEDS_SOURCE|LEGACY_PENDING|CALENDAR_TARGET_MISSING|CALENDAR_AMBIGUOUS|CALENDAR_ACCESS_DENIED))$/.test(this.error);}
-    assertWrite(){if(this.fatal())copyError(this.error);if(!this.initialized)copyError('COPY_LOADING');if(!this.available())copyError('COPY_LOW_SPACE');}
+    assertWrite(){if(this.fatal())copyError(this.error);if(this.busy)copyError('COPY_SYNC_BUSY');if(!this.initialized)copyError('COPY_LOADING');if(!this.available())copyError('COPY_LOW_SPACE');}
     changed(){
         if(!this.initialized)return;
         const local=this.local();
@@ -56,13 +57,13 @@ class DesktopCopy {
                 this.state.dirty=true;this.save();
             }
             const result=await copy.synchronize({state:this.state,local:()=>this.local(),client:remote,save:()=>this.save(),
-                apply:record=>this.lock(()=>{
-                    if(this.state.dirty)copyError('COPY_CONFLICT');
+                apply:(record,authoritative=false)=>this.lock(()=>{
+                    if(this.state.dirty&&!authoritative)copyError('COPY_CONFLICT');
                     copy.install(folder,record);this.selectCalendar(record.calendar);this.onChange();
                 }),calendarSync:record=>this.calendarSync(record)});
             if(result.status==='missing')copyError('COPY_MISSING');
             this.initialized=true;this.error='';this.status=result.status;
-            if(result.status==='saved'){this.state.lastSynced=new Date().toISOString();this.save();}
+            if(result.status==='saved'||result.status==='authority-applied'){this.state.lastSynced=new Date().toISOString();this.save();}
             if(result.status==='pending')this.schedule();
         }catch(error){this.error=String(error.code||error.message||'COPY_FAILED');this.status='error';if(!this.fatal() && this.state.base)this.initialized=true;
             if(this.state.dirty && !this.fatal()){clearTimeout(this.timer);this.timer=setTimeout(()=>this.sync(),30000);this.timer.unref?.();}}

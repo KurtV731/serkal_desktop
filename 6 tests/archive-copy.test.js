@@ -4,7 +4,7 @@ const copy=require('../2 src/common/archive-copy');
 const owner='123',calendar={mode:'google',id:'existing-calendar'},file={name:'Serie (2026).txt',content:'S01; startOriginal=2026-10-01; dates=01.10.,08.10.; offsetDE=1; note=OffsetDE%3A%20%2B1D; manualFlags=152\n'};
 file.sha256=copy.hash(file.content);
 function record(parent='',files=[file]) {return {schema:2,owner,revision:crypto.randomUUID(),parent,generatedAt:new Date().toISOString(),calendar,files};}
-function metadata(r) {return {id:r.revision,name:copy.PREFIX+r.revision+'.json',md5Checksum:copy.hash(JSON.stringify(r)),appProperties:{owner,revision:r.revision,parent:r.parent}};}
+function metadata(r) {return {id:r.revision,name:copy.PREFIX+r.revision+'.json',md5Checksum:copy.hash(JSON.stringify(r)),appProperties:{owner,revision:r.revision,parent:r.parent,...(r.authorityId?{authorityId:r.authorityId}:{})}};}
 function fakeRemote() {const records=[];return {records,identify:async()=>owner,list:async()=>records.map(metadata),load:async f=>records.find(r=>r.revision===f.id),upload:async r=>records.push(JSON.parse(JSON.stringify(r)))};}
 (async()=>{
  const a=record(),b=record(a.revision),branch=record(a.revision);
@@ -35,6 +35,12 @@ function fakeRemote() {const records=[];return {records,identify:async()=>owner,
  remote.upload=upload;assert.equal((await copy.synchronize(args)).status,'saved');assert.equal(remote.records.at(-1).files[0].content,newer.content);
  state.dirty=true;const foreign=record(state.base);remote.records.push(foreign);
  await assert.rejects(copy.synchronize(args),/COPY_CONFLICT/);assert(state.dirty);assert.equal(remote.records.at(-1),foreign);
+ const authoritative=record('',[{...file,content:file.content+'S02; eps=2\n',sha256:copy.hash(file.content+'S02; eps=2\n')}]);authoritative.authorityId=authoritative.revision;
+ const authorityRemote=fakeRemote();authorityRemote.records.push(authoritative);
+ const stale={owner,base:'00000000-0000-0000-0000-000000000001',dirty:true,pending:record()};let installed=false;
+ const authorityArgs={state:stale,local:{files:[file],calendar},client:authorityRemote,save:()=>{},apply:async(r,force)=>{assert.equal(force,true);installed=r.files[0].content===authoritative.files[0].content;}};
+ assert.equal((await copy.synchronize(authorityArgs)).status,'authority-applied');
+ assert(installed);assert.equal(stale.base,authoritative.revision);assert.equal(stale.authorityId,authoritative.authorityId);assert.equal(stale.dirty,false);assert(!stale.pending);
  // A successful upload can be fetched directly while the listing still lags.
  const lagged=fakeRemote(),lagState={owner,base:'',dirty:true};let listVisible=false;
  const lagUpload=lagged.upload;lagged.upload=async r=>{await lagUpload(r);return {id:r.revision};};

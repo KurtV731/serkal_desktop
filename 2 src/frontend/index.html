@@ -1914,7 +1914,7 @@
           </div>
 
           <div class="hint" id="archiveSyncStatus" role="status" aria-live="polite"></div>
-          <button id="btnArchiveAdoptLocal" type="button" style="display:none;background:#b91c1c;color:#fff;border:0;border-radius:8px;padding:8px 12px;font-weight:800;cursor:pointer">Diesen Archivstand als maßgeblich festlegen</button>
+          <button id="btnArchiveAdoptLocal" type="button" style="display:none;background:#b91c1c;color:#fff;border:0;border-radius:8px;padding:8px 12px;font-weight:800;cursor:pointer"></button>
           <div class="hint" id="archivHint"></div>
         </div>
       </section>
@@ -3912,6 +3912,7 @@ const I18N = {
     COPY_UI_LOADING: "Archiv wird geladen – Lesen möglich",
     COPY_UI_PENDING: "Lokal gespeichert · Übertragung ausstehend",
     COPY_UI_SYNCING: "Übertragung läuft · du kannst weiterarbeiten",
+    COPY_UI_SYNC_BUSY: "Synchronisation läuft gerade · bitte gleich erneut versuchen",
     COPY_UI_SAVED: "Bei Google gespeichert · auf anderen Geräten verfügbar",
     "COPY_PHASE_identity":"Google-Konto wird geprüft",
     "COPY_PHASE_archive-list":"Archivstand bei Google wird geprüft",
@@ -3923,8 +3924,12 @@ const I18N = {
     COPY_UI_ERROR: "Übertragung ausstehend · lokale Kopie bleibt erhalten",
     COPY_UI_LOW_SPACE: "Zu wenig freier Speicher · nur Lesen möglich",
     COPY_UI_CONFLICT: "Neuerer Archivstand bei Google · lokale Kopie bleibt erhalten",
+    COPY_UI_HISTORY_MISSING: "Google-Archivhistorie unvollständig · diesen lokalen Stand festlegen",
     COPY_UI_ADOPT_LOCAL: "Diesen Archivstand als maßgeblich festlegen",
     COPY_UI_ADOPTING: "Lokaler Archivstand wird übernommen …",
+    COPY_UI_ADOPT_CONFIRM: "Der aktuell geöffnete Archivstand dieses Rechners wird zum verbindlichen Google-Archiv. Andere aktive Archivstände werden ersetzt; Einträge, die in diesem Stand fehlen, werden aus dem aktiven Archiv entfernt. Alle verbundenen Geräte übernehmen diesen Stand bei ihrer nächsten Synchronisation. Fortfahren?",
+    COPY_UI_AUTHORITY_APPLIED: "Der verbindliche Google-Archivstand wurde übernommen; abweichende lokale Einträge wurden ersetzt.",
+    COPY_UI_AUTHORITY_PENDING: "Dieser Rechner ist lokal als maßgeblich festgelegt · Google-Bestätigung steht aus",
     COPY_UI_CONNECT: "Google verbinden · vorhandene lokale Kopie bleibt erhalten",
     COPY_UI_SOURCE: "Erste Übernahme: bitte am bisherigen Quell-PC starten",
     COPY_UI_CALENDAR: "Kalenderabgleich ausstehend · Log prüfen",
@@ -4098,6 +4103,7 @@ const I18N = {
     COPY_UI_LOADING: "Loading archive \u2013 reading available",
     COPY_UI_PENDING: "Saved locally \u00b7 transfer pending",
     COPY_UI_SYNCING: "Transfer running \u00b7 you can keep working",
+    COPY_UI_SYNC_BUSY: "Synchronization is in progress \u00b7 try again in a moment",
     COPY_UI_SAVED: "Saved on Google \u00b7 available on other devices",
     "COPY_PHASE_identity":"Checking Google account",
     "COPY_PHASE_archive-list":"Checking archive on Google",
@@ -4109,8 +4115,12 @@ const I18N = {
     COPY_UI_ERROR: "Transfer pending \u00b7 local copy preserved",
     COPY_UI_LOW_SPACE: "Not enough free storage \u00b7 reading only",
     COPY_UI_CONFLICT: "Newer archive on Google \u00b7 local copy preserved",
+    COPY_UI_HISTORY_MISSING: "Google archive history is incomplete \u00b7 set this local version as authoritative",
     COPY_UI_ADOPT_LOCAL: "Make this archive the authoritative version",
     COPY_UI_ADOPTING: "Adopting local archive …",
+    COPY_UI_ADOPT_CONFIRM: "The archive currently open on this PC will become the authoritative Google archive. Other active archive versions will be replaced; entries missing from this version will be removed from the active archive. All connected devices will adopt it at their next synchronization. Continue?",
+    COPY_UI_AUTHORITY_APPLIED: "The authoritative Google archive was adopted; differing local entries were replaced.",
+    COPY_UI_AUTHORITY_PENDING: "This PC is locally set as authoritative · awaiting Google confirmation",
     COPY_UI_CONNECT: "Connect Google \u00b7 existing local copy preserved",
     COPY_UI_SOURCE: "First transfer: start on the previous source PC",
     COPY_UI_CALENDAR: "Calendar synchronization pending \u00b7 check log",
@@ -5186,12 +5196,15 @@ async function archiveCopyStatus_() {
   try {
     const info=await window.serkal.archive.syncStatus();
     const label=document.getElementById('archiveSyncStatus');
-    let key=info.status==='saved'?'COPY_UI_SAVED':info.status==='syncing'?'COPY_UI_SYNCING':info.status==='pending'?'COPY_UI_PENDING':info.status==='loading'?'COPY_UI_LOADING':'COPY_UI_ERROR';
+    let key=info.status==='saved'?'COPY_UI_SAVED':info.status==='syncing'?'COPY_UI_SYNCING':info.status==='pending'?'COPY_UI_PENDING':info.status==='authority-applied'?'COPY_UI_AUTHORITY_APPLIED':info.status==='loading'?'COPY_UI_LOADING':'COPY_UI_ERROR';
     if(info.code==='COPY_LOW_SPACE')key='COPY_UI_LOW_SPACE';
     else if(info.code==='COPY_CONFLICT')key='COPY_UI_CONFLICT';
+    else if(info.code==='COPY_HISTORY_MISSING')key='COPY_UI_HISTORY_MISSING';
+    else if(info.code==='COPY_SYNC_BUSY')key='COPY_UI_SYNC_BUSY';
     else if(info.code==='COPY_CONNECT')key='COPY_UI_CONNECT';
     else if(info.code==='COPY_NEEDS_SOURCE')key='COPY_UI_SOURCE';
     else if(info.code?.startsWith('COPY_CALENDAR'))key='COPY_UI_CALENDAR';
+    if(info.authorityPending)key='COPY_UI_AUTHORITY_PENDING';
     if(state.isDirty)key='COPY_UI_UNSAVED';
     let text=t(key);
     if(info.busy && info.progress){const p=info.progress,phaseKey='COPY_PHASE_'+p.phase;text=t(phaseKey,{current:p.current,total:p.total});}
@@ -5201,13 +5214,13 @@ async function archiveCopyStatus_() {
     const button=document.getElementById('btnArchiveSync');
     button.disabled=info.busy||archiveSyncButtonBusy_;
     const adoptButton=document.getElementById('btnArchiveAdoptLocal');
-    if(adoptButton){adoptButton.textContent=t(archiveSyncButtonBusy_?'COPY_UI_ADOPTING':'COPY_UI_ADOPT_LOCAL');adoptButton.style.display=info.code==='COPY_CONFLICT'?'inline-block':'none';adoptButton.disabled=info.busy||archiveSyncButtonBusy_;}
+    if(adoptButton){adoptButton.textContent=t(archiveSyncButtonBusy_?'COPY_UI_ADOPTING':'COPY_UI_ADOPT_LOCAL');adoptButton.style.display=['COPY_CONFLICT','COPY_HISTORY_MISSING'].includes(info.code)?'inline-block':'none';adoptButton.disabled=info.busy||archiveSyncButtonBusy_;}
   }catch(_e){}
 }
 document.getElementById('btnArchiveAdoptLocal')?.addEventListener('click',async()=>{
-  if(archiveSyncButtonBusy_)return;
+  if(archiveSyncButtonBusy_||!confirm(t('COPY_UI_ADOPT_CONFIRM')))return;
   archiveSyncButtonBusy_=true;archiveCopyStatus_();
-  try{await window.serkal.archive.adoptLocal();if(state.isDirty)await window.serkalSaveBeforeClose();}catch(error){console.error('Archivübernahme fehlgeschlagen',error);}finally{archiveSyncButtonBusy_=false;archiveCopyStatus_();}
+  try{await window.serkal.archive.adoptLocal();if(state.isDirty)await window.serkalSaveBeforeClose();}catch(error){console.error('Archive authority action failed',error);}finally{archiveSyncButtonBusy_=false;archiveCopyStatus_();}
 });
 document.getElementById('btnArchiveSync')?.addEventListener('click',async()=>{
   if(archiveSyncButtonBusy_ || guardDirtyBeforeAction_())return;
