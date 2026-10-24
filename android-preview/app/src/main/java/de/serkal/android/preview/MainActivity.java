@@ -895,9 +895,9 @@ public class MainActivity extends Activity {
 
         // Verbindliche Reihenfolge wie am Desktop: Suche – Anzeige/Bearbeitung – Archiv.
         LinearLayout left = panel(29);
-        left.addView(heading(english ? "SEARCH / CALENDAR" : "SUCHE / KALENDER"));
-        left.addView(text(english ? "Search for a series" : "Seriensuche", 8.5f, MUTED));
+        left.addView(heading(english ? "SEARCH & ENTRY" : "SUCHE & EINTRAG"));
         LinearLayout searchFields=new LinearLayout(this);searchFields.setOrientation(LinearLayout.HORIZONTAL);searchFields.setGravity(Gravity.CENTER_VERTICAL);
+        TextView titleLabel=text(english?"Title":"Titel",9,TEXT);titleLabel.setTypeface(Typeface.DEFAULT,Typeface.BOLD);searchFields.addView(titleLabel,new LinearLayout.LayoutParams(-2,dp(34)));
         queryField = new EditText(new android.view.ContextThemeWrapper(this, dark ? android.R.style.Theme_Material : android.R.style.Theme_Material_Light));
         queryField.setSingleLine(true);
         // Keep the real title field and suggestions visible in landscape.
