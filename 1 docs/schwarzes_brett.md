@@ -3983,3 +3983,25 @@ Nach Kurts positiver Rückmeldung zum Ablauf mit 30 folgt sein neuer Bedienauftr
 **031-SerKal-Android-1.2-Alpha31.apk**: 2.891.527 Bytes, SHA-256 `023923c391ed71c7e1b514fb2c55f45c3320cdb646dd6ea6a2eb2bb909b2618c`. Mit bisherigem Schlüssel signiert und Zertifikat geprüft; keine Zugangsdaten veröffentlicht. APK an Kurt bereitgestellt.
 
 Kurt aktualisiert wieder erst alle vier Geräte und startet danach zuerst den PC; gespeicherten Google-Abgleich abwarten. Noch keine öffentliche 1.2-Freigabe. Ein einheitlicher Wartungsbericht, weitere Menüabstimmungen und die genaue Systemkartierung bleiben offene Aufträge; dieser Stand erledigt die hier bestätigten Android-Verschiebungen und den Reset.
+
+
+## CE HASA – 25.10.2026: Registrierung live bestätigt; Kontolöschung und bedingtes E-Mail-Feld ergänzt
+
+Status: **REGISTRIERUNG DURCH STYL LIVE ABGENOMMEN / VERWALTUNGSKORREKTUR GETESTET UND ALS PAKET BEREIT / UPLOAD OFFEN**
+
+Styl bestätigt den erfolgreichen Praxistest der Selbstregistrierung, Anmeldung/Abmeldung und Passwortwiederherstellung einschließlich echter E-Mail-Zustellung. Die bisher offene erste Mail-Liveprüfung ist damit nach seiner Rückmeldung bestanden.
+
+Seine zwei Nachbesserungen sind umgesetzt:
+
+1. E-Mail-Feld samt Hinweis nur bei „Passwortlink per E-Mail senden“ einblenden und aktivieren. Bei anderen Aktionen bleiben die Felder verborgen und deaktiviert; ein ungültiger E-Mail-Wert blockiert keine fachfremde Aktion.
+2. Zusätzliche Aktion **„HASA-Konto endgültig löschen“** für normale verwaltbare Konten. Exakter angezeigter Spielername als Bestätigung, auch serverseitig geprüft. Eigenes Konto, root und Benutzerleitung bleiben geschützt; bei Benutzeradmins zuerst das Zusatzrecht entziehen. Delegierte Verwaltungsgrenzen gelten unverändert.
+
+Die bestätigte Löschung entfernt das HASA-Konto und seine eigenen Serverdaten: Systeme mit Planeten, Sondenberichten, Messwerten und ASFI, dazu Ereignis-/Produktionshistorie, Kontaktdaten, Passwortlinks und Freigaben. Fremde Konten und gleich koordinierte Daten anderer Eigentümer bleiben erhalten. Weitere früher vom gelöschten Benutzer angelegte Konten werden behalten. Globale Galaxienmetadaten werden nicht gelöscht. Registrierungsreste werden beseitigt, alte Links funktionieren nicht mehr, erneute Registrierung erhält keine alten privaten Daten. Das betrifft kein Horizon-Spielkonto.
+
+System- und Sonden-Uploads prüfen das Konto in der Schreibtransaktion unter derselben Benutzer-Zeilensperre wie Löschung/Sperrung. Eine vorher authentifizierte, verspätete Übertragung kann nach der Löschung keine verwaisten eigenen Daten erzeugen.
+
+HASA `dev-1.3-alpha1`, geprüfter Commit **971f3056c41343dea14451f7c99bac0a9c45b8e2**. Komplettlauf erfolgreich: https://github.com/KurtV731/hasa/actions/runs/40235257056 . Einschließlich **51 Konto-/Passwort-Datenbankprüfungen**, **24 realen lokalen HTTP-Prüfungen** und Browserfällen zu bedingtem E-Mail-Feld, deaktivierter Validierung und Namensbestätigung. Löschfälle umfassen Berechtigungen, Zurückweisung falscher Bestätigung, Datenbereinigung, Erhalt fremder Daten, alte Links und erneute Anmeldung. Windows-PowerShell-Helferprüfung des unverändert übernommenen Helfers sowie Release-/Pfadprüfung bestanden. Keine produktiven Konten durch CE gelöscht.
+
+Paket **HASA-Benutzerverwaltung-Korrektur.zip**, SHA-256 `d250f7be2246fa987cb783984bf6d566d4316ae2b246df4a1104cdef8c08f4d2`. Entpacken, `HASA-BENUTZERVERWALTUNG-AKTUALISIEREN.bat` starten, Benutzerverwaltung mit Strg+F5 neu laden. Nach Sicherung Austausch von genau fünf API-Dateien: auth.php, systems.php, prospection-reports.php, user-admin-service.php, user-admin.php. Kein Userscriptwechsel, SQL-Import oder erneute Registrierungseinrichtung. Website-Startseite, private config.php und die bereits erfolgreiche Mailfunktion werden nicht ersetzt.
+
+Website-Chatty: Die Live-Rückmeldung zur Registrierung kann jetzt in Hilfe/Anleitung berücksichtigt werden; Kontoverwaltung bei Bedarf um Passwortlink statt dauerndem E-Mail-Feld und ausdrücklich bestätigte HASA-Kontolöschung ergänzen. Fachquelle: `03 Dokumentation/hasa_benutzerverwaltung_loeschen.md`. Öffentlicher stabiler Userscriptkanal bleibt unverändert; bis zur abgestimmten Quellübernahme den Pakethelfer verwenden.
