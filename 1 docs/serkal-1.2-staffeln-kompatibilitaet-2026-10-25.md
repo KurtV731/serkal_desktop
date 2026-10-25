@@ -43,3 +43,14 @@ Identische Eingabefälle werden auf beiden Plattformen gegen dieselben erwartete
 - Einrichtungs-/Übernahmeabbruch und Neustart; Aktualisierung eines vergessenen Geräts; verständliche Meldung auf inkompatiblen neuen Clients.
 
 Kein 1.2-Public-Build und keine Freigabe, bevor beide Pakete integriert getestet und praktisch auf Desktop und Android abgenommen wurden. Bisherige Layouttests und 52 erfolgreiche Androidtests belegen diese beiden neuen Anforderungen nicht.
+
+
+## Präzisierung von Kurt – Start bekannt, Folgetermine fehlen
+
+Für Silo S04 und Ahsoka S02 beschreibt Kurt ausdrücklich diesen Eingabestand: Startdatum bekannt, weitere Folgetermine noch unbekannt. Die Staffel wird bereits geführt. Am bekannten Startdatum steht genau eine als vorläufig gekennzeichnete Ankündigung im Kalender, z. B. „Ahsoka · S02 – Staffelstart angekündigt; Folgetermine noch offen“. Eine bekannte erwartete Folgenzahl (z. B. 8) ist Information, keine Datumszuweisung.
+
+Insbesondere darf der bekannte Start NICHT auf alle acht Folgen kopiert und dadurch ein gleichzeitiger Komplettstart behauptet werden. Ein tatsächlicher Komplettstart ist nur dann ein vollständiger Episodenplan, wenn jede einzelne Episode mit genau diesem Datum belegt ist.
+
+Bei der Wartung werden neu belegte Folgetermine ergänzt bzw. bisher vorläufige Angaben aktualisiert. Eine Ankündigung darf nicht als zweiter bestätigter Termin neben derselben Episode entstehen. Kalenderobjekte brauchen dafür stabile Identitäten und eine ausdrücklich definierte Umwandlung. Bestehende permanent gedachte Ankündigungskarten dürfen bei der Umwandlung nicht zusätzlich als aktive Episodentermine zählen. Derselbe Übergang gilt auf Desktop und Android. Bereits belegte Teiltermine sind von unbekannten Terminen unterscheidbar; fehlende Termine werden weiterhin nicht geraten.
+
+Die aktuelle Live-TMDB-Datenlage wurde damit nicht unabhängig verifiziert. Kurts Beschreibung ist der konkrete Abnahmefall. Die gemeldete Darstellung wie acht Folgen am selben Tag ist ein zu reproduzierender Fehlerverdacht, kein bestätigter gleichzeitiger Komplettstart.
