@@ -3849,3 +3849,23 @@ Prüfungen: Browserfälle für BR-Betreff, abweichende CSS-Klasse, verschachtelt
 Paket **HASA-1.3-Alpha2-Korrektur.zip**, SHA-256 `21cb847fc3f3279575ee416b28e34dca56caa4b14bc6bf3fd8ac472ebb095e91`, ersetzt das Alpha-1-Paket für den weiteren Test. Enthält `HASA-SERVERUPDATE-ALPHA2.bat`, Prüfsummen, Userscript und Anleitung. Serverhelfer sichert wie zuvor drei vorhandene API-Dateien und lädt nur das geprüfte Dreierpaket. Zusätzlich Userscript auf Alpha 2 aktualisieren; danach Horizon und Weblisten neu laden. Fehlende Volltexte können aus der Nachrichtenübersicht nachgeladen werden, ohne jeden Bericht erneut einzeln manuell zu öffnen.
 
 Der tatsächliche Spiel-HTML-Quelltext lag hier nicht vor. Die reproduzierten Fehler sind behoben und getestet; eine bereits erfolgreiche Live-Abnahme von Styls persönlicher Liste wird nicht behauptet. Keine privaten Screenshots, Spielquellen oder Zugangsdaten veröffentlicht. Website-Chatty hat daraus keinen öffentlichen Website-/Downloadauftrag.
+
+## Website-Chatty – 25.10.2026: Impressum und Datenschutz für hasa.li fertig
+
+Status: **QUELLSTAND AUF HASA-MAIN / PRODUKTIVER UPLOAD DURCH STYL OFFEN**
+
+Auf Kurts Freigabe wurden die bereits öffentlich verwendeten Betreiberangaben aus dem SerKal-Impressum für HASA übernommen und im eigenständigen HASA-Stil umgesetzt:
+
+- `02 Website/impressum/index.html` → `https://hasa.li/impressum/`;
+- `02 Website/datenschutz/index.html` → `https://hasa.li/datenschutz/`.
+
+Das Impressum nennt Kurt Vogelsaenger, Anschrift und die bereits veröffentlichten Telefon- und E-Mail-Kontakte sowie die Inhaltsverantwortung und kennzeichnet HASA als eigenständiges Fanprojekt.
+
+Die Datenschutzerklärung wurde nicht unverändert von SerKal kopiert, sondern an die tatsächliche HASA-Technik angepasst: Hosting bei ALL-INKL.COM, technische Serverprotokolle, verwaltete Spielerkonten, Passwort-Hashes, Anmeldebegrenzung, das technisch notwendige Cookie `HASA_SESSION` mit höchstens 24 Stunden Laufzeit, vom Userscript übertragene Spiel-/Galaxie-/Planeten-/Berichts-/Ereignisdaten, Sichtbarkeitsfreigaben, Speicherdauer, Sicherheit und Betroffenenrechte. Es werden keine Werbe-, Analyse- oder Profilingdienste behauptet.
+
+Startseite, Downloadseite, Anleitung, schnelle Hilfe und Updatehilfe verlinken Impressum und Datenschutz im Fußbereich. Der Uploadhelfer überträgt zusätzlich ausschließlich die Ordner `impressum` und `datenschutz`; `02 Website/api/`, private `config.php`, Datenbank, Userscript und 39a bleiben unberührt.
+
+HASA main, letzter Commit **ff74849dda639c5644f28dd225f44ac6e170d3ac**. Sämtliche geänderten Dateien auf GitHub zurückgelesen; Links, Betreiberangaben, HASA-Sitzungshinweis, LF-Zeilenenden und der ausdrücklich begrenzte Uploadumfang geprüft.
+
+Veröffentlichung: Styl aktualisiert lokal `C:\ppd\hasa` und startet `HASA-START.cmd` → Menüpunkt **3**. Danach sind `/impressum/`, `/datenschutz/` und die Fußzeilenlinks live zu prüfen. Eine bereits erfolgte Veröffentlichung wird nicht behauptet.
+
