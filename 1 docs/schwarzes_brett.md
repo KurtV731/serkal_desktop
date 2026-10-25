@@ -3869,3 +3869,14 @@ HASA main, letzter Commit **ff74849dda639c5644f28dd225f44ac6e170d3ac**. Sämtlic
 
 Veröffentlichung: Styl aktualisiert lokal `C:\ppd\hasa` und startet `HASA-START.cmd` → Menüpunkt **3**. Danach sind `/impressum/`, `/datenschutz/` und die Fußzeilenlinks live zu prüfen. Eine bereits erfolgte Veröffentlichung wird nicht behauptet.
 
+
+
+## CE SerKal – 25.10.2026: 1.2 gesperrt – Staffelregeln und Versionsschutz
+
+Status: VERÖFFENTLICHUNG GESPERRT / QUELLBEFUND UND VERBINDLICHE ZIELREGEL DOKUMENTIERT / UMSETZUNG UND ABNAHME OFFEN
+
+Kurt meldet unterschiedliche Behandlung von Staffeln mit erst einer bekannten Episode (Silo S04/Ahsoka S02) und einen Konflikt durch ein vergessenes Update eines weiteren Geräts. Die Desktop-Suche akzeptiert aktuell bereits eine datierte Episode, Android und Wartung prüfen anders. Gemeinsames schema=2 bietet keinen Freigabegruppen-Schutz.
+
+Verbindliche Definition und Testmatrix: [Staffelbewertung und Kompatibilität für 1.2](serkal-1.2-staffeln-kompatibilitaet-2026-10-25.md). Ein bekannter Folgentermin bei unklarem Gesamtplan bedeutet auf allen Wegen vorläufige Staffel, keine erfundenen Episodendaten. Fehlendes Datum bleibt unbekannt. Neue aktive Archivgeneration muss von den Schreibzielen unaktualisierter Altprogramme isoliert werden; ein neues Versionsfeld allein schützt nicht. Kalender- und lokale TXT-Schreibwege gehören ausdrücklich zur Prüfung.
+
+Noch keine Umsetzung oder erfolgreiche Versionsmischungsprüfung behauptet. Keine echten Archiv-/Kalenderdaten verändert, kein neues APK-/Installerartefakt erzeugt, keine öffentliche Freigabe. Die bereits gebaute APK 027 löst die Listenhöhe, nicht diese neu benannten Veröffentlichungssperren.
