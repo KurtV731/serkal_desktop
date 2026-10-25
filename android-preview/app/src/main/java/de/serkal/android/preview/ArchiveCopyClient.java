@@ -45,7 +45,7 @@ class ArchiveCopyClient {
         List<JSONObject> tips=new ArrayList<>();for(Map.Entry<String,JSONObject> e:revisions.entrySet())if(!parents.contains(e.getKey()))tips.add(e.getValue());
         if(roots!=1 || tips.size()!=1)throw new Exception("COPY_CONFLICT");
         Set<String> visited=new HashSet<>();JSONObject cursor=tips.get(0);while(cursor!=null){JSONObject p=cursor.getJSONObject("appProperties");if(!visited.add(p.getString("revision")))throw new Exception("COPY_INVALID");cursor=revisions.get(p.getString("parent"));}
-        if(visited.size()!=revisions.size())throw new Exception("COPY_INVALID");ArchiveCodec.assertRelease(tips.get(0).getJSONObject("appProperties").opt("releaseNumber"));return tips.get(0);
+        if(visited.size()!=revisions.size())throw new Exception("COPY_INVALID");ArchiveCodec.assertReadableRelease(tips.get(0).getJSONObject("appProperties").opt("releaseNumber"));return tips.get(0);
     }
     JSONObject load(JSONObject file,String owner) throws Exception {
         JSONObject r=ArchiveCodec.validate(get("https://www.googleapis.com/drive/v3/files/"+esc(file.getString("id"))+"?alt=media"),owner);
@@ -62,7 +62,7 @@ class ArchiveCopyClient {
     }
 
     void archiveActiveRevisions(List<JSONObject> files) throws Exception {
-        for(JSONObject file:files)ArchiveCodec.assertRelease(file.getJSONObject("appProperties").opt("releaseNumber"));
+        for(JSONObject file:files)ArchiveCodec.assertReadableRelease(file.getJSONObject("appProperties").opt("releaseNumber"));
         for(JSONObject file:files) {
             JSONObject meta=new JSONObject().put("name","serkal-backup-v2-"+file.getString("id")+".json");
             URL url=new URL("https://www.googleapis.com/drive/v3/files/"+esc(file.getString("id"))+"?fields=id,name");
