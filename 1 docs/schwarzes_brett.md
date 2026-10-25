@@ -3885,3 +3885,18 @@ Noch keine Umsetzung oder erfolgreiche Versionsmischungsprüfung behauptet. Kein
 ### CE SerKal – 25.10.2026: Kurts Präzisierung zu Silo S04/Ahsoka S02
 
 Startdatum bekannt, Folgetermine unbekannt: Staffel bereits führen und genau einen vorläufigen Kalenderhinweis am Startdatum anzeigen. Erwartete acht Folgen bedeuten nicht acht Termine am Starttag. Später belegte Folgetermine ergänzen/aktualisieren; Ankündigung und bestätigter Episodentermin nicht doppelt zählen. Präzisierung und Abnahmefall im oben verlinkten Dokument ergänzt. Live-TMDB-Daten nicht unabhängig geprüft, gemeldeter Komplettstart-Eindruck als Fehlerverdacht festgehalten. Umsetzung/Abnahme weiterhin offen.
+
+
+## CE SerKal – 25.10.2026: Desktop-Staffelregeln umgesetzt und als Zwischenstand gesichert
+
+Status: **DESKTOP-QUELLÄNDERUNG UND REGRESSIONEN GEPRÜFT / VERSIONSISOLATION UND ANDROID-ABGLEICH OFFEN / 1.2 WEITER GESPERRT**
+
+Auf Kurts Auftrag tatsächlich am Code gearbeitet. Geprüfter Entwicklungsstand: Branch `ce-1.2-staffelregeln-2026-10-25`, Commit `2d0a2d22b98e963b2fd68cd5b3f50dd003f43955`. Noch nicht in Kurts regulären Abrufstand übernommen; kein Updateauftrag an Kurt.
+
+Desktop-Suche und Wartung verwenden jetzt dieselbe Staffelbewertung (`season-plan-1`). Ein einzelner datierter TMDB-Platzhalter gilt als vorläufig. Fehlende, doppelte oder lückenhafte Episodennummern sowie ungültige oder fehlende Daten ergeben keinen vollständigen Plan. Ein unbekannter Start bleibt unbekannt; der bisherige erfundene 1. Januar entfällt. Alle tatsächlich belegten Episoden dürfen weiterhin denselben Starttag haben.
+
+Die gewählte vorläufige Staffel erhält eine eigene TXT-Zeile mit erwarteter Folgenzahl, ohne erfundene Episodentermine. Bei bekanntem Start entsteht genau ein vorläufiger Kalenderhinweis; auch der ICS-Export behandelt ihn als Hinweis statt als E01. Die automatische Wartung legt eine nach der vorhandenen Gesehen-Regel zulässige Folgestaffel einmalig an. Vollständige neue Daten ersetzen die vorläufige Zeile. Eine schwächere Antwort darf einen bestehenden vollständigen Plan nicht zurücksetzen; ein später fehlendes Ankündigungsdatum entfernt den zuvor bekannten Start nicht. Erneute Suche schützt manuelle Termin-/Folgenangaben und übernimmt bestehende Gesehen-Felder.
+
+Nachweis: gesamte lokale Node-Testsuite bestanden, zusätzliche echte Backend-Fälle für Suchanreicherung, angekündigte Archivzeile, einen Google-Kalenderhinweis, ICS, vollständige Ablösung, schwächere Antworten, unbekannte Daten sowie einmalige Wartungsanlage. Alle zehn übertragenen Dateien über die GitHub-App zurückgelesen und mit dem geprüften Inhalt verglichen. Keine echten Archiv- oder Kalenderdaten verändert.
+
+**Ausstehend:** Schutz vor inkompatiblen Altprogrammen einschließlich getrennter Drive-, lokaler TXT- und Kalenderschreibziele; Android muss dieselben Regeln erhalten und geprüft werden. Die Behandlung einer ausdrücklich belegten echten Ein-Folgen-Staffel ist noch nicht ergänzt. Menüanordnung, vollständige Desktop-/Android-Vereinheitlichung und einheitliches Wartungsergebnis bleiben als Kurts weitere Aufträge offen. Keine neue APK, kein Installer und keine öffentliche Freigabe.
