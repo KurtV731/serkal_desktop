@@ -320,6 +320,7 @@ public class MainActivity extends Activity {
         else if(code.equals("authority-applied"))label=english ? "The authoritative Google archive was applied. Local differences were replaced." : "Der verbindliche Google-Archivstand wurde übernommen. Abweichende lokale Einträge wurden ersetzt.";
         else if(code.equals("syncing"))label=english ? "Transferring · you can keep working" : "Übertragung läuft · du kannst weiterarbeiten";
         else if(code.equals("pending"))label=english ? "Saved locally · transfer pending" : "Lokal gespeichert · Übertragung ausstehend";
+        else if(code.equals("COPY_VERSION_MISMATCH"))label=english ? "Different SerKal versions · install the same version on all devices" : "Unterschiedliche SerKal-Versionen · bitte auf allen Geräten dieselbe Version installieren";
         else if(code.equals("COPY_LOW_SPACE"))label=english ? "Not enough storage · reading only" : "Zu wenig freier Speicher · nur Lesen möglich";
         else if(code.equals("COPY_CONFLICT"))label=english ? "Newer archive on Google · local copy preserved" : "Neuerer Archivstand bei Google · lokale Kopie bleibt erhalten";
         else if(code.equals("COPY_HISTORY_MISSING"))label=english ? "Google archive history is incomplete · choose this local archive or sync the authoritative version" : "Google-Archivhistorie unvollständig · diesen lokalen Stand festlegen oder verbindlichen Stand synchronisieren";

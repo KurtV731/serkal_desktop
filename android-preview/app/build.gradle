@@ -1,6 +1,7 @@
 plugins { id 'com.android.application' }
 
-def previewVersion = '0.0.5a27'
+def releaseInfo = new groovy.json.JsonSlurper().parse(rootProject.file('../serkal-release.json'))
+def previewVersion = releaseInfo.version
 
 android {
     namespace 'de.serkal.android.preview'
@@ -11,8 +12,9 @@ android {
         applicationId 'de.serkal.android.preview.v005'
         minSdk 24
         targetSdk 35
-        versionCode 35
+        versionCode releaseInfo.androidVersionCode as int
         versionName previewVersion
+        buildConfigField 'int', 'SERKAL_RELEASE', releaseInfo.number.toString()
         resValue 'string', 'app_name', previewVersion + ' - SerKal Android'
     }
     buildFeatures { buildConfig true }

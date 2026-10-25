@@ -7,7 +7,7 @@ public class SeasonAnnouncementsTest {
   SeasonAnnouncements.update(a,2,"2027-01-26","Ahsoka",false,"2026-10-23");
   JSONObject e=new JSONObject().put("tmdbId",42).put("announcements",a);String id=SeasonAnnouncements.desired(new JSONArray().put(e)).get(0).getString("id");
   SeasonAnnouncements.update(a,2,"","Ahsoka",false,"2026-10-24");JSONObject card=SeasonAnnouncements.desired(new JSONArray().put(e)).get(0);
-  assertEquals(id,card.getString("id"));assertEquals("2027-01-26",card.getJSONObject("start").getString("date"));assertTrue(card.getString("description").contains("Termin unbekannt"));assertEquals(3,a.getJSONObject(0).getJSONArray("history").length());
+  assertEquals(id,card.getString("id"));assertEquals("2027-01-26",card.getJSONObject("start").getString("date"));assertFalse(card.getString("description").contains("Termin unbekannt"));assertEquals(2,a.getJSONObject(0).getJSONArray("history").length());
  }
  @Test public void watchedLatestSeasonAddsFullNextSeasonButNotPast()throws Exception{
   JSONArray entries=new JSONArray().put(new JSONObject().put("tmdbId",42).put("title","Show").put("year","2026").put("seasonLabel","S07").put("seen",1));

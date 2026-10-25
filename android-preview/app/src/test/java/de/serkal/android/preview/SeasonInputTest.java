@@ -11,6 +11,17 @@ public class SeasonInputTest {
   return new JSONObject().put("air_date","2027-01-19").put("episodes",episodes);
  }
  JSONObject payload(boolean complete)throws Exception{return SeasonInput.schedule(tv(),season(complete),2).put("tmdbId",42).put("staffelNummer",2).put("titel","Ahsoka").put("jahr","2023").put("calendarLanguage","en");}
+ @Test public void duplicateMissingAndInvalidEpisodeNumbersStayProvisional()throws Exception{
+  for(String episodes:new String[]{"[{episode_number:1,air_date:'2027-01-19'},{episode_number:1,air_date:'2027-01-26'}]","[{episode_number:1,air_date:'2027-01-19'},{episode_number:3,air_date:'2027-01-26'}]","[{episode_number:1,air_date:'2027-01-19'},{episode_number:2,air_date:'2027-02-30'}]"}){
+   JSONObject p=SeasonInput.schedule(new JSONObject(),new JSONObject().put("episodes",new JSONArray(episodes)),2);assertTrue(p.getBoolean("announcementOnly"));assertEquals(0,p.getJSONArray("termindaten").length());
+  }
+ }
+ @Test public void oneDatedPlaceholderIsNotACompleteSeason()throws Exception{
+  JSONObject p=SeasonInput.schedule(tv(),new JSONObject("{episodes:[{episode_number:1,air_date:'2027-01-19'}]}"),2);assertTrue(p.getBoolean("announcementOnly"));assertEquals(8,p.getInt("episoden"));
+ }
+ @Test public void confirmedEpisodesAreSortedAndCanShareADate()throws Exception{
+  JSONObject p=SeasonInput.schedule(new JSONObject(),new JSONObject("{episodes:[{episode_number:2,air_date:'2027-01-19'},{episode_number:1,air_date:'2027-01-19'}]}"),2);assertFalse(p.getBoolean("announcementOnly"));assertEquals(2,p.getJSONArray("termindaten").length());
+ }
  @Test public void knownStartAndEightUnknownEpisodesAreAnAnnouncement()throws Exception{
   JSONObject p=payload(false);assertTrue(p.getBoolean("announcementOnly"));assertEquals(8,p.getInt("episoden"));assertEquals(0,p.getJSONArray("termindaten").length());assertEquals("2027-01-19",p.getString("announcedStart"));
  }
@@ -18,7 +29,7 @@ public class SeasonInputTest {
   JSONObject p=SeasonInput.schedule(tv(),new JSONObject(),2);assertEquals(8,p.getInt("episoden"));assertTrue(p.getBoolean("announcementOnly"));
  }
  @Test public void missingStartDoesNotInventADate()throws Exception{
-  try{SeasonInput.schedule(new JSONObject(),new JSONObject(),2);fail();}catch(Exception e){assertEquals("DATES",e.getMessage());}
+  JSONObject p=SeasonInput.schedule(new JSONObject(),new JSONObject(),2);assertTrue(p.getBoolean("announcementOnly"));assertEquals("",p.getString("announcedStart"));assertEquals(0,p.getJSONArray("termindaten").length());
  }
  @Test public void completeScheduleRemainsAnEpisodeSchedule()throws Exception{
   JSONObject p=payload(true);assertFalse(p.getBoolean("announcementOnly"));assertEquals(8,p.getJSONArray("termindaten").length());

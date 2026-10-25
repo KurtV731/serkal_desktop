@@ -12,6 +12,10 @@ import java.text.SimpleDateFormat;
 
 /** Full TXT files are the portable truth; display rows are derived, never used as backups. */
 final class ArchiveCodec {
+    static final int RELEASE=BuildConfig.SERKAL_RELEASE;
+    static void assertRelease(Object value) throws Exception {
+        if(value!=null && value!=JSONObject.NULL && !String.valueOf(RELEASE).equals(String.valueOf(value)))throw new Exception("COPY_VERSION_MISMATCH");
+    }
     static final String PREFIX="serkal-copy-v2-";
     static final int LIMIT=64*1024*1024;
     static final String UUID="[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}";
@@ -25,6 +29,7 @@ final class ArchiveCodec {
     static boolean safeName(String name){return name.length()<=240 && name.matches("[^\\\\/:*?\"<>|\\x00-\\x1f]+\\.[tT][xX][tT]") &&
         !name.toLowerCase(Locale.ROOT).matches("^(!!serkal_log_|fanal_|\\.|con\\.|prn\\.|aux\\.|nul\\.|com[1-9]\\.|lpt[1-9]\\.).*");}
     static JSONObject validate(JSONObject r,String owner) throws Exception {
+        assertRelease(r.opt("releaseNumber"));
         if(r.optInt("schema")!=2 || !owner.equals(r.optString("owner")) || !r.optString("revision").matches(UUID) ||
             !(r.optString("parent").isEmpty() || r.optString("parent").matches(UUID)) || r.optString("parent").equals(r.optString("revision")) ||
             (!r.optString("authorityId").isEmpty() && !r.optString("authorityId").matches(UUID)) ||
@@ -107,6 +112,11 @@ final class ArchiveCodec {
         if(id<=0)throw new Exception("COPY_INVALID");String season=action.equals("insert")?String.format(Locale.ROOT,"S%02d",payload.getInt("staffelNummer")):payload.getString("seasonLabel");
         if(!Arrays.asList("insert","notes","delete","seen").contains(action))throw new Exception("COPY_INVALID");
         boolean provisional=action.equals("insert") && payload.optBoolean("announcementOnly");
+        if(action.equals("insert"))for(int fi=0;fi<files.length();fi++)for(String raw:files.getJSONObject(fi).getString("content").split("\\r?\\n")){
+            Map<String,String> old=fields(raw);
+            if(number(old.getOrDefault("tmdb","0"))!=id || !old.getOrDefault("season","").equalsIgnoreCase(season))continue;
+            if((number(old.getOrDefault("manualFlags","0"))&56)!=0 || (provisional && !old.getOrDefault("announcementOnly","0").equals("1")) || (!provisional && payload.getJSONArray("termindaten").length()<number(old.getOrDefault("eps","0"))))return r;
+        }
         JSONArray announcementList=new JSONArray();
         if(provisional){
             for(int i=0;i<files.length();i++)for(String raw:files.getJSONObject(i).getString("content").split("\\r?\\n")){
@@ -118,7 +128,7 @@ final class ArchiveCodec {
             }
             String today=new SimpleDateFormat("yyyy-MM-dd",Locale.ROOT).format(new Date());
             SeasonAnnouncements.update(announcementList,payload.getInt("staffelNummer"),payload.getString("announcedStart"),payload.getString("titel"),payload.optString("calendarLanguage").equals("en"),today);
-            for(int i=0;i<announcementList.length();i++)if(announcementList.getJSONObject(i).optInt("season")==payload.getInt("staffelNummer"))announcementList.getJSONObject(i).put("episodeCount",payload.optInt("episoden"));
+            for(int i=0;i<announcementList.length();i++)if(announcementList.getJSONObject(i).optInt("season")==payload.getInt("staffelNummer"))announcementList.getJSONObject(i).put("episodeCount",Math.max(announcementList.getJSONObject(i).optInt("episodeCount"),payload.optInt("episoden")));
         }
         boolean found=false;JSONArray result=new JSONArray();String target="";
         for(int i=0;i<files.length();i++){
@@ -132,7 +142,7 @@ final class ArchiveCodec {
                     if(action.equals("seen")){f.put("seen",payload.optBoolean("seen")?"1":"0");raw=line(f);}
                     if(action.equals("notes")){note(f,payload.getString("note"));raw=line(f);}
                     if(action.equals("insert") && (!provisional || f.getOrDefault("announcementOnly","0").equals("1"))){
-                        f.put("announcementOnly",provisional?"1":"0");f.put("eps",String.valueOf(payload.getInt("episoden")));f.put("dates",compact(payload.getJSONArray("termindaten")));f.put("startOriginal",provisional?payload.getString("announcedStart"):payload.getJSONArray("termindaten").getString(0));
+                        f.put("announcementOnly",provisional?"1":"0");f.put("eps",String.valueOf(provisional?Math.max(payload.optInt("episoden"),number(f.getOrDefault("eps","0"))):payload.getInt("episoden")));f.put("dates",compact(payload.getJSONArray("termindaten")));f.put("startOriginal",provisional?(payload.optString("announcedStart").isEmpty()?f.getOrDefault("startOriginal",""):payload.getString("announcedStart")):payload.getJSONArray("termindaten").getString(0));
                         f.put("descDE",encode(payload.optString("descDE")));f.put("descEN",encode(payload.optString("descEN")));
                         for(String k:new String[]{"titleDE","titleEN"})if(payload.has(k) && (number(f.getOrDefault("manualFlags","0"))&1)==0)f.put(k,encode(payload.optString(k)));
                         if(payload.has("calendarLanguage"))f.put("calendarLanguage",payload.optString("calendarLanguage"));note(f,decode(f.getOrDefault("note","")));raw=line(f);}
