@@ -221,8 +221,9 @@ async function synchronize({state, local, client:remote, save, apply, calendarSy
             state.authorityId=confirmed.authorityId||state.authorityId||'';
             const same=digest(current.files,current.calendar)===digest(state.pending.files,state.pending.calendar);
             state.clean=digest(state.pending.files,state.pending.calendar);
-            state.dirty=!same;delete state.pending;delete state.pendingFileId;save();
-            return {status:same?'saved':'pending'};
+            const needsUpgrade=confirmed.releaseNumber!==undefined && Number(confirmed.releaseNumber)<RELEASE;
+            state.dirty=!same || needsUpgrade;delete state.pending;delete state.pendingFileId;save();
+            return {status:same && !needsUpgrade?'saved':'pending'};
         }
         if(revision!==(state.base||''))fail('COPY_CONFLICT');
         if(!state.pending) {state.pending=validate({schema:2,releaseNumber:RELEASE,owner,revision:crypto.randomUUID(),parent:revision,authorityId:state.authorityId||'',
