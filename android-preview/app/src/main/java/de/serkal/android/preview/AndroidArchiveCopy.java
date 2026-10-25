@@ -33,9 +33,10 @@ final class AndroidArchiveCopy {
         try(InputStream in=disk.openRead();ByteArrayOutputStream out=new ByteArrayOutputStream()){
             byte[] b=new byte[8192];int n;while((n=in.read(b))!=-1){out.write(b,0,n);if(out.size()>ArchiveCodec.LIMIT*2L)throw new Exception("COPY_TOO_LARGE");}
             state=new JSONObject(out.toString("UTF-8"));if(!owner.equals(state.getString("owner")))throw new Exception("COPY_ACCOUNT_CHANGED");
+            if(state.optBoolean("releaseMismatch"))error="COPY_VERSION_MISMATCH";
             if(state.has("record"))ArchiveCodec.validate(state.getJSONObject("record"),owner);
             if(state.has("pending"))ArchiveCodec.validate(state.getJSONObject("pending"),owner);
-        }catch(FileNotFoundException absent){}catch(Exception invalid){error="COPY_LOCAL_STATE_INVALID";}
+        }catch(FileNotFoundException absent){}catch(Exception invalid){error="COPY_VERSION_MISMATCH".equals(invalid.getMessage())?"COPY_VERSION_MISMATCH":"COPY_LOCAL_STATE_INVALID";}
     }
     private synchronized void save(JSONObject value) throws Exception {
         if(closed)throw new Exception("COPY_CLOSED");if(!spaceFor(value))throw new Exception("COPY_LOW_SPACE");FileOutputStream out=null;
@@ -55,8 +56,8 @@ final class AndroidArchiveCopy {
     private boolean spaceFor(JSONObject value){long bytes=value.toString().getBytes(StandardCharsets.UTF_8).length;return directory.getUsableSpace()>=Math.max(10*1024*1024L,bytes*3+1024*1024L);}
     private synchronized boolean space(){return spaceFor(state);}
     synchronized boolean writable(){return loaded && state.has("record") && space() && !fatal() && !closed && !busy;}
-    private boolean fatal(){return error.matches("COPY_(CONFLICT|ACCOUNT_CHANGED|LOCAL_STATE_INVALID|INVALID|HISTORY_MISSING|NEEDS_SOURCE|LEGACY_PENDING)");}
-    synchronized String status(){if(!space())return "COPY_LOW_SPACE";if(state.optBoolean("authorityPending")&&!error.matches("COPY_(ACCOUNT_CHANGED|LOCAL_STATE_INVALID)"))return "authority-pending";if(!error.isEmpty())return error;return status;}
+    private boolean fatal(){return error.matches("COPY_(VERSION_MISMATCH|CONFLICT|ACCOUNT_CHANGED|LOCAL_STATE_INVALID|INVALID|HISTORY_MISSING|NEEDS_SOURCE|LEGACY_PENDING)");}
+    synchronized String status(){if(!space())return "COPY_LOW_SPACE";if(state.optBoolean("authorityPending")&&!error.matches("COPY_(VERSION_MISMATCH|ACCOUNT_CHANGED|LOCAL_STATE_INVALID)"))return "authority-pending";if(!error.isEmpty())return error;return status;}
     boolean busy(){return busy;}
     synchronized String calendarId() {
         JSONObject record=readOnlyRecord!=null?readOnlyRecord:state.optJSONObject("record");
@@ -131,12 +132,14 @@ final class AndroidArchiveCopy {
         synchronized(this){JSONObject next=new JSONObject(state.toString());next.put("pending",pending);next.getJSONObject("record").getJSONObject("calendar").put("id",found);next.remove("calendarCreating");save(next);}
     }
     private void synchronize() {
+        final String previousError=error;
         synchronized(this){if(closed||busy)return;busy=true;status="syncing";log("SYNC_START","");}notifyChange();
         try {
             if(error.equals("COPY_LOCAL_STATE_INVALID"))throw new Exception(error);
             if(token==null || token.isEmpty())throw new Exception("COPY_CONNECT");
             ArchiveCopyClient client=new ArchiveCopyClient(token);if(!owner.equals(client.owner()))throw new Exception("COPY_ACCOUNT_CHANGED");
             List<JSONObject> remoteFiles=client.list(ArchiveCodec.PREFIX);JSONObject tip=ArchiveCopyClient.head(remoteFiles,owner);String revision=tip==null?"":tip.getJSONObject("appProperties").getString("revision");
+            synchronized(this){if(state.optBoolean("releaseMismatch")){JSONObject next=new JSONObject(state.toString());next.remove("releaseMismatch");save(next);}}
             JSONObject pending;String base;boolean dirty;
             synchronized(this){dirty=state.optBoolean("dirty");base=state.optString("base");pending=state.has("pending")?new JSONObject(state.getJSONObject("pending").toString()):null;}
             boolean authorityPending;String authorityRevision,authorityGeneratedAt;
@@ -162,13 +165,17 @@ final class AndroidArchiveCopy {
                     JSONObject confirmed=client.load(proof,owner);
                     if(!confirmed.getJSONArray("files").toString().equals(pending.getJSONArray("files").toString()))throw new Exception("COPY_CONFLICT");
                     synchronized(this){JSONObject next=new JSONObject(state.toString());boolean same=next.getLong("epoch")==next.getLong("pendingEpoch");next.put("base",confirmed.getString("revision")).put("dirty",!same);
-                        next.getJSONObject("record").put("revision",confirmed.getString("revision")).put("parent",confirmed.getString("parent")).put("generatedAt",confirmed.getString("generatedAt"));
+                        next.getJSONObject("record").put("releaseNumber",ArchiveCodec.RELEASE).put("revision",confirmed.getString("revision")).put("parent",confirmed.getString("parent")).put("generatedAt",confirmed.getString("generatedAt"));
                         next.remove("pending");next.remove("pendingFileId");next.remove("pendingEpoch");next.put("lastSynced",now());save(next);status=same?"saved":"pending";error="";if(!same)schedule(1);}
                 } else {
                     if(!revision.equals(base))throw new Exception("COPY_CONFLICT");
                     if(pending==null)synchronized(this){JSONObject next=new JSONObject(state.toString());pending=new JSONObject(next.getJSONObject("record").toString());
-                        pending.put("revision",java.util.UUID.randomUUID().toString()).put("parent",base).put("generatedAt",now());next.put("pending",pending).put("pendingEpoch",next.getLong("epoch"));save(next);}
+                        pending.put("releaseNumber",ArchiveCodec.RELEASE).put("revision",java.util.UUID.randomUUID().toString()).put("parent",base).put("generatedAt",now());next.put("pending",pending).put("pendingEpoch",next.getLong("epoch"));save(next);}
                     pending=new JSONObject(pending.toString());
+                    ArchiveCodec.assertRelease(pending.opt("releaseNumber"));
+                    pending.put("releaseNumber",ArchiveCodec.RELEASE);
+                    synchronized(this){JSONObject next=new JSONObject(state.toString());next.put("pending",pending);save(next);}
+                    ArchiveCopyClient.head(client.list(ArchiveCodec.PREFIX),owner);
                     ensureCalendar(client,pending);CalendarCopy.synchronize(client,pending);
                     JSONObject latest=ArchiveCopyClient.head(client.list(ArchiveCodec.PREFIX),owner);
                     if(!(latest==null?"":latest.getJSONObject("appProperties").getString("revision")).equals(base))throw new Exception("COPY_CONFLICT");
@@ -177,7 +184,7 @@ final class AndroidArchiveCopy {
             } else {
                 if(tip==null) {
                     if(!client.list("serkal-archive-v1.json").isEmpty())throw new Exception("COPY_NEEDS_SOURCE");
-                    synchronized(this){JSONObject next=new JSONObject(state.toString());JSONObject record=new JSONObject().put("schema",2).put("owner",owner).put("revision",java.util.UUID.randomUUID().toString())
+                    synchronized(this){JSONObject next=new JSONObject(state.toString());JSONObject record=new JSONObject().put("schema",2).put("releaseNumber",ArchiveCodec.RELEASE).put("owner",owner).put("revision",java.util.UUID.randomUUID().toString())
                         .put("parent","").put("generatedAt",now()).put("calendar",new JSONObject().put("mode","google").put("id","" )).put("files",new JSONArray());
                         next.put("record",record).put("dirty",true).put("epoch",1);if(!space())throw new Exception("COPY_LOW_SPACE");save(next);status="pending";schedule(1);}
                 } else if(!revision.equals(base)) {
@@ -188,7 +195,7 @@ final class AndroidArchiveCopy {
                         if(!spaceFor(next)){readOnlyRecord=record;throw new Exception("COPY_LOW_SPACE");}save(next);readOnlyRecord=null;status="saved";error="";}
                 } else synchronized(this){status="saved";error="";}
             }
-        }catch(Exception failure){synchronized(this){if(!closed){error=String.valueOf(failure.getMessage());status="error";if(state.optBoolean("dirty") && !fatal())schedule(30);}}}
+        }catch(Exception failure){synchronized(this){if(!closed){error=String.valueOf(failure.getMessage());if(error.equals("COPY_VERSION_MISMATCH")||previousError.equals("COPY_VERSION_MISMATCH")){error="COPY_VERSION_MISMATCH";try{JSONObject next=new JSONObject(state.toString());next.put("releaseMismatch",true);save(next);}catch(Exception ignored){}}status="error";if(state.optBoolean("dirty") && !fatal())schedule(30);}}}
         finally {synchronized(this){busy=false;if(state.has("record") && !fatal())loaded=true;log("SYNC_END",error);}notifyChange();}
     }
     static boolean shouldInstallAuthority(String localAuthorityId,String remoteAuthorityId){
