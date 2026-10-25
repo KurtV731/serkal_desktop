@@ -699,7 +699,9 @@ function archiveInsert_(payload) {
         const dates = (Array.isArray(data.termindaten) ? data.termindaten : (Array.isArray(data.episodeDates) ? data.episodeDates : []))
             .map(x=>String(x||"")).filter(x=>/^\d{4}-\d{2}-\d{2}$/.test(x));
         if (!title) return { ok:false, message:bt_("TITLE_MISSING") };
-        if (!seasonNumber || (!dates.length && !episodeCount)) return { ok:false, message:bt_("ENTRY_INCOMPLETE") };
+        const provisional=!!data.announcementOnly || data.dateFlag==="ANNOUNCED";
+        const announcedStart=require(path.join(__dirname,"../common/season-policy")).validDate(data.announcedStart||data.seasonStart)?String(data.announcedStart||data.seasonStart):"";
+        if (!seasonNumber || (!provisional && (!dates.length && !episodeCount))) return { ok:false, message:bt_("ENTRY_INCOMPLETE") };
         const folder = archiveFolderPath_();
         if (!folder) return { ok:false, message:bt_("ARCHIVE_FOLDER_UNSET") };
         if (!archiveEnsureFolder_(folder)) return { ok:false, message:bt_("ARCHIVE_FOLDER_MISSING", { folder }) };
@@ -724,6 +726,9 @@ function archiveInsert_(payload) {
         const oldLine = oldLines.find(x=>new RegExp("^"+label+"(?:\\b|;|\\|)","i").test(x)) || "";
         let flags = Number(archiveField_(oldLine,"flags") || 0) || 0;
         const manualFlags = Number(archiveField_(oldLine,"manualFlags") || 0) || 0;
+        if(oldLine && (manualFlags & (SERKAL_MANUAL_CALENDAR | SERKAL_MANUAL_EPISODES))) return {ok:true,unchanged:true,archiv:archiveLoad_()};
+        if(provisional && oldLine && archiveField_(oldLine,"announcementOnly")!=="1")return {ok:true,unchanged:true,archiv:archiveLoad_()};
+        if(!provisional && oldLine && dates.length<archiveExpandDates_(archiveField_(oldLine,"dates").split(","),archiveField_(oldLine,"startOriginal")).length)return {ok:true,unchanged:true,archiv:archiveLoad_()};
         const oldNote = archiveField_(oldLine,"note");
         const oldStartDE = archiveField_(oldLine,"startDE");
         const oldDatesDE = archiveField_(oldLine,"datesDE");
@@ -732,11 +737,13 @@ function archiveInsert_(payload) {
         const descEN = String(data.descEN || "").trim();
         if (descDE && descEN) flags |= 32;
         const parts = [label];
-        if (dates.length) parts.push("startOriginal="+dates[0]);
-        if (episodeCount) parts.push("eps="+episodeCount);
+        if(provisional)parts.push("startOriginal="+(announcedStart||archiveField_(oldLine,"startOriginal")));
+        else if (dates.length) parts.push("startOriginal="+dates[0]);
+        if (episodeCount) parts.push("eps="+(provisional?Math.max(episodeCount,Number(archiveField_(oldLine,"eps")||0)):episodeCount));
+        if(provisional || archiveField_(oldLine,"announcementOnly")) parts.push("announcementOnly="+(provisional?"1":"0"));
         if (tmdbId) parts.push("tmdb="+tmdbId);
         parts.push("titleOriginal="+archiveEncode_(title));
-        if (dates.length) parts.push("dates="+archiveCompactDates_(dates).join(","));
+        if (!provisional && dates.length) parts.push("dates="+archiveCompactDates_(dates).join(","));
         if (descDE) parts.push("descDE="+archiveEncode_(descDE));
         if (descEN) parts.push("descEN="+archiveEncode_(descEN));
         if (oldStartDE) parts.push("startDE="+oldStartDE);
@@ -745,7 +752,18 @@ function archiveInsert_(payload) {
         if (oldNote) parts.push("note="+oldNote);
         parts.push("flags="+flags);
         if (manualFlags) parts.push("manualFlags="+manualFlags);
-        for (const field of ["watchProviders","titleDE","titleEN","announcements","calendarLanguage"]) { const old=archiveField_(oldLine,field); if(old)parts.push(field+"="+old); }
+        for (const field of ["watchProviders","titleDE","titleEN","announcements","calendarLanguage","seen","buttonPressed"]) { const old=archiveField_(oldLine,field); if(old)parts.push(field+"="+old); }
+        if(provisional){
+            const parsed=require(path.join(__dirname,"../common/watch-providers")).parse(archiveDecode_(archiveField_(oldLine,"announcements")));
+            const list=Array.isArray(parsed)?parsed:[];
+            const old=list.find(a=>Number(a.season)===seasonNumber);
+            const date=announcedStart||old?.date||"";
+            const next={season:seasonNumber,date,title,language:activeLanguage_,episodeCount:Math.max(episodeCount,Number(archiveField_(oldLine,"eps")||0)),history:old?.history||[]};
+            if(!old||old.date!==date)next.history=[...next.history,{capturedAt:new Date().toISOString().slice(0,10),from:old?.date||"",to:date}];
+            const updated=list.filter(a=>Number(a.season)!==seasonNumber).concat(next);
+            const at=parts.findIndex(x=>x.startsWith("announcements="));if(at>=0)parts.splice(at,1);
+            parts.push("announcements="+archiveEncode_(JSON.stringify(updated)));
+        }
         const newLine = parts.join("; ");
         const kept = oldLines.filter(x=>!new RegExp("^"+label+"(?:\\b|;|\\|)","i").test(x));
         kept.push(newLine);
@@ -1169,14 +1187,8 @@ async function tmdbPoster_(id, lang) {
     }
 }
 
-function analyseSeason_(seasonJson) {
-    const eps = seasonJson && Array.isArray(seasonJson.episodes) ? seasonJson.episodes : [];
-    const episodeDates = eps.map(e => e && e.air_date ? String(e.air_date) : "").filter(d => /^\d{4}-\d{2}-\d{2}$/.test(d));
-    return {
-        episodeCount:eps.length,
-        seasonStart:episodeDates.length ? episodeDates[0] : "",
-        episodeDates
-    };
+function analyseSeason_(seasonJson, metadata={}) {
+    return require(path.join(__dirname,"../common/season-policy")).evaluate(seasonJson || {}, metadata);
 }
 
 function seasonEpisodeCount_(seasons, seasonNumber) {
@@ -1196,41 +1208,11 @@ async function pickSeasonWithDates_(tvId, seasons, seasonOverride, lang) {
 
     const newestSeason = seasonMeta.length ? seasonMeta[seasonMeta.length-1].seasonNumber : 1;
     const requested = Number(seasonOverride || 0);
-    const scanList = requested > 0 ? [requested] : seasonMeta.slice().sort((a,b)=>b.seasonNumber-a.seasonNumber).map(s=>s.seasonNumber);
-    if (!scanList.length) scanList.push(newestSeason);
-
-    let picked = null;
-    for (const sn of scanList) {
-        const seasonRes = await tmdbSeasonDetails_(tvId, sn, lang);
-        if (!seasonRes.ok) continue;
-        const a = analyseSeason_(seasonRes.data || {});
-        if (a.episodeDates.length) {
-            picked = {
-                seasonNumber:sn,
-                seasonLabel:"S" + pad2_(sn),
-                episodeCount:a.episodeCount || seasonEpisodeCount_(seasons, sn),
-                seasonStart:a.seasonStart || a.episodeDates[0] || "",
-                episodeDates:a.episodeDates,
-                dateFlag:"",
-                placeholderStart:""
-            };
-            break;
-        }
-    }
-
-    if (!picked) {
-        const target = requested > 0 ? requested : newestSeason;
-        const placeholderStart = String(new Date().getFullYear()+1) + "-01-01";
-        picked = {
-            seasonNumber:target,
-            seasonLabel:"S" + pad2_(target),
-            episodeCount:seasonEpisodeCount_(seasons, target),
-            seasonStart:placeholderStart,
-            episodeDates:[],
-            dateFlag:"ANNOUNCED",
-            placeholderStart
-        };
-    }
+    const target=requested>0?requested:newestSeason;
+    const meta=(Array.isArray(seasons)?seasons:[]).find(s=>Number(s.season_number)===target)||{};
+    const seasonRes=await tmdbSeasonDetails_(tvId,target,lang);
+    const a=analyseSeason_(seasonRes.ok?seasonRes.data:{},meta);
+    const picked={...a,seasonNumber:target,seasonLabel:"S"+pad2_(target)};
 
     const futureSeasons = seasonMeta
         .filter(s => s.seasonNumber > Number(picked.seasonNumber || 0))
@@ -1297,6 +1279,8 @@ async function buildHit_(id, fallback, detDE, detEN, seasonOverride, searchLang)
         episoden:pick.episodeCount,
         episodeDates:pick.episodeDates,
         termindaten:pick.episodeDates,
+        announcementOnly:pick.announcementOnly,
+        announcedStart:pick.announcedStart,
         dateFlag:pick.dateFlag || "",
         placeholderStart:pick.placeholderStart || "",
         futureSeasonsCount:pick.futureSeasonsCount || 0,
@@ -1519,10 +1503,11 @@ function calendarCreateIcs_(payload) {
         const seasonNumber = Number(data.staffelOverride || data.staffelNummer || data.seasonNumber ||
             String(data.staffelLabel || data.seasonLabel || "").replace(/\D/g, ""));
         const tmdbId = Number(data.tmdbId || data.id || 0) || 0;
-        const dates = (Array.isArray(data.termindaten) ? data.termindaten :
-            (Array.isArray(data.episodeDates) ? data.episodeDates : []))
+        const provisional=!!data.announcementOnly || data.dateFlag==="ANNOUNCED";
+        const dates = (provisional ? [data.announcedStart || data.seasonStart || ""] : (Array.isArray(data.termindaten) ? data.termindaten :
+            (Array.isArray(data.episodeDates) ? data.episodeDates : [])))
             .map(value => String(value || "").trim())
-            .filter(value => /^\d{4}-\d{2}-\d{2}$/.test(value));
+            .filter(value => require(path.join(__dirname,"../common/season-policy")).validDate(value));
 
         if (!title || !/^\d{4}$/.test(year) || !Number.isFinite(seasonNumber) || seasonNumber <= 0) {
             return { ok:false, message:bt_("ICS_FIELDS_MISSING") };
@@ -1547,12 +1532,12 @@ function calendarCreateIcs_(payload) {
         for (const block of blocks) {
             const startCompact = block.date.replace(/-/g, "");
             const endCompact = calendarIcsNextDay_(block.date).replace(/-/g, "");
-            const summary = title + " (" + year + ") " + seasonLabel + "E" + calendarPad2_(block.eFrom) +
+            const summary = provisional ? bt_("CALENDAR_ANNOUNCED_START") + ": " + title + " " + seasonLabel : title + " (" + year + ") " + seasonLabel + "E" + calendarPad2_(block.eFrom) +
                 (block.eTo !== block.eFrom ? ("–E" + calendarPad2_(block.eTo)) : "");
             const uidBase = tmdbId ? ("tmdb-" + tmdbId) :
                 calendarIcsFileName_(title + "-" + year).toLowerCase().replace(/[^a-z0-9]+/g, "-");
             const uid = "serkal-desktop-" + uidBase + "-" + seasonLabel.toLowerCase() +
-                "-e" + calendarPad2_(block.eFrom) + "-e" + calendarPad2_(block.eTo) + "@serkal.de";
+                (provisional ? "-announcement" : "-e" + calendarPad2_(block.eFrom) + "-e" + calendarPad2_(block.eTo)) + "@serkal.de";
 
             lines.push("BEGIN:VEVENT");
             lines.push("UID:" + uid);
@@ -1563,7 +1548,7 @@ function calendarCreateIcs_(payload) {
             lines.push("DTSTART;VALUE=DATE:" + startCompact);
             lines.push("DTEND;VALUE=DATE:" + endCompact);
             lines.push("SUMMARY:" + calendarIcsEscape_(summary));
-            lines.push("DESCRIPTION:SerKal");
+            lines.push("DESCRIPTION:"+calendarIcsEscape_(provisional ? bt_("CALENDAR_ANNOUNCED_DETAIL") : "SerKal"));
             lines.push("TRANSP:TRANSPARENT");
             lines.push("END:VEVENT");
         }
@@ -2781,7 +2766,7 @@ function maintenanceEntryDates_(entry) {
 function maintenanceSeasonIsComplete_(analysed) {
     const count = Number(analysed && analysed.episodeCount || 0);
     const dates = Array.isArray(analysed && analysed.episodeDates) ? analysed.episodeDates : [];
-    return count > 0 && dates.length === count &&
+    return analysed?.complete === true && count > 1 && dates.length === count &&
         dates.every(value => /^\d{4}-\d{2}-\d{2}$/.test(String(value || "")));
 }
 
@@ -2821,7 +2806,7 @@ function maintenanceAnalyse_(groups, snapshot) {
             const seasonRecord = record.seasons && record.seasons[String(maxTmdbSeason)];
             const seasonData = seasonRecord && seasonRecord.ok && seasonRecord.data
                 ? seasonRecord.data : null;
-            const analysed = seasonData ? analyseSeason_(seasonData) : null;
+            const analysed = seasonData ? analyseSeason_(seasonData,(tv.seasons||[]).find(s=>Number(s.season_number)===maxTmdbSeason)||{}) : null;
             const episodeCount = Number(analysed && analysed.episodeCount || 0);
             // Schutz gegen vorläufige TMDB-Platzhalter:
             // 1 Episode + 1 Termin ist formal vollständig, aber für eine neu
@@ -2862,8 +2847,8 @@ function maintenanceAnalyse_(groups, snapshot) {
             const season = record.seasons && record.seasons[String(seasonNumber)];
             if (!season || season.ok === false || !season.data) continue;
 
-            const analysed = analyseSeason_(season.data);
-            const seasonComplete = maintenanceSeasonIsComplete_(analysed) && (!entry.announcementOnly || analysed.episodeCount>=Number(entry.episoden||entry.eps||0));
+            const analysed = analyseSeason_(season.data,(tv.seasons||[]).find(s=>Number(s.season_number)===seasonNumber)||{});
+            const seasonComplete = maintenanceSeasonIsComplete_(analysed) && analysed.episodeCount>=Number(entry.episoden||entry.eps||0);
             const flags = Number(entry.manualFlags || 0);
             const archiveEpisodes = Number(entry && (entry.episoden || entry.eps) || 0);
 
@@ -2928,10 +2913,10 @@ function maintenanceBuildOperations_(groups, snapshot, findings) {
         const seasonRecord = record && record.seasons && record.seasons[String(seasonNumber)];
         if (!group || !record || !seasonRecord || !seasonRecord.ok || !seasonRecord.data) continue;
 
-        const analysed = analyseSeason_(seasonRecord.data);
+        const analysed = analyseSeason_(seasonRecord.data,(record.tv.seasons||[]).find(s=>Number(s.season_number)===seasonNumber)||{});
         if (!maintenanceSeasonIsComplete_(analysed)) continue;
         const existing = group.entries.find(entry => maintenanceSeasonNumber_(entry) === seasonNumber) || null;
-        if(existing && existing.announcementOnly && analysed.episodeCount<Number(existing.episoden||existing.eps||0))continue;
+        if(existing && analysed.episodeCount<Number(existing.episoden||existing.eps||0))continue;
         const base = existing || group.entries[0];
         if (!base) continue;
         if(!existing && !require(path.join(__dirname,"../common/maintenance-follow")).eligible(group.entries,seasonNumber))continue;
@@ -3374,6 +3359,16 @@ function maintenanceWriteProviders_(groups,snapshot) {
     for(const group of groups){
         const record=snapshot.get(String(group.tmdbId));if(!record || !record.ok)continue;
         const announcementUpdate=require(path.join(__dirname,"../common/season-announcements")).update(group,record,undefined,activeLanguage_);
+        for(const [number,value] of Object.entries(record.seasons||{})){
+            const n=Number(number);
+            if(group.entries.some(e=>maintenanceSeasonNumber_(e)===n)||!require(path.join(__dirname,"../common/maintenance-follow")).eligible(group.entries,n))continue;
+            if(!value.ok && !value.pending)continue;
+            const plan=analyseSeason_(value.data||{},(record.tv.seasons||[]).find(s=>Number(s.season_number)===n)||{});
+            if(plan.complete)continue;
+            const base=group.entries[0];
+            const inserted=archiveInsert_({titel:base.titel||base.title||record.tv.name,jahr:base.jahr||base.year,tmdbId:group.tmdbId,staffelNummer:n,episoden:plan.episodeCount,termindaten:[],announcementOnly:true,announcedStart:plan.announcedStart});
+            if(!inserted.ok)throw new Error(inserted.message);
+        }
         corrections.push(...announcementUpdate.changes);
         for(const entry of group.entries){
             const file=path.join(archiveFolderPath_(),entry.fileName);
@@ -3383,7 +3378,7 @@ function maintenanceWriteProviders_(groups,snapshot) {
                 line=archiveSetField_(line,"announcements",archiveEncode_(JSON.stringify(announcementUpdate.announcements)));
                 if(archiveField_(line,"announcementOnly")==="1"){
                     const own=announcementUpdate.announcements.find(a=>Number(a.season)===Number((line.match(/^S(\d+)/i)||[])[1]||0) && a.date);
-                    if(own)line=archiveSetField_(line,"startOriginal",own.date);
+                    if(own && !(Number(archiveField_(line,"manualFlags")||0)&SERKAL_MANUAL_CALENDAR))line=archiveSetField_(line,"startOriginal",own.date);
                 }
                 line=archiveSetField_(line,"calendarLanguage",activeLanguage_);
                 if(record.watchProviders)line=archiveSetField_(line,"watchProviders",archiveEncode_(JSON.stringify(record.watchProviders)));
