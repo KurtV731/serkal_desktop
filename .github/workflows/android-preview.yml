@@ -1,11 +1,16 @@
-name: Build Android preview
+name: Test and build SerKal Android
 
 on:
   workflow_dispatch:
   push:
     paths:
       - 'android-preview/**'
+      - 'serkal-release.json'
       - '.github/workflows/android-preview.yml'
+
+concurrency:
+  group: android-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -19,18 +24,20 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
-      - name: Test and build unsigned APK
+      - name: Test
+        working-directory: android-preview
+        run: gradle testDebugUnitTest
+      - name: Build unsigned APK
+        if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[build apk]')
         working-directory: android-preview
         run: |
-          gradle testDebugUnitTest assembleDebug
+          gradle assembleDebug
           cp "$ANDROID_HOME/build-tools/35.0.0/lib/apksigner.jar" apksigner.jar
       - uses: actions/upload-artifact@v4
+        if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[build apk]')
         with:
-          name: 0.0.5a27-SerKal-Android-unsigned
+          name: 030-SerKal-Android-unsigned
           path: |
             android-preview/app/build/outputs/apk/debug/app-debug-unsigned.apk
             android-preview/apksigner.jar
             android-preview/app/build/test-results/testDebugUnitTest/*.xml
-
-
-
