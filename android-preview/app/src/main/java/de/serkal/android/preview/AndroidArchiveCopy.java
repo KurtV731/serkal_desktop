@@ -172,7 +172,7 @@ final class AndroidArchiveCopy {
                     if(pending==null)synchronized(this){JSONObject next=new JSONObject(state.toString());pending=new JSONObject(next.getJSONObject("record").toString());
                         pending.put("releaseNumber",ArchiveCodec.RELEASE).put("revision",java.util.UUID.randomUUID().toString()).put("parent",base).put("generatedAt",now());next.put("pending",pending).put("pendingEpoch",next.getLong("epoch"));save(next);}
                     pending=new JSONObject(pending.toString());
-                    ArchiveCodec.assertRelease(pending.opt("releaseNumber"));
+                    ArchiveCodec.assertReadableRelease(pending.opt("releaseNumber"));
                     pending.put("releaseNumber",ArchiveCodec.RELEASE);
                     synchronized(this){JSONObject next=new JSONObject(state.toString());next.put("pending",pending);save(next);}
                     ArchiveCopyClient.head(client.list(ArchiveCodec.PREFIX),owner);
@@ -195,6 +195,13 @@ final class AndroidArchiveCopy {
                         if(!spaceFor(next)){readOnlyRecord=record;throw new Exception("COPY_LOW_SPACE");}save(next);readOnlyRecord=null;status="saved";error="";}
                 } else synchronized(this){status="saved";error="";}
             }
+            if(tip!=null && tip.getJSONObject("appProperties").has("releaseNumber") && tip.getJSONObject("appProperties").optInt("releaseNumber")<ArchiveCodec.RELEASE){
+                synchronized(this){if(!state.optBoolean("dirty") && revision.equals(state.optString("base"))){
+                    JSONObject next=new JSONObject(state.toString());next.getJSONObject("record").put("releaseNumber",ArchiveCodec.RELEASE);
+                    next.put("dirty",true).put("epoch",next.optLong("epoch")+1);save(next);status="pending";schedule(1);
+                }}
+            }
+
         }catch(Exception failure){synchronized(this){if(!closed){error=String.valueOf(failure.getMessage());if(error.equals("COPY_VERSION_MISMATCH")||previousError.equals("COPY_VERSION_MISMATCH")){error="COPY_VERSION_MISMATCH";try{JSONObject next=new JSONObject(state.toString());next.put("releaseMismatch",true);save(next);}catch(Exception ignored){}}status="error";if(state.optBoolean("dirty") && !fatal())schedule(30);}}}
         finally {synchronized(this){busy=false;if(state.has("record") && !fatal())loaded=true;log("SYNC_END",error);}notifyChange();}
     }
