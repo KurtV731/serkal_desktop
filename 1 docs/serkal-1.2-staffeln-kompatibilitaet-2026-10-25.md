@@ -8,7 +8,7 @@ Stand: 25.10.2026. Auftrag: Kurt. Status: VERÖFFENTLICHUNG GESPERRT; fachliche 
 
 - Gemeinsame Versionsnummer beginnt bei **30**, danach 31, 32 usw. Auch bei einer Änderung nur einer Plattform werden beide Plattformnummern gemeinsam erhöht.
 - Versionsquelle im Quellstand: `serkal-release.json`. Desktop-Paketversion und Android-Version müssen damit übereinstimmen.
-- Neue Google-Archivstände und ihre Drive-Metadaten tragen `releaseNumber:30`. Bei einer abweichenden vorhandenen Nummer wird vor Übertragung, Kalenderänderungen und erzwungener Übernahme mit `COPY_VERSION_MISMATCH` gestoppt.
+- Neue Google-Archivstände und ihre Drive-Metadaten tragen `releaseNumber:30`. Ein älteres Programm wird bei einer neueren Archivnummer vor Übertragung, Kalenderänderungen und erzwungener Übernahme mit `COPY_VERSION_MISMATCH` gestoppt. Ab Fassung 31 darf die neue Anwendung einen älteren gespeicherten Snapshot (zum Beispiel 30) einlesen und ihn automatisch unter ihrer aktuellen Nummer neu übertragen. Dies ist die Datenübernahme beim Update; es erlaubt keinem alten Programm, in einen neueren Archivstand zu schreiben.
 - Der bisherige unnummerierte Archivstand darf bei der ersten Umstellung eingelesen werden. Die nächste Übertragung trägt die gemeinsame Nummer. Bereits ausgelieferte alte Programme bekommen dadurch keine nachträgliche Prüfung; Kurts einmalige Umstellung aller Geräte ist deshalb Voraussetzung.
 - Eine erkannte Versionssperre wird auf dem Gerät gespeichert und darf durch einen Neustart ohne Netzwerk nicht verschwinden. Gleiche Programmnummern ersetzen nicht die normalen Prüfungen auf konkurrierende Änderungen.
 
