@@ -2,6 +2,18 @@
 
 Stand: 25.10.2026. Auftrag: Kurt. Status: VERÖFFENTLICHUNG GESPERRT; fachliche Definition und Quellbefund dokumentiert. Die hier beschriebenen Schutzmaßnahmen sind noch nicht als implementiert oder abgenommen zu behandeln.
 
+## Verbindliche Vereinfachung von Kurt – Version 30
+
+**Dieser Nachtrag ersetzt die unten beschriebene aufwendige Trennung der Schreibziele.** Kurt installiert zuerst auf allen vier Geräten dieselbe neue Fassung und startet erst danach die Programme. Unaktualisierte Altprogramme sind damit ausdrücklich außerhalb des vereinbarten Betriebsablaufs. Keine neue Archivgeneration und kein getrennter Kalender erforderlich.
+
+- Gemeinsame Versionsnummer beginnt bei **30**, danach 31, 32 usw. Auch bei einer Änderung nur einer Plattform werden beide Plattformnummern gemeinsam erhöht.
+- Versionsquelle im Quellstand: `serkal-release.json`. Desktop-Paketversion und Android-Version müssen damit übereinstimmen.
+- Neue Google-Archivstände und ihre Drive-Metadaten tragen `releaseNumber:30`. Bei einer abweichenden vorhandenen Nummer wird vor Übertragung, Kalenderänderungen und erzwungener Übernahme mit `COPY_VERSION_MISMATCH` gestoppt.
+- Der bisherige unnummerierte Archivstand darf bei der ersten Umstellung eingelesen werden. Die nächste Übertragung trägt die gemeinsame Nummer. Bereits ausgelieferte alte Programme bekommen dadurch keine nachträgliche Prüfung; Kurts einmalige Umstellung aller Geräte ist deshalb Voraussetzung.
+- Eine erkannte Versionssperre wird auf dem Gerät gespeichert und darf durch einen Neustart ohne Netzwerk nicht verschwinden. Gleiche Programmnummern ersetzen nicht die normalen Prüfungen auf konkurrierende Änderungen.
+
+Die vorherigen Abschnitte über getrennte Drive-, TXT- und Kalenderschreibziele bleiben nur als historische Begründung erhalten und sind **kein aktueller Umsetzungsauftrag**.
+
 ## Belegter Quellbefund
 
 Desktop-Fachbranch: `2 src/backend/main.js → pickSeasonWithDates_()` akzeptiert `a.episodeDates.length` als Auswahlkriterium und setzt dann `dateFlag:""`. Ein einzelner bekannter Folgentermin genügt. Ohne Treffer wird außerdem ein synthetischer Start 01.01. des Folgejahres erzeugt.
