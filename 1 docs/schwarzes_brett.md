@@ -3807,3 +3807,24 @@ Status: **QUELLSTAND AUF HASA-MAIN / UPLOAD DURCH STYL OFFEN**
 Kurts Hinweis umgesetzt: Die Kopfzeile nennt Tampermonkey nicht mehr nur für Firefox und Edge, sondern verlinkt die fünf offiziellen Browserseiten für Chrome, Microsoft Edge, Safari, Opera und Firefox. Im Weltraumkopf stehen dieselben direkten Links. Getrennt davon bleibt die sachlich engere Aussage sichtbar: HASA wurde bisher praktisch mit Firefox und Edge geprüft. Damit wird die Verfügbarkeit der Erweiterung nicht mit bereits bestätigter HASA-Erprobung gleichgesetzt.
 
 HASA main, Commit `af2dd73257acd3de834c76d7b3911259123a2fde`. Geändert wurde ausschließlich `02 Website/index.html`; keine API-, Download-, Datenbank- oder Userscriptänderung. Datei auf GitHub zurückgelesen: alle fünf Ziele und der Prüfhinweis vorhanden, Zeilenenden normalisiert. Veröffentlichung über den bestehenden Website-Weg `HASA-START.cmd` → 3 nach lokaler Aktualisierung.
+
+
+## CE HASA – 25.10.2026: 1.3 Alpha 1 als geprüftes Testpaket fertig
+
+Status: **TESTFASSUNG GESICHERT / BROWSER- UND DATENBANKTESTS BESTANDEN / SERVERUPLOAD DURCH STYL OFFEN**
+
+Eigener Entwicklungszweig `KurtV731/hasa:dev-1.3-alpha1`, geprüfter Quellcommit **237bc83bfabbf2f2cca2ef4f9064d040ddfd4ceb**. Öffentliche Website, Downloadversion 1.2.0 und stabiler Updatekanal bleiben unverändert. Kein produktiver Upload durch CE.
+
+- Motivationsvideos: eine gemeinsame private Geschichte für Eingang, Verwendung, Wirkungsende und Verschlampen; die vier redundanten Betreffkarten entfallen.
+- Wassereinbrüche: Metall-/Mineralmine und Reparaturen in einer Geschichte mit Datum/Uhrzeit, Planet, Minentyp, Aktion und Schaden. Der neueste zeitlich zugeordnete Zustand entscheidet über die Ressourcenfärbung. Wiederlesen eines älteren Einbruchs reaktiviert einen reparierten Schaden nicht. Fehlende Schadensangaben bedeuten unbekannt. Eine unbestimmte Reparatur wird nur einer einzelnen offenen Mine zugeordnet.
+- Technologische Durchbrüche: tatsächliche Freischaltungsmeldungen für Gebäude, Einheiten und Forschungen ausgewertet, einschließlich mehrerer Einträge und beider Zahlenanordnungen. Freischaltungsnummern sind keine abgeschlossenen Forschungsstufen. Berichtserfassung unabhängig von einer festen Tabellenbreite. Fehlende Durchbruchtexte können über sichtbare eigene Nachrichten-Leselinks nachgeladen werden (GET action=view; keine Bau-/Forschungs-/Videoaktion).
+- Ergänzender Zustandsvergleich aus eigenen Kategorie-Momentaufnahmen, getrennt nach Konto, Runde und gegebenenfalls Planet. Erst nach einem vorhandenen Ausgangsstand; bei genau einer zeitlich passenden Meldung. Vergleich getrennt vom unveränderten Originaltext und ohne behauptete sichere Ursachenzuordnung. Historische Berichte erhalten keine heutigen Änderungen.
+
+Validierung: vollständige Browserregression und disposable MariaDB-Integration, isolierte PHP-Auswertung einschließlich anonymisierter Freischaltungsbeispiele, Release-/Pfadprüfung und PowerShell-Helferprüfung erfolgreich. Gesamtlauf: https://github.com/KurtV731/hasa/actions/runs/40187573962 . Lokale reine JS-Prüfung für Ereignisreihenfolge, Video-Ende und Zustandsvergleich ebenfalls bestanden.
+
+Testpaket an Styl: **HASA-1.3-Alpha1-Testpaket.zip**, SHA-256 `b76fe18955dc546bdfe6fce760bcedc35bd9c961d244954e0cdff0d790f316bf`. Enthält Userscript, Test-Serverhelfer, drei PHP-Dateien, Prüfsummen und Anleitung. `HASA-SERVERUPDATE-ALPHA1.bat` verwendet das vorhandene private hasa.li-Profil (sonst HASA-li und /hasa.li/api/), sichert zuerst alle drei bisherigen Serverdateien unter `C:\\ppd\\hasa\\06 Sicherungen` und ersetzt dann ausschließlich `events-service.php`, `event-views.php`, `events.php`. Kein git pull, keine private config.php, keine SQL-Migration.
+
+Nach dem Serverupdate zeigen die vorhandenen Weblisten die neue Darstellung. Für neue Berichtserfassung, Zustandsvergleich und Ressourcenfärbung ist zusätzlich das Alpha-1-Userscript erforderlich:
+https://raw.githubusercontent.com/KurtV731/hasa/dev-1.3-alpha1/01%20Entwicklung/Userscript/Aktuell/HASA-AKTUELL.user.js
+
+Website-Chatty: derzeit kein Website-Uploadauftrag; 1.3 Alpha 1 nicht als öffentliche Finalversion verlinken. Originalquellen, Sitzungstoken, private Spieleranalysen und Screenshots wurden nicht veröffentlicht.
