@@ -5,7 +5,7 @@ class DesktopCopy {
     constructor({folder,stateFile,calendar,selectCalendar,token,bootstrap,calendarSync,lock,onChange=()=>{},onStatus=()=>{}}) {
         Object.assign(this,{folder,stateFile,calendar,selectCalendar,token,bootstrap,calendarSync,lock,onChange,onStatus});
         this.state={base:'',owner:'',dirty:false};this.status='loading';this.error='';this.initialized=false;this.busy=false;
-        try {this.state=JSON.parse(fs.readFileSync(stateFile,'utf8'));}catch(error){if(error.code!=='ENOENT')this.error='COPY_LOCAL_STATE_INVALID';}
+        try {this.state=JSON.parse(fs.readFileSync(stateFile,'utf8'));if(this.state.releaseMismatch)this.error='COPY_VERSION_MISMATCH';}catch(error){if(error.code!=='ENOENT')this.error='COPY_LOCAL_STATE_INVALID';}
     }
     save(){copy.writeAtomic(this.stateFile,this.state);}
     local(){return copy.capture(this.folder(),this.calendar());}
@@ -16,16 +16,17 @@ class DesktopCopy {
     view(){const available=this.available();return {status:this.status,code:available?this.error:"COPY_LOW_SPACE",busy:this.busy,writable:this.initialized && !this.fatal() && available,dirty:!!this.state.dirty,authorityPending:!!this.state.adoption,
         progress:this.progress||null,lastSynced:this.state.lastSynced||'',revision:this.state.base||''};}
     async adoptLocal(){
+        if(this.error==='COPY_VERSION_MISMATCH')copyError(this.error);
         if(this.busy)copyError('COPY_BUSY');
         const current=this.local();
-        this.state.adoption=copy.validate({schema:2,owner:this.state.owner||'pending',revision:crypto.randomUUID(),parent:'',
+        this.state.adoption=copy.validate({schema:2,releaseNumber:copy.RELEASE,owner:this.state.owner||'pending',revision:crypto.randomUUID(),parent:'',
             authorityId:'',generatedAt:new Date().toISOString(),files:current.files,calendar:current.calendar},this.state.owner||'pending');
         this.state.adoption.authorityId=this.state.adoption.revision;
         this.save();this.error='';this.initialized=true;
         return this.sync();
     }
     report(phase,current=0,total=0){this.progress={phase,current,total};this.onStatus(this.view());}
-    fatal(){return /^(COPY_(CONFLICT|ACCOUNT_CHANGED|LOW_SPACE|LOCAL_STATE_INVALID|INVALID|HISTORY_MISSING|NEEDS_SOURCE|LEGACY_PENDING|CALENDAR_TARGET_MISSING|CALENDAR_AMBIGUOUS|CALENDAR_ACCESS_DENIED))$/.test(this.error);}
+    fatal(){return /^(COPY_(VERSION_MISMATCH|CONFLICT|ACCOUNT_CHANGED|LOW_SPACE|LOCAL_STATE_INVALID|INVALID|HISTORY_MISSING|NEEDS_SOURCE|LEGACY_PENDING|CALENDAR_TARGET_MISSING|CALENDAR_AMBIGUOUS|CALENDAR_ACCESS_DENIED))$/.test(this.error);}
     assertWrite(){if(this.fatal())copyError(this.error);if(this.busy)copyError('COPY_SYNC_BUSY');if(!this.initialized)copyError('COPY_LOADING');if(!this.available())copyError('COPY_LOW_SPACE');}
     changed(){
         if(!this.initialized)return;
@@ -62,10 +63,10 @@ class DesktopCopy {
                     copy.install(folder,record);this.selectCalendar(record.calendar);this.onChange();
                 }),calendarSync:record=>this.calendarSync(record)});
             if(result.status==='missing')copyError('COPY_MISSING');
-            this.initialized=true;this.error='';this.status=result.status;
+            this.initialized=true;this.error='';delete this.state.releaseMismatch;this.status=result.status;
             if(result.status==='saved'||result.status==='authority-applied'){this.state.lastSynced=new Date().toISOString();this.save();}
             if(result.status==='pending')this.schedule();
-        }catch(error){this.error=String(error.code||error.message||'COPY_FAILED');this.status='error';if(!this.fatal() && this.state.base)this.initialized=true;
+        }catch(error){this.error=String(error.code||error.message||'COPY_FAILED');if(this.error==='COPY_VERSION_MISMATCH'||previousError==='COPY_VERSION_MISMATCH'){this.error='COPY_VERSION_MISMATCH';this.state.releaseMismatch=true;this.save();}this.status='error';if(!this.fatal() && this.state.base)this.initialized=true;
             if(this.state.dirty && !this.fatal()){clearTimeout(this.timer);this.timer=setTimeout(()=>this.sync(),30000);this.timer.unref?.();}}
         finally{this.busy=false;this.progress=null;this.onStatus(this.view());}
         return this.view();

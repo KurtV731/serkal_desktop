@@ -5,7 +5,7 @@ const copy=require('../2 src/common/archive-copy'),{DesktopCopy}=require('../2 s
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'serkal-manager-')),folder=path.join(root,'archive');fs.mkdirSync(folder);
  fs.writeFileSync(path.join(folder,'Test (2026).txt'),'S01; tmdb=42; startOriginal=2026-10-12; dates=12.10.\n');
  const records=[],archived=new Set();let failPatch=false;const originalFetch=global.fetch;
- const metadata=r=>({id:r.revision,name:(archived.has(r.revision)?'serkal-history-v2-':'serkal-copy-v2-')+r.revision+'.json',md5Checksum:copy.hash(JSON.stringify(r)),appProperties:{owner:'123',revision:r.revision,parent:r.parent||'root',...(r.authorityId?{authorityId:r.authorityId}:{})}});
+ const metadata=r=>({id:r.revision,name:(archived.has(r.revision)?'serkal-history-v2-':'serkal-copy-v2-')+r.revision+'.json',md5Checksum:copy.hash(JSON.stringify(r)),appProperties:{owner:'123',revision:r.revision,parent:r.parent||'root',...(r.releaseNumber===undefined?{}:{releaseNumber:String(r.releaseNumber)}),...(r.authorityId?{authorityId:r.authorityId}:{})}});
  global.fetch=async(url,options)=>{
   let body;if(url.includes('userinfo'))body={sub:'123',email_verified:true};
   else if(options.method==='PATCH'){if(failPatch){failPatch=false;return {ok:false,status:503,text:async()=>'{"error":"offline"}'};}const id=decodeURIComponent(url.split('/files/')[1].split('?')[0]);archived.add(id);body={id};}
@@ -25,7 +25,17 @@ const copy=require('../2 src/common/archive-copy'),{DesktopCopy}=require('../2 s
   const oldCount=fs.readdirSync(otherFolder).filter(name=>name.endsWith('.txt')).length;assert.equal(oldCount,1);
   const followed=await second.sync();assert.equal(followed.status,'authority-applied');assert.equal(second.state.authorityId,manager.state.authorityId);assert.equal(second.state.base,manager.state.base);assert.equal(second.state.dirty,false);assert.equal(fs.readdirSync(otherFolder).filter(name=>name.endsWith('.txt')).length,1);assert(!fs.readFileSync(path.join(otherFolder,'Test (2026).txt'),'utf8').includes('new local edit'));
   fs.appendFileSync(path.join(otherFolder,'Test (2026).txt'),'S03; tmdb=42; seen=1\n');second.changed();clearTimeout(second.timer);assert.equal((await second.sync()).status,'saved');assert.equal(second.state.dirty,false);assert(records.at(-1).authorityId===manager.state.authorityId);assert(records.at(-1).files[0].content.endsWith('S03; tmdb=42; seen=1\n'));assert.equal((await second.sync()).status,'saved');assert(fs.readFileSync(path.join(otherFolder,'Test (2026).txt'),'utf8').endsWith('S03; tmdb=42; seen=1\n'));
-  clearTimeout(manager.timer);clearTimeout(second.timer);clearTimeout(restart.timer);
+  const future={...records.at(-1),releaseNumber:31,parent:records.at(-1).revision,revision:require('node:crypto').randomUUID()};records.push(future);
+  const beforeWrites=records.length,beforeArchived=archived.size;
+  assert.equal((await second.sync()).code,'COPY_VERSION_MISMATCH');
+  assert.throws(()=>second.assertWrite(),/COPY_VERSION_MISMATCH/);
+  await assert.rejects(second.adoptLocal(),/COPY_VERSION_MISMATCH/);
+  assert.equal(records.length,beforeWrites);assert.equal(archived.size,beforeArchived);
+  const blockedRestart=new DesktopCopy({...options,folder:()=>otherFolder,stateFile:path.join(root,'second.json')});
+  global.fetch=async()=>{throw Error('offline');};
+  assert.equal((await blockedRestart.sync()).code,'COPY_VERSION_MISMATCH');
+  assert.throws(()=>blockedRestart.assertWrite(),/COPY_VERSION_MISMATCH/);
+  clearTimeout(manager.timer);clearTimeout(second.timer);clearTimeout(restart.timer);clearTimeout(blockedRestart.timer);
  }finally{global.fetch=originalFetch;fs.rmSync(root,{recursive:true,force:true});}
  console.log('desktop archive copy: first export, local edit, authority adoption, post-adoption edit and interrupted state recovery passed');
 })().catch(e=>{console.error(e);process.exitCode=1;});
