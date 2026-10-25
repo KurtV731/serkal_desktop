@@ -3900,3 +3900,32 @@ Die gewählte vorläufige Staffel erhält eine eigene TXT-Zeile mit erwarteter F
 Nachweis: gesamte lokale Node-Testsuite bestanden, zusätzliche echte Backend-Fälle für Suchanreicherung, angekündigte Archivzeile, einen Google-Kalenderhinweis, ICS, vollständige Ablösung, schwächere Antworten, unbekannte Daten sowie einmalige Wartungsanlage. Alle zehn übertragenen Dateien über die GitHub-App zurückgelesen und mit dem geprüften Inhalt verglichen. Keine echten Archiv- oder Kalenderdaten verändert.
 
 **Ausstehend:** Schutz vor inkompatiblen Altprogrammen einschließlich getrennter Drive-, lokaler TXT- und Kalenderschreibziele; Android muss dieselben Regeln erhalten und geprüft werden. Die Behandlung einer ausdrücklich belegten echten Ein-Folgen-Staffel ist noch nicht ergänzt. Menüanordnung, vollständige Desktop-/Android-Vereinheitlichung und einheitliches Wartungsergebnis bleiben als Kurts weitere Aufträge offen. Keine neue APK, kein Installer und keine öffentliche Freigabe.
+
+
+## CE SerKal – 25.10.2026: gemeinsame Version 30 für Desktop und Android geliefert
+
+Status: **QUELLSTÄNDE ÜBERNOMMEN / TESTS BESTANDEN / APK SIGNIERT UND AN KURT / PRAKTISCHE VIERGERÄTE-ABNAHME OFFEN**
+
+### Neue verbindliche Entscheidung von Kurt
+
+Die vorherige Planung mit getrennten Drive-, lokalen TXT- und Kalenderschreibzielen ist aufgehoben. Kurt installiert zuerst auf allen vier Geräten die gemeinsame **30** und startet erst danach die Programme. Danach werden beide Plattformnummern gemeinsam als 31, 32 usw. erhöht, auch bei Änderungen nur einer Plattform. Bereits alte Programme werden nicht nachträglich ferngeändert; sie gehören nach Kurts ausdrücklich zugesagter Umstellung nicht mehr zum Betrieb. Fachunterlage entsprechend mit vorrangigem Nachtrag korrigiert, Commit `20dd42c0c0f423d2e99a8255ed5d4acd2b23dd78`.
+
+### Gelieferte Quellstände
+
+- Desktop, regulärer Abrufstand `serkal-0.0.5-archiv-start`: Merge `13aa7344b3803bba4fc96a5904d1df7415055d98`, PR #3. Abruf für Kurt weiterhin **git pull**, danach **npm start**.
+- Android, `android-preview-0.0.5`: Merge `06d2f23f5cd8050c51293ffb80986604d8227e48`, PR #4. Geprüfter Buildquellstand `21658cc86ce722b012556e2b7d03e6a7023d4f58`.
+- Beide enthalten identisches `serkal-release.json`: gemeinsame Nummer 30, technische Version **1.2.0-alpha.30**, Android versionCode **38**. Gleiche Paketkennung und bisherige Signatur beibehalten.
+
+Die bestehenden schema=2-Archive und Kalender werden weiterverwendet. Neue Übertragungen tragen `releaseNumber:30` im Datensatz und den Drive-Metadaten. Abweichende vorhandene Nummern stoppen den Abgleich mit `COPY_VERSION_MISMATCH` vor Archiv- und Kalenderschreiben; auch vorgemerkte Übertragungen und der rote Übernahme-Knopf dürfen das nicht umgehen. Erkannte Sperre bleibt nach Neustart ohne Netz bestehen. Unnummerierte bisherige Archivdaten werden eingelesen; die nächste reguläre Übertragung trägt 30. Gleiche Nummern heben normale Konfliktprüfungen nicht auf.
+
+Die zuvor lokal geprüften Desktop-Staffelregeln sind jetzt im regulären Abrufstand; Android-Suche und Wartung wurden angeglichen: Einzelplatzhalter bleiben vorläufig, unbekannte Daten bleiben unbekannt, bekannte Ankündigungsdaten verschwinden bei einer schwächeren Antwort nicht, bestätigte Pläne werden nicht verkürzt und manuelle Termin-/Folgenangaben bleiben geschützt. Die Listenhöhenkorrektur aus 027 bleibt enthalten.
+
+### Artefakt und Nachweise
+
+**030-SerKal-Android-1.2-Alpha30.apk**, 2.891.527 Bytes, SHA-256 `8ef3de5d7a242bab10ebfcfc6e5116afc7c63df8bfdce8f83985ea87ec2e30c0`. Signatur v2/v3 verifiziert; Zertifikat identisch mit bisheriger Preview. Keine Signaturzugangsdaten veröffentlicht.
+
+Gesamte lokale Desktop-Node-Suite einschließlich neuer Staffel- und Versionsfälle bestanden. Android: **60 Tests, 0 Fehler, 0 Fehlschläge**, einschließlich gemessener Listenhöhe und Versionsprüfungen; danach APK-Bau erfolgreich. Lauf: https://github.com/KurtV731/serkal_desktop/actions/runs/40226601970 . Der erste Versuch scheiterte nur am neuen Testtransport (finale Klasse); korrigiert vor dem erfolgreichen Bau, kein APK aus dem gescheiterten Versuch.
+
+Übertragene Quelländerungen über GitHub-App zurückgelesen und inhaltlich verglichen; beide regulären Branches nach den Merges auf Version 30 kontrolliert. Keine persönlichen Archiv- oder Google-Kalenderdaten hier verändert. Keine öffentliche 1.2-Freigabe und kein Website-/Windows-Installerauftrag daraus ableiten.
+
+**Weiter offen:** reale Prüfung auf Kurts vier Geräten; Menüanordnung und vollständige Plattformvereinheitlichung; einheitliche Wartungsergebnisanzeige; genaue Systemkartierung; ausdrücklicher Abschlussbeleg für tatsächlich einteilige Staffeln. Kurt braucht keine Branch-/Commitbedienung: zwei PCs erst aktualisieren, APK auf beiden Android-Geräten installieren, danach Programme starten.
