@@ -3,6 +3,11 @@
 const crypto = require('node:crypto');
 const fs = require('node:fs');
 const path = require('node:path');
+const RELEASE = require('../../serkal-release.json').number;
+function assertRelease(value) {
+    // The unnumbered archive is imported once when all devices move to release 30.
+    if (value !== undefined && value !== null && String(value) !== String(RELEASE)) fail('COPY_VERSION_MISMATCH');
+}
 const PREFIX = 'serkal-copy-v2-';
 const LIMIT = 64 * 1024 * 1024;
 const UUID = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/;
@@ -13,6 +18,7 @@ function safeName(name) {
         /\.txt$/i.test(name) && !/^(?:!!serkal_log_|fanal_|\.|con\.|prn\.|aux\.|nul\.|com[1-9]\.|lpt[1-9]\.)/i.test(name);
 }
 function validate(record, owner) {
+    if(record) assertRelease(record.releaseNumber);
     if (!record || record.schema !== 2 || record.owner !== owner || !UUID.test(record.revision) ||
         !(record.parent === '' || UUID.test(record.parent)) || record.parent === record.revision ||
         (record.authorityId!==undefined && record.authorityId!=='' && !UUID.test(record.authorityId)) ||
@@ -113,6 +119,7 @@ function head(files, owner) {
     let cursor=tips[0], visited=new Set();
     while(cursor) {const rev=cursor.appProperties.revision;if(visited.has(rev))fail('COPY_INVALID');visited.add(rev);cursor=revisions.get(cursor.appProperties.parent);}
     if(visited.size!==revisions.size)fail('COPY_INVALID');
+    assertRelease(tips[0].appProperties.releaseNumber);
     return tips[0];
 }
 function client(accessToken, fetchImpl=fetch) {
@@ -141,9 +148,9 @@ function client(accessToken, fetchImpl=fetch) {
                 await request('https://www.googleapis.com/drive/v3/files/'+encodeURIComponent(file.id)+'?fields=id,name','PATCH',JSON.stringify({name}));
             }
         },
-        async upload(record){validate(record,record.owner);const json=JSON.stringify(record);if(Buffer.byteLength(json)>LIMIT)fail('COPY_TOO_LARGE');
+        async upload(record){validate(record,record.owner);if(record.releaseNumber!==RELEASE)fail('COPY_VERSION_MISMATCH');const json=JSON.stringify(record);if(Buffer.byteLength(json)>LIMIT)fail('COPY_TOO_LARGE');
             const boundary='serkal-'+crypto.randomUUID();const meta={name:PREFIX+record.revision+'.json',mimeType:'application/json',parents:['appDataFolder'],
-                appProperties:{owner:record.owner,revision:record.revision,parent:record.parent||'root',...(record.authorityId?{authorityId:record.authorityId}:{})}};
+                appProperties:{owner:record.owner,revision:record.revision,parent:record.parent||'root',releaseNumber:String(RELEASE),...(record.authorityId?{authorityId:record.authorityId}:{})}};
             const body='--'+boundary+'\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n'+JSON.stringify(meta)+
                 '\r\n--'+boundary+'\r\nContent-Type: application/json\r\n\r\n'+json+'\r\n--'+boundary+'--\r\n';
             return request('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id','POST',body,'multipart/related; boundary='+boundary);
@@ -155,8 +162,12 @@ async function synchronize({state, local, client:remote, save, apply, calendarSy
     const current=typeof local==='function' ? local() : local;
     if(state.owner && state.owner!==owner)fail('COPY_ACCOUNT_CHANGED');
     let remoteFiles=await remote.list();
+    for(const file of remoteFiles)assertRelease(file.appProperties?.releaseNumber); // Includes authority override.
+    if(state.pending)validate(state.pending,owner);
     if(state.adoption) {
         state.adoption.owner=owner;
+        assertRelease(state.adoption.releaseNumber);
+        state.adoption.releaseNumber=RELEASE;
         state.adoption.authorityId=state.adoption.authorityId||state.adoption.revision;
         validate(state.adoption,owner);
         save();
@@ -178,6 +189,9 @@ async function synchronize({state, local, client:remote, save, apply, calendarSy
     }
     const tip=head(remoteFiles,owner), revision=tip ? tip.appProperties.revision : '';
     const authorityId=tip?.appProperties?.authorityId||'';
+    // Force-install the chosen archive only on devices that have not yet
+    // acknowledged this authority marker. Once acknowledged, edits are regular
+    // child revisions and must be uploaded instead of overwritten on each sync.
     if(tip && authorityId && state.authorityId!==authorityId) {
         const record=await remote.load(tip,owner);
         const same=digest(current.files,current.calendar)===digest(record.files,record.calendar);
@@ -203,8 +217,10 @@ async function synchronize({state, local, client:remote, save, apply, calendarSy
             return {status:same?'saved':'pending'};
         }
         if(revision!==(state.base||''))fail('COPY_CONFLICT');
-        if(!state.pending) {state.pending=validate({schema:2,owner,revision:crypto.randomUUID(),parent:revision,authorityId:state.authorityId||'',
+        if(!state.pending) {state.pending=validate({schema:2,releaseNumber:RELEASE,owner,revision:crypto.randomUUID(),parent:revision,authorityId:state.authorityId||'',
             generatedAt:new Date().toISOString(),files:current.files,calendar:current.calendar},owner);state.owner=owner;save();}
+        if(!state.pending.releaseNumber){state.pending.releaseNumber=RELEASE;save();}
+        head(await remote.list(),owner); // Stop before Calendar writes on a version mismatch.
         await calendarSync(state.pending);
         // Check again after network calendar work. Never publish onto an unseen new parent.
         const again=head(await remote.list(),owner);
@@ -220,4 +236,4 @@ async function synchronize({state, local, client:remote, save, apply, calendarSy
     }
     return {status:'saved'};
 }
-module.exports={PREFIX,LIMIT,hash,safeName,validate,digest,capture,writable,writeAtomic,install,recover,head,client,synchronize};
+module.exports={RELEASE,assertRelease,PREFIX,LIMIT,hash,safeName,validate,digest,capture,writable,writeAtomic,install,recover,head,client,synchronize};
