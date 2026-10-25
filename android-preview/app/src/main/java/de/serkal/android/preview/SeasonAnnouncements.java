@@ -2,9 +2,10 @@ package de.serkal.android.preview;
 import org.json.*;import java.util.*;
 /** Same persisted announcement format and stable calendar IDs as Desktop. */
 final class SeasonAnnouncements {
- static String date(JSONObject o,String key){String s=o==null?"":o.optString(key);return s.matches("\\d{4}-\\d{2}-\\d{2}")?s:"";}
+ static String date(JSONObject o,String key){String s=o==null?"":o.optString(key);try{return s.matches("\\d{4}-\\d{2}-\\d{2}") && ArchiveCodec.dateShift(s,0).equals(s)?s:"";}catch(Exception invalid){return "";}}
  static JSONObject update(JSONArray old,int season,String date,String title,boolean en,String today)throws Exception{
   JSONObject previous=null;for(int i=0;i<old.length();i++)if(old.getJSONObject(i).optInt("season")==season)previous=old.getJSONObject(i);
+  if(previous!=null && date.isEmpty())date=previous.optString("date");
   if(previous!=null && previous.optString("date").equals(date))return null;
   JSONArray history=previous==null || previous.optJSONArray("history")==null?new JSONArray():new JSONArray(previous.optJSONArray("history").toString());
   history.put(new JSONObject().put("capturedAt",today).put("from",previous==null?"":previous.optString("date")).put("to",date));
