@@ -3955,3 +3955,31 @@ Paket: **HASA-Selbstregistrierung.zip**, SHA-256 `87c37bf283f031274c20b4fd1533b2
 **Styls nächste Schritte:** ZIP entpacken, BAT starten, als Benutzerleitung https://hasa.li/api/user-admin.php öffnen und einmal „Öffentliche Registrierung einrichten“ wählen. Vier neue Tabellen, wiederholbar, keine Löschung bestehender Konten/Spieldaten, kein manueller SQL-Import. Anschließend Registrierung mit neuem Testnamen und eigenem Postfach praktisch prüfen, einschließlich Mail/Spamordner. Der tatsächliche Hoster-Mailtransport wurde hier nicht live geprüft.
 
 **Website-Chatty:** öffentliche Hilfe/Anleitung nach erfolgreicher Live-Abnahme um Selbstregistrierung, Mailbestätigung und Passwortwiederherstellung ergänzen. Der neue Quelltext unter `03 Dokumentation/hasa_selbstregistrierung.md` beschreibt den Ablauf. Bitte neue Einstiege bei späteren Website-Updates erhalten. Öffentliche Downloadversion 1.2.0 und Userscript bleiben in diesem Paket unverändert. Die bestehende separate einmalige API-Schlüssel-Einrichtung und Browser-/Cookieanbindung werden mit dieser Kontenänderung nicht als abgeschafft behauptet. Hauptzweig bisher nicht auf den Entwicklungsgesamtstand gezogen; bis zur abgestimmten Übernahme den Pakethelfer verwenden, damit ein alter main-Serverupload die neuen Verwaltungsseiten nicht zurücksetzt.
+
+
+## CE SerKal – 25.10.2026: Version 31 – Android-Bedienung links und automatischer Reset
+
+Status: **GEBAUT, SIGNIERT, QUELLSTÄNDE ÜBERNOMMEN / PRAKTISCHE SICHTPRÜFUNG DURCH KURT OFFEN**
+
+Nach Kurts positiver Rückmeldung zum Ablauf mit 30 folgt sein neuer Bedienauftrag. Die aus dem Diktat abgeleitete Anordnung wurde ausdrücklich über die Rückfrage bestätigt:
+
+- Direkt unter Titel/Jahr/Staffel: **Reset – Suchen – Ins Archiv**.
+- Links unten: **Sprachwahl – Hell/Dunkel – Hilfe**, darunter **Kalender öffnen – SerKal beenden**.
+- Sprache, Hell/Dunkel und Kalender entfallen oben rechts; Kalender/Beenden stehen nicht mehr unter der Archivliste. Die volle Listenhöhe aus 027 bleibt erhalten.
+- Ein gemeinsamer Reset wird bei Reset-Knopf, erfolgreicher Aufnahme und erfolgreichem Löschen verwendet. Titel, Jahr, Staffel, Treffer, Details und Poster werden geleert; Fokus zum Serientitel. Ausstehende Suchen werden abgebrochen und bereits laufende Antworten durch die Suchgeneration ungültig. Bei fehlgeschlagener oder gesperrter Speicherung bleibt die Eingabe zum erneuten Versuch erhalten.
+- Native kurze DE/EN-Bedienhilfe ergänzt. Keine zusätzliche Spracherkennungsfunktion behauptet.
+
+**Gemeinsame Nummer 31**, technisch `1.2.0-alpha.31`, Android versionCode 39. Desktop bekommt entsprechend Kurts Regel ebenfalls 31. Beim Update darf die neue Anwendung den gespeicherten Vorgänger-Snapshot 30 übernehmen und ohne Änderung der TXT-Dateiinhalte unter 31 neu übertragen. Ältere Programme dürfen weiterhin keinen neueren Archivstand schreiben. Damit kann die gemeinsame Nummer auch nach 30 regulär erhöht werden; keine getrennten Archive oder Kalender. Desktop prüft zusätzlich die Übernahme nach Wiederherstellung einer früheren Upload-Antwort.
+
+### Übernommen und geprüft
+
+- Desktop `serkal-0.0.5-archiv-start`: Merge `76f7f659f0d8679c1e85c70d9063b902376a2523`, PR #6. Abruf für Kurt unverändert **git pull**, Start **npm start**.
+- Android `android-preview-0.0.5`: Merge `cec70fef2e7a2b7bba5ae325a3e4ca08d0263b1e`, PR #5. Gebauter Quellstand `139a455b3428d00e4f508ce56aeb60857d7bcfc6`.
+- Gesamte Desktop-Node-Suite bestanden; anschließend gezielte Abgleichprüfung für Wiederherstellung einer Vorgängerübertragung bestanden.
+- Android **64 Tests, 0 Fehler, 0 Fehlschläge**. Neue Robolectric-Fälle messen die Anordnung bei 1280×800, 960×600 und 800×480, prüfen den Reset mit abgebrochener verzögerter Suche, echte erfolgreiche lokale Aufnahme sowie Erhalt der Eingabe bei Ablehnung. Bestehende Listenhöhenprüfung weiterhin bestanden.
+- Erfolgreicher Lauf: https://github.com/KurtV731/serkal_desktop/actions/runs/40231541792 .
+- Alle übertragenen Quelländerungen zurückgelesen, nach den Merges beide regulären Versionsdateien und Android-UI kontrolliert. Keine privaten Archiv-/Google-Kalenderdaten verändert.
+
+**031-SerKal-Android-1.2-Alpha31.apk**: 2.891.527 Bytes, SHA-256 `023923c391ed71c7e1b514fb2c55f45c3320cdb646dd6ea6a2eb2bb909b2618c`. Mit bisherigem Schlüssel signiert und Zertifikat geprüft; keine Zugangsdaten veröffentlicht. APK an Kurt bereitgestellt.
+
+Kurt aktualisiert wieder erst alle vier Geräte und startet danach zuerst den PC; gespeicherten Google-Abgleich abwarten. Noch keine öffentliche 1.2-Freigabe. Ein einheitlicher Wartungsbericht, weitere Menüabstimmungen und die genaue Systemkartierung bleiben offene Aufträge; dieser Stand erledigt die hier bestätigten Android-Verschiebungen und den Reset.
