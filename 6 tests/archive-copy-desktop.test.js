@@ -25,7 +25,7 @@ const copy=require('../2 src/common/archive-copy'),{DesktopCopy}=require('../2 s
   const oldCount=fs.readdirSync(otherFolder).filter(name=>name.endsWith('.txt')).length;assert.equal(oldCount,1);
   const followed=await second.sync();assert.equal(followed.status,'authority-applied');assert.equal(second.state.authorityId,manager.state.authorityId);assert.equal(second.state.base,manager.state.base);assert.equal(second.state.dirty,false);assert.equal(fs.readdirSync(otherFolder).filter(name=>name.endsWith('.txt')).length,1);assert(!fs.readFileSync(path.join(otherFolder,'Test (2026).txt'),'utf8').includes('new local edit'));
   fs.appendFileSync(path.join(otherFolder,'Test (2026).txt'),'S03; tmdb=42; seen=1\n');second.changed();clearTimeout(second.timer);assert.equal((await second.sync()).status,'saved');assert.equal(second.state.dirty,false);assert(records.at(-1).authorityId===manager.state.authorityId);assert(records.at(-1).files[0].content.endsWith('S03; tmdb=42; seen=1\n'));assert.equal((await second.sync()).status,'saved');assert(fs.readFileSync(path.join(otherFolder,'Test (2026).txt'),'utf8').endsWith('S03; tmdb=42; seen=1\n'));
-  const future={...records.at(-1),releaseNumber:31,parent:records.at(-1).revision,revision:require('node:crypto').randomUUID()};records.push(future);
+  const future={...records.at(-1),releaseNumber:copy.RELEASE+1,parent:records.at(-1).revision,revision:require('node:crypto').randomUUID()};records.push(future);
   const beforeWrites=records.length,beforeArchived=archived.size;
   assert.equal((await second.sync()).code,'COPY_VERSION_MISMATCH');
   assert.throws(()=>second.assertWrite(),/COPY_VERSION_MISMATCH/);

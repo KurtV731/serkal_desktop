@@ -8,6 +8,13 @@ function assertRelease(value) {
     // The unnumbered archive is imported once when all devices move to release 30.
     if (value !== undefined && value !== null && String(value) !== String(RELEASE)) fail('COPY_VERSION_MISMATCH');
 }
+function assertReadableRelease(value) {
+    // A newer application may import an older saved snapshot, then publish its own number.
+    // An older application must never consume a newer snapshot.
+    if(value===undefined || value===null)return;
+    const number=Number(value);
+    if(!Number.isSafeInteger(number) || number<1 || number>RELEASE || String(number)!==String(value))fail('COPY_VERSION_MISMATCH');
+}
 const PREFIX = 'serkal-copy-v2-';
 const LIMIT = 64 * 1024 * 1024;
 const UUID = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/;
@@ -18,7 +25,7 @@ function safeName(name) {
         /\.txt$/i.test(name) && !/^(?:!!serkal_log_|fanal_|\.|con\.|prn\.|aux\.|nul\.|com[1-9]\.|lpt[1-9]\.)/i.test(name);
 }
 function validate(record, owner) {
-    if(record) assertRelease(record.releaseNumber);
+    if(record) assertReadableRelease(record.releaseNumber);
     if (!record || record.schema !== 2 || record.owner !== owner || !UUID.test(record.revision) ||
         !(record.parent === '' || UUID.test(record.parent)) || record.parent === record.revision ||
         (record.authorityId!==undefined && record.authorityId!=='' && !UUID.test(record.authorityId)) ||
@@ -119,7 +126,7 @@ function head(files, owner) {
     let cursor=tips[0], visited=new Set();
     while(cursor) {const rev=cursor.appProperties.revision;if(visited.has(rev))fail('COPY_INVALID');visited.add(rev);cursor=revisions.get(cursor.appProperties.parent);}
     if(visited.size!==revisions.size)fail('COPY_INVALID');
-    assertRelease(tips[0].appProperties.releaseNumber);
+    assertReadableRelease(tips[0].appProperties.releaseNumber);
     return tips[0];
 }
 function client(accessToken, fetchImpl=fetch) {
@@ -162,11 +169,11 @@ async function synchronize({state, local, client:remote, save, apply, calendarSy
     const current=typeof local==='function' ? local() : local;
     if(state.owner && state.owner!==owner)fail('COPY_ACCOUNT_CHANGED');
     let remoteFiles=await remote.list();
-    for(const file of remoteFiles)assertRelease(file.appProperties?.releaseNumber); // Includes authority override.
+    for(const file of remoteFiles)assertReadableRelease(file.appProperties?.releaseNumber); // Includes authority override.
     if(state.pending)validate(state.pending,owner);
     if(state.adoption) {
         state.adoption.owner=owner;
-        assertRelease(state.adoption.releaseNumber);
+        assertReadableRelease(state.adoption.releaseNumber);
         state.adoption.releaseNumber=RELEASE;
         state.adoption.authorityId=state.adoption.authorityId||state.adoption.revision;
         validate(state.adoption,owner);
@@ -200,6 +207,7 @@ async function synchronize({state, local, client:remote, save, apply, calendarSy
         state.owner=owner;state.base=revision;state.authorityId=authorityId;
         state.clean=digest(record.files,record.calendar);state.dirty=false;
         delete state.pending;delete state.pendingFileId;delete state.adoption;save();
+        if(record.releaseNumber!==undefined && Number(record.releaseNumber)<RELEASE){state.dirty=true;save();return {status:'pending'};}
         return {status:changed?'authority-applied':'saved'};
     }
     if(state.dirty) {
@@ -213,13 +221,14 @@ async function synchronize({state, local, client:remote, save, apply, calendarSy
             state.authorityId=confirmed.authorityId||state.authorityId||'';
             const same=digest(current.files,current.calendar)===digest(state.pending.files,state.pending.calendar);
             state.clean=digest(state.pending.files,state.pending.calendar);
-            state.dirty=!same;delete state.pending;delete state.pendingFileId;save();
-            return {status:same?'saved':'pending'};
+            const needsUpgrade=confirmed.releaseNumber!==undefined && Number(confirmed.releaseNumber)<RELEASE;
+            state.dirty=!same || needsUpgrade;delete state.pending;delete state.pendingFileId;save();
+            return {status:same && !needsUpgrade?'saved':'pending'};
         }
         if(revision!==(state.base||''))fail('COPY_CONFLICT');
         if(!state.pending) {state.pending=validate({schema:2,releaseNumber:RELEASE,owner,revision:crypto.randomUUID(),parent:revision,authorityId:state.authorityId||'',
             generatedAt:new Date().toISOString(),files:current.files,calendar:current.calendar},owner);state.owner=owner;save();}
-        if(!state.pending.releaseNumber){state.pending.releaseNumber=RELEASE;save();}
+        if(state.pending.releaseNumber!==RELEASE){state.pending.releaseNumber=RELEASE;save();}
         head(await remote.list(),owner); // Stop before Calendar writes on a version mismatch.
         await calendarSync(state.pending);
         // Check again after network calendar work. Never publish onto an unseen new parent.
@@ -234,6 +243,7 @@ async function synchronize({state, local, client:remote, save, apply, calendarSy
         const record=await remote.load(tip,owner); await apply(record);
         state.owner=owner;state.base=record.revision;state.clean=digest(record.files,record.calendar);save();
     }
+    if(tip.appProperties.releaseNumber!==undefined && Number(tip.appProperties.releaseNumber)<RELEASE){state.dirty=true;save();return {status:'pending'};}
     return {status:'saved'};
 }
-module.exports={RELEASE,assertRelease,PREFIX,LIMIT,hash,safeName,validate,digest,capture,writable,writeAtomic,install,recover,head,client,synchronize};
+module.exports={RELEASE,assertRelease,assertReadableRelease,PREFIX,LIMIT,hash,safeName,validate,digest,capture,writable,writeAtomic,install,recover,head,client,synchronize};
