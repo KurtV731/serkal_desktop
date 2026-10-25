@@ -32,6 +32,12 @@ function remote(r){return {records:[r],writes:0,identify:async()=>owner,list:asy
  assert.equal((await copy.synchronize(upgradeArgs)).status,"pending");
  assert.equal((await copy.synchronize(upgradeArgs)).status,"saved");
  assert.equal(upgrade.records.at(-1).releaseNumber,release.number);
+ // A confirmed upload from the previous release must also schedule the number upgrade.
+ const recovered=record(release.number-1),recoveryRemote=remote(recovered),recoveryState={owner,base:"",dirty:true,pending:recovered};
+ const recoveryArgs={state:recoveryState,local,client:recoveryRemote,save:()=>{},apply:async()=>{throw Error("do not replace pending local data");}};
+ assert.equal((await copy.synchronize(recoveryArgs)).status,"pending");
+ assert.equal((await copy.synchronize(recoveryArgs)).status,"saved");
+ assert.equal(recoveryRemote.records.at(-1).releaseNumber,release.number);
  // A queued operation from another release must also stop before Calendar writes.
  state.dirty=true;state.pending=record(release.number+1);let calendars=0;
  await assert.rejects(copy.synchronize({state,local,client:service,save:()=>{},apply:async()=>{},calendarSync:async()=>calendars++}),/COPY_VERSION_MISMATCH/);
