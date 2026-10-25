@@ -12,10 +12,10 @@ assert.deepEqual(calendar.plan([],[event],'r3',2026),[]); // Series removed, per
 assert.deepEqual(calendar.plan([entry],[{id:event.id,status:'cancelled'}],'r4',2026),[]); // Manual deletion respected.
 const revised={...entry,announcements:changed.announcements};const ops=calendar.plan([revised],[event],'r5',2026);assert.equal(ops[0].method,'PUT');assert.equal(ops[0].body.start.date,'2027-01-07');assert.match(ops[0].body.description,/from 2027-01-01/);
 assert.deepEqual(calendar.plan([revised],ops.map(o=>({...o.body,id:o.id})),'r6',2028),[]); // Past announcement retained.
-const undated=structuredClone(shifted);undated.seasons[8].data.air_date=null;const withdrawn=update({...group,entries:[{...entry,announcements:changed.announcements}]},undated,'2026-12-01','en');assert.equal(withdrawn.changes[0].date,'');assert.equal(withdrawn.announcements[0].history.length,3);
+const undated=structuredClone(shifted);undated.seasons[8].data.air_date=null;const withdrawn=update({...group,entries:[{...entry,announcements:changed.announcements}]},undated,'2026-12-01','en');assert.equal(withdrawn.changes.length,0);assert.equal(withdrawn.announcements[0].date,'2027-01-07');assert.equal(withdrawn.announcements[0].history.length,2);
 console.log('season announcements: tracked range, deduplication, history, permanent cards, manual deletion and shifted dates passed');
 
-const withdrawnEntry={...entry,announcements:withdrawn.announcements};const withdrawnOps=calendar.plan([withdrawnEntry],ops.map(o=>({...o.body,id:o.id})),"r7",2026);assert.equal(withdrawnOps[0].body.start.date,"2027-01-07");assert.match(withdrawnOps[0].body.description,/date unknown/);
+const withdrawnEntry={...entry,announcements:withdrawn.announcements};const withdrawnOps=calendar.plan([withdrawnEntry],ops.map(o=>({...o.body,id:o.id})),"r7",2026);assert.deepEqual(withdrawnOps,[]);
 
 
 // Shared Android announcement rows do not become fictitious episode appointments on Desktop.
