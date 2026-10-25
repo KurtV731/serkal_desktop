@@ -7810,7 +7810,7 @@ function nextResult() {
         const df = String(cur.dateFlag || '').trim();
         const td = Array.isArray(cur.termindaten || cur.episodeDates) ? (cur.termindaten || cur.episodeDates) : [];
         const eps = Number(cur.episodes != null ? cur.episodes : cur.episoden != null ? cur.episoden : cur.episodeCount || 0);
-        if ((df && !(td.length > 0 && eps > 0)) || (!td.length && !eps)) {
+        if (!cur.announcementOnly && ((df && !(td.length > 0 && eps > 0)) || (!td.length && !eps))) {
           state.insertLock = false;
           uiSetBusy_(false);
           state.phase='searched';
