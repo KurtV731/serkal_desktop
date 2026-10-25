@@ -45,15 +45,15 @@ final class ArchiveCopyClient {
         List<JSONObject> tips=new ArrayList<>();for(Map.Entry<String,JSONObject> e:revisions.entrySet())if(!parents.contains(e.getKey()))tips.add(e.getValue());
         if(roots!=1 || tips.size()!=1)throw new Exception("COPY_CONFLICT");
         Set<String> visited=new HashSet<>();JSONObject cursor=tips.get(0);while(cursor!=null){JSONObject p=cursor.getJSONObject("appProperties");if(!visited.add(p.getString("revision")))throw new Exception("COPY_INVALID");cursor=revisions.get(p.getString("parent"));}
-        if(visited.size()!=revisions.size())throw new Exception("COPY_INVALID");return tips.get(0);
+        if(visited.size()!=revisions.size())throw new Exception("COPY_INVALID");ArchiveCodec.assertRelease(tips.get(0).getJSONObject("appProperties").opt("releaseNumber"));return tips.get(0);
     }
     JSONObject load(JSONObject file,String owner) throws Exception {
         JSONObject r=ArchiveCodec.validate(get("https://www.googleapis.com/drive/v3/files/"+esc(file.getString("id"))+"?alt=media"),owner);
         if(!r.getString("revision").equals(file.getJSONObject("appProperties").getString("revision")) || !r.getString("parent").equals(file.getJSONObject("appProperties").getString("parent")) || !r.optString("authorityId").equals(file.getJSONObject("appProperties").optString("authorityId")))throw new Exception("COPY_INVALID");return r;
     }
     String upload(JSONObject record) throws Exception {
-        ArchiveCodec.validate(record,record.getString("owner"));String id=record.getString("revision"),boundary="serkal-"+id;
-        JSONObject properties=new JSONObject().put("owner",record.getString("owner")).put("revision",id).put("parent",record.getString("parent").isEmpty()?"root":record.getString("parent"));
+        ArchiveCodec.validate(record,record.getString("owner"));if(record.optInt("releaseNumber")!=ArchiveCodec.RELEASE)throw new Exception("COPY_VERSION_MISMATCH");String id=record.getString("revision"),boundary="serkal-"+id;
+        JSONObject properties=new JSONObject().put("releaseNumber",String.valueOf(ArchiveCodec.RELEASE)).put("owner",record.getString("owner")).put("revision",id).put("parent",record.getString("parent").isEmpty()?"root":record.getString("parent"));
         if(!record.optString("authorityId").isEmpty())properties.put("authorityId",record.getString("authorityId"));
         JSONObject meta=new JSONObject().put("name",ArchiveCodec.PREFIX+id+".json").put("mimeType","application/json").put("parents",new JSONArray().put("appDataFolder"))
             .put("appProperties",properties);
@@ -62,6 +62,7 @@ final class ArchiveCopyClient {
     }
 
     void archiveActiveRevisions(List<JSONObject> files) throws Exception {
+        for(JSONObject file:files)ArchiveCodec.assertRelease(file.getJSONObject("appProperties").opt("releaseNumber"));
         for(JSONObject file:files) {
             JSONObject meta=new JSONObject().put("name","serkal-backup-v2-"+file.getString("id")+".json");
             URL url=new URL("https://www.googleapis.com/drive/v3/files/"+esc(file.getString("id"))+"?fields=id,name");
