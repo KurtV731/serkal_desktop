@@ -3929,3 +3929,29 @@ Gesamte lokale Desktop-Node-Suite einschließlich neuer Staffel- und Versionsfä
 Übertragene Quelländerungen über GitHub-App zurückgelesen und inhaltlich verglichen; beide regulären Branches nach den Merges auf Version 30 kontrolliert. Keine persönlichen Archiv- oder Google-Kalenderdaten hier verändert. Keine öffentliche 1.2-Freigabe und kein Website-/Windows-Installerauftrag daraus ableiten.
 
 **Weiter offen:** reale Prüfung auf Kurts vier Geräten; Menüanordnung und vollständige Plattformvereinheitlichung; einheitliche Wartungsergebnisanzeige; genaue Systemkartierung; ausdrücklicher Abschlussbeleg für tatsächlich einteilige Staffeln. Kurt braucht keine Branch-/Commitbedienung: zwei PCs erst aktualisieren, APK auf beiden Android-Geräten installieren, danach Programme starten.
+
+
+## CE HASA – 25.10.2026: öffentliche Selbstregistrierung mit eigener Passwortwahl fertig vorbereitet
+
+Status: **IMPLEMENTIERT UND GETESTET / PAKET AN STYL / PRODUKTIVER UPLOAD UND ECHTE MAILZUSTELLUNG OFFEN**
+
+Styl hat den zunächst vorgeschlagenen Einladungsablauf ausdrücklich erweitert: Neue Spieler sollen sich auf hasa.li frei selbst registrieren und automatisch normale Spielerrechte bekommen. Vorherige manuelle Kontoanlage, manuelles Startpasswort und eine Freigabeschleife durch Styl entfallen für neue Registrierungen.
+
+Umgesetzt auf HASA `dev-1.3-alpha1`, geprüfter Commit **ae39b876440ea58add5a7d52311878b1fdb2a63f**:
+
+- Startseite: „Registrieren“ in Navigation und Hauptinhalt, zusätzlich Anmeldung und „Passwort vergessen“.
+- `/api/register.php`: Spielername, E-Mail, selbst gewähltes Passwort zweimal.
+- `/api/verify.php`: E-Mail bestätigen, danach automatisch aktives normales Spielerkonto ohne Startpasswortwechsel. Höhere Verwaltungsrechte bleiben ausgeschlossen und werden weiterhin in der Benutzerverwaltung erteilt. Neues Konto startet privat ohne Allianzzuordnung.
+- `/api/password-reset.php` und `password-set.php`: Passwortwiederherstellung an bestätigte Mailadresse; keine automatische Änderung des alten Passworts beim bloßen Anfordern.
+- Neue Spielerkonten werden erst bei Mailbestätigung angelegt. Unbestätigte Anfragen reservieren keinen Namen. Bestehende Konten einschließlich Alt-Platzhalter werden nicht übernommen. Die Bestätigung belegt Postfachzugriff, keine zusätzliche technische Ingame-Identitätsprüfung.
+- Neue Bestätigungslinks: 48 Stunden, Passwortlinks: eine Stunde, jeweils einmalig und nur als Digest in der DB. Passwort nur gehasht; nicht in E-Mails oder Verwaltungsansichten. Fragmentlink, feste HTTPS-Basis, CSRF-POST, IP-/Mailbegrenzung; Mail-Vorschau aktiviert noch nichts.
+- Benutzerleitung kann in der vorhandenen Verwaltung weiterhin sperren/befördern sowie für ältere Konten Passwortlinks an die vereinbarte Mailadresse senden. Delegierte Verwaltungsgrenzen bleiben erhalten. Einmalige Linkanzeige wird nicht in Session-Flashdaten kopiert.
+- Maildienst: PHP mail(), voreingestellter Absender gemäß Styls Vorgabe **kp.vogelsaenger@hasa.li**. Optional privates config.php-Feld `signup_mail_from`. Keine SMTP-Zugangsdaten oder private Konfiguration im Paket. Mailannahme-/Fehlerzähler für Registrierungsmails in der Benutzerverwaltung; Annahme bedeutet keine bestätigte Zustellung.
+
+Validierung am finalen Commit: vollständige bestehende Browser-/MariaDB-Regressionssuite; **33 neue Dienst-/DB-Prüfungen**, **19 echte lokale HTTP-Prüfungen** einschließlich Registrierung → isoliertes Testpostfach → Bestätigung → Login → Passwortwiederherstellung und Beförderung über die echte Verwaltung. Fragment-/Preview-/Mobilprüfungen beider Mailseiten und Registrierungseinstiege auf 390/800/1200 Pixeln. Neue Endpunkte im Wartungstest enthalten. Gesamtlauf: https://github.com/KurtV731/hasa/actions/runs/40227706908 . Windows-PowerShell-Helfer- und Release-/Pfadprüfung ebenfalls bestanden. Es wurden keine echten E-Mails gesendet.
+
+Paket: **HASA-Selbstregistrierung.zip**, SHA-256 `87c37bf283f031274c20b4fd1533b2f2439a338ed6fc73ed6b41295a8bf78b2c`. `HASA-SELBSTREGISTRIERUNG-INSTALLIEREN.bat` sichert zuerst vorhandenen PHP-Stand ohne private config.php und die Startseite, danach Upload von neun PHP-Dateien und index.html. Profil wie bisher hasa.li, Ziel /hasa.li/api/; Webwurzel daraus /hasa.li. Kein git pull, keine Überschreibung von Hilfe, Anleitung, Download oder Impressum und keine Rücknahme der Alpha-2-Ereigniskorrekturen. Die Startseite basiert auf aktuellem main **ff74849dda639c5644f28dd225f44ac6e170d3ac**; Impressum im Entwicklungszweig unverändert aus main übernommen.
+
+**Styls nächste Schritte:** ZIP entpacken, BAT starten, als Benutzerleitung https://hasa.li/api/user-admin.php öffnen und einmal „Öffentliche Registrierung einrichten“ wählen. Vier neue Tabellen, wiederholbar, keine Löschung bestehender Konten/Spieldaten, kein manueller SQL-Import. Anschließend Registrierung mit neuem Testnamen und eigenem Postfach praktisch prüfen, einschließlich Mail/Spamordner. Der tatsächliche Hoster-Mailtransport wurde hier nicht live geprüft.
+
+**Website-Chatty:** öffentliche Hilfe/Anleitung nach erfolgreicher Live-Abnahme um Selbstregistrierung, Mailbestätigung und Passwortwiederherstellung ergänzen. Der neue Quelltext unter `03 Dokumentation/hasa_selbstregistrierung.md` beschreibt den Ablauf. Bitte neue Einstiege bei späteren Website-Updates erhalten. Öffentliche Downloadversion 1.2.0 und Userscript bleiben in diesem Paket unverändert. Die bestehende separate einmalige API-Schlüssel-Einrichtung und Browser-/Cookieanbindung werden mit dieser Kontenänderung nicht als abgeschafft behauptet. Hauptzweig bisher nicht auf den Entwicklungsgesamtstand gezogen; bis zur abgestimmten Übernahme den Pakethelfer verwenden, damit ein alter main-Serverupload die neuen Verwaltungsseiten nicht zurücksetzt.
