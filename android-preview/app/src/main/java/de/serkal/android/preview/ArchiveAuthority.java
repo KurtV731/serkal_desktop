@@ -10,7 +10,8 @@ final class ArchiveAuthority {
         return select(local,owner,generatedAt,UUID.randomUUID().toString());
     }
     static JSONObject select(JSONObject local, String owner, String generatedAt, String revision) throws Exception {
-        JSONObject chosen=new JSONObject(local.toString());
+        ArchiveCodec.assertRelease(local.opt("releaseNumber"));
+        JSONObject chosen=new JSONObject(local.toString()).put("releaseNumber",ArchiveCodec.RELEASE);
         chosen.put("revision",revision).put("parent","").put("generatedAt",generatedAt);
         chosen.put("authorityId",chosen.getString("revision"));
         ArchiveCodec.validate(chosen,owner);
