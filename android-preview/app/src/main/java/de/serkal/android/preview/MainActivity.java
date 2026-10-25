@@ -296,6 +296,7 @@ public class MainActivity extends Activity {
     private LinearLayout suggestions;
     private TextView statusText, selectedName, selectedInfo, tmdbReference;
     private Runnable pendingSearch;
+    private boolean resettingSearch;
     private int selectedTmdbId;
     private JSONObject selectedArchiveEntry;
     private boolean writeBusy;
@@ -470,12 +471,34 @@ public class MainActivity extends Activity {
             if((action.equals("notes") || action.equals("seen")) && archiveSnapshot!=null){
                 org.json.JSONArray entries=archiveSnapshot.getJSONArray("entries");
                 for(int i=0;i<entries.length();i++){JSONObject entry=entries.getJSONObject(i);if(entry.optInt("tmdbId")==payload.getInt("tmdbId") && entry.optString("seasonLabel").equals(payload.getString("seasonLabel"))){showArchiveEntry(entry);break;}}
-            } else if(action.equals("delete")){
-                selectedArchiveEntry=null;selectedTmdbId=0;updateTmdbReference();selectedName.setText(english ? "Select a series" : "Serie auswählen");selectedInfo.setText("");clearPoster();
+            } else if(action.equals("insert") || action.equals("delete")){
+                resetSearch();
             }
             statusText.setText(english ? "Saved locally. Google transfer runs in the background." : "Lokal gespeichert. Google-Übertragung läuft im Hintergrund.");
         }catch(Exception error){statusText.setText(english ? "Could not save locally. Nothing confirmed." : "Lokal konnte nicht gespeichert werden. Nichts bestätigt.");}
     }
+    private void resetSearch() {
+        // Invalidate in-flight searches before clearing anything they could refill.
+        requestGeneration++;
+        if(pendingSearch!=null){handler.removeCallbacks(pendingSearch);pendingSearch=null;}
+        resettingSearch=true;
+        try {queryField.setText("");yearField.setText("");seasonField.setText("");}
+        finally {resettingSearch=false;}
+        suggestions.removeAllViews();displayedResults.clear();selectedDetail=null;selectedArchiveEntry=null;
+        selectedTmdbId=0;updateTmdbReference();clearPoster();
+        selectedName.setText(english?"Select a series":"Serie auswählen");selectedInfo.setText("");
+        statusText.setText(english?"Ready.":"Bereit.");
+        queryField.requestFocus();queryField.setSelection(0);
+    }
+
+    private void showHelp() {
+        dialogBuilder().setTitle(english?"SerKal help":"SerKal-Hilfe")
+            .setMessage(english
+                ? "Enter a series title; year and season are optional. Choose a result, then Add to archive. After saving, the fields are cleared for the next series.\n\nTap an archive entry to view it. Edit opens notes, watched status and deletion. Google and TMDB settings are in the archive menu."
+                : "Serientitel eingeben; Jahr und Staffel sind optional. Einen Treffer auswählen und mit Ins Archiv übernehmen. Nach dem Speichern sind die Felder für die nächste Serie wieder leer.\n\nEinen Archiveintrag zum Anzeigen antippen. Bearbeiten öffnet Notizen, Gesehen-Status und Löschen. Google- und TMDB-Einstellungen stehen im Archivmenü.")
+            .setPositiveButton(english?"Close":"Schließen",null).show();
+    }
+
     private void checkPendingRequest() { refreshLocalCopy(); }
     private String archiveTitle(JSONObject e){return ArchiveOrder.title(e,english);}
     private String archiveStatusLabel(JSONObject e){
@@ -876,14 +899,11 @@ public class MainActivity extends Activity {
         });
         language.setMinHeight(0);
         language.setMinimumHeight(0);
-        top.addView(language, new LinearLayout.LayoutParams(dp(42), dp(28)));
+
         Button theme = new Button(this); theme.setText(english ? (dark ? "Light" : "Dark") : (dark ? "Hell" : "Dunkel"));
         styleTopButton_(theme);
         theme.setOnClickListener(v -> { dark=!dark;getPreferences(0).edit().putBoolean("dark",dark).apply();setPalette();configureFullscreen_();buildScreen(); });
-        top.addView(theme,new LinearLayout.LayoutParams(dp(58),dp(28)));
-        Button calendarShortcut=new Button(this);calendarShortcut.setText(english?"Calendar":"Kalender");
-        styleTopButton_(calendarShortcut);calendarShortcut.setContentDescription(english?"Open Google calendar":"Google-Kalender öffnen");
-        calendarShortcut.setOnClickListener(v->openCalendar());top.addView(calendarShortcut,new LinearLayout.LayoutParams(dp(76),dp(28)));
+
         root.addView(top);
 
         zoomSurface = new ZoomPanLayout(this);
@@ -931,6 +951,7 @@ public class MainActivity extends Activity {
         queryField.addTextChangedListener(new TextWatcher() {
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if(resettingSearch)return;
                 requestGeneration++;
                 if (pendingSearch != null) handler.removeCallbacks(pendingSearch);
                 if (!credential.isEmpty()) {
@@ -941,13 +962,20 @@ public class MainActivity extends Activity {
             public void afterTextChanged(Editable value) {}
         });
         LinearLayout leftButtons = new LinearLayout(this);leftButtons.setOrientation(LinearLayout.HORIZONTAL);
-        Button reset=verticalButton("✕ Reset");
-        reset.setOnClickListener(v->{queryField.setText("");yearField.setText("");seasonField.setText("");suggestions.removeAllViews();displayedResults.clear();selectedDetail=null;selectedArchiveEntry=null;selectedTmdbId=0;updateTmdbReference();clearPoster();selectedName.setText(english?"Select a series":"Serie auswählen");selectedInfo.setText("");statusText.setText(english?"Ready.":"Bereit.");});
-        leftButtons.addView(reset);
-        Button search = verticalButton(english ? "Search" : "Suchen");
-        search.setOnClickListener(v -> searchNow());
-        leftButtons.addView(search);
-        left.addView(leftButtons);
+        leftButtons.setTag("searchActions");
+        Button reset=button("Reset");reset.setTag("resetSearch");reset.setOnClickListener(v->resetSearch());leftButtons.addView(reset);
+        Button search=button(english?"Search":"Suchen");search.setOnClickListener(v->searchNow());leftButtons.addView(search);
+        Button add=button(english?"Add to archive":"Ins Archiv");add.setTag("addToArchive");add.setOnClickListener(v->askForSeason());leftButtons.addView(add);
+        left.addView(leftButtons,2);
+        LinearLayout preferences=new LinearLayout(this);preferences.setOrientation(LinearLayout.HORIZONTAL);preferences.setTag("preferences");
+        language.setLayoutParams(new LinearLayout.LayoutParams(0,dp(28),1));preferences.addView(language);
+        theme.setLayoutParams(new LinearLayout.LayoutParams(0,dp(28),1));preferences.addView(theme);
+        Button help=button(english?"Help":"Hilfe");help.setLayoutParams(new LinearLayout.LayoutParams(0,dp(28),1));help.setOnClickListener(v->showHelp());preferences.addView(help);
+        left.addView(preferences);
+        LinearLayout utilities=new LinearLayout(this);utilities.setOrientation(LinearLayout.HORIZONTAL);utilities.setTag("utilities");
+        Button calendarButton=button(english?"Open calendar":"Kalender öffnen");calendarButton.setOnClickListener(v->openCalendar());utilities.addView(calendarButton);
+        Button quitButton=button(english?"Exit SerKal":"SerKal beenden");quitButton.setOnClickListener(v->onBackPressed());utilities.addView(quitButton);
+        left.addView(utilities);
         columns.addView(left);
 
         LinearLayout middle = panel(43);
@@ -972,7 +1000,6 @@ public class MainActivity extends Activity {
         detailScroll.addView(detailBody);
         middle.addView(detailScroll, new LinearLayout.LayoutParams(-1, 0, 1));
         LinearLayout editBar=new LinearLayout(this);editBar.setOrientation(LinearLayout.HORIZONTAL);
-        Button add=button(english ? "Add to archive" : "Ins Archiv");add.setOnClickListener(v->askForSeason());editBar.addView(add);
         Button edit=button(english ? "Edit ▾" : "Bearbeiten ▾");
         edit.setOnClickListener(v->{archiveDialogOpen=true;dialogBuilder().setTitle(english?"Selected series":"Ausgewählte Serie")
             .setItems(english?new String[]{"Edit notes / offset / provider","Toggle watched","Delete complete series"}:new String[]{"Notiz / Offset / Anbieter ändern","Gesehen umschalten","Ganze Serie löschen"},(d,which)->handler.post(()->{if(which==0)editArchiveNotes();else if(which==1 && selectedArchiveEntry!=null)toggleArchiveSeen(selectedArchiveEntry);else if(which==2)deleteArchiveSeries();}))
@@ -994,15 +1021,8 @@ public class MainActivity extends Activity {
         authorityButton.setOnClickListener(v->confirmMakeLocalAuthoritative());authorityButton.setVisibility(View.GONE);right.addView(authorityButton);
         archiveRows=new LinearLayout(this);archiveRows.setOrientation(LinearLayout.VERTICAL);
         ScrollView archiveScroll=new ScrollView(this);archiveScroll.setFillViewport(true);archiveScroll.setVerticalScrollBarEnabled(true);archiveScroll.addView(archiveRows);right.addView(archiveScroll,new LinearLayout.LayoutParams(-1,0,1));
-        Button calendarButton=button(english?"Open calendar":"Kalender öffnen");calendarButton.setOnClickListener(v->openCalendar());
-        // Fixed footer: only archiveScroll may consume the remaining panel height.
-        calendarButton.setLayoutParams(new LinearLayout.LayoutParams(-1,dp(30)));right.addView(calendarButton);
-        Button quitButton=button(english?"Exit SerKal":"SerKal beenden");quitButton.setLayoutParams(new LinearLayout.LayoutParams(-1,dp(30)));
-        quitButton.setContentDescription(english?"Exit SerKal":"SerKal beenden");
-        quitButton.setOnClickListener(v->onBackPressed());
         copySyncButton=null;copySyncStatus=text("",9,MUTED);copySyncStatus.setMaxLines(2);copySyncStatus.setEllipsize(android.text.TextUtils.TruncateAt.END);right.addView(copySyncStatus);
         copySyncStatus.setOnClickListener(v->{archiveDialogOpen=true;dialogBuilder().setTitle(english?"Synchronization":"Synchronisation").setMessage(copySyncStatus.getText()).setPositiveButton(english?"Close":"Schließen",null).setOnDismissListener(d->archiveDialogOpen=false).show();});
-        right.addView(quitButton);
         renderArchive();
         columns.addView(right);
 

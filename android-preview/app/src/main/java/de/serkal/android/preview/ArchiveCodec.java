@@ -16,6 +16,11 @@ final class ArchiveCodec {
     static void assertRelease(Object value) throws Exception {
         if(value!=null && value!=JSONObject.NULL && !String.valueOf(RELEASE).equals(String.valueOf(value)))throw new Exception("COPY_VERSION_MISMATCH");
     }
+    static void assertReadableRelease(Object value) throws Exception {
+        if(value==null || value==JSONObject.NULL)return;
+        int number;try{number=Integer.parseInt(String.valueOf(value));}catch(Exception e){throw new Exception("COPY_VERSION_MISMATCH");}
+        if(number<1 || number>RELEASE || !String.valueOf(number).equals(String.valueOf(value)))throw new Exception("COPY_VERSION_MISMATCH");
+    }
     static final String PREFIX="serkal-copy-v2-";
     static final int LIMIT=64*1024*1024;
     static final String UUID="[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}";
@@ -29,7 +34,7 @@ final class ArchiveCodec {
     static boolean safeName(String name){return name.length()<=240 && name.matches("[^\\\\/:*?\"<>|\\x00-\\x1f]+\\.[tT][xX][tT]") &&
         !name.toLowerCase(Locale.ROOT).matches("^(!!serkal_log_|fanal_|\\.|con\\.|prn\\.|aux\\.|nul\\.|com[1-9]\\.|lpt[1-9]\\.).*");}
     static JSONObject validate(JSONObject r,String owner) throws Exception {
-        assertRelease(r.opt("releaseNumber"));
+        assertReadableRelease(r.opt("releaseNumber"));
         if(r.optInt("schema")!=2 || !owner.equals(r.optString("owner")) || !r.optString("revision").matches(UUID) ||
             !(r.optString("parent").isEmpty() || r.optString("parent").matches(UUID)) || r.optString("parent").equals(r.optString("revision")) ||
             (!r.optString("authorityId").isEmpty() && !r.optString("authorityId").matches(UUID)) ||
