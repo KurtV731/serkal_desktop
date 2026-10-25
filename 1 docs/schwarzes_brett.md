@@ -3880,3 +3880,8 @@ Kurt meldet unterschiedliche Behandlung von Staffeln mit erst einer bekannten Ep
 Verbindliche Definition und Testmatrix: [Staffelbewertung und Kompatibilität für 1.2](serkal-1.2-staffeln-kompatibilitaet-2026-10-25.md). Ein bekannter Folgentermin bei unklarem Gesamtplan bedeutet auf allen Wegen vorläufige Staffel, keine erfundenen Episodendaten. Fehlendes Datum bleibt unbekannt. Neue aktive Archivgeneration muss von den Schreibzielen unaktualisierter Altprogramme isoliert werden; ein neues Versionsfeld allein schützt nicht. Kalender- und lokale TXT-Schreibwege gehören ausdrücklich zur Prüfung.
 
 Noch keine Umsetzung oder erfolgreiche Versionsmischungsprüfung behauptet. Keine echten Archiv-/Kalenderdaten verändert, kein neues APK-/Installerartefakt erzeugt, keine öffentliche Freigabe. Die bereits gebaute APK 027 löst die Listenhöhe, nicht diese neu benannten Veröffentlichungssperren.
+
+
+### CE SerKal – 25.10.2026: Kurts Präzisierung zu Silo S04/Ahsoka S02
+
+Startdatum bekannt, Folgetermine unbekannt: Staffel bereits führen und genau einen vorläufigen Kalenderhinweis am Startdatum anzeigen. Erwartete acht Folgen bedeuten nicht acht Termine am Starttag. Später belegte Folgetermine ergänzen/aktualisieren; Ankündigung und bestätigter Episodentermin nicht doppelt zählen. Präzisierung und Abnahmefall im oben verlinkten Dokument ergänzt. Live-TMDB-Daten nicht unabhängig geprüft, gemeldeter Komplettstart-Eindruck als Fehlerverdacht festgehalten. Umsetzung/Abnahme weiterhin offen.
