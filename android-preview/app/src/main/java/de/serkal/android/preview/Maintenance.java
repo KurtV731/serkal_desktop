@@ -3,7 +3,7 @@ import org.json.*;
 import java.util.*;
 import java.text.SimpleDateFormat;
 
-/** Fetch first, then atomically apply to the still-current local archive. Never auto-add seasons. */
+/** Fetch first, then atomically apply; follow only the latest watched season. */
 final class Maintenance {
     interface Source {JSONObject get(String path,String query) throws Exception;}
     static JSONObject run(JSONArray entries,Source source,String country,boolean english,String now) throws Exception {
@@ -34,25 +34,26 @@ final class Maintenance {
                 for(int n=first;n<=max;n++){
                     if(Thread.currentThread().isInterrupted())throw new InterruptedException();
                     JSONObject e=existing.get(n),season;
-                    try{season=source.get("tv/"+id+"/season/"+n,language);}catch(Exception error){errors.put(new JSONObject().put("tmdbId",id).put("season",n));continue;}
-                    JSONArray episodes=season.optJSONArray("episodes");if(episodes==null)episodes=new JSONArray();JSONArray dates=new JSONArray();boolean complete=episodes.length()>0;
-                    String start=SeasonAnnouncements.date(season,"air_date");if(start.isEmpty() && episodes.length()>0)start=SeasonAnnouncements.date(episodes.optJSONObject(0),"air_date");
+                    try{season=source.get("tv/"+id+"/season/"+n,language);}catch(Exception error){errors.put(new JSONObject().put("tmdbId",id).put("season",n));season=new JSONObject();}
+                    JSONArray episodes=season.optJSONArray("episodes");if(episodes==null)episodes=new JSONArray();JSONArray dates=new JSONArray();JSONObject plan=SeasonInput.schedule(tv,season,n);boolean complete=!plan.optBoolean("announcementOnly");
+                    String start=plan.optString("announcedStart");if(complete && plan.getJSONArray("termindaten").length()>0)start=plan.getJSONArray("termindaten").optString(0);
+                    if(start.isEmpty() && e!=null)start=e.optString("startOriginal");
                     if(e==null && (!start.isEmpty() && start.compareTo(today)<=0))report.put(new JSONObject().put("kind","missing-season").put("title",title).put("season",n).put("date",start));
                     if(e==null && (start.isEmpty() || start.compareTo(today)>0) && !(n>last && follow))report.put(new JSONObject().put("kind","announced-season").put("title",title).put("season",n).put("date",start));
                     if(e==null && n>last && follow){JSONObject change=SeasonAnnouncements.update(announcements,n,start,title,english,today);if(change!=null)report.put(change);}
                     // Continue following already recorded announcements even after a season is archived.
                     else for(int ai=0;ai<announcements.length();ai++)if(announcements.getJSONObject(ai).optInt("season")==n){JSONObject change=SeasonAnnouncements.update(announcements,n,start,title,english,today);if(change!=null)report.put(change);break;}
-                    for(int j=0;j<episodes.length();j++){JSONObject ep=episodes.getJSONObject(j);String date=ep.optString("air_date");int number=ep.optInt("episode_number",j+1);
+                    for(int j=0;j<episodes.length();j++){JSONObject ep=episodes.getJSONObject(j);String date=SeasonAnnouncements.date(ep,"air_date");int number=ep.optInt("episode_number",j+1);
                         if(!date.matches("\\d{4}-\\d{2}-\\d{2}")){complete=false;continue;}ArchiveCodec.dateShift(date,0);dates.put(date);
                         JSONArray old=e==null?null:e.optJSONArray("datesOriginal");String previous=old==null?"":old.optString(number-1);
                         if(e!=null && !previous.equals(date))report.put(new JSONObject().put("kind",previous.isEmpty()?"new-episode":"changed-episode").put("title",title).put("season",n).put("episode",number).put("date",date));
                     }
-                    try{complete=complete && !SeasonInput.schedule(tv,season,n).optBoolean("announcementOnly");}catch(Exception noStart){complete=false;}
-                    if(e!=null && e.optBoolean("announcementOnly") && episodes.length()<e.optInt("eps"))complete=false;
-                    if(e==null && n>last && follow && complete && episodes.length()>1){
-                        JSONObject payload=new JSONObject().put("tmdbId",id).put("titel",title).put("jahr",group.getValue().get(0).getString("year")).put("staffelNummer",n).put("episoden",episodes.length()).put("termindaten",dates).put(english?"titleEN":"titleDE",title).put("calendarLanguage",english?"en":"de");
+                    if(complete)dates=plan.getJSONArray("termindaten");
+                    if(e!=null && episodes.length()<e.optInt("eps"))complete=false;
+                    if(e==null && n>last && follow){
+                        JSONObject payload=new JSONObject(plan.toString()).put("tmdbId",id).put("titel",title).put("jahr",group.getValue().get(0).getString("year")).put("staffelNummer",n).put(english?"titleEN":"titleDE",title).put("calendarLanguage",english?"en":"de");
                         patches.put(new JSONObject().put("tmdbId",id).put("seasonLabel",String.format(Locale.ROOT,"S%02d",n)).put("insertPayload",payload));
-                        report.put(new JSONObject().put("kind","added-season").put("title",title).put("season",n).put("date",start));
+                        report.put(new JSONObject().put("kind",complete?"added-season":"announced-season").put("title",title).put("season",n).put("date",start));
                     }
                     if(e!=null){JSONObject patch=new JSONObject().put("tmdbId",id).put("seasonLabel",e.getString("seasonLabel"));if(offers!=null)patch.put("watchProviders",offers);
                         int flags=e.optInt("manualFlags");if(complete && (flags&56)==0)patch.put("termindaten",dates).put("episoden",episodes.length());
