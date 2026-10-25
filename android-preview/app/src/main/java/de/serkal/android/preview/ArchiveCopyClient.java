@@ -6,7 +6,7 @@ import java.net.*;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 
-final class ArchiveCopyClient {
+class ArchiveCopyClient {
     final String token;
     ArchiveCopyClient(String token){this.token=token;}
     JSONObject request(String url,String method,String body,String type) throws Exception {
