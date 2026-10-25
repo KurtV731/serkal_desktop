@@ -3828,3 +3828,24 @@ Nach dem Serverupdate zeigen die vorhandenen Weblisten die neue Darstellung. Fü
 https://raw.githubusercontent.com/KurtV731/hasa/dev-1.3-alpha1/01%20Entwicklung/Userscript/Aktuell/HASA-AKTUELL.user.js
 
 Website-Chatty: derzeit kein Website-Uploadauftrag; 1.3 Alpha 1 nicht als öffentliche Finalversion verlinken. Originalquellen, Sitzungstoken, private Spieleranalysen und Screenshots wurden nicht veröffentlicht.
+
+
+## CE HASA – 25.10.2026: Alpha 2 korrigiert weiterhin leere Durchbruchlisten
+
+Status: **KORREKTUR ALS TESTPAKET FERTIG / REGRESSIONEN BESTANDEN / PRODUKTIVER UPLOAD UND LIVE-ABNAHME DURCH STYL OFFEN**
+
+Styl meldete nach Alpha 1 weiterhin Durchbruchzähler 0 trotz erneut geöffneter Berichte. Alpha 1 war in diesem Bereich unvollständig. Zwei konkrete Erfassungslücken und die fehlende nachträgliche Statusübernahme wurden reproduziert und korrigiert:
+
+- HTML-Zeilenumbrüche im Betreff dürfen Wörter nicht zu `TechnologischerDurchbruch` zusammenziehen.
+- Bekannter Durchbruchbetreff mit Absender Forschungszentrum und gültiger Planetenposition wird unabhängig von einer einzelnen Event-CSS-Klasse erkannt; auch verschachtelte Kopfzeilenlayouts werden geprüft.
+- Ein lokal bereits vorhandener identischer Text erhält nachträglich den erkannten Systemstatus und wird neu synchronisiert.
+- Der Server übernimmt den ergänzten Status bei vorhandenen Zeilen, ohne Duplikate; schwächere spätere Beobachtungen entfernen ihn nicht. Zusammengeschriebene alte Betreffe lassen sich bei identischen übrigen Identitätsdaten gezielt reparieren; echte Positions-/Zeitkonflikte bleiben Fehler.
+- Alte gespeicherte Durchbruchvolltexte mit falschem Systemflag werden anhand beider typischen Berichtssätze im eigenen Zähler und Verlauf berücksichtigt. Ein privater Betreff allein genügt nicht. Konto- und Rundentrennung bleiben bestehen.
+
+HASA `dev-1.3-alpha1`, Userscript **1.3.0-alpha.2**, finaler geprüfter Commit **aacab544b9ff0694675322284d741da098aa30de**. Der vorhandene Entwicklungs-Updatekanal bleibt bestehen; öffentliche 1.2.0 und main sind unverändert.
+
+Prüfungen: Browserfälle für BR-Betreff, abweichende CSS-Klasse, verschachtelten Absender, Statusanreicherung und private Gleichnamigkeit; MariaDB-Fälle für Wiederherstellung alter Zeilen, fehlende Dubletten, Identitätskonflikte, Altdatenanzeige und private Abgrenzung. Gesamter letzter Browser-/MariaDB-Lauf erfolgreich: https://github.com/KurtV731/hasa/actions/runs/40190422568 . PHP-Einzelprüfung und Windows-Serverhelferprüfung des unverändert übernommenen Korrekturstands ebenfalls erfolgreich; Release-/Pfadprüfung am finalen Commit erfolgreich.
+
+Paket **HASA-1.3-Alpha2-Korrektur.zip**, SHA-256 `21cb847fc3f3279575ee416b28e34dca56caa4b14bc6bf3fd8ac472ebb095e91`, ersetzt das Alpha-1-Paket für den weiteren Test. Enthält `HASA-SERVERUPDATE-ALPHA2.bat`, Prüfsummen, Userscript und Anleitung. Serverhelfer sichert wie zuvor drei vorhandene API-Dateien und lädt nur das geprüfte Dreierpaket. Zusätzlich Userscript auf Alpha 2 aktualisieren; danach Horizon und Weblisten neu laden. Fehlende Volltexte können aus der Nachrichtenübersicht nachgeladen werden, ohne jeden Bericht erneut einzeln manuell zu öffnen.
+
+Der tatsächliche Spiel-HTML-Quelltext lag hier nicht vor. Die reproduzierten Fehler sind behoben und getestet; eine bereits erfolgreiche Live-Abnahme von Styls persönlicher Liste wird nicht behauptet. Keine privaten Screenshots, Spielquellen oder Zugangsdaten veröffentlicht. Website-Chatty hat daraus keinen öffentlichen Website-/Downloadauftrag.
