@@ -3922,6 +3922,7 @@ const I18N = {
     "COPY_PHASE_archive-upload":"Vollständiges Archiv wird übertragen und bestätigt",
     COPY_LOCAL_COUNT:"{count} Archiveinträge lokal geladen",
     COPY_UI_ERROR: "Übertragung ausstehend · lokale Kopie bleibt erhalten",
+    COPY_UI_VERSION_MISMATCH: "Unterschiedliche SerKal-Versionen · bitte auf allen Geräten dieselbe Version installieren",
     COPY_UI_LOW_SPACE: "Zu wenig freier Speicher · nur Lesen möglich",
     COPY_UI_CONFLICT: "Neuerer Archivstand bei Google · lokale Kopie bleibt erhalten",
     COPY_UI_HISTORY_MISSING: "Google-Archivhistorie unvollständig · diesen lokalen Stand festlegen",
@@ -4113,6 +4114,7 @@ const I18N = {
     "COPY_PHASE_archive-upload":"Transferring and confirming the complete archive",
     COPY_LOCAL_COUNT:"{count} archive entries loaded locally",
     COPY_UI_ERROR: "Transfer pending \u00b7 local copy preserved",
+    COPY_UI_VERSION_MISMATCH: "Different SerKal versions · install the same version on all devices",
     COPY_UI_LOW_SPACE: "Not enough free storage \u00b7 reading only",
     COPY_UI_CONFLICT: "Newer archive on Google \u00b7 local copy preserved",
     COPY_UI_HISTORY_MISSING: "Google archive history is incomplete \u00b7 set this local version as authoritative",
@@ -5197,7 +5199,8 @@ async function archiveCopyStatus_() {
     const info=await window.serkal.archive.syncStatus();
     const label=document.getElementById('archiveSyncStatus');
     let key=info.status==='saved'?'COPY_UI_SAVED':info.status==='syncing'?'COPY_UI_SYNCING':info.status==='pending'?'COPY_UI_PENDING':info.status==='authority-applied'?'COPY_UI_AUTHORITY_APPLIED':info.status==='loading'?'COPY_UI_LOADING':'COPY_UI_ERROR';
-    if(info.code==='COPY_LOW_SPACE')key='COPY_UI_LOW_SPACE';
+    if(info.code==='COPY_VERSION_MISMATCH')key='COPY_UI_VERSION_MISMATCH';
+    else if(info.code==='COPY_LOW_SPACE')key='COPY_UI_LOW_SPACE';
     else if(info.code==='COPY_CONFLICT')key='COPY_UI_CONFLICT';
     else if(info.code==='COPY_HISTORY_MISSING')key='COPY_UI_HISTORY_MISSING';
     else if(info.code==='COPY_SYNC_BUSY')key='COPY_UI_SYNC_BUSY';
