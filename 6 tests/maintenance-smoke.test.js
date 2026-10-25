@@ -69,8 +69,8 @@ const snapshot = new Map([["123", {
     ok:true,
     tv:{ name:"Testserie", overview:"Beschreibung", number_of_seasons:1 },
     seasons:{ "1":{ ok:true, data:{ episodes:[
-        { air_date:"2026-01-02" },
-        { air_date:"2026-01-09" }
+        { episode_number:1, air_date:"2026-01-02" },
+        { episode_number:2, air_date:"2026-01-09" }
     ] } } }
 }]]);
 const findings = api.maintenanceAnalyse_([group], snapshot);
@@ -114,7 +114,7 @@ assert.equal(api.archiveLoad_().daten.entries[0].titleEN,"My own title");
 api.maintenanceRestoreArchive_(before);api.saveSettingsPatch_({language:"de"});
 
 const laterGroup={tmdbId:77,entries:[7,9].map(n=>({tmdbId:77,titel:"Later start",fileName:"Later start (2026).txt",staffelLabel:"S0"+n,episoden:2,datesOriginal:["2026-11-01","2026-11-08"]}))};
-const laterSeasons={};for(let n=1;n<=9;n++)laterSeasons[n]={ok:true,data:{episodes:[{air_date:"2026-11-01"},{air_date:"2026-11-08"}]}};
+const laterSeasons={};for(let n=1;n<=9;n++)laterSeasons[n]={ok:true,data:{episodes:[{episode_number:1,air_date:"2026-11-01"},{episode_number:2,air_date:"2026-11-08"}]}};
 const limitedFindings=api.maintenanceAnalyse_([laterGroup],new Map([["77",{ok:true,tv:{name:"Later start",number_of_seasons:9},seasons:laterSeasons}]]));
 assert.deepEqual(Array.from(limitedFindings.filter(f=>f.type.startsWith("NEW_SEASON")),f=>f.tmdbSeason),[8]);
 
@@ -160,3 +160,21 @@ const oneEpisode=new Map([['42',{ok:true,tv:{name:'Ahsoka',number_of_seasons:2},
 const provisionalFindings=api.maintenanceAnalyse_([provisionalGroup],oneEpisode);
 assert.equal(provisionalFindings.filter(f=>f.action==='apply').length,0);
 assert.equal(api.maintenanceBuildOperations_([provisionalGroup],oneEpisode,[{action:'apply',tmdbId:42,seasonNumber:2,type:'DATES_READY'}]).length,0);
+
+// Maintenance creates an eligible next announced season and does not duplicate it.
+fs.writeFileSync(path.join(archivePath,'Follow (2020).txt'),
+    'S01; startOriginal=2020-01-01; eps=2; tmdb=700; dates=01.01.,08.01.; seen=1; flags=0\n');
+let followGroup={tmdbId:700,entries:api.archiveLoad_().daten.entries.filter(e=>e.tmdbId===700)};
+const followRecord={ok:true,tv:{name:'Follow',seasons:[{season_number:2,episode_count:8,air_date:'2099-02-01'}]},
+    seasons:{2:{ok:true,data:{episodes:[{episode_number:1,air_date:'2099-02-01'}]}}}};
+const followSnapshot=new Map([['700',followRecord]]);
+api.maintenanceWriteProviders_([followGroup],followSnapshot);
+followGroup={tmdbId:700,entries:api.archiveLoad_().daten.entries.filter(e=>e.tmdbId===700)};
+assert.equal(followGroup.entries.length,2);
+const next=followGroup.entries.find(e=>e.staffelLabel==='S02');
+assert.equal(next.announcementOnly,true);
+assert.equal(next.episoden,8);
+assert.equal(next.datesOriginal.length,0);
+api.maintenanceWriteProviders_([followGroup],followSnapshot);
+assert.equal(api.archiveLoad_().daten.entries.filter(e=>e.tmdbId===700).length,2);
+console.log('Maintenance creates one provisional next season with known start and no invented dates: OK');
