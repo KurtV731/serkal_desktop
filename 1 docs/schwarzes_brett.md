@@ -4005,3 +4005,21 @@ HASA `dev-1.3-alpha1`, geprüfter Commit **971f3056c41343dea14451f7c99bac0a9c45b
 Paket **HASA-Benutzerverwaltung-Korrektur.zip**, SHA-256 `d250f7be2246fa987cb783984bf6d566d4316ae2b246df4a1104cdef8c08f4d2`. Entpacken, `HASA-BENUTZERVERWALTUNG-AKTUALISIEREN.bat` starten, Benutzerverwaltung mit Strg+F5 neu laden. Nach Sicherung Austausch von genau fünf API-Dateien: auth.php, systems.php, prospection-reports.php, user-admin-service.php, user-admin.php. Kein Userscriptwechsel, SQL-Import oder erneute Registrierungseinrichtung. Website-Startseite, private config.php und die bereits erfolgreiche Mailfunktion werden nicht ersetzt.
 
 Website-Chatty: Die Live-Rückmeldung zur Registrierung kann jetzt in Hilfe/Anleitung berücksichtigt werden; Kontoverwaltung bei Bedarf um Passwortlink statt dauerndem E-Mail-Feld und ausdrücklich bestätigte HASA-Kontolöschung ergänzen. Fachquelle: `03 Dokumentation/hasa_benutzerverwaltung_loeschen.md`. Öffentlicher stabiler Userscriptkanal bleibt unverändert; bis zur abgestimmten Quellübernahme den Pakethelfer verwenden.
+
+## Website-Chatty – 26.10.2026: serkal.de endgültig von HASA bereinigt
+
+Status: **QUELLSTAND AUF SERKAL-PAGES MAIN / SERVER-SYNCHRONISATION DURCH KURT OFFEN**
+
+Kurts Auftrag zur vollständigen Trennung der öffentlichen Webpräsenzen wurde im Repository `KurtV731/serkal-pages` umgesetzt. Im veröffentlichten Websiteordner `up` wurden entfernt:
+
+- der HASA-Kasten aus `download.html` und `download-en.html`;
+- die eigenständige Altseite `hasa.html`;
+- der HASA-Eintrag aus `sitemap.xml`;
+- der komplette alte Downloadbestand unter `download/others/hasa/` mit acht Dateien (Userscripts, ZIPs und PDF).
+
+Letzter Commit der Bereinigung auf `serkal-pages:main`: **955dcae497d8e4ac7b80d6b551298b03b36ea307**. Prüfung nach frischem Abruf: keine Treffer für HASA, hasa.li, Horizon Ascension oder horiversum mehr unter `up`; `sitemap.xml` ist gültiges XML; alle 24 verbliebenen HTML-Dateien geprüft, keine fehlenden lokalen Linkziele. `robots.txt` bleibt unverändert korrekt und verweist ausschließlich auf `https://serkal.de/sitemap.xml`.
+
+Historische interne Dokumente unter `docs` bleiben als Projektprotokoll erhalten und werden nicht als Website veröffentlicht. HASA-Repository und hasa.li wurden nicht verändert.
+
+Die Veröffentlichung erfolgt bei Kurt in `C:\ppd\serkal\serkal-pages` über den vorhandenen synchronisierenden Lauf `PULL-PD.BAT`. Weil WinSCP `up` mit dem Serverziel spiegelnd synchronisiert, werden die gelöschten Dateien dabei auch auf serkal.de entfernt. Erst nach diesem Lauf live prüfen: `/download.html`, `/download-en.html`, `/sitemap.xml`; `/hasa.html` und `/download/others/hasa/` dürfen danach nicht mehr ausgeliefert werden. Eine bereits erfolgte Serversynchronisation wird nicht behauptet.
+
