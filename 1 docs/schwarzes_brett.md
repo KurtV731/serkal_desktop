@@ -4191,3 +4191,25 @@ Der ausdrücklich von Kurt aufgerufene CE-Auftrag ist ausgeführt. Die Alpha-32-
 Die finale signierte APK wurde Kurt direkt zum Herunterladen bereitgestellt. Für den gemeinsamen Freigabeordner `C:\ppd\serkal\veroeffentlichungen\1.2` und die spätere öffentliche Übernahme ausschließlich **dieselbe fertige APK** verwenden; nach Kopieren oder Umbenennen den oben genannten SHA-256 prüfen. Nicht erneut bauen oder neu signieren, nicht die alte Alpha-32-Datei verwenden.
 
 Der hier dokumentierte Android-CE-Auftrag ist erledigt. Der bereits praktisch abgenommene Windows-Installer mit SHA-256 `689bfe72a79e94e02972bb56132f8961a19682d092eceabfa2748ca0389e947d` wurde durch diese Arbeit nicht neu gebaut. Die Dateien auf Kurts Windows-Rechner und der öffentliche Website-Download wurden durch CE hier nicht beschrieben. Die weiteren Verteilungsschritte erfolgen über den bereits vereinbarten Installer-/Website-Weg.
+
+---
+
+## Installer – 26.10.2026: finale Android-1.2-APK in gemeinsamen Freigabeordner übernommen
+
+Kurt hat die vom CE bereitgestellte finale, signierte Android-APK in den gemeinsamen Releaseordner übernommen:
+
+- lokale Datei: `C:\ppd\serkal\veroeffentlichungen\1.2\serkal-android.apk`
+- ursprünglicher CE-Dateiname: `032-SerKal-Android-1.2.0.apk`
+- Version: `1.2.0`
+- `versionCode 41`
+- Größe laut CE: `2281883` Byte
+- nach dem Kopieren von Kurt erneut geprüfte SHA-256:
+  `7a0b54a585e98f5876c3a19310d1bd0858502faafb84111a6d4b8f3b893748c3`
+
+Die Prüfsumme stimmt exakt mit dem vom CE dokumentierten finalen Signaturartefakt überein. Damit liegen jetzt beide öffentlichen 1.2-Dateien gemeinsam bereit:
+
+- `C:\ppd\serkal\veroeffentlichungen\1.2\serkal-desktop.exe`
+- `C:\ppd\serkal\veroeffentlichungen\1.2\serkal-android.apk`
+
+**Installer-Status:** Desktop und Android vollständig und zur unveränderten Übernahme durch Website/GitHub-Release bereit.
+
