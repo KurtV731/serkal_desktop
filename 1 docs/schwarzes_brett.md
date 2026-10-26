@@ -4153,3 +4153,41 @@ Der öffentliche unveränderliche Downloadname bleibt `serkal-desktop.exe`.
 
 **Android-Status:** finale stabile Android-1.2-APK mit `versionCode 41` und bestehender Signatur weiterhin beim CE offen; Alpha 32 nicht lediglich umbenennen.
 
+
+
+## CE SerKal – 26.10.2026: Auftrag erledigt – finale signierte Android 1.2.0, versionCode 41
+
+Status: **FINALES RELEASE-APK NEU GEBAUT, SIGNIERT, GEPRÜFT UND KURT BEREITGESTELLT**
+
+Der ausdrücklich von Kurt aufgerufene CE-Auftrag ist ausgeführt. Die Alpha-32-Datei wurde nicht umbenannt; es wurde aus dem freigegebenen Android-Stand 32 ein neues **assembleRelease**-Artefakt erstellt.
+
+### Verbindliches finales Android-Artefakt
+
+- Datei: **032-SerKal-Android-1.2.0.apk**
+- Produktversion / versionName: **1.2.0**
+- Android versionCode: **41**
+- gemeinsamer Archiv-/Datenstand / releaseNumber: **32**
+- applicationId: `de.serkal.android.preview.v005` – identisch mit den bisherigen installierten Fassungen
+- Größe: **2281883 Byte**
+- SHA-256: `7a0b54a585e98f5876c3a19310d1bd0858502faafb84111a6d4b8f3b893748c3`
+- bestehender SerKal-Schlüssel verwendet; Signaturen v2 und v3 erfolgreich geprüft, Zertifikat entspricht den bisherigen APKs
+- Zertifikat SHA-1: `0d63f508dc1fe14e976c221a0c2798d3a1515986`
+- keine private Schlüsseldatei und keine Signaturpasswörter veröffentlicht
+
+### Quellen und Nachweise
+
+- freigegebene Android-Grundlage 32: `bf3c6003d9078b955f67eeb3a6b2f6d761aa5c13`
+- tatsächlich gebauter stabiler Quellcommit: `f55bda2ad85b9e1e2752af6d0e244fbd313dcac5`
+- Actions-Lauf: https://github.com/KurtV731/serkal_desktop/actions/runs/40400797247
+- **67 Release-Unit-Tests, 0 Fehlschläge, 0 Fehler**, anschließend assembleRelease erfolgreich
+- Pull Request #10 in den regulären Android-Branch übernommen; Merge `1b2a32ab117098fe70ab182c5cacc6e3a42fa4da`
+- Laufzeit-Javaquellen, Ressourcen und AndroidManifest.xml anhand ihrer Git-Objekt-SHAs mit der freigegebenen 32 verglichen: identisch. Änderungen nur an Versionsmetadaten, Test-Erwartung und Release-Bauweg.
+- echte erzeugte APK per aapt geprüft: Paketkennung unverändert, **versionName 1.2.0**, **versionCode 41**, **nicht debuggable**
+- AndroidManifest.xml vor und nach dem Signieren bytegleich; SHA-256 erst an der fertig signierten Datei berechnet
+- stabile Metadaten nach Übernahme auf GitHub zurückgelesen; sie stimmen mit der bereits vorhandenen Desktop-1.2-Konfiguration überein
+
+### Übergabe an Installer / Website
+
+Die finale signierte APK wurde Kurt direkt zum Herunterladen bereitgestellt. Für den gemeinsamen Freigabeordner `C:\ppd\serkal\veroeffentlichungen\1.2` und die spätere öffentliche Übernahme ausschließlich **dieselbe fertige APK** verwenden; nach Kopieren oder Umbenennen den oben genannten SHA-256 prüfen. Nicht erneut bauen oder neu signieren, nicht die alte Alpha-32-Datei verwenden.
+
+Der hier dokumentierte Android-CE-Auftrag ist erledigt. Der bereits praktisch abgenommene Windows-Installer mit SHA-256 `689bfe72a79e94e02972bb56132f8961a19682d092eceabfa2748ca0389e947d` wurde durch diese Arbeit nicht neu gebaut. Die Dateien auf Kurts Windows-Rechner und der öffentliche Website-Download wurden durch CE hier nicht beschrieben. Die weiteren Verteilungsschritte erfolgen über den bereits vereinbarten Installer-/Website-Weg.
