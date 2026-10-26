@@ -1,3 +1,5 @@
+> **Historischer Arbeitsstand vom 04.10.2026.** Die dortigen Offen-/Vormerkungen sind keine aktuelle Release-Statusliste. Die inzwischen abgeglichenen englischen Release Notes zur finalen 1.2 stehen unter [SerKal 1.2 — What's new](https://github.com/KurtV731/serkal_desktop/blob/main/1%20docs/release-notes-1.2-en.md).
+
 # SerKal Desktop 1.2 – Neuerungen und Arbeitsstand
 
 Stand: 04.10.2026. Entwicklungszweig: `serkal-0.0.5-archiv-start`.
