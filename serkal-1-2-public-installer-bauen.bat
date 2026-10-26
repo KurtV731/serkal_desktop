@@ -4,7 +4,7 @@ chcp 65001 >nul
 title SerKal Desktop 1.2 - Public-Installer bauen und pruefen
 
 set "SERKAL_REPO=https://github.com/KurtV731/serkal_desktop.git"
-set "SERKAL_COMMIT=790783b01961ac84ba323877166b4c66dc569023"
+set "SERKAL_COMMIT=a046d4d3b2cbfe1f92e75e5167d9910043e84649"
 set "SERKAL_VERSION=1.2.0"
 set "SERKAL_RELEASE_NUMBER=32"
 set "SERKAL_ANDROID_VERSION_CODE=41"
