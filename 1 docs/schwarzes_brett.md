@@ -4266,3 +4266,18 @@ Auf Grundlage der vom CE geprüften englischen Release Notes wurden zwei vollst�
 Beide Seiten enthalten die abgestimmten 7 neuen Funktionsgruppen, 10 Verbesserungen, 12 konkret beschriebenen Fehlerkorrekturen und die wichtigen Hinweise zum Umstieg auf 1.2. Die Downloadseiten verlinken die jeweilige Sprachfassung direkt bei Windows und Android. Beide Seiten besitzen Canonical-/hreflang-Verknüpfungen und wurden in `sitemap.xml` aufgenommen.
 
 Letzter Website-Commit: `a5a4959059a561ffed24dff353ded0bd23d962e6`. Dateien nach Speicherung zurückgelesen: Überschriften, Zählblöcke, Download-Rücklinks und beide Sitemap-Einträge vorhanden. Programmdateien und Prüfsummen wurden durch diese reine Websiteergänzung nicht verändert. Kurt veröffentlicht den ergänzten Stand mit einem erneuten Lauf von `PULL-PD.BAT`.
+
+
+## CE SerKal – 26.10.2026: Code-Bestandsaufnahme der Sperren für Kurt
+
+Status: **DOKUMENTIERT / KEINE PROGRAMMÄNDERUNG UND KEIN NEUER BUILD**
+
+Auf Kurts Bitte die Stellen herausgelesen, die mit den Archivblockaden, „nur lesbar“, „Archiv wird vorbereitet“, Nachladen und Schließproblemen zusammenhängen.
+
+Ergebnis: [SerKal 1.2 – Codekarte der Sperren](archiv-sperren-codekarte-1.2-2026-10-26.md). Bezug auf den ausgelieferten Windows-Quellcommit a046d4d3b2cbfe1f92e75e5167d9910043e84649 und finalen Android-Quellcommit f55bda2ad85b9e1e2752af6d0e244fbd313dcac5. Zentrale Dateien mit den aktuellen regulären Quellen auf gleiche Git-Objekte verglichen.
+
+Enthält: Desktop-Schreibschleuse und vollständige fatal()-Liste, Android-writable()/generische Nur-lesbar-Meldung, UI-Dirty- und Nachlade-Guards, Unterschied zwischen ungespeicherter Eingabe und bereits lokal gespeicherter ausstehender Übertragung, Google-Revisionskette, bewusste maßgebliche Archivwahl, Konto-/Versionsprüfung, Zustandsdateien, Speicherreserve und echte Dateisperren, Kalenderkopplung, Android-Wartungs-epoch, Close-Guard, automatische Versuche und tatsächlich noch vorhandene Altübernahmefälle. Quellen mit festen Commit-Links und Codeausschnitten.
+
+Besonders sichtbar im aktuellen Code: busy blockiert Archiv-Schreibaktionen während des gesamten Abgleichs trotz Meldung „du kannst weiterarbeiten“; drei Desktop-Kalenderziel-Fehler sperren auch lokale Archivschreibaktionen; Android fasst mehrere Gründe als „nur lesbar“ zusammen; Desktop available() kann Ordner-/Lesefehler als Speicherplatzproblem erscheinen lassen; der Close-Guard akzeptiert beim gewählten Online-Abschluss nur Status exakt saved. Das sind Codebefunde, kein Nachweis aktueller Fehlerzustände auf Kurts Geräten.
+
+Die bereits reparierten alten Fehler (Konflikt durch COPY_LOADING verdeckt; bestätigte maßgebliche Kopie wiederholt angewandt) sind getrennt von den weiterhin vorhandenen Sperrregeln beschrieben. Keine JSON-, Token-, Archiv- oder Kalenderdaten verändert; kein Auftrag zur Entfernung von Sperren unterstellt. Die ausgelieferte 1.2 bleibt unverändert.
