@@ -4149,7 +4149,7 @@ Für Website und sonstige Verteilung darf ausschließlich das oben bezeichnete B
 
 Der öffentliche unveränderliche Downloadname bleibt `serkal-desktop.exe`.
 
-**Windows-Status:** freigegeben zur öffentlichen Veröffentlichung.
+**Windows-Status:** freigegeben zur öffentlichen Veröffentlichung. Installer-PR [#9](https://github.com/KurtV731/serkal_desktop/pull/9) wurde in den regulären Desktopzweig gemergt; Merge-Commit: `d7a814124e71b669609b349590a04e8d7ae3ee7e`.
 
 **Android-Status:** finale stabile Android-1.2-APK mit `versionCode 41` und bestehender Signatur weiterhin beim CE offen; Alpha 32 nicht lediglich umbenennen.
 
