@@ -17,3 +17,12 @@ assert.match(own[0].body.description,/Paramount\+/);assert.doesNotMatch(own[0].b
 const providerEvents=providerUpdate.map(op=>({...op.body,id:op.id}));assert.deepEqual(protocol.plan([providerEntry],providerEvents,revision,2026),[]);
 const past={...entry,activeDates:['2025-10-12']},pastEvents=protocol.plan([past],[],revision,2025).map(o=>o.body);assert.deepEqual(protocol.plan([past],pastEvents,revision,2026),[]);
 console.log('archive calendar copy: create, update, delete, manual protection, grouped episodes and past seasons passed');
+
+// A German archive filename must not leak into an English calendar when the English title is stored.
+for(const [de,en] of [["Dark Winds - Der Wind des Bösen","Dark Winds"],["Der Herr der Ringe Die Ringe der Macht","The Lord of the Rings: The Rings of Power"],["Dark Matter - Der Zeitenläufer","Dark Matter"]]){
+ const entry={tmdbId:900,title:de,year:2026,seasonLabel:"S01",activeDates:["2027-01-01"],calendarLanguage:"en"};
+ const before=require('../2 src/common/archive-calendar-copy').plan([entry],[],"r1",2026)[0].body;
+ const next=require('../2 src/common/archive-calendar-copy').plan([{...entry,titleEN:en}],[before],"r2",2026);
+ assert.equal(next.length,1);assert.equal(next[0].method,"PUT");assert.equal(next[0].body.summary,en+" (2026) S01E01");
+}
+console.log("Calendar titles: stored English translation repairs German filename titles without duplicates");
