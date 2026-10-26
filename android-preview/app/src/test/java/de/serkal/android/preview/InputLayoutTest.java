@@ -30,6 +30,13 @@ public class InputLayoutTest {
   assertTrue(((EditText)get(a,"queryField")).hasFocus());assertEquals(0,((LinearLayout)get(a,"suggestions")).getChildCount());
   assertEquals(0,get(a,"selectedTmdbId"));assertNull(get(a,"selectedDetail"));assertNull(get(a,"selectedArchiveEntry"));
  }
+ @Test public void exitButtonFinishesActivityEvenDuringGoogleConnection()throws Exception{
+  for(boolean connecting:new boolean[]{false,true}){
+   ActivityController<MainActivity> c=Robolectric.buildActivity(MainActivity.class).create();MainActivity a=c.get();
+   try{set(a,"googleBusy",connecting);assertFalse(a.isFinishing());a.findViewById(android.R.id.content).findViewWithTag("exitSerKal").performClick();assertTrue("Exit must finish the activity, not put it behind other apps",a.isFinishing());}
+   finally{c.destroy();}
+  }
+ }
  @Test public void actionsAreBelowFieldsAndUtilitiesAreBottomLeft()throws Exception{
   ActivityController<MainActivity> c=Robolectric.buildActivity(MainActivity.class).create();MainActivity a=c.get();
   try{
