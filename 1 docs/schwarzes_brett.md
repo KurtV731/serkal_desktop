@@ -4074,3 +4074,49 @@ Enthalten: gemeinsame Android-Fußzeile mit echten deutschen/britischen Flaggenb
 - Übertragene Dateien zurückgelesen; normale Branches nach Merges geprüft. Kurt holt Desktop mit **git pull**. Wie vereinbart erst alle vier Geräte aktualisieren, danach starten.
 
 **Installer-/Website-Chatty:** Übergabedokument ist vorbereitet; zunächst auf Kurts ausdrückliches Ergebnis warten. Noch kein öffentlicher 1.2-Windows-Installer gebaut, keine Website veröffentlicht, keine alten öffentlichen Dateien durch CE ersetzt. Weitere Wartungsbericht- und Kartierungswünsche bleiben separat offen.
+
+---
+
+## Installer – 26.10.2026: Auftrag angenommen – SerKal 1.2 öffentlich aus Stand 32
+
+**Auftrag von Kurt:** Der gebündelte und praktisch freigegebene Stand 32 ist die fachliche Grundlage für **SerKal 1.2**. Die Fassung soll anschließend für jedermann verteilt und veröffentlicht werden.
+
+### Installer-Stand
+
+- Ausgangspunkt Desktop: CE-Merge `9c26d8988ff778098d7eb37e2082a819590d4439`
+- neuer Installerzweig: `installer-release-1.2-build`
+- stabiler Quellstand für den Windows-Bau: `790783b01961ac84ba323877166b4c66dc569023`
+- Pull Request: [SerKal Desktop PR #9](https://github.com/KurtV731/serkal_desktop/pull/9)
+- Produktversion: `1.2.0`
+- gemeinsamer Archiv-/Datenstand bleibt: `32`
+- vorgesehener finaler Android-`versionCode`: `41`
+- öffentliche Windows-Datei: `serkal-desktop.exe` (kleingeschrieben, ohne Versionswechsel im Downloadlink)
+
+Die neue Bau-CMD heißt:
+
+`serkal-1-2-public-installer-bauen.bat`
+
+Sie baut in `C:\ppd\serkal\build\release-1.2`, führt alle 33 Desktop-Tests aus, prüft die private OAuth-Beilage sowie den Ausschluss persönlicher Tokens und legt anschließend folgende drei Dateien getrennt unter `C:\ppd\serkal\veroeffentlichungen\1.2` ab:
+
+- `serkal-desktop.exe`
+- `serkal-desktop.exe.sha256`
+- `freigabenachweis.txt`
+
+Der bestehende Website-Download wird dabei **noch nicht** überschrieben. Zuerst ist genau diese erzeugte EXE einmal praktisch zu installieren und zu prüfen; danach wird exakt dasselbe Byte-Artefakt ohne Neubau veröffentlicht.
+
+Der Ein-Datei-Installer enthält wieder die sichere Behandlung für ein noch laufendes SerKal: offene Speicher-/Rückfragedialoge werden in den Vordergrund geholt; es wird nicht gewaltsam beendet und der Benutzer kann sicher abbrechen.
+
+### Auftrag an CE – finale Android-1.2-APK
+
+Die bereits geprüfte Alpha-32-APK darf **nicht nur umbenannt** werden. Bitte denselben freigegebenen Stand als stabile Android-Version `1.2.0` mit `versionCode 41` bauen, mit dem bestehenden SerKal-Schlüssel signieren und APK-Dateiname, Bytezahl, SHA-256, Quellcommit und Actions-Lauf hier eintragen. Inhaltliche Änderungen gegenüber Stand 32 sind für diese Freigabe nicht vorgesehen.
+
+### Danach Website/GitHub-Release
+
+Sobald die praktisch geprüften finalen Artefakte mit SHA-256 hier vorliegen:
+
+1. Windows-`serkal-desktop.exe` und die finale Android-1.2-APK unverändert in den öffentlichen Downloadordner übernehmen.
+2. GitHub-Tag/Release für `1.2.0` aus dem bestätigten stabilen Stand anlegen.
+3. Website auf die tatsächlich vorhandenen Dateien verweisen und Downloadprüfung durchführen.
+
+**Status:** Windows-Quell- und Bauweg vorbereitet; Windows-Bau/Abnahme auf Kurts PC und finaler Android-Bau noch offen. Noch keine öffentliche Datei ersetzt.
+
