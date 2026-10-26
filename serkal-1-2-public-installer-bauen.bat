@@ -4,6 +4,7 @@ chcp 65001 >nul
 title SerKal Desktop 1.2 - Public-Installer bauen und pruefen
 
 set "SERKAL_REPO=https://github.com/KurtV731/serkal_desktop.git"
+for %%I in ("%~dp0.") do set "SERKAL_LOCAL_REPO=%%~fI"
 set "SERKAL_COMMIT=a046d4d3b2cbfe1f92e75e5167d9910043e84649"
 set "SERKAL_VERSION=1.2.0"
 set "SERKAL_RELEASE_NUMBER=32"
@@ -14,6 +15,7 @@ set "SERKAL_SETUP=%SERKAL_BUILD_DIR%\out\make\squirrel.windows\x64\serkal-deskto
 set "SERKAL_DESKTOP=%SERKAL_DEST_DIR%\serkal-desktop.exe"
 set "SERKAL_DESKTOP_NEW=%SERKAL_DESKTOP%.neu"
 set "SERKAL_DESKTOP_SHA=%SERKAL_DESKTOP%.sha256"
+set "SERKAL_SOURCE_ICON=%SERKAL_LOCAL_REPO%\4 assets\icon\serkal.ico"
 set "SERKAL_BUILD_ICON=%SERKAL_BUILD_DIR%\4 assets\icon\serkal.ico"
 
 if not defined SERKAL_GOOGLE_OAUTH_FILE if exist "C:\ppd\serkal\serkal_private\google_oauth_client.json" set "SERKAL_GOOGLE_OAUTH_FILE=C:\ppd\serkal\serkal_private\google_oauth_client.json"
@@ -33,6 +35,7 @@ echo.
 where git >nul 2>&1 || goto :missing_git
 where node >nul 2>&1 || goto :missing_node
 where npm >nul 2>&1 || goto :missing_npm
+if not exist "%SERKAL_SOURCE_ICON%" goto :missing_icon
 if not defined SERKAL_GOOGLE_OAUTH_FILE goto :missing_oauth
 if not exist "%SERKAL_GOOGLE_OAUTH_FILE%" goto :missing_oauth
 if exist "%SERKAL_BUILD_DIR%" goto :build_exists
@@ -52,7 +55,8 @@ if /I not "%SERKAL_ACTUAL_COMMIT%"=="%SERKAL_COMMIT%" goto :wrong_commit
 echo [3/10] Stabile Versionsangaben und Dateinamen kontrollieren ...
 powershell -NoProfile -Command "$p=Get-Content -Raw package.json|ConvertFrom-Json;$r=Get-Content -Raw serkal-release.json|ConvertFrom-Json;$f=Get-Content -Raw forge.config.js;if($p.version -ne $env:SERKAL_VERSION){exit 1};if($r.version -ne $env:SERKAL_VERSION -or [int]$r.number -ne [int]$env:SERKAL_RELEASE_NUMBER -or [int]$r.androidVersionCode -ne [int]$env:SERKAL_ANDROID_VERSION_CODE){exit 2};if($f -notmatch 'serkal-desktop-1-2-setup\.exe'){exit 3}" || goto :wrong_version
 
-echo [4/10] Private OAuth-Grunddatei pruefen ...
+echo [4/10] Bewaehrtes lokales Symbol und private OAuth-Grunddatei pruefen ...
+copy /y "%SERKAL_SOURCE_ICON%" "%SERKAL_BUILD_ICON%" >nul || goto :failed
 powershell -NoProfile -Command "$ErrorActionPreference='Stop';$j=Get-Content -Raw -LiteralPath $env:SERKAL_GOOGLE_OAUTH_FILE|ConvertFrom-Json;if(-not $j.installed -and -not $j.web){throw 'Keine gueltige OAuth-Datei'}" || goto :failed
 
 echo [5/10] Abhaengigkeiten reproduzierbar installieren ...
@@ -129,7 +133,8 @@ goto :stop
 echo FEHLER: serkal-desktop-1-2-setup.exe wurde nicht erzeugt.
 goto :stop
 :missing_icon
-echo FEHLER: Das SerKal-Symbol fehlt im Bauordner.
+echo FEHLER: Das bewaehrte lokale SerKal-Symbol fehlt:
+echo %SERKAL_SOURCE_ICON%
 goto :stop
 :missing_packaged_oauth
 echo FEHLER: google_oauth_client.json fehlt im gebauten Paket.
