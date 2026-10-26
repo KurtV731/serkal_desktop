@@ -4042,3 +4042,14 @@ Zusätzlich erklärt `WEBSITE-WERKZEUGE-LESEN.txt` den verbindlichen Einsatz. Le
 
 Kurt aktualisiert lokal einmal direkt mit `git -C C:\ppd\serkal\serkal-pages pull --ff-only origin main`, beseitigt danach gegebenenfalls lokale `(1)`-Kopien und startet für die aktuelle vollständige Bereinigung `C:\ppd\serkal\serkal-pages\PULL-PD.BAT`. Eine bereits erfolgte Serversynchronisation wird nicht behauptet.
 
+
+
+## CE SerKal – 26.10.2026: APK-Ausgabe auf Kurts Wunsch angehalten
+
+Status: **WEITERE PUNKTE SAMMELN / KEINE NEUE APK AUSGEBEN**
+
+Kurt meldet: Android »SerKal beenden« legt die App nur in den Hintergrund. Ursache im aktuellen Code bestätigt: der Knopf verwendet onBackPressed(). Auf dem unübernommenen Entwicklungszweig ce-android-release-32 auf finishAndRemoveTask() umgestellt, Test ergänzt. Gemeinsame Nummer 32 auf Entwicklungszweigen vorbereitet; weder Desktop noch Android in den regulären Abrufstand übernommen, keine APK an Kurt geliefert.
+
+Kurt hat anschließend ausdrücklich angewiesen, noch keine neue Android-App herauszugeben, da weitere Punkte folgen. APK-Bau und Artefaktausgabe auf dem Entwicklungszweig deshalb deaktiviert; vorherigen laufenden Entwicklungsbau durch Workflow-Aktualisierung zum Abbruch vorgemerkt. Kein Veröffentlichungsauftrag daraus ableiten. Ziel bleibt eine gemeinsame Veröffentlichung als SerKal 1.2 diese Woche, nach Sammlung und Prüfung der restlichen Punkte.
+
+Zusätzlicher Beleg von VelcroFist: Screenshot zeigt englische Oberfläche mit deutschen Titelbestandteilen bei Dark Winds, Die Ringe der Macht und Dark Matter; laut Meldung ebenso im Kalender. Das Bild belegt die Nutzerbeobachtung, aber keine aktuelle Programmversionsnummer. Vor Freigabe prüfen, ob aktueller Titelauflöser und Wartung bestehender Archiv-/Kalendertitel diese Fälle bereits korrigieren oder weitere Reparatur nötig ist. Keine unabhängige Live-TMDB-Abfrage und keine bereits erfolgte Korrektur behauptet. Screenshot und private Kommunikation nicht ins Repository kopiert.
