@@ -70,6 +70,11 @@ public class MainActivity extends Activity {
         statusText.setText(english?"Google connection cancelled. Your local archive is unchanged.":"Google-Verbindung abgebrochen. Dein lokales Archiv bleibt unverändert.");
     }
 
+    private void exitSerKal(){
+        // The explicit Exit action must finish the root task, even during sign-in.
+        finishAndRemoveTask();
+    }
+
     @Override public void onBackPressed(){
         if(googleBusy){cancelGoogleConnection();return;}
         super.onBackPressed();
@@ -974,7 +979,7 @@ public class MainActivity extends Activity {
         left.addView(preferences);
         LinearLayout utilities=new LinearLayout(this);utilities.setOrientation(LinearLayout.HORIZONTAL);utilities.setTag("utilities");
         Button calendarButton=button(english?"Open calendar":"Kalender öffnen");calendarButton.setOnClickListener(v->openCalendar());utilities.addView(calendarButton);
-        Button quitButton=button(english?"Exit SerKal":"SerKal beenden");quitButton.setOnClickListener(v->onBackPressed());utilities.addView(quitButton);
+        Button quitButton=button(english?"Exit SerKal":"SerKal beenden");quitButton.setTag("exitSerKal");quitButton.setOnClickListener(v->exitSerKal());utilities.addView(quitButton);
         left.addView(utilities);
         columns.addView(left);
 
