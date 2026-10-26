@@ -30,18 +30,38 @@ public class InputLayoutTest {
   assertTrue(((EditText)get(a,"queryField")).hasFocus());assertEquals(0,((LinearLayout)get(a,"suggestions")).getChildCount());
   assertEquals(0,get(a,"selectedTmdbId"));assertNull(get(a,"selectedDetail"));assertNull(get(a,"selectedArchiveEntry"));
  }
- @Test public void actionsAreBelowFieldsAndUtilitiesAreBottomLeft()throws Exception{
+ @Test public void exitButtonFinishesActivityEvenDuringGoogleConnection()throws Exception{
+  for(boolean connecting:new boolean[]{false,true}){
+   ActivityController<MainActivity> c=Robolectric.buildActivity(MainActivity.class).create();MainActivity a=c.get();
+   try{set(a,"googleBusy",connecting);assertFalse(a.isFinishing());a.findViewById(android.R.id.content).findViewWithTag("exitSerKal").performClick();assertTrue("Exit must finish the activity, not put it behind other apps",a.isFinishing());}
+   finally{c.destroy();}
+  }
+ }
+ @Test public void actionsStayBelowFieldsAndCompactFooterSpansAllColumns()throws Exception{
   ActivityController<MainActivity> c=Robolectric.buildActivity(MainActivity.class).create();MainActivity a=c.get();
   try{
-   View root=a.findViewById(android.R.id.content),actions=root.findViewWithTag("searchActions"),prefs=root.findViewWithTag("preferences"),utilities=root.findViewWithTag("utilities");
-   ViewGroup left=(ViewGroup)actions.getParent();assertSame(left,prefs.getParent());assertSame(left,utilities.getParent());
-   assertEquals(2,left.indexOfChild(actions));assertEquals(left.getChildCount()-1,left.indexOfChild(utilities));
+   View root=a.findViewById(android.R.id.content),actions=root.findViewWithTag("searchActions"),footer=root.findViewWithTag("globalFooter");
+   ViewGroup left=(ViewGroup)actions.getParent();assertEquals(2,left.indexOfChild(actions));
    assertSame(actions,root.findViewWithTag("addToArchive").getParent());
+   for(String tag:new String[]{"languageDE","languageEN","themeToggle","openCalendar","help","exitSerKal"})assertSame(footer,root.findViewWithTag(tag).getParent());
    for(int[] size:new int[][]{{1280,800},{960,600},{800,480}}){
     root.measure(View.MeasureSpec.makeMeasureSpec(size[0],View.MeasureSpec.EXACTLY),View.MeasureSpec.makeMeasureSpec(size[1],View.MeasureSpec.EXACTLY));root.layout(0,0,size[0],size[1]);
-    assertTrue(actions.getBottom()<prefs.getTop());assertTrue(prefs.getBottom()<=utilities.getTop());
+    View exit=root.findViewWithTag("exitSerKal"),calendar=root.findViewWithTag("openCalendar"),help=root.findViewWithTag("help"),edit=root.findViewWithTag("editEntry");
+    assertTrue("Footer spans the screen",footer.getWidth()>size[0]*0.9f);
+    assertTrue("Exit is on the right",exit.getRight()>footer.getWidth()*0.9f);
+    assertTrue(calendar.getRight()<=help.getLeft());assertTrue(help.getRight()<exit.getLeft());
+    assertTrue("Edit uses only its text width",edit.getWidth()<((View)edit.getParent()).getWidth()*0.65f);
+    for(int i=0;i<((ViewGroup)footer).getChildCount();i++){View child=((ViewGroup)footer).getChildAt(i);assertTrue("Every control fits",child.getRight()<=footer.getWidth());}
     for(int i=0;i<((ViewGroup)actions).getChildCount();i++){View button=((ViewGroup)actions).getChildAt(i);assertTrue(button.getWidth()>0);assertTrue(button.getRight()<=actions.getWidth());}
    }
+  }finally{c.destroy();}
+ }
+ @Test public void flagImagesChooseGermanAndEnglishWithoutEmojiFonts()throws Exception{
+  ActivityController<MainActivity> c=Robolectric.buildActivity(MainActivity.class).create();MainActivity a=c.get();
+  try{
+   View root=a.findViewById(android.R.id.content);assertTrue(((ImageButton)root.findViewWithTag("languageEN")).getDrawable() instanceof LanguageFlagDrawable);
+   root.findViewWithTag("languageEN").performClick();assertEquals(true,get(a,"english"));
+   a.findViewById(android.R.id.content).findViewWithTag("languageDE").performClick();assertEquals(false,get(a,"english"));
   }finally{c.destroy();}
  }
  @Test public void resetClearsFieldsCancelsPendingSearchAndRestoresFocus()throws Exception{
