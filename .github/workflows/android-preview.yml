@@ -26,18 +26,20 @@ jobs:
           gradle-version: '8.9'
       - name: Test
         working-directory: android-preview
-        run: gradle testDebugUnitTest
+        run: gradle testReleaseUnitTest
       - name: Build unsigned APK
         if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[build apk]')
         working-directory: android-preview
         run: |
-          gradle assembleDebug
+          gradle assembleRelease
+          "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging app/build/outputs/apk/release/app-release-unsigned.apk > apk-badging.txt
           cp "$ANDROID_HOME/build-tools/35.0.0/lib/apksigner.jar" apksigner.jar
       - uses: actions/upload-artifact@v4
         if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[build apk]')
         with:
-          name: 032-SerKal-Android-unsigned
+          name: SerKal-Android-1.2.0-code41-unsigned
           path: |
-            android-preview/app/build/outputs/apk/debug/app-debug-unsigned.apk
+            android-preview/app/build/outputs/apk/release/app-release-unsigned.apk
             android-preview/apksigner.jar
-            android-preview/app/build/test-results/testDebugUnitTest/*.xml
+            android-preview/app/build/test-results/testReleaseUnitTest/*.xml
+            android-preview/apk-badging.txt
