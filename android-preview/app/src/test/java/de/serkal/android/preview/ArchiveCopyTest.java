@@ -71,4 +71,11 @@ public class ArchiveCopyTest {
         assertEquals(first.getJSONObject("extendedProperties").getJSONObject("private").getString("serkalSignature"),CalendarCopy.signature(first));
         assertEquals(first.getString("id"),CalendarCopy.desired(new JSONObject(r.toString())).get(0).getString("id"));
     }
+    @Test public void calendarUsesStoredLanguageInsteadOfGermanFileName()throws Exception{
+        JSONObject r=record();JSONObject f=r.getJSONArray("files").getJSONObject(0);
+        String text=f.getString("content").trim()+"; calendarLanguage=en; titleEN=Dark%20Matter\n";
+        f.put("name","Dark Matter - Der Zeitenläufer (2026).txt").put("content",text).put("sha256",ArchiveCodec.hash(text));
+        List<JSONObject> events=CalendarCopy.desired(r);assertFalse(events.isEmpty());
+        for(JSONObject e:events){assertTrue(e.getString("summary").startsWith("Dark Matter (2026)"));assertFalse(e.getString("summary").contains("Zeitenläufer"));}
+    }
 }
