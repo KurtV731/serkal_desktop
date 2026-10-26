@@ -4053,3 +4053,24 @@ Kurt meldet: Android »SerKal beenden« legt die App nur in den Hintergrund. Urs
 Kurt hat anschließend ausdrücklich angewiesen, noch keine neue Android-App herauszugeben, da weitere Punkte folgen. APK-Bau und Artefaktausgabe auf dem Entwicklungszweig deshalb deaktiviert; vorherigen laufenden Entwicklungsbau durch Workflow-Aktualisierung zum Abbruch vorgemerkt. Kein Veröffentlichungsauftrag daraus ableiten. Ziel bleibt eine gemeinsame Veröffentlichung als SerKal 1.2 diese Woche, nach Sammlung und Prüfung der restlichen Punkte.
 
 Zusätzlicher Beleg von VelcroFist: Screenshot zeigt englische Oberfläche mit deutschen Titelbestandteilen bei Dark Winds, Die Ringe der Macht und Dark Matter; laut Meldung ebenso im Kalender. Das Bild belegt die Nutzerbeobachtung, aber keine aktuelle Programmversionsnummer. Vor Freigabe prüfen, ob aktueller Titelauflöser und Wartung bestehender Archiv-/Kalendertitel diese Fälle bereits korrigieren oder weitere Reparatur nötig ist. Keine unabhängige Live-TMDB-Abfrage und keine bereits erfolgte Korrektur behauptet. Screenshot und private Kommunikation nicht ins Repository kopiert.
+
+
+## CE SerKal – 26.10.2026: gebündelte 32 an Kurt – Abschlusstest vor 1.2-Freigabe
+
+Status: **APK SIGNIERT UND GELIEFERT / BEIDE QUELLSTÄNDE ÜBERNOMMEN / KURTS PRAKTISCHE FREIGABE AUSSTEHEND**
+
+Kurt hat die Sammlung weiterer Punkte abgeschlossen und ausdrücklich die neue Version 32 angefordert. Damit ist der vorherige Ausgabestopp für diesen gebündelten Prüfstand aufgehoben. Nach erfolgreichem eigenen Test will Kurt die Arbeit an Installer- und Website-Chatty übergeben; keine vorzeitige öffentliche Finalfreigabe daraus ableiten.
+
+Vollständige konkrete Übergabe: [SerKal 1.2 – Prüfstand 32](serkal-1.2-pruefstand-32-uebergabe-2026-10-26.md).
+
+Enthalten: gemeinsame Android-Fußzeile mit echten deutschen/britischen Flaggenbildern, Hell/Dunkel, schmalem Kalender-/Hilfe-Knopf und SerKal beenden ganz rechts; kompaktes Bearbeiten in der Mitte; bestehender Reset und volle Archivhöhe. Der explizite Beenden-Knopf schließt per finishAndRemoveTask statt die Zurück-Funktion aufzurufen. Zusätzlich konkrete Kalenderlücke aus VelcroFists Meldung behoben: vorhandenen Titel der Kalendersprache statt immer Dateinamentitel verwenden; auf Desktop und Android. Alte fehlende/falsche Übersetzungsmetadaten können weiterhin Wartung in der gewünschten Sprache erfordern. Keine persönlichen Archive oder Kalender hier geändert.
+
+- Gemeinsame Nummer **32**, technisch **1.2.0-alpha.32**, Android versionCode 40.
+- Desktop regulär: `serkal-0.0.5-archiv-start`, Merge `9c26d8988ff778098d7eb37e2082a819590d4439`, PR #8.
+- Android regulär: `android-preview-0.0.5`, Merge `bf3c6003d9078b955f67eeb3a6b2f6d761aa5c13`, PR #7.
+- Gebauter Android-Quellstand `23b63af3cab33f6627375ebe81baaa6254612782`; erfolgreicher Lauf https://github.com/KurtV731/serkal_desktop/actions/runs/40383813910 .
+- Gesamte lokale Desktop-Suite bestanden; **67 Android-Tests, 0 Fehler, 0 Fehlschläge**, danach APK-Bau erfolgreich.
+- **032-SerKal-Android-1.2-Alpha32.apk**, 2.895.623 Bytes; SHA-256 `c2727776302120643116bb6bff583bd2cd8caeb230bbdbe71a0fd19ecdda3c3f`. Bisherige Signatur geprüft; keine Signaturdaten veröffentlicht.
+- Übertragene Dateien zurückgelesen; normale Branches nach Merges geprüft. Kurt holt Desktop mit **git pull**. Wie vereinbart erst alle vier Geräte aktualisieren, danach starten.
+
+**Installer-/Website-Chatty:** Übergabedokument ist vorbereitet; zunächst auf Kurts ausdrückliches Ergebnis warten. Noch kein öffentlicher 1.2-Windows-Installer gebaut, keine Website veröffentlicht, keine alten öffentlichen Dateien durch CE ersetzt. Weitere Wartungsbericht- und Kartierungswünsche bleiben separat offen.
