@@ -21,7 +21,7 @@ final class CalendarCopy {
             for(int i=0;i<dates.length();){int last=i;while(last+1<dates.length() && dates.getString(last+1).equals(dates.getString(i)))last++;
                 JSONObject p=new JSONObject().put("serkal","1").put("tmdbId",String.valueOf(e.getInt("tmdbId"))).put("season",e.getString("seasonLabel"))
                     .put("episodeFrom",String.valueOf(i+1)).put("episodeTo",String.valueOf(last+1));
-                String summary=e.getString("title")+" ("+e.getString("year")+") "+e.getString("seasonLabel")+String.format(Locale.ROOT,"E%02d",i+1)+(last==i?"":String.format(Locale.ROOT,"–E%02d",last+1));
+                String summary=ArchiveOrder.title(e,e.optString("calendarLanguage","de").equals("en"))+" ("+e.getString("year")+") "+e.getString("seasonLabel")+String.format(Locale.ROOT,"E%02d",i+1)+(last==i?"":String.format(Locale.ROOT,"–E%02d",last+1));
                 String providers=WatchProviders.text(e.optJSONObject("watchProviders"),e.optString("note"),e.optString("calendarLanguage").equals("en"));
                 JSONObject event=new JSONObject().put("summary",summary).put("description","SerKal"+(providers.isEmpty()?"":"\n"+providers)).put("start",new JSONObject().put("date",dates.getString(i)))
                     .put("end",new JSONObject().put("date",ArchiveCodec.dateShift(dates.getString(i),1))).put("transparency","transparent").put("extendedProperties",new JSONObject().put("private",p));
