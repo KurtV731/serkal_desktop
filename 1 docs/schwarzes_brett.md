@@ -4233,3 +4233,20 @@ Nach Kurts ausdrücklicher Gesamtfreigabe wurden die deutschen und englischen Do
 Letzter Website-Commit dieser Vorbereitung: `5298635e84e3f4f474dd4f7f05d0326a64e27c58`.
 
 Die Binärdateien liegen ausschließlich auf Kurts Windows-Rechner unter `C:\ppd\serkal\veroeffentlichungen\1.2`; die GitHub-App kann nicht auf dieses lokale Laufwerk zugreifen. Kurt kopiert deshalb unverändert `serkal-desktop.exe` und `serkal-android.apk` nach `C:\ppd\serkal\serkal-pages\up\download` und startet danach `PULL-PD.BAT`. Erst dessen erfolgreiche Prüfsummen- und WinSCP-Abschlussmeldung bestätigt die Veröffentlichung. Eine bereits erfolgte Serververöffentlichung wird hier noch nicht behauptet.
+
+
+## CE SerKal – 26.10.2026: begonnene Neuerungsliste wiedergefunden, englische Release Notes 1.2 ergänzt
+
+Status: **TEXT FERTIG UND GEPRÜFT / KEINE WEBSITEÄNDERUNG DURCH CE**
+
+Kurt fragte nach der früher begonnenen Liste neuer Funktionen, Verbesserungen und Fehlerbehebungen, auf Englisch für die aktuelle 1.2.
+
+Gefunden: `1 docs/werkstatt/neuerungen-1.2.md` auf `serkal-0.0.5-archiv-start`, Stand **04.10.2026**. Diese frühe Liste enthält inzwischen überholte Offen-/Vormerkungen, unter anderem zu gemeinsamem TMDB-Key, Wartung und Anbietern. Sie wurde als historischer Arbeitsstand gekennzeichnet, der alte Text bleibt erhalten. Dokumentationscommit `033164256c706cfe10f49d6417199009fe8b8c23`.
+
+Aktuelle englische Zusammenfassung: [SerKal 1.2 — What's new](release-notes-1.2-en.md), Datei `1 docs/release-notes-1.2-en.md` auf main, Commit `3d198c216e60dcd3d7ccae5bdc0ec5dc35fcffa9`.
+
+Abgleich mit Fachunterlagen und dem tatsächlich gelieferten Stand: Windows/Android, vollständige gemeinsame Archivkopie, Suchverbesserungen, Wartung im persönlich verfolgten Staffelbereich, Anbieter nach Land, Ankündigungen ohne erfundene Termine, explizite maßgebliche Archivwahl, Sprach-/Kalendertitel, Gesehen-Umschaltung, Android-Listenhöhe/Reset/Flaggen/Beenden, Schließen und Update. Historische Aussagen wurden nicht ungeprüft als aktuell übernommen.
+
+Die englische Datei enthält **12 konkrete Korrekturpunkte**; das ist eine redaktionelle Gruppierung, keine aus einem vollständigen Bugtracker abgeleitete Gesamtzahl einzelner Fehler. Automatisierte Testzahlen werden nicht als Zahl behobener Bugs ausgegeben. Trailer, lernende Rechtschreibkorrektur und noch offene Wunschfunktionen werden nicht als fertig angekündigt. Keine Google-Play-Verfügbarkeit behauptet; Android wird als APK bezeichnet. Hinweise auf nötige Wartung für alte Titel und Länder-/Seriengrenzen bei Anbietern sind enthalten.
+
+Die Release Notes sind als Text für Kurt und eine spätere Übernahme auf Website/Release vorbereitet. Keine Website veröffentlicht, keine Nachricht an Tester versendet und keine Programmdatei neu gebaut.
