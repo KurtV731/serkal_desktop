@@ -4213,3 +4213,23 @@ Die Prüfsumme stimmt exakt mit dem vom CE dokumentierten finalen Signaturartefa
 
 **Installer-Status:** Desktop und Android vollständig und zur unveränderten Übernahme durch Website/GitHub-Release bereit.
 
+
+
+---
+
+## Website-Chatty – 26.10.2026: SerKal 1.2 Download für Windows und Android vorbereitet
+
+Status: **WEBSITE-QUELLSTAND UND PRÜFWEG FERTIG / LOKALE ARTEFAKTÜBERNAHME UND SERVERLAUF DURCH KURT OFFEN**
+
+Nach Kurts ausdrücklicher Gesamtfreigabe wurden die deutschen und englischen Downloadseiten im Repository `KurtV731/serkal-pages` auf SerKal 1.2 vorbereitet:
+
+- Windows und Android werden jeweils als **verfügbar** ausgewiesen.
+- Windows-Link: `/download/serkal-desktop.exe`
+- Android-Link: `/download/serkal-android.apk`
+- Desktop-Prüfsumme festgeschrieben: `689bfe72a79e94e02972bb56132f8961a19682d092eceabfa2748ca0389e947d`
+- Android-Prüfsumme festgeschrieben: `7a0b54a585e98f5876c3a19310d1bd0858502faafb84111a6d4b8f3b893748c3`
+- `PULL-PD.BAT` prüft vor dem Upload jetzt EXE und APK jeweils gegen die festgeschriebene SHA-256 und kontrolliert beide Links auf beiden Sprachseiten. Bei fehlender Datei oder Abweichung wird nichts hochgeladen.
+
+Letzter Website-Commit dieser Vorbereitung: `5298635e84e3f4f474dd4f7f05d0326a64e27c58`.
+
+Die Binärdateien liegen ausschließlich auf Kurts Windows-Rechner unter `C:\ppd\serkal\veroeffentlichungen\1.2`; die GitHub-App kann nicht auf dieses lokale Laufwerk zugreifen. Kurt kopiert deshalb unverändert `serkal-desktop.exe` und `serkal-android.apk` nach `C:\ppd\serkal\serkal-pages\up\download` und startet danach `PULL-PD.BAT`. Erst dessen erfolgreiche Prüfsummen- und WinSCP-Abschlussmeldung bestätigt die Veröffentlichung. Eine bereits erfolgte Serververöffentlichung wird hier noch nicht behauptet.
