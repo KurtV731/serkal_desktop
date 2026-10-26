@@ -28,13 +28,13 @@ jobs:
         working-directory: android-preview
         run: gradle testDebugUnitTest
       - name: Build unsigned APK
-        if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[build apk]')
+        if: false # Kurt: release on hold until remaining points are collected
         working-directory: android-preview
         run: |
           gradle assembleDebug
           cp "$ANDROID_HOME/build-tools/35.0.0/lib/apksigner.jar" apksigner.jar
       - uses: actions/upload-artifact@v4
-        if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[build apk]')
+        if: false # Kurt: release on hold until remaining points are collected
         with:
           name: 032-SerKal-Android-unsigned
           path: |
