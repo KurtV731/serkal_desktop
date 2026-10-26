@@ -4085,7 +4085,7 @@ Enthalten: gemeinsame Android-Fußzeile mit echten deutschen/britischen Flaggenb
 
 - Ausgangspunkt Desktop: CE-Merge `9c26d8988ff778098d7eb37e2082a819590d4439`
 - neuer Installerzweig: `installer-release-1.2-build`
-- stabiler Quellstand für den Windows-Bau: `790783b01961ac84ba323877166b4c66dc569023`
+- stabiler Quellstand für den Windows-Bau: `a046d4d3b2cbfe1f92e75e5167d9910043e84649`
 - Pull Request: [SerKal Desktop PR #9](https://github.com/KurtV731/serkal_desktop/pull/9)
 - Produktversion: `1.2.0`
 - gemeinsamer Archiv-/Datenstand bleibt: `32`
