@@ -891,20 +891,6 @@ public class MainActivity extends Activity {
         styleTopButton_(zoomIn);
         zoomIn.setOnClickListener(v -> { if (zoomSurface != null) zoomSurface.zoomBy(1.25f); });
         top.addView(zoomIn, new LinearLayout.LayoutParams(dp(38), dp(28)));
-        Button language = new Button(this);
-        language.setText(english ? "DE" : "EN");
-        styleTopButton_(language);
-        language.setOnClickListener(v -> {
-            english = !english; getPreferences(0).edit().putBoolean("english",english).apply(); buildScreen();
-            if (selectedArchiveEntry != null) showArchiveEntry(selectedArchiveEntry);
-            else if (selectedTmdbId > 0) {
-                try { selectSeries(new JSONObject().put("id",selectedTmdbId).put("name",selectedName.getText().toString()),credential,english); }
-                catch(Exception ignored) {}
-            } else if (queryField.getText().length() >= 2 && !credential.isEmpty()) searchNow();
-        });
-        language.setMinHeight(0);
-        language.setMinimumHeight(0);
-
         Button theme = new Button(this); theme.setText(english ? (dark ? "Light" : "Dark") : (dark ? "Hell" : "Dunkel"));
         styleTopButton_(theme);
         theme.setOnClickListener(v -> { dark=!dark;getPreferences(0).edit().putBoolean("dark",dark).apply();setPalette();configureFullscreen_();buildScreen(); });
@@ -972,15 +958,6 @@ public class MainActivity extends Activity {
         Button search=button(english?"Search":"Suchen");search.setOnClickListener(v->searchNow());leftButtons.addView(search);
         Button add=button(english?"Add to archive":"Ins Archiv");add.setTag("addToArchive");add.setOnClickListener(v->askForSeason());leftButtons.addView(add);
         left.addView(leftButtons,2);
-        LinearLayout preferences=new LinearLayout(this);preferences.setOrientation(LinearLayout.HORIZONTAL);preferences.setTag("preferences");
-        language.setLayoutParams(new LinearLayout.LayoutParams(0,dp(28),1));preferences.addView(language);
-        theme.setLayoutParams(new LinearLayout.LayoutParams(0,dp(28),1));preferences.addView(theme);
-        Button help=button(english?"Help":"Hilfe");help.setLayoutParams(new LinearLayout.LayoutParams(0,dp(28),1));help.setOnClickListener(v->showHelp());preferences.addView(help);
-        left.addView(preferences);
-        LinearLayout utilities=new LinearLayout(this);utilities.setOrientation(LinearLayout.HORIZONTAL);utilities.setTag("utilities");
-        Button calendarButton=button(english?"Open calendar":"Kalender öffnen");calendarButton.setOnClickListener(v->openCalendar());utilities.addView(calendarButton);
-        Button quitButton=button(english?"Exit SerKal":"SerKal beenden");quitButton.setTag("exitSerKal");quitButton.setOnClickListener(v->exitSerKal());utilities.addView(quitButton);
-        left.addView(utilities);
         columns.addView(left);
 
         LinearLayout middle = panel(43);
@@ -1006,6 +983,8 @@ public class MainActivity extends Activity {
         middle.addView(detailScroll, new LinearLayout.LayoutParams(-1, 0, 1));
         LinearLayout editBar=new LinearLayout(this);editBar.setOrientation(LinearLayout.HORIZONTAL);
         Button edit=button(english ? "Edit ▾" : "Bearbeiten ▾");
+        edit.setTag("editEntry");edit.setMinWidth(0);edit.setMinimumWidth(0);
+        edit.setPadding(dp(8),0,dp(8),0);edit.setLayoutParams(new LinearLayout.LayoutParams(-2,dp(30)));
         edit.setOnClickListener(v->{archiveDialogOpen=true;dialogBuilder().setTitle(english?"Selected series":"Ausgewählte Serie")
             .setItems(english?new String[]{"Edit notes / offset / provider","Toggle watched","Delete complete series"}:new String[]{"Notiz / Offset / Anbieter ändern","Gesehen umschalten","Ganze Serie löschen"},(d,which)->handler.post(()->{if(which==0)editArchiveNotes();else if(which==1 && selectedArchiveEntry!=null)toggleArchiveSeen(selectedArchiveEntry);else if(which==2)deleteArchiveSeries();}))
             .setNegativeButton(english?"Close":"Schließen",null).setOnDismissListener(d->archiveDialogOpen=false).show();});editBar.addView(edit);middle.addView(editBar);
@@ -1031,6 +1010,20 @@ public class MainActivity extends Activity {
         renderArchive();
         columns.addView(right);
 
+        LinearLayout footer=new LinearLayout(this);footer.setOrientation(LinearLayout.HORIZONTAL);footer.setGravity(Gravity.CENTER_VERTICAL);footer.setTag("globalFooter");
+        for(boolean en:new boolean[]{false,true}){
+            android.widget.ImageButton flag=new android.widget.ImageButton(this);
+            flag.setImageDrawable(new LanguageFlagDrawable(en));flag.setScaleType(ImageView.ScaleType.FIT_CENTER);
+            flag.setPadding(dp(6),dp(5),dp(6),dp(5));flag.setBackgroundColor(en==english?BLUE:CARD);
+            flag.setContentDescription(en?"English":"Deutsch");flag.setTag(en?"languageEN":"languageDE");
+            flag.setOnClickListener(v->selectLanguage(en));footer.addView(flag,new LinearLayout.LayoutParams(dp(40),dp(32)));
+        }
+        theme.setTag("themeToggle");theme.setMinWidth(0);theme.setMinimumWidth(0);theme.setPadding(dp(8),0,dp(8),0);footer.addView(theme,new LinearLayout.LayoutParams(-2,dp(32)));
+        Button calendarButton=footerButton(english?"Open calendar":"Kalender öffnen");calendarButton.setTag("openCalendar");calendarButton.setOnClickListener(v->openCalendar());footer.addView(calendarButton);
+        Button help=footerButton(english?"Help":"Hilfe");help.setTag("help");help.setOnClickListener(v->showHelp());footer.addView(help);
+        footer.addView(new View(this),new LinearLayout.LayoutParams(0,1,1));
+        Button quitButton=footerButton(english?"Exit SerKal":"SerKal beenden");quitButton.setTag("exitSerKal");quitButton.setOnClickListener(v->exitSerKal());footer.addView(quitButton);
+        root.addView(footer,new LinearLayout.LayoutParams(-1,dp(36)));
         setContentView(root);
         if (!previousName.toString().isEmpty()) selectedName.setText(previousName);
         selectedInfo.setText(previousInfo);
@@ -1041,6 +1034,18 @@ public class MainActivity extends Activity {
         refreshLocalCopy();
         if (selectedTmdbId>0 && previousPoster==null) showPoster(selectedTmdbId, selectedDetail==null ? null : selectedDetail.optString("poster_path"));
         else if (selectedTmdbId==0 && displayedResults.isEmpty() && previousQuery.length()>=2 && !credential.isEmpty()) searchNow();
+    }
+
+    private Button footerButton(String label){
+        Button b=button(label);b.setMinWidth(0);b.setMinimumWidth(0);b.setPadding(dp(8),0,dp(8),0);
+        LinearLayout.LayoutParams params=new LinearLayout.LayoutParams(-2,dp(32));params.setMargins(dp(2),0,dp(2),0);b.setLayoutParams(params);return b;
+    }
+    private void selectLanguage(boolean en){
+        if(english==en)return;
+        english=en;getPreferences(0).edit().putBoolean("english",english).apply();buildScreen();
+        if(selectedArchiveEntry!=null)showArchiveEntry(selectedArchiveEntry);
+        else if(selectedTmdbId>0){try{selectSeries(new JSONObject().put("id",selectedTmdbId).put("name",selectedName.getText().toString()),credential,english);}catch(Exception ignored){}}
+        else if(queryField.getText().length()>=2 && !credential.isEmpty())searchNow();
     }
 
     private void styleTopButton_(Button button) {
