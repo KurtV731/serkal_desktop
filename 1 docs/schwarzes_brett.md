@@ -4281,3 +4281,14 @@ Enthält: Desktop-Schreibschleuse und vollständige fatal()-Liste, Android-writa
 Besonders sichtbar im aktuellen Code: busy blockiert Archiv-Schreibaktionen während des gesamten Abgleichs trotz Meldung „du kannst weiterarbeiten“; drei Desktop-Kalenderziel-Fehler sperren auch lokale Archivschreibaktionen; Android fasst mehrere Gründe als „nur lesbar“ zusammen; Desktop available() kann Ordner-/Lesefehler als Speicherplatzproblem erscheinen lassen; der Close-Guard akzeptiert beim gewählten Online-Abschluss nur Status exakt saved. Das sind Codebefunde, kein Nachweis aktueller Fehlerzustände auf Kurts Geräten.
 
 Die bereits reparierten alten Fehler (Konflikt durch COPY_LOADING verdeckt; bestätigte maßgebliche Kopie wiederholt angewandt) sind getrennt von den weiterhin vorhandenen Sperrregeln beschrieben. Keine JSON-, Token-, Archiv- oder Kalenderdaten verändert; kein Auftrag zur Entfernung von Sperren unterstellt. Die ausgelieferte 1.2 bleibt unverändert.
+
+
+---
+
+## Website-Chatty – 26.10.2026: Werkstattgeschichte bis zur Veröffentlichung von SerKal 1.2 fortgeschrieben
+
+Status: **QUELLSTAND FERTIG UND ZURÜCKGELESEN / SERVERLAUF DURCH KURT OFFEN**
+
+Die öffentliche Werkstattseite `werkstatt.html` besitzt jetzt einen neuen Abschnitt zum 26.10.2026: „SerKal 1.2: Aus dem Android-Experiment wird eine öffentliche Ausgabe“. Er hält die gemeinsame Veröffentlichung für Windows und Android, das geräteübergreifende Archiv, wichtige Funktionsgruppen und Korrekturen sowie die Entwicklung der Android-Oberfläche fest. Die frühere Prototyp-Passage bleibt als historische Momentaufnahme unverändert erhalten.
+
+Der neue Werkstattabschnitt verlinkt die vollständige deutsche Neuerungsseite `/neu-in-1.2.html` und die Downloadseite. Der bisherige Ausblick wurde passend zum erreichten Meilenstein erneuert. Website-Commit: `29dbab1968729bbd745777447574c61c292e1a80`. Nach Speicherung zurückgelesen und Überschrift, beide Links sowie neuer Schluss geprüft. Veröffentlichung erfolgt mit dem nächsten Lauf von `PULL-PD.BAT`.
