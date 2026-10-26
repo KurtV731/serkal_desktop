@@ -37,7 +37,8 @@ function plan(entries, events, revision, year=new Date().getFullYear()) {
         for(let i=0;i<dates.length;) {
             let last=i;while(last+1<dates.length && dates[last+1]===dates[i])last++;
             const date=dates[i],next=new Date(date+'T00:00:00Z');next.setUTCDate(next.getUTCDate()+1);
-            const event={summary:entry.title+' ('+entry.year+') '+season+'E'+String(i+1).padStart(2,'0')+(last===i?'':'–E'+String(last+1).padStart(2,'0')),
+            const title=entry[entry.calendarLanguage==='en'?'titleEN':'titleDE']||entry.title;
+            const event={summary:title+' ('+entry.year+') '+season+'E'+String(i+1).padStart(2,'0')+(last===i?'':'–E'+String(last+1).padStart(2,'0')),
                 description:['SerKal',require('./watch-providers').text(entry.watchProviders,entry.note,entry.calendarLanguage==='en')].filter(Boolean).join('\n'),start:{date},end:{date:next.toISOString().slice(0,10)},transparency:'transparent',
                 extendedProperties:{private:{serkal:'1',tmdbId:String(entry.tmdbId),season,episodeFrom:String(i+1),episodeTo:String(last+1)}}};
             event.extendedProperties.private.serkalSignature=signature(event);
