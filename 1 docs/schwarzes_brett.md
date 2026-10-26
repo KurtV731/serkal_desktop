@@ -4023,3 +4023,22 @@ Historische interne Dokumente unter `docs` bleiben als Projektprotokoll erhalten
 
 Die Veröffentlichung erfolgt bei Kurt in `C:\ppd\serkal\serkal-pages` über den vorhandenen synchronisierenden Lauf `PULL-PD.BAT`. Weil WinSCP `up` mit dem Serverziel spiegelnd synchronisiert, werden die gelöschten Dateien dabei auch auf serkal.de entfernt. Erst nach diesem Lauf live prüfen: `/download.html`, `/download-en.html`, `/sitemap.xml`; `/hasa.html` und `/download/others/hasa/` dürfen danach nicht mehr ausgeliefert werden. Eine bereits erfolgte Serversynchronisation wird nicht behauptet.
 
+## Website-Chatty – 26.10.2026: SerKal-Websitewerkzeuge auf neuen Ordner bereinigt
+
+Status: **WERKZEUGBESTAND AUF SERKAL-PAGES MAIN BEREINIGT / LOKALER ABRUF UND SERVERLAUF DURCH KURT OFFEN**
+
+Kurts neuer verbindlicher Websitepfad ist `C:\ppd\serkal\serkal-pages`. Die von ihm vorgelegten fünf BAT-Dateien wurden geprüft. Ursache der gemeldeten Fehlermeldung war `SERKAL_pull_v2.bat` mit dem alten fest eingetragenen Pfad `C:\serkal-pages`.
+
+Aktiver Werkzeugbestand im Repository `KurtV731/serkal-pages`:
+
+- `PULL-PD.BAT`: Hauptwerkzeug für GitHub-Abruf, Installer-/Prüfsummenprüfung und vollständige spiegelnde Synchronisation von `up` nach serkal.de; bereits pfadunabhängig über den eigenen BAT-Ordner.
+- `NUR-WEBSITE-HOCHLADEN.BAT`: neu als pfadunabhängiger Sonderweg für reine Website-Synchronisation ohne Git-Pull und ohne Installer-/Programmpakete. Prüft vorher, dass unter `up` keine lokalen Abweichungen liegen.
+- `SERKAL_pull_v2.bat`: aus Kompatibilitätsgründen behalten, aber vollständig auf eine einfache Weiterleitung zu `PULL-PD.BAT` reduziert.
+- `support\elwms_website_check.bat`: bleibt als lokales Prüfwerkzeug, führt keinen Upload aus.
+
+Entfernt: `RELEASE-1-0005-FESTSCHREIBEN.BAT`, da diese einmalige Veröffentlichung abgeschlossen ist. Die vorgelegte `SERKAL-1-1-WEBSITE-VEROEFFENTLICHEN.BAT` ist nicht Bestandteil des aktuellen Repositorys und bleibt bis zu einem ausdrücklichen 1.1-Releaseauftrag außerhalb des aktiven Werkzeugbestands. Dateien mit `(1)` im Namen sind lokale Downloadkopien und können gelöscht werden.
+
+Zusätzlich erklärt `WEBSITE-WERKZEUGE-LESEN.txt` den verbindlichen Einsatz. Letzter geprüfter Commit `ca1f11af83c6ce93e197be123cd6629510f93688`. Nach frischem Abruf keine aktive Root-BAT mit festem `C:\serkal-pages`-Pfad. HASA-Bereinigung aus dem vorherigen Auftrag bleibt enthalten.
+
+Kurt aktualisiert lokal einmal direkt mit `git -C C:\ppd\serkal\serkal-pages pull --ff-only origin main`, beseitigt danach gegebenenfalls lokale `(1)`-Kopien und startet für die aktuelle vollständige Bereinigung `C:\ppd\serkal\serkal-pages\PULL-PD.BAT`. Eine bereits erfolgte Serversynchronisation wird nicht behauptet.
+
