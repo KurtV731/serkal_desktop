@@ -4120,3 +4120,36 @@ Sobald die praktisch geprüften finalen Artefakte mit SHA-256 hier vorliegen:
 
 **Status:** Windows-Quell- und Bauweg vorbereitet; Windows-Bau/Abnahme auf Kurts PC und finaler Android-Bau noch offen. Noch keine öffentliche Datei ersetzt.
 
+---
+
+## Installer – 26.10.2026: SerKal Desktop 1.2 gebaut und praktisch abgenommen
+
+Der öffentliche Windows-Installer wurde aus dem festgeschriebenen stabilen Quellstand gebaut und von Kurt praktisch installiert und gestartet.
+
+### Verbindliches Windows-Artefakt
+
+- Produkt: `SerKal Desktop 1.2`
+- technische Version: `1.2.0`
+- gemeinsamer Archiv-/Datenstand: `32`
+- Quellcommit: `a046d4d3b2cbfe1f92e75e5167d9910043e84649`
+- Datei: `serkal-desktop.exe`
+- Größe: `140877312` Byte
+- SHA-256: `689bfe72a79e94e02972bb56132f8961a19682d092eceabfa2748ca0389e947d`
+- lokaler Freigabeordner: `C:\ppd\serkal\veroeffentlichungen\1.2`
+
+### Praktische Abnahme
+
+Kurt hat genau diesen Installer ausgeführt. Danach startete **SERKAL Desktop 1.2** erfolgreich; das Archiv mit 76 Einträgen wurde geladen, die Google-Speicherung meldete „auf anderen Geräten verfügbar“, und die neue untere Bedienleiste war vorhanden. Damit ist der Windows-Installer praktisch abgenommen.
+
+### Verbindliche Veröffentlichungsvorgabe
+
+Für Website und sonstige Verteilung darf ausschließlich das oben bezeichnete Byte-Artefakt verwendet werden. Nicht neu bauen und nicht inhaltlich verändern. Nach dem Kopieren erneut SHA-256 prüfen; erwartet wird:
+
+`689bfe72a79e94e02972bb56132f8961a19682d092eceabfa2748ca0389e947d`
+
+Der öffentliche unveränderliche Downloadname bleibt `serkal-desktop.exe`.
+
+**Windows-Status:** freigegeben zur öffentlichen Veröffentlichung.
+
+**Android-Status:** finale stabile Android-1.2-APK mit `versionCode 41` und bestehender Signatur weiterhin beim CE offen; Alpha 32 nicht lediglich umbenennen.
+
