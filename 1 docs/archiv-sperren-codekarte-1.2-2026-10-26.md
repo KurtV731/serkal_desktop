@@ -93,6 +93,12 @@ Das sind zusätzliche Desktop-UI-Prüfungen:
 
 Die Prüfung läuft in der Ansicht alle zwei Sekunden. Sie ist **kein eigener permanenter Google-Abruf**. Im normalen Kopiermodus wird beim Start synchronisiert; weitere Abgleiche entstehen durch Änderungen, die ausdrückliche Synchronisationsaktion und Wiederholungen nach Fehlern. Die älteren 10-/30-Sekunden-Beobachter stehen im anderen Startzweig: [main.js](https://github.com/KurtV731/serkal_desktop/blob/a046d4d3b2cbfe1f92e75e5167d9910043e84649/2%20src/backend/main.js#L4124).
 
+### Zwei unterschiedliche Arten von „dirty“
+
+- `state.isDirty` in der Oberfläche: Eingaben sind noch nicht als lokale Archivänderung gespeichert.
+- `state.dirty` im Kopiermanager: Daten sind lokal gespeichert, aber noch nicht bei Google bestätigt.
+- „Lokal gespeichert · Übertragung ausstehend“ ist für sich allein **keine** allgemeine Schreibsperre. Hinzukommen können `busy`, fehlende Initialisierung, ein fatal()-Fehler oder eine Dateisperre.
+
 ## 5. Warum Google einen Archivkonflikt meldet
 
 [archive-copy.js – head() und synchronize()](https://github.com/KurtV731/serkal_desktop/blob/a046d4d3b2cbfe1f92e75e5167d9910043e84649/2%20src/common/archive-copy.js#L103) prüfen:
@@ -147,6 +153,8 @@ Quellen: [Desktop-Kopiermanager](https://github.com/KurtV731/serkal_desktop/blob
 - Aktiver Prozess oder anderer Rechner: `ARCHIVE_LOCK_BUSY`.
 - Nicht lesbarer/eindeutiger Sperrdatensatz: `ARCHIVE_LOCK_UNKNOWN`.
 - Beim Freigeben abweichendes Besitzertoken: `ARCHIVE_LOCK_LOST`.
+
+Die Dateisperre koordiniert Zugriffe auf das reale Dateisystem. Der Code weist selbst darauf hin, dass durch einen Synchronisationsclient replizierte Ordner damit keine verlässliche geräteübergreifende Mutex-Sperre erhalten. Der Google-Abgleich besitzt deshalb zusätzlich seine eigene Revisionsprüfung.
 
 Eine tote Prozesskennung des eigenen Rechners kann der Code bereinigen. Für ein bereits vorhandenes Guard-Verzeichnis enthält die gezeigte Erwerbslogik dagegen keine Ablaufzeit. Das ist eine Eigenschaft der Logik, kein Nachweis, dass eine solche Datei bei Kurt vorliegt.
 
