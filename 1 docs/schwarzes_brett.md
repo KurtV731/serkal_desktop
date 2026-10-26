@@ -4250,3 +4250,19 @@ Abgleich mit Fachunterlagen und dem tatsächlich gelieferten Stand: Windows/Andr
 Die englische Datei enthält **12 konkrete Korrekturpunkte**; das ist eine redaktionelle Gruppierung, keine aus einem vollständigen Bugtracker abgeleitete Gesamtzahl einzelner Fehler. Automatisierte Testzahlen werden nicht als Zahl behobener Bugs ausgegeben. Trailer, lernende Rechtschreibkorrektur und noch offene Wunschfunktionen werden nicht als fertig angekündigt. Keine Google-Play-Verfügbarkeit behauptet; Android wird als APK bezeichnet. Hinweise auf nötige Wartung für alte Titel und Länder-/Seriengrenzen bei Anbietern sind enthalten.
 
 Die Release Notes sind als Text für Kurt und eine spätere Übernahme auf Website/Release vorbereitet. Keine Website veröffentlicht, keine Nachricht an Tester versendet und keine Programmdatei neu gebaut.
+
+
+---
+
+## Website-Chatty – 26.10.2026: vollständige SerKal-1.2-Neuerungsliste für die Website umgesetzt
+
+Status: **QUELLSTAND FERTIG UND ZURÜCKGELESEN / ERNEUTER SERVERLAUF DURCH KURT OFFEN**
+
+Auf Grundlage der vom CE geprüften englischen Release Notes wurden zwei vollständige öffentliche Seiten erstellt:
+
+- Deutsch: `/neu-in-1.2.html`
+- Englisch: `/whats-new-1.2.html`
+
+Beide Seiten enthalten die abgestimmten 7 neuen Funktionsgruppen, 10 Verbesserungen, 12 konkret beschriebenen Fehlerkorrekturen und die wichtigen Hinweise zum Umstieg auf 1.2. Die Downloadseiten verlinken die jeweilige Sprachfassung direkt bei Windows und Android. Beide Seiten besitzen Canonical-/hreflang-Verknüpfungen und wurden in `sitemap.xml` aufgenommen.
+
+Letzter Website-Commit: `a5a4959059a561ffed24dff353ded0bd23d962e6`. Dateien nach Speicherung zurückgelesen: Überschriften, Zählblöcke, Download-Rücklinks und beide Sitemap-Einträge vorhanden. Programmdateien und Prüfsummen wurden durch diese reine Websiteergänzung nicht verändert. Kurt veröffentlicht den ergänzten Stand mit einem erneuten Lauf von `PULL-PD.BAT`.
