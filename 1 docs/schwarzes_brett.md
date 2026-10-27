@@ -4362,3 +4362,25 @@ Es wird kein Setup installiert, keine Verknüpfung angelegt und nichts nach `C:\
 
 **Nächster Schritt:** Kurt führt die Bau-CMD auf Windows aus und meldet Endausgabe beziehungsweise Fehler. Erst nach erfolgreichem Bau beginnt die im CE-Dokument beschriebene praktische Abnahmematrix.
 
+
+
+---
+
+## Installer – 27.10.2026: isolierter Windows-Sitzungstest 33 praktisch bestanden
+
+Status: **WINDOWS-PRÜFBAU UND ZENTRALER SITZUNGSABLAUF BESTANDEN / NICHT ÖFFENTLICH VERÖFFENTLICHEN**
+
+Kurt hat den isolierten portablen Windows-Prüfstand aus dem festgeschriebenen CE-Stand praktisch getestet:
+
+- sichtbare Programmversion: `SerKal Desktop 1.2.1-alpha.33`
+- eigenes Testprofil: `%APPDATA%\SerKal-Session-Test-33`
+- das isolierte Google-Testarchiv wurde beim Start geladen;
+- die Statusanzeige bestätigte den lokalen Sitzungsbetrieb;
+- während der Sitzung vorgenommene Änderungen wurden als noch nicht zu Google gespeichert angezeigt;
+- beim regulären Beenden wurden diese ungespeicherten Änderungen automatisch als vollständiger Archivstand zu Google geschrieben;
+- nach dem anschließenden Neustart wurden die drei Testeinträge erneut aus dem Google-Testarchiv geladen;
+- die zuvor geänderten Werte waren vorhanden, die Anzeige meldete wieder „Google archive loaded · working locally“.
+
+Damit ist der zentrale Desktop-Ablauf **Start laden → ausschließlich lokal arbeiten → beim regulären Beenden einmal vollständig speichern → beim Neustart wieder laden** praktisch nachgewiesen.
+
+Der Build bleibt ein isolierter Teststand. Er ersetzt weder die öffentliche Desktop-Version 1.2 noch deren Downloadartefakt und darf nicht veröffentlicht werden. Weitere fachliche Schritte, insbesondere Android-Sitzungsumbau und endgültige Übernahme in eine neue gemeinsame Produktfassung, bleiben beim CE.
