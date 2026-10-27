@@ -45,7 +45,8 @@ Der UI-Verbindungsdialog erhält die ausführliche Fehlermeldung ebenfalls.
 Wichtig: Ein aussagekräftigerer Fehlerbericht behebt keinen von Google verweigerten Zugriff. VelcroFists konkrete 403-Ursache ist noch nicht geklärt. Den neuen vollständigen Antworttext aus einer echten betroffenen Verbindung zur Diagnose verwenden.
 
 ## Eigene Prüfung
-- Vollständiges `npm test` lokal bestanden; zusätzliche Sitzungstests über `npm run test:session`.
+- Vollständiges `npm test` lokal bestanden: 33 bisherige und 5 zusätzliche Testskripte, alle erfolgreich. Zusätzliche Sitzungstests über `npm run test:session`.
+- Derselbe Quellcommit auch auf GitHub Actions erfolgreich geprüft: https://github.com/KurtV731/serkal_desktop/actions/runs/40466024439 .
 - Neue Fälle: Start ersetzt alte Sitzung; kein Upload bei mehreren Bearbeitungen; ein Abschlussupload; unveränderter Abschluss ohne Upload; letzter Gesamtstand gewinnt; Prozessabbruch verwirft lokale Änderungen; Löschung bleibt weg; Offlinefehler sperrt weitere lokale Arbeit nicht; Startfehler endet als Fehler statt Ladeschleife; verwerfbarer Abschlussfehler.
 - Remote-Test: eigener Dateiname, kein Startup-Upload, vollständiges PATCH, Auswahl der letzten Google-Änderung bei gleichzeitiger erstmaliger Erstellung.
 - Vollständiger langer JSON- und HTML-Fehlertext mit reason/details geprüft, einschließlich Schwärzung von Testtokens.
