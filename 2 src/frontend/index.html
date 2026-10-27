@@ -3908,6 +3908,12 @@ const I18N = {
     BTN_SAVE_DOCK: '💾 Speichern',
     TT_SAVE_DOCK: 'Nachträgliche Änderungen an Archivnotizen und Status speichern',
     BTN_ARCHIVE_SYNC: "Jetzt synchronisieren",
+    SESSION_LOADING: "Archiv wird von Google geladen…",
+    SESSION_SAVING: "Archiv wird bei Google gespeichert…",
+    SESSION_PENDING: "Änderungen noch nicht bei Google gespeichert",
+    SESSION_READY: "Google-Archiv geladen · lokale Sitzung",
+    SESSION_ERROR: "Google-/Archivfehler: ",
+    SESSION_RETRY: "Laden von Google erneut versuchen",
     COPY_UI_UNSAVED: 'Ungespeicherte Eingabe · zuerst speichern',
     COPY_UI_LOADING: "Archiv wird geladen – Lesen möglich",
     COPY_UI_PENDING: "Lokal gespeichert · Übertragung ausstehend",
@@ -4100,6 +4106,12 @@ const I18N = {
     BTN_SAVE_DOCK: '💾 Save edits',
     TT_SAVE_DOCK: 'Save later edits to archive notes and status; Insert adds a new season',
     BTN_ARCHIVE_SYNC: "Sync now",
+    SESSION_LOADING: "Loading archive from Google…",
+    SESSION_SAVING: "Saving archive to Google…",
+    SESSION_PENDING: "Changes not yet saved to Google",
+    SESSION_READY: "Google archive loaded · working locally",
+    SESSION_ERROR: "Google/archive error: ",
+    SESSION_RETRY: "Retry loading from Google",
     COPY_UI_UNSAVED: "Unsaved input · save first",
     COPY_UI_LOADING: "Loading archive \u2013 reading available",
     COPY_UI_PENDING: "Saved locally \u00b7 transfer pending",
@@ -5198,6 +5210,19 @@ async function archiveCopyStatus_() {
   try {
     const info=await window.serkal.archive.syncStatus();
     const label=document.getElementById('archiveSyncStatus');
+    if(info.session){
+      
+      let text=info.busy?(info.status==='loading'?t('SESSION_LOADING'):t('SESSION_SAVING')):
+        (state.isDirty||info.dirty)?t('SESSION_PENDING'):
+        t('SESSION_READY');
+      if(info.code)text=t('SESSION_ERROR')+(info.message||info.code);
+      label.textContent=text;label.style.whiteSpace='pre-wrap';
+      const button=document.getElementById('btnArchiveSync');
+      button.style.display=info.writable?'none':'';button.disabled=info.busy;
+      button.textContent=t('SESSION_RETRY');
+      document.getElementById('btnArchiveAdoptLocal').style.display='none';
+      return;
+    }
     let key=info.status==='saved'?'COPY_UI_SAVED':info.status==='syncing'?'COPY_UI_SYNCING':info.status==='pending'?'COPY_UI_PENDING':info.status==='authority-applied'?'COPY_UI_AUTHORITY_APPLIED':info.status==='loading'?'COPY_UI_LOADING':'COPY_UI_ERROR';
     if(info.code==='COPY_VERSION_MISMATCH')key='COPY_UI_VERSION_MISMATCH';
     else if(info.code==='COPY_LOW_SPACE')key='COPY_UI_LOW_SPACE';
@@ -9455,7 +9480,7 @@ try {
     if(code==='SHARED_KEY_CONFLICT') return t('SHAREDKEY_CONFLICT');
     if(code==='SHARED_KEY_CANCELLED') return t('SHAREDKEY_CANCELLED');
     if(code==='GOOGLE_HTTP_403') return t('SHAREDKEY_PERMISSION');
-    return t('SHAREDKEY_FAILED');
+    return t('SHAREDKEY_FAILED')+(result?.message?'\n\n'+result.message:'');
   }
   async function connect(button){
     if(!window.serkal || !window.serkal.tmdb.sharedKey) return;
@@ -9480,7 +9505,7 @@ try {
       if(button)button.addEventListener('click',function(){connect(button)});
     });
     if(window.serkal && window.serkal.tmdb.sharedKey)
-      window.serkal.tmdb.sharedKey(false).catch(function(){});
+      window.serkal.archive.syncStatus().then(function(info){if(!info.session)return window.serkal.tmdb.sharedKey(false);}).catch(function(){});
   });
 })();
 </script>

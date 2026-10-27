@@ -3,6 +3,11 @@
 // Central language catalogue for every text created by the Electron backend.
 // No user-visible backend message may be written directly at its call site.
 const PAIRS = {
+  SESSION_CONNECT:["Bitte Google über TMDB · Google verbinden.", "Connect Google using TMDB · Google."],
+  SESSION_LOCAL:["Für diese Testsitzung lokal gespeichert.", "Saved locally for this test session."],
+  SESSION_CLOSE_FAILED:["Änderungen konnten nicht gespeichert werden. Beenden und diese Sitzung verwerfen?", "Changes could not be saved. Close and discard this session?"],
+  SESSION_KEEP_OPEN:["Geöffnet lassen", "Keep open"],
+
   EXIT_TITLE:["SerKal beenden", "Exit SerKal"],
   EXIT_DIRTY:["Es gibt ungespeicherte Änderungen.", "There are unsaved changes."],
   EXIT_SYNC:["Lokal gespeichert; die Google-Übertragung ist noch offen.", "Saved locally; transfer to Google is still pending."],

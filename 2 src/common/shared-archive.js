@@ -25,7 +25,7 @@ async function sync({accessToken, publisher, archive, fetchImpl=fetch, allowCrea
     async function request(url, method='GET', body, contentType='application/json') {
         const response=await fetchImpl(url,{method,headers:{Authorization:'Bearer '+accessToken,'Content-Type':contentType},
             body,signal:AbortSignal.timeout(20000)});
-        if(!response.ok) fail('GOOGLE_HTTP_'+response.status);
+        if(!response.ok) throw await require('./google-http-error').googleHttpError(response,{url,method,operation:'shared-archive',secrets:[accessToken]});
         const text=await response.text(); if(Buffer.byteLength(text)>LIMIT) fail('SHARED_ARCHIVE_TOO_LARGE');
         try { return JSON.parse(text); } catch(_) { fail('SHARED_ARCHIVE_INVALID'); }
     }

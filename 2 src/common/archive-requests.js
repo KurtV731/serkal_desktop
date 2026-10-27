@@ -32,7 +32,7 @@ async function processOne({request,snapshot,journal,save,apply,publish}){
 function client(accessToken,fetchImpl=fetch){
  async function request(url,method='GET',body,contentType='application/json'){
   const res=await fetchImpl(url,{method,headers:{Authorization:'Bearer '+accessToken,'Content-Type':contentType},body,signal:AbortSignal.timeout(20000)});
-  if(!res.ok)fail('GOOGLE_HTTP_'+res.status);const text=await res.text();if(Buffer.byteLength(text)>8*1024*1024)fail('REQUEST_TOO_LARGE');return JSON.parse(text);
+  if(!res.ok)throw await require('./google-http-error').googleHttpError(res,{url,method,operation:'archive-request',secrets:[accessToken]});const text=await res.text();if(Buffer.byteLength(text)>8*1024*1024)fail('REQUEST_TOO_LARGE');return JSON.parse(text);
  }
  async function list(name,contains=false){let page='',files=[];do{
   const u=new URL('https://www.googleapis.com/drive/v3/files');u.searchParams.set('spaces','appDataFolder');u.searchParams.set('q',`name ${contains?'contains':'='} '${name}' and trashed = false`);u.searchParams.set('fields','nextPageToken,files(id,name)');u.searchParams.set('pageSize','100');if(page)u.searchParams.set('pageToken',page);

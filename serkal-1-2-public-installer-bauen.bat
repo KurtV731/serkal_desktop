@@ -1,4 +1,9 @@
 @echo off
+rem SESSION-33: Dieser Zweig ist ausschliesslich ein isolierter Test.
+echo Bitte serkal-sitzungstest-33-bauen.bat verwenden. Kein oeffentlicher 1.2-Bau aus diesem Testzweig.
+exit /b 1
+rem Alter Bauweg bleibt unten als Referenz erhalten.
+@echo off
 setlocal EnableExtensions
 chcp 65001 >nul
 title SerKal Desktop 1.2 - Public-Installer bauen und pruefen
@@ -152,3 +157,4 @@ echo FEHLER: Der Bau wurde abgebrochen. Es wird nichts installiert.
 echo.
 pause
 exit /b 1
+

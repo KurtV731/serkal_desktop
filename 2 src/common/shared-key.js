@@ -17,7 +17,7 @@ async function syncKey({accessToken, localKey="", validate, fetchImpl=fetch,allo
         const response = await fetchImpl(url, {...options,
             headers:{Authorization:"Bearer " + accessToken, ...(options.headers || {})},
             signal:AbortSignal.timeout(20000)});
-        if (!response.ok) fail("GOOGLE_HTTP_" + response.status);
+        if (!response.ok) throw await require('./google-http-error').googleHttpError(response,{url,method:options.method||'GET',operation:'shared-tmdb-key',secrets:[accessToken,localKey]});
         return response.json();
     }
     const user = await request("https://www.googleapis.com/oauth2/v3/userinfo");

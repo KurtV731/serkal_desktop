@@ -133,7 +133,7 @@ function client(accessToken, fetchImpl=fetch) {
     async function request(url, method='GET', body, contentType='application/json') {
         const r=await fetchImpl(url,{method,headers:{Authorization:'Bearer '+accessToken,'Content-Type':contentType},body,
             signal:AbortSignal.timeout(45000)});
-        if(!r.ok)fail('GOOGLE_HTTP_'+r.status);
+        if(!r.ok)throw await require('./google-http-error').googleHttpError(r,{url,method,operation:'archive-copy',secrets:[accessToken]});
         const text=await r.text();if(Buffer.byteLength(text)>LIMIT)fail('COPY_TOO_LARGE');
         try{return JSON.parse(text);}catch(_){fail('COPY_INVALID');}
     }

@@ -49,10 +49,10 @@ module.exports = {
     {
       name: '@electron-forge/maker-squirrel',
       config: {
-        name: 'SerKalDesktop',
+        name: 'SerKalSessionTest33',
         authors: 'Kurt Vogelsaenger',
         description: 'SERKAL Desktop – Serienkalender',
-        setupExe: 'serkal-desktop-1-2-setup.exe',
+        setupExe: 'serkal-sitzungstest-33-setup.exe',
         setupIcon: '4 assets/icon/serkal.ico',
 
         // Squirrel versucht sonst zusaetzlich, Update.exe mit demselben Icon
@@ -94,3 +94,4 @@ module.exports = {
     }),
   ],
 };
+
