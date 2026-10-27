@@ -4413,3 +4413,36 @@ Kurt weist zu Recht darauf hin, dass auf der öffentlichen HASA-Startseite seit 
 **Website-Chatty übernimmt unmittelbar nach dieser Übergabe:** sichtbares Formular im vorhandenen HASA-Layout, Pflichtfeld-/Längenprüfung, klare Sende- und Fehlermeldungen, Datenschutz-Hinweis, mobile Prüfung und Ersetzung des Platzhalters. Bis der echte Empfänger geprüft ist, wird keine Attrappe eingebaut, die Texte entgegennimmt oder eine erfolgreiche Übertragung vortäuscht.
 
 Damit ist der Punkt nicht länger als unverbindliches „später“ behandelt: Der fehlende technische Teil ist jetzt als konkret abnehmbarer Auftrag mit klarer Zuständigkeit dokumentiert. Eine ehrliche Fertigmeldung oder ein Datum ist erst möglich, sobald CE HASA den Empfangsweg liefert; die Websiteoberfläche selbst ist danach keine offene Konzeptfrage mehr.
+
+
+## CE SerKal – 27.10.2026: Gesamtauftrag weitergeführt – Ersatzfassung 1.2.1, gemeinsame 35
+
+Status: **DESKTOP UND ANDROID IMPLEMENTIERT, REGULÄRE QUELLZWEIGE AKTUALISIERT / APK SIGNIERT FERTIG / WINDOWS-EXE-BAU AUF WINDOWS NOCH OFFEN**
+
+Kurt hat ausdrücklich korrigiert: Der Gesamtauftrag ist eine funktionierende Ersatzfassung für VelcroFist und seine Geräte, kein Abschluss nach einem isolierten Teillos. CE hat daraufhin Android, Kalenderabschluss und echte Bestandsübernahme umgesetzt.
+
+Vollständige konkrete Übergabe: [SerKal 1.2.1 – Ersatzfassung](serkal-1.2.1-ersatz-uebergabe-2026-10-27.md).
+- Beide Plattformen: Version **1.2.1**, gemeinsamer Archivstand **35**, Android **versionCode 44**.
+- Desktop-Quellstand für den Bau: **fec9f40186f7dfd2bc1a071a91931547acdd95df**. PR #11 und abschließender PR #13 in regulären Desktopzweig übernommen.
+- Android gebauter Quellstand: **19d017fab89e9543a889c4c4d4a8f551a79140d2**, PR #12 in regulären Androidzweig übernommen; kein zweites APK aus dem Merge erzeugt.
+- Neue Bau-BAT auf main: **serkal-1-2-1-ersatz-bauen.bat**. Pin, Version, gemeinsamer Stand, Dateiname und eigene Ausgabeordner angepasst. Verwendet den vorhandenen Windows-Ein-Datei-Bauweg mit lokaler privater OAuth-Beilage und bewährtem Icon, führt alle 39 Tests aus und erzeugt SHA-256/Freigabenachweis.
+- Windows-Ausgabe: **C:\ppd\serkal\veroeffentlichungen\1.2.1**. Bestehender 1.2-Download wird nicht beschrieben.
+
+Implementiert auf beiden Plattformen: Google-Gesamtstand beim Start; lokal arbeiten; einmal beim regulären Beenden speichern; Prozessabbruch verwirft nicht veröffentlichte Änderungen; letzter vollständiger Abschluss gewinnt; keine laufenden Cloudarchivabfragen oder Edit-Uploads. Gemeinsame neue Datei serkal-session-v1.json; einmalige Übernahme der letzten alten Google-v2-Kopie. Desktop kann vorhandene lokale TXT bei fehlender Google-Kopie übernehmen.
+
+Google-Zugriffsfehler werden mit kompletter Antwort im Log erhalten und machen die lokale Bearbeitung nicht dauerhaft schreibgeschützt. Android protokolliert Verbindungsfehler auch vor Anlage eines Archivmanagers. Kalenderabschluss ist enthalten und verhindert bei Fehlern den Archivupload nicht; solche Fehler werden separat sichtbar gemeldet. Von SerKal verwaltete Kalendereinträge werden anhand des Sitzungsstands abgeglichen; fremde persönliche Termine bleiben außerhalb. Keine fremden Kalender oder privaten Archive hier bearbeitet.
+
+Prüfungen: **39 Desktop-Testskripte**, letzter CI-Lauf https://github.com/KurtV731/serkal_desktop/actions/runs/40549775596 erfolgreich. **73 Android-Tests, 0 Fehlschläge, 0 Fehler**, Release-Bau https://github.com/KurtV731/serkal_desktop/actions/runs/40548633786 erfolgreich. Enthalten: Migration, Kalenderfehler trotz erfolgreichem Archivupload, 403 ohne lokale Dauersperre, lokales Arbeiten, Abbruch/Neustart, Löschung und letzter Abschluss gewinnt. Der bereits bestandene Laptop→PC-Test 33 ist anerkannt; praktische Android-/Kalenderabnahme der neuen 1.2.1 wird noch nicht behauptet.
+
+### Verbindliche fertige APK
+- **035-SerKal-Android-1.2.1.apk**, **2285979 Byte**
+- SHA-256: **c0142f13bc00083db12c6c84e0363489ca65e2fdacd54776d4fc73260d179849**
+- Paketkennung unverändert; tatsächliche APK-Metadaten 1.2.1/code44 geprüft.
+- Bisherige SerKal-Signatur v2/v3 und Zertifikatsübereinstimmung geprüft; Manifest vor/nach Signieren bytegleich.
+- APK Kurt direkt bereitgestellt. Kein Passwort oder privater Schlüssel veröffentlicht.
+- Bei Verteilung exakt dieselbe Datei verwenden; nach Kopieren erneut Hash prüfen. Kein erneuter Bau mit gleicher Android-Versionsnummer.
+
+### Verbleibender tatsächlicher Bau-/Diagnosestand
+Die Windows-EXE kann in dieser Umgebung ohne Kurts Windows-Bauplatz und private OAuth-Beilage nicht fertig erzeugt werden. Der gesamte festgeschriebene Bauweg liegt jetzt ausführbar bereit; Installer kann ihn direkt ausführen und anschließend die EXE samt Hash zurückmelden. Das ist kein noch offenes fachliches Konzeptlos.
+
+VelcroFists konkrete Google-403-Berechtigungs-/Projektursache ist ohne vollständige neue Antwort weiterhin offen. Die alte irreführende Dauersperre ist im neuen Ablauf beseitigt. Keine Behauptung einer serverseitigen Berechtigungsreparatur und noch keine öffentliche Website-Datei ersetzt. Nach echtem Windows-Bau und praktischer Abnahme die fertigen neuen Artefakte unverändert über den bestehenden Veröffentlichungsweg ersetzen.
