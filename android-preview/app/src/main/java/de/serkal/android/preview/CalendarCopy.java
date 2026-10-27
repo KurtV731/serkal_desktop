@@ -29,7 +29,8 @@ final class CalendarCopy {
             }
         }return events;
     }
-    static void synchronize(ArchiveCopyClient client,JSONObject record) throws Exception {
+    static void synchronize(ArchiveCopyClient client,JSONObject record) throws Exception {synchronize(client,record,false);}
+    static void synchronize(ArchiveCopyClient client,JSONObject record,boolean replaceManaged) throws Exception {
         JSONObject calendar=record.getJSONObject("calendar");if(!calendar.getString("mode").equals("google"))return;
         String id=calendar.getString("id");List<JSONObject> wanted=desired(record),announced=SeasonAnnouncements.desired(ArchiveCodec.entries(record));
         if(id.isEmpty()){if(wanted.isEmpty() && announced.isEmpty())return;throw new Exception("COPY_CALENDAR_ID_MISSING");}
@@ -45,14 +46,14 @@ final class CalendarCopy {
         Map<String,JSONObject> desired=new LinkedHashMap<>();for(JSONObject e:wanted)desired.put(key(e),e);Set<String> seen=new HashSet<>();List<JSONObject> actions=new ArrayList<>();
         for(JSONObject e:remote){JSONObject p=e.getJSONObject("extendedProperties").getJSONObject("private");String k=key(e);JSONObject target=desired.get(k);
             if(target==null && past.contains(p.optString("tmdbId")+":"+p.optString("season")))continue;
-            if(!signature(e).equals(p.optString("serkalSignature"))){if(target==null || !signature(target).equals(signature(e)))throw new Exception("COPY_CALENDAR_PROTECTED");seen.add(k);continue;}
+            if(!replaceManaged && !signature(e).equals(p.optString("serkalSignature"))){if(target==null || !signature(target).equals(signature(e)))throw new Exception("COPY_CALENDAR_PROTECTED");seen.add(k);continue;}
             if(target==null || seen.contains(k))actions.add(new JSONObject().put("method","DELETE").put("id",e.getString("id")));
             else {seen.add(k);if(!signature(target).equals(signature(e))){JSONObject body=new JSONObject(target.toString());body.remove("id");actions.add(new JSONObject().put("method","PUT").put("id",e.getString("id")).put("body",body));}}
         }
         for(Map.Entry<String,JSONObject> e:desired.entrySet())if(!seen.contains(e.getKey()))actions.add(new JSONObject().put("method","POST").put("id","").put("body",e.getValue()));
         for(JSONObject op:actions){String method=op.getString("method"),eventId=op.getString("id");JSONObject body=op.optJSONObject("body");
             try{client.request(base+(eventId.isEmpty()?"":"/"+ArchiveCopyClient.esc(eventId)),method,body==null?null:body.toString(),"application/json");}
-            catch(Exception error){String code=error.getMessage();if(method.equals("DELETE") && ("GOOGLE_HTTP_404".equals(code)||"GOOGLE_HTTP_410".equals(code)))continue;
+            catch(Exception error){String code=GoogleHttpFailure.code(error);if(method.equals("DELETE") && ("GOOGLE_HTTP_404".equals(code)||"GOOGLE_HTTP_410".equals(code)))continue;
                 if(method.equals("POST") && "GOOGLE_HTTP_409".equals(code)){JSONObject old=client.get(base+"/"+ArchiveCopyClient.esc(body.getString("id")));if(signature(old).equals(signature(body)))continue;}throw error;}
         }
     }

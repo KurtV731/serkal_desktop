@@ -70,15 +70,35 @@ public class MainActivity extends Activity {
         statusText.setText(english?"Google connection cancelled. Your local archive is unchanged.":"Google-Verbindung abgebrochen. Dein lokales Archiv bleibt unverändert.");
     }
 
+    private boolean exitPending;
     private void exitSerKal(){
-        // The explicit Exit action must finish the root task, even during sign-in.
-        finishAndRemoveTask();
+        if(exitPending)return;
+        if(maintenanceBusy){statusText.setText(english?"Please wait for maintenance to finish.":"Bitte den Wartungslauf abschließen lassen.");return;}
+        if(archiveCopy==null){finishAndRemoveTask();return;}
+        if(archiveCopy.busy()){
+            dialogBuilder().setMessage(english?"A transfer is running. Close without saving?":"Eine Übertragung läuft. Ohne Speichern beenden?")
+                .setPositiveButton(english?"Close":"Beenden",(d,w)->finishAndRemoveTask()).setNegativeButton(english?"Keep open":"Geöffnet lassen",null).show();return;
+        }
+        exitPending=true;
+        AuthorizationRequest request=AuthorizationRequest.builder().setRequestedScopes(java.util.Arrays.asList(
+            new Scope("https://www.googleapis.com/auth/drive.appdata"),new Scope("openid"),new Scope("https://www.googleapis.com/auth/userinfo.email"),
+            new Scope("https://www.googleapis.com/auth/calendar.app.created"),new Scope("https://www.googleapis.com/auth/calendar.calendarlist.readonly"))).build();
+        Identity.getAuthorizationClient(this).authorize(request).addOnSuccessListener(result->{
+            if(!result.hasResolution()&&result.getAccessToken()!=null)archiveCopy.updateToken(result.getAccessToken());
+            finishArchiveSession();
+        }).addOnFailureListener(error->finishArchiveSession());
     }
-
-    @Override public void onBackPressed(){
-        if(googleBusy){cancelGoogleConnection();return;}
-        super.onBackPressed();
+    private void finishArchiveSession(){
+        archiveCopy.finish(()->handler.post(()->{
+            exitPending=false;if(isFinishing())return;
+            if(!archiveCopy.needsExitWarning()){finishAndRemoveTask();return;}
+            TextView detail=text(archiveCopy.message(),12,TEXT);detail.setTextIsSelectable(true);ScrollView scroll=new ScrollView(this);scroll.addView(detail);
+            dialogBuilder().setTitle(english?"Session closing report":"Abschluss der Sitzung").setView(scroll)
+                .setPositiveButton(english?"Close":"Beenden",(d,w)->finishAndRemoveTask())
+                .setNegativeButton(english?"Keep open":"Geöffnet lassen",null).show();
+        }));
     }
+    @Override public void onBackPressed(){exitSerKal();}
 
     private void connectGoogle(boolean chooseAccount) {
         if (googleBusy) return;
@@ -117,7 +137,7 @@ public class MainActivity extends Activity {
 
     private void useGoogleResult(AuthorizationResult result, int generation) {
         if (!result.getGrantedScopes().contains("https://www.googleapis.com/auth/drive.appdata")) {
-            googleFailure(new Exception("GOOGLE_HTTP_403")); return;
+            googleFailure(new Exception("GOOGLE_PERMISSION_MISSING\nGoogle did not grant the required Drive app-data permission.")); return;
         }
         String accessToken = result.getAccessToken();
         if (accessToken == null || accessToken.isEmpty()) { googleFailure(new Exception("GOOGLE_TOKEN_MISSING")); return; }
@@ -125,7 +145,9 @@ public class MainActivity extends Activity {
             try {
                 SharedKeyClient client = new SharedKeyClient(accessToken);
                 SharedKeyClient.Result user = client.identify();
-                SharedKeyClient.Result loaded = client.load(user);
+                SharedKeyClient.Result value;Exception keyProblem=null;
+                try{value=client.load(user);}catch(Exception failure){value=user;keyProblem=failure;}
+                final SharedKeyClient.Result loaded=value;final Exception keyFailure=keyProblem;
                 String cached = loaded.key.isEmpty() ? KeyCache.load(this, user.owner) : "";
                 if (!loaded.key.isEmpty()) {
                     new TmdbClient(loaded.key).validate();
@@ -144,12 +166,14 @@ public class MainActivity extends Activity {
                     googleUser = user;
                     getPreferences(0).edit().putString("lastOwner",user.owner).putString("lastEmail",user.email).apply();
                     loadArchive();
+                    if(keyFailure!=null){GoogleHttpFailure.record(this,keyFailure);if(archiveCopy!=null)archiveCopy.recordFailure(keyFailure);}
                     if (!loaded.key.isEmpty()) {
                         credential = loaded.key;
                         statusText.setText(user.email + (english ? "\nTMDB key adopted automatically." : "\nTMDB-Schlüssel automatisch übernommen."));
                         if (queryField.getText().length() >= 2) searchNow();
                     } else if (!cached.isEmpty()) {
-                        confirmPublish(cached);
+                        if(keyFailure==null)confirmPublish(cached);
+                        else{credential=cached;statusText.setText(user.email+"\n"+keyFailure.getMessage());}
                     } else {
                         statusText.setText(user.email + (english
                             ? "\nNo shared key yet. Enter or paste your TMDB key using API key."
@@ -192,6 +216,7 @@ public class MainActivity extends Activity {
     }
 
     private void googleFailure(Exception error) {
+        GoogleHttpFailure.record(this,error);
         googleBusy = false;
         String code = error.getMessage() == null ? "" : error.getMessage();
         String message;
@@ -203,14 +228,15 @@ public class MainActivity extends Activity {
             + ((ApiException)error).getStatusCode() + (english ? ". Check Android OAuth package and signing SHA-1." : ". Android-OAuth-Paket und Signatur-SHA-1 prüfen.");
         else message = english ? "Google/key connection failed. Please retry." : "Google-/Schlüsselverbindung fehlgeschlagen. Bitte erneut versuchen.";
         if(googleUser==null)restoreLocalArchive();else if(!googleAccessToken.isEmpty())loadArchive();
-        statusText.setText(message);
+        if(archiveCopy!=null)archiveCopy.recordFailure(error);
+        statusText.setText(message+"\n"+(english?"Full Google response is in Log.":"Die vollständige Google-Antwort steht im Log."));
     }
     private void restoreLocalArchive() {
         String owner=getPreferences(0).getString("lastOwner","");if(owner.isEmpty())return;
         try {
             googleAccessToken="";
             if(archiveCopy==null || !archiveCopy.owner.equals(owner)){
-                if(archiveCopy!=null)archiveCopy.close();archiveCopy=new AndroidArchiveCopy(this,owner,"",()->handler.post(this::refreshLocalCopy));
+                if(archiveCopy!=null)archiveCopy.close();archiveCopy=new AndroidArchiveSession(this,owner,"",()->handler.post(this::refreshLocalCopy));
             }
             if(!archiveCopy.useOfflineCache())return;
             credential=KeyCache.load(this,owner);googleUser=new SharedKeyClient.Result(credential,owner,getPreferences(0).getString("lastEmail",""));
@@ -315,17 +341,17 @@ public class MainActivity extends Activity {
     private LinearLayout archiveRows;
     private TextView archiveStatus,archiveCount,copySyncStatus;
     private Button copySyncButton,authorityButton;
-    private AndroidArchiveCopy archiveCopy;
+    private AndroidArchiveSession archiveCopy;
 
     private void refreshLocalCopy() {
         if(archiveCopy==null || googleUser==null || !archiveCopy.owner.equals(googleUser.owner) || isFinishing())return;
         try {JSONObject local=archiveCopy.snapshot();if(local!=null){archiveSnapshot=local;archiveError="";renderArchive();}}catch(Exception error){archiveError=String.valueOf(error.getMessage());renderArchive();}
         String code=archiveCopy.status();String label;
-        if(code.equals("saved"))label=english ? "Saved on Google · available on other devices" : "Bei Google gespeichert · auf anderen Geräten verfügbar";
+        if(code.equals("saved"))label=english ? "Google archive loaded · working locally" : "Google-Archiv geladen · lokale Sitzung";
         else if(code.equals("authority-pending"))label=english ? "This device is locally set as authoritative · Google confirmation is pending" : "Dieser Rechner ist lokal als maßgeblich festgelegt · Google-Bestätigung steht aus";
         else if(code.equals("authority-applied"))label=english ? "The authoritative Google archive was applied. Local differences were replaced." : "Der verbindliche Google-Archivstand wurde übernommen. Abweichende lokale Einträge wurden ersetzt.";
-        else if(code.equals("syncing"))label=english ? "Transferring · you can keep working" : "Übertragung läuft · du kannst weiterarbeiten";
-        else if(code.equals("pending"))label=english ? "Saved locally · transfer pending" : "Lokal gespeichert · Übertragung ausstehend";
+        else if(code.equals("syncing"))label=english ? "Saving session to Google…" : "Sitzung wird bei Google gespeichert…";
+        else if(code.equals("pending"))label=english ? "Changes not yet saved to Google" : "Änderungen noch nicht bei Google gespeichert";
         else if(code.equals("COPY_VERSION_MISMATCH"))label=english ? "Different SerKal versions · install the same version on all devices" : "Unterschiedliche SerKal-Versionen · bitte auf allen Geräten dieselbe Version installieren";
         else if(code.equals("COPY_LOW_SPACE"))label=english ? "Not enough storage · reading only" : "Zu wenig freier Speicher · nur Lesen möglich";
         else if(code.equals("COPY_CONFLICT"))label=english ? "Newer archive on Google · local copy preserved" : "Neuerer Archivstand bei Google · lokale Kopie bleibt erhalten";
@@ -336,8 +362,9 @@ public class MainActivity extends Activity {
         else if(code.equals("COPY_ACCOUNT_CHANGED"))label=english ? "Google account does not match archive" : "Google-Konto passt nicht zum Archiv";
         else if(code.equals("loading"))label=english ? "Loading archive…" : "Archiv wird geladen…";
         else label=english ? "Transfer pending · local copy preserved · retry Sync now" : "Übertragung ausstehend · lokale Kopie bleibt erhalten · Jetzt synchronisieren versuchen";
+        if(!archiveCopy.message().isEmpty())label=(archiveCopy.hasChanges()?(english?"Changes not yet saved to Google\n":"Änderungen noch nicht bei Google gespeichert\n"):"")+(english?"Google error · working locally\n":"Google-Fehler · lokale Arbeit möglich\n")+archiveCopy.status()+(english?" · Full response: Log":" · Vollständige Antwort: Log");
         if(copySyncStatus!=null){copySyncStatus.setText(label);copySyncStatus.setContentDescription(label);}
-        if(copySyncButton!=null)copySyncButton.setEnabled(!archiveCopy.busy());
+        if(copySyncButton!=null){copySyncButton.setEnabled(!archiveCopy.busy());copySyncButton.setVisibility(archiveCopy.status().equals("loading")||!archiveCopy.message().isEmpty()?View.VISIBLE:View.GONE);}
         if(authorityButton!=null){boolean available=archiveCopy.canMakeAuthoritative();authorityButton.setVisibility(available?View.VISIBLE:View.GONE);authorityButton.setEnabled(available);}
     }
 
@@ -361,7 +388,7 @@ public class MainActivity extends Activity {
             final int generation=googleGeneration;
             if(archiveCopy==null || !archiveCopy.owner.equals(googleUser.owner)){
                 if(archiveCopy!=null)archiveCopy.close();
-                archiveCopy=new AndroidArchiveCopy(this,googleUser.owner,googleAccessToken,()->handler.post(()->{
+                archiveCopy=new AndroidArchiveSession(this,googleUser.owner,googleAccessToken,()->handler.post(()->{
                     if(generation==googleGeneration && !isFinishing())refreshLocalCopy();
                 }));
             }else archiveCopy.updateToken(googleAccessToken);
@@ -466,7 +493,7 @@ public class MainActivity extends Activity {
 
     private boolean writeReady() {
         if(archiveCopy==null || !archiveCopy.writable()){
-            refreshLocalCopy();statusText.setText(english ? "Archive currently read-only. See synchronization status." : "Archiv derzeit nur lesbar. Synchronisationsstatus beachten.");return false;
+            refreshLocalCopy();statusText.setText(english ? "An archive operation is still running." : "Ein Archivvorgang läuft noch.");return false;
         }return true;
     }
     private void sendRequest(String action,JSONObject payload) {
@@ -523,7 +550,7 @@ public class MainActivity extends Activity {
     }
     private void runMaintenance(String country){
         if(maintenanceBusy || !writeReady())return;
-        final AndroidArchiveCopy target=archiveCopy;final JSONObject initial;try{initial=target.snapshot();}catch(Exception e){return;}
+        final AndroidArchiveSession target=archiveCopy;final JSONObject initial;try{initial=target.snapshot();}catch(Exception e){return;}
         if(initial==null)return;final int generation=googleGeneration;final boolean language=english;final String key=credential;
         maintenanceBusy=true;statusText.setText(english?"Maintenance running · you can keep working":"Wartung läuft · du kannst weiterarbeiten");
         maintenanceWorker.execute(()->{
@@ -572,7 +599,7 @@ public class MainActivity extends Activity {
         if(which==3){loadArchive();checkPendingRequest();return;}
         if(which==4){askMaintenanceCountry();return;}
         if(which==5){try{String result=getPreferences(0).getString("maintenanceReport","");if(!result.isEmpty())showMaintenanceReport(new JSONObject(result));else statusText.setText(english?"No maintenance results yet.":"Noch kein Wartungsergebnis vorhanden.");}catch(Exception ignored){}return;}
-        try{TextView lines=text(archiveCopy==null?"":archiveCopy.readLog(),11,TEXT);lines.setTextIsSelectable(true);ScrollView scroll=new ScrollView(this);scroll.addView(lines);
+        try{TextView lines=text((archiveCopy==null?"":archiveCopy.readLog())+GoogleHttpFailure.readLog(this),11,TEXT);lines.setTextIsSelectable(true);ScrollView scroll=new ScrollView(this);scroll.addView(lines);
             archiveDialogOpen=true;dialogBuilder().setTitle("SerKal Log").setView(scroll).setPositiveButton(english?"Close":"Schließen",null).setOnDismissListener(d->archiveDialogOpen=false).show();
         }catch(Exception error){statusText.setText(english?"Log unavailable":"Log nicht verfügbar");}
     }

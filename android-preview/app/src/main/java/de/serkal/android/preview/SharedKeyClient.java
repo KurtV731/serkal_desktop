@@ -30,7 +30,7 @@ final class SharedKeyClient {
                 try(java.io.OutputStream out=c.getOutputStream()) { out.write(body.getBytes(StandardCharsets.UTF_8)); }
             }
             int status=c.getResponseCode();
-            if(status!=200 && status!=201) throw new Exception("GOOGLE_HTTP_"+status);
+            if(status!=200 && status!=201) throw GoogleHttpFailure.read(c,status,token);
             try(InputStream in=c.getInputStream(); ByteArrayOutputStream out=new ByteArrayOutputStream()) {
                 byte[] b=new byte[8192]; int n;
                 while((n=in.read(b))!=-1) {
