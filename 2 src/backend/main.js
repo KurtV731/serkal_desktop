@@ -1828,7 +1828,8 @@ function copyManager_() {
             selectCalendar:calendar=>{if(!sessionTest_){const settings=readSettings_();settings.calendar={mode:calendar.mode||'none',googleCalendarId:calendar.id};writeSettings_(settings);}},
             calendarSync:record=>sessionTest_?Promise.resolve():copyCalendarSync_(record),
             calendarPrepare:record=>sessionTest_?Promise.resolve():copyCalendarSync_(record,true),
-            bootstrap:()=>require('../common/archive-copy').capture(archiveFolderPath_(),readSettings_().calendar),
+            confirmedFile:path.join(app.getPath('userData'),'session-confirmed-'+crypto.createHash('sha256').update(path.resolve(archiveFolderPath_()||'.')).digest('hex')+'.json'),
+            bootstrap:()=>{const folder=archiveFolderPath_();archiveEnsureFolder_(folder);return require('../common/archive-copy').capture(folder,readSettings_().calendar);},
             connect:async()=>{
                 let token;try{token=JSON.parse(fs.readFileSync(googleSharedKeyTokenFile_(),'utf8'));}catch(_){}
                 if(token && Number(token.expiry_date||0)<=Date.now()+60000 && token.refresh_token)
