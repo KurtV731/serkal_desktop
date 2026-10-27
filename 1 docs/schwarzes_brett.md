@@ -4307,3 +4307,23 @@ Anlass VelcroFist (ein PC): lokales Archiv lädt 60 Einträge; Identitätsabfrag
 Kurt kündigt einen temporären isolierten Installer-Prüfstand an. Noch kein konkretes neues Isolationsartefakt auf diesem Brett nachgewiesen. Für die Umsetzung sind eigenes Electron-Profil UND separates Google-Testarchiv/Testkalender nötig; eine zweite EXE allein genügt nicht. Neue installierbare Fassung braucht eine eindeutig höhere Version. Nach bestandenem praktischen Test will Kurt die ausgegebene öffentliche Fassung durch die geprüfte neue ersetzen. Das ist eine bedingte Freigabefolge, noch kein bereits bestandener Test oder Veröffentlichungsnachweis.
 
 Durch diese Dokumentation noch keine Programmdateien geändert, kein Installer/APK gebaut, keine öffentlichen Artefakte ersetzt. CE-Umsetzung, Installer-Prüfbau und praktische Abnahme bleiben ausdrücklich offen.
+
+
+## CE SerKal – 27.10.2026: Desktop-Sitzungstest 33 implementiert – vollständige Google-Fehlerantworten
+
+Status: **TEST-QUELLCODE FERTIG / LOKAL UND GITHUB-CI BESTANDEN / ISOLIERTER WINDOWS-BAU BEIM INSTALLER OFFEN**
+
+Kurt hat ausdrücklich den Beginn der Umsetzung beauftragt und vollständige Google-Fehlermeldungen verlangt.
+
+Verbindliche Installer-Übergabe: [Sitzungstest 33 – Quellstand, Isolation, Bauweg und Praxisprüfung](sitzungstest-33-installer-2026-10-27.md).
+Testbranch ce-session-test-33, Commit 553972d0008552333d4fba7781668ddd210206ac, technische Version 1.2.1-alpha.33. Nur Testzweig; nicht in den normalen Abrufstand gemergt.
+
+Umgesetzt: Google-Gesamtstand beim Start statt lokaler Wiederherstellung; Archivarbeit ausschließlich lokal; keine Upload-Timer oder Cloudarchiv-Abfragen während der Sitzung; vollständiger Abschlussupload beim regulären Beenden; letzte erfolgreich gespeicherte Sitzung gewinnt; keine Revisionskette; verlorene Sitzung beim nächsten Start durch Google ersetzt. Fehler beim Beenden kann der Nutzer mit „Ohne Speichern beenden“ quittieren. Deutliche untere Statusanzeige. Im Testprofil keine über einen Prozessabbruch hinaus bestehenden Archiv-Dateisperren.
+
+Isolation: eigene Produkt-/Paketkennung, eigenes %APPDATA%-Profil, eigener Google-Dateiname serkal-session-test-33.json, keine normale serkal://-Registrierung. Echter Google-Kalender für diesen ersten Archivtest bewusst deaktiviert und gegen direkten API-/ICS-Aufruf gesperrt. Der erste Teststart beginnt bei fehlender Google-Testdatei leer. Keine Produktiv-Archivdaten für den Test importiert. Neue Build-BAT serkal-sitzungstest-33-bauen.bat erzeugt den vollständigen separaten Windows-Programmordner; öffentlicher 1.2-Bauweg auf diesem Testzweig ausdrücklich abgefangen.
+
+Google-Diagnose: HTTP-Status, Operation, Methode, Endpunkt ohne Querystring und vollständiger Google-Antworttext einschließlich reason/domain/details werden erhalten und im Log ausgegeben. Keine Längenkürzung des Antworttexts. Tokens/übliche Credential-Felder werden geschwärzt. Gemeinsamer Key-Verbindungsdialog bekommt den ausführlichen Fehler ebenfalls. Die konkrete Ursache von VelcroFists 403 bleibt ohne neue reale Google-Antwort offen.
+
+Prüfung: alle 33 bestehenden + 5 neuen Testskripte lokal erfolgreich; 5 Frontend-Scriptblöcke syntaktisch geprüft. Neuer Integrationstest prüft den tatsächlichen Backend-Manager-/Status-/Log-Pfad mit kompletter langer 403-Antwort und ohne Testtoken im Log. GitHub Actions für genau diesen Commit ebenfalls erfolgreich: https://github.com/KurtV731/serkal_desktop/actions/runs/40466024439 . Zentrale übertragene Quelltexte auf GitHub zurückgelesen und mit lokal getesteten Inhalten verglichen.
+
+Installer: bitte gemäß verlinktem Dokument in separatem Checkout bauen und vollständigen Programmordner als temporäre isolierte Testausgabe bereitstellen. Kein öffentliches Downloadartefakt ersetzen. Noch kein Windows-Artefakt erzeugt oder praktisch geprüft. Android-Sitzungsumbau, eigener Kalender-Abschlusstest, Übernahme des echten Bestands und gemeinsame finale Produktfreigabe bleiben offen. Android-Metadaten 42 sind nur reserviert, keine neue APK geliefert.
