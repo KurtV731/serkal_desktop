@@ -4486,3 +4486,18 @@ Die Android-Prüfsumme stimmt exakt mit dem signierten CE-Artefakt überein. Die
 ### Nächster Schritt
 
 Jetzt praktische Abnahme genau dieser beiden Dateien. Bis zu Kurts ausdrücklicher Freigabe keine Website-Kopie, kein Serverupload und kein öffentlicher Ersatz der bestehenden 1.2. Bei erfolgreicher Abnahme werden ausschließlich diese hashidentischen Dateien weitergereicht.
+
+
+## CE HASA – 27.10.2026: Forschungsplaner nach gemeldetem Aufstieg erneut prüfen
+
+Status: **REGRESSION IM QUELLTEXT NACHGEWIESEN / LIVE-URSACHE UND AUFSTIEGSSIGNAL NOCH OFFEN / KEIN UPDATE VERÖFFENTLICHT**
+
+Obi-Wan meldet, dass HASA seinen Aufstieg nicht bemerkt habe. Auf dem vorliegenden Bild ist die HASA-Anzeige „1.2.0 Alpha 40“ sowie ein Forschungsplan mit vorhandenen Stufen zu sehen. Das Bild allein beweist nicht, welche davon nach dem Aufstieg tatsächlich falsch sind oder welches interne Build installiert ist.
+
+Die Erinnerung an eine frühere Lösung ist korrekt: Das Archiv `07 Archiv/Userscripts/hasa_1.0.3l_ascension-reset-solartechnik.user.js.txt` beschreibt und implementiert das Entfernen alter Stände des jeweils gescannten Bereichs vor dem erneuten Einlesen. In der späteren 1.2-Alpha-3-Fassung wurde diese Bereinigung geändert, weil eine geöffnete Horizon-Unterseite nicht zuverlässig alle Forschungen/Gebäude zeigt: Nicht sichtbare Werte bleiben seither erhalten, sichtbare niedrigere Werte ersetzen alte. Eine ausdrückliche zuverlässige automatische Erkennung eines erfolgten Aufstiegs und bereichsübergreifende Bereinigung ist im aktuellen stabilen Userscript und im Entwicklungsstand nicht gefunden worden.
+
+Ein isolierter Test direkt mit dem aktuell auf main gespeicherten stabilen Userscript reproduziert: Eine nach dem angenommenen Aufstieg gelesene Forschung wird auf ihren sichtbaren neuen Stand gesetzt; eine andere, auf dieser Seite fehlende alte Forschungsstufe bleibt im Planerspeicher stehen. Das erklärt eine plausible Fehlerkette, ist aber kein Nachweis des individuellen Server-/Browserstands von Obi-Wan.
+
+Für eine belastbare automatische Korrektur fehlt ein eindeutiger Spielnachweis für den tatsächlich erfolgten Aufstieg und die Information, welche Werte Horizon dabei zurücksetzt beziehungsweise behält. Beispielsweise eignen sich eine echte Spielmeldung oder die relevante Spielseite bzw. ein sicherer Zähler vor/nach dem Aufstieg. Keine automatischen Spielfunktionen auslösen, keine Sitzungstoken öffentlich ablegen; alte Werte nicht anhand eines einzelnen niedrigen oder fehlenden Wertes pauschal löschen. Teilseiten weiterhin korrekt berücksichtigen. Regressionsprüfung muss Aufstieg und gewöhnliche Seitenwechsel gleichermaßen abdecken.
+
+Bis zum Nachweis bitte nicht behaupten, die frühere Aufstiegslösung sei in der aktuellen Fassung wirksam oder ein Versionswechsel allein behebe den Fehler. Kein Code, keine Serverdaten und keine öffentliche Fassung wurden bei dieser Diagnose geändert.
