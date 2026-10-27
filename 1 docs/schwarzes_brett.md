@@ -4292,3 +4292,18 @@ Status: **QUELLSTAND FERTIG UND ZURÜCKGELESEN / SERVERLAUF DURCH KURT OFFEN**
 Die öffentliche Werkstattseite `werkstatt.html` besitzt jetzt einen neuen Abschnitt zum 26.10.2026: „SerKal 1.2: Aus dem Android-Experiment wird eine öffentliche Ausgabe“. Er hält die gemeinsame Veröffentlichung für Windows und Android, das geräteübergreifende Archiv, wichtige Funktionsgruppen und Korrekturen sowie die Entwicklung der Android-Oberfläche fest. Die frühere Prototyp-Passage bleibt als historische Momentaufnahme unverändert erhalten.
 
 Der neue Werkstattabschnitt verlinkt die vollständige deutsche Neuerungsseite `/neu-in-1.2.html` und die Downloadseite. Der bisherige Ausblick wurde passend zum erreichten Meilenstein erneuert. Website-Commit: `29dbab1968729bbd745777447574c61c292e1a80`. Nach Speicherung zurückgelesen und Überschrift, beide Links sowie neuer Schluss geprüft. Veröffentlichung erfolgt mit dem nächsten Lauf von `PULL-PD.BAT`.
+
+
+## CE SerKal – 27.10.2026: Kurt beschließt einfachen Sitzungsbetrieb und isolierten Test vor Ersatz der öffentlichen 1.2
+
+Status: **NEUER ARCHITEKTURAUFTRAG / PRÜFPLAN FESTGEHALTEN / IMPLEMENTIERUNG UND TESTBUILD OFFEN**
+
+Kurt ersetzt ausdrücklich die bisherige Priorität möglichst verlustfreier laufender Synchronisation: Archivdaten und Gesehen-Markierungen dürfen bei einem nicht gespeicherten Sitzungsende verloren gehen. Keine weitere Ausweitung der Konfliktsicherungen. Neuer verbindlicher Ablauf für Desktop und Android: beim Programmstart Google-Gesamtstand in lokale Sitzung laden; ausschließlich lokal bearbeiten; beim regulären Beenden vollständigen Stand einmal zurückschreiben. Keine laufenden Cloudabfragen oder Einzeländerungsuploads. Nicht zurückgeschriebene Sitzungen werden beim nächsten Start verworfen, ohne Wiederherstellungsfragen. Bei parallelen Sitzungen gewinnt der letzte erfolgreich gespeicherte Gesamtstand.
+
+Konkrete Vereinbarung, Isolation und Abnahmematrix: [Archivsitzung – Prüfplan](archiv-sitzungsmodell-pruefplan-2026-10-27.md), Dokumentationscommit bead01ce3a6c9122c48080ce76cb47ae015b914f. Echte Fehler bei Laden/Speichern sichtbar machen; keine endlose Vorbereitungsanzeige und keine dauerhafte Sperre lokaler Arbeit durch Übertragungsprobleme.
+
+Anlass VelcroFist (ein PC): lokales Archiv lädt 60 Einträge; Identitätsabfrage gelingt; Google-Archivanfrage zweimal GOOGLE_HTTP_403. Das belegt einen verweigerten Zugriff vor dem Archivvergleich, keinen Mehrgerätekonflikt. Der bisherige HTTP-Helfer verwirft die detaillierte Google-Antwort. Exakte 403-Ursache noch offen; Architekturwechsel allein behebt keine Google-Projekt-/Berechtigungseinstellung. Keine privaten Logs, Konten oder Schlüssel veröffentlicht.
+
+Kurt kündigt einen temporären isolierten Installer-Prüfstand an. Noch kein konkretes neues Isolationsartefakt auf diesem Brett nachgewiesen. Für die Umsetzung sind eigenes Electron-Profil UND separates Google-Testarchiv/Testkalender nötig; eine zweite EXE allein genügt nicht. Neue installierbare Fassung braucht eine eindeutig höhere Version. Nach bestandenem praktischen Test will Kurt die ausgegebene öffentliche Fassung durch die geprüfte neue ersetzen. Das ist eine bedingte Freigabefolge, noch kein bereits bestandener Test oder Veröffentlichungsnachweis.
+
+Durch diese Dokumentation noch keine Programmdateien geändert, kein Installer/APK gebaut, keine öffentlichen Artefakte ersetzt. CE-Umsetzung, Installer-Prüfbau und praktische Abnahme bleiben ausdrücklich offen.
