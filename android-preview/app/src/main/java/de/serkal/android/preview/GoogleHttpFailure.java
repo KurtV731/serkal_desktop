@@ -17,5 +17,16 @@ final class GoogleHttpFailure extends Exception {
         }
         return new GoogleHttpFailure(status,text,connection.getURL().toString(),connection.getRequestMethod(),token);
     }
+    static void record(android.content.Context context,Exception error){
+        try(FileOutputStream out=new FileOutputStream(new File(context.getFilesDir(),"google-errors.jsonl"),true)){
+            org.json.JSONObject row=new org.json.JSONObject().put("message",String.valueOf(error.getMessage()));
+            if(error instanceof GoogleHttpFailure){GoogleHttpFailure g=(GoogleHttpFailure)error;row.put("code",g.code).put("endpoint",g.endpoint).put("method",g.method).put("responseText",g.responseText);}
+            out.write((row+"\n").getBytes(StandardCharsets.UTF_8));
+        }catch(Exception ignored){}
+    }
+    static String readLog(android.content.Context context)throws Exception{
+        File file=new File(context.getFilesDir(),"google-errors.jsonl");if(!file.exists())return "";
+        try(InputStream in=new FileInputStream(file);ByteArrayOutputStream out=new ByteArrayOutputStream()){byte[] b=new byte[8192];int n;while((n=in.read(b))!=-1)out.write(b,0,n);return out.toString("UTF-8");}
+    }
     static String code(Exception error){return error instanceof GoogleHttpFailure?((GoogleHttpFailure)error).code:String.valueOf(error.getMessage()).split("\\n",2)[0];}
 }
