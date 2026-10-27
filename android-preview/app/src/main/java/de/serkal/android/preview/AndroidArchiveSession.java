@@ -30,6 +30,10 @@ final class AndroidArchiveSession {
         try(InputStream in=disk.openRead()){confirmed=ArchiveCodec.validate(read(in),owner);}catch(FileNotFoundException absent){}
         catch(Exception invalid){log("CACHE_INVALID",invalid);}
         // A previous unsaved working record is never restored.
+        if(confirmed==null){
+            File legacy=new File(context.getFilesDir(),"archive-copy-"+ArchiveCodec.hash(owner)+".json");
+            if(legacy.exists())try(InputStream in=new FileInputStream(legacy)){JSONObject old=read(in);if(old.has("record"))confirmed=ArchiveCodec.validate(old.getJSONObject("record"),owner);}catch(Exception invalid){log("LEGACY_CACHE_INVALID",invalid);}
+        }
         record=empty(owner);
     }
     static String now(){SimpleDateFormat f=new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",Locale.ROOT);f.setTimeZone(TimeZone.getTimeZone("UTC"));return f.format(new Date());}
@@ -44,6 +48,7 @@ final class AndroidArchiveSession {
     synchronized String readLog() throws Exception {if(!logFile.exists())return "";try(InputStream in=new FileInputStream(logFile);ByteArrayOutputStream out=new ByteArrayOutputStream()){byte[] b=new byte[8192];int n;while((n=in.read(b))!=-1)out.write(b,0,n);return out.toString("UTF-8");}}
     private synchronized void changed(){if(listener!=null&&!closed)listener.changed();}
     synchronized boolean writable(){return loaded&&!busy&&!closed;}
+    synchronized boolean hasChanges(){return dirty;}
     synchronized boolean busy(){return busy;}
     synchronized String status(){return error.isEmpty()?status:error;}
     synchronized String message(){return message;}
@@ -71,8 +76,9 @@ final class AndroidArchiveSession {
             if(!loaded)return;
             if(token==null||token.isEmpty())throw new Exception("COPY_CONNECT");SessionArchiveClient client=factory.create(token);if(!owner.equals(client.owner()))throw new Exception("COPY_ACCOUNT_CHANGED");
             String before=outgoing.getJSONObject("calendar").toString();
-            try{client.updateCalendar(outgoing);}catch(Exception failure){calendarFailure=failure;log("CALENDAR_SAVE_FAILED",failure);}
+            try{client.prepareCalendar(outgoing);}catch(Exception failure){calendarFailure=failure;log("CALENDAR_PREPARE_FAILED",failure);}
             if(write||!before.equals(outgoing.getJSONObject("calendar").toString()))client.saveSession(outgoing);
+            if(calendarFailure==null)try{client.updateCalendar(outgoing);}catch(Exception failure){calendarFailure=failure;log("CALENDAR_SAVE_FAILED",failure);}
             synchronized(this){record=outgoing;dirty=false;saveConfirmed();error=calendarFailure==null?"":GoogleHttpFailure.code(calendarFailure);message=calendarFailure==null?"":"Archive saved. Calendar update failed:\n"+calendarFailure.getMessage();status=calendarFailure==null?"saved":"calendar-warning";log("SESSION_FINISHED",null);}
         }catch(Exception failure){synchronized(this){error=GoogleHttpFailure.code(failure);message=String.valueOf(failure.getMessage());status="error";log("SESSION_SAVE_FAILED",failure);}}
         finally{synchronized(this){busy=false;}changed();if(complete!=null)complete.run();}});

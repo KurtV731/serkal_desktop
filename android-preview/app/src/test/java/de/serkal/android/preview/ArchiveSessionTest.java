@@ -15,6 +15,7 @@ public class ArchiveSessionTest {
         @Override String owner(){return "123";}
         @Override JSONObject loadSession(String owner)throws Exception{reads++;if(denied)throw new GoogleHttpFailure(403,"Complete reason: SERVICE_DISABLED","https://www.googleapis.com/drive/v3/files","GET","token");return cloud==null?null:new JSONObject(cloud.toString());}
         @Override void saveSession(JSONObject record)throws Exception{if(denied)throw new GoogleHttpFailure(403,"Full save error","https://www.googleapis.com/upload/drive/v3/files","POST","token");writes++;cloud=new JSONObject(record.toString());}
+        @Override void prepareCalendar(JSONObject record){}
         @Override void updateCalendar(JSONObject record)throws Exception{calendarWrites++;if(calendarDenied)throw new GoogleHttpFailure(403,"Calendar access denied with details","https://www.googleapis.com/calendar/v3/calendars","GET","token");}
     }
     AndroidArchiveSession make()throws Exception{return new AndroidArchiveSession(RuntimeEnvironment.getApplication(),"123","token",()->{},token->new Remote());}

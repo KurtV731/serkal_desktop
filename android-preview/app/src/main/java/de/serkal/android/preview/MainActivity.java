@@ -137,7 +137,7 @@ public class MainActivity extends Activity {
 
     private void useGoogleResult(AuthorizationResult result, int generation) {
         if (!result.getGrantedScopes().contains("https://www.googleapis.com/auth/drive.appdata")) {
-            googleFailure(new Exception("GOOGLE_HTTP_403")); return;
+            googleFailure(new Exception("GOOGLE_PERMISSION_MISSING\nGoogle did not grant the required Drive app-data permission.")); return;
         }
         String accessToken = result.getAccessToken();
         if (accessToken == null || accessToken.isEmpty()) { googleFailure(new Exception("GOOGLE_TOKEN_MISSING")); return; }
@@ -172,7 +172,8 @@ public class MainActivity extends Activity {
                         statusText.setText(user.email + (english ? "\nTMDB key adopted automatically." : "\nTMDB-Schlüssel automatisch übernommen."));
                         if (queryField.getText().length() >= 2) searchNow();
                     } else if (!cached.isEmpty()) {
-                        confirmPublish(cached);
+                        if(keyFailure==null)confirmPublish(cached);
+                        else{credential=cached;statusText.setText(user.email+"\n"+keyFailure.getMessage());}
                     } else {
                         statusText.setText(user.email + (english
                             ? "\nNo shared key yet. Enter or paste your TMDB key using API key."
@@ -360,7 +361,7 @@ public class MainActivity extends Activity {
         else if(code.equals("COPY_ACCOUNT_CHANGED"))label=english ? "Google account does not match archive" : "Google-Konto passt nicht zum Archiv";
         else if(code.equals("loading"))label=english ? "Loading archive…" : "Archiv wird geladen…";
         else label=english ? "Transfer pending · local copy preserved · retry Sync now" : "Übertragung ausstehend · lokale Kopie bleibt erhalten · Jetzt synchronisieren versuchen";
-        if(!archiveCopy.message().isEmpty())label=(english?"Google error · working locally\n":"Google-Fehler · lokale Arbeit möglich\n")+archiveCopy.message();
+        if(!archiveCopy.message().isEmpty())label=(archiveCopy.hasChanges()?(english?"Changes not yet saved to Google\n":"Änderungen noch nicht bei Google gespeichert\n"):"")+(english?"Google error · working locally\n":"Google-Fehler · lokale Arbeit möglich\n")+archiveCopy.message();
         if(copySyncStatus!=null){copySyncStatus.setText(label);copySyncStatus.setContentDescription(label);}
         if(copySyncButton!=null){copySyncButton.setEnabled(!archiveCopy.busy());copySyncButton.setVisibility(archiveCopy.status().equals("loading")||!archiveCopy.message().isEmpty()?View.VISIBLE:View.GONE);}
         if(authorityButton!=null){boolean available=archiveCopy.canMakeAuthoritative();authorityButton.setVisibility(available?View.VISIBLE:View.GONE);authorityButton.setEnabled(available);}

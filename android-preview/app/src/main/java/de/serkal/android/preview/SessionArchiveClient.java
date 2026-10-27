@@ -27,7 +27,7 @@ class SessionArchiveClient extends ArchiveCopyClient {
             "\r\n--"+boundary+"\r\nContent-Type: application/json\r\n\r\n"+record+"\r\n--"+boundary+"--\r\n";
         request("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id","POST",body,"multipart/related; boundary="+boundary);
     }
-    void updateCalendar(JSONObject record) throws Exception {
+    void prepareCalendar(JSONObject record) throws Exception {
         JSONObject calendar=record.getJSONObject("calendar");if(!calendar.optString("mode").equals("google"))return;
         if(calendar.optString("id").isEmpty()){
             if(CalendarCopy.desired(record).isEmpty()&&SeasonAnnouncements.desired(ArchiveCodec.entries(record)).isEmpty())return;
@@ -39,6 +39,8 @@ class SessionArchiveClient extends ArchiveCopyClient {
             if(found.isEmpty())found=request("https://www.googleapis.com/calendar/v3/calendars","POST",new JSONObject().put("summary","SerKal").put("description","SerKal session archive").toString(),"application/json").getString("id");
             calendar.put("id",found);
         }
+    }
+    void updateCalendar(JSONObject record) throws Exception {
         CalendarCopy.synchronize(this,record,true);
     }
 }
