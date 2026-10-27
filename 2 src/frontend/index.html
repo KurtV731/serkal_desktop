@@ -5219,7 +5219,7 @@ async function archiveCopyStatus_() {
         t('SESSION_READY');
       if(info.warning)text=t('SESSION_CALENDAR_WARNING')+'\n'+info.warning;
       if(info.code)text=((state.isDirty||info.dirty)?t('SESSION_PENDING')+' · ':'')+t('SESSION_ERROR')+(info.message||info.code);
-      label.textContent=text;label.style.whiteSpace='pre-wrap';
+      label.textContent=text;label.style.whiteSpace='pre-wrap';label.style.maxHeight='64px';label.style.overflowY='auto';
       const button=document.getElementById('btnArchiveSync');
       button.style.display=info.writable?'none':'';button.disabled=info.busy;
       button.textContent=t('SESSION_RETRY');
