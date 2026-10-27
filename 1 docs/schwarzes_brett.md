@@ -4327,3 +4327,38 @@ Google-Diagnose: HTTP-Status, Operation, Methode, Endpunkt ohne Querystring und 
 Prüfung: alle 33 bestehenden + 5 neuen Testskripte lokal erfolgreich; 5 Frontend-Scriptblöcke syntaktisch geprüft. Neuer Integrationstest prüft den tatsächlichen Backend-Manager-/Status-/Log-Pfad mit kompletter langer 403-Antwort und ohne Testtoken im Log. GitHub Actions für genau diesen Commit ebenfalls erfolgreich: https://github.com/KurtV731/serkal_desktop/actions/runs/40466024439 . Zentrale übertragene Quelltexte auf GitHub zurückgelesen und mit lokal getesteten Inhalten verglichen.
 
 Installer: bitte gemäß verlinktem Dokument in separatem Checkout bauen und vollständigen Programmordner als temporäre isolierte Testausgabe bereitstellen. Kein öffentliches Downloadartefakt ersetzen. Noch kein Windows-Artefakt erzeugt oder praktisch geprüft. Android-Sitzungsumbau, eigener Kalender-Abschlusstest, Übernahme des echten Bestands und gemeinsame finale Produktfreigabe bleiben offen. Android-Metadaten 42 sind nur reserviert, keine neue APK geliefert.
+
+---
+
+## Installer – 27.10.2026: isolierter Windows-Prüfbau für Sitzungstest 33 vorbereitet
+
+Status: **REPRODUZIERBARER BAUWEG FERTIG / WINDOWS-BAU AUF KURTS PC UND PRAXISTEST OFFEN**
+
+Die CE-Übergabe zum Sitzungstest 33 wurde übernommen. Der Test ersetzt weder die installierte öffentliche 1.2 noch deren Downloadartefakte.
+
+### Festgeschriebene Quellen
+
+- CE-Testbranch: `ce-session-test-33`
+- unveränderter CE-Quellcommit: `553972d0008552333d4fba7781668ddd210206ac`
+- technische Version: `1.2.1-alpha.33`
+- Installer-Arbeitsbranch: `installer-session-test-33`
+- Bau-CMD: `serkal-sitzungstest-33-pruefstand-bauen.bat`
+- letzter Commit der Bau-CMD: `84b960e48263f09482f12368961cddf5fce2e2a5`
+
+### Bau- und Ausgabeverhalten
+
+Die CMD verwendet einen getrennten Checkout unter `C:\ppd\serkal\build\sitzungstest-33`, prüft Testkennung und Isolation, stellt die private OAuth-Grundkonfiguration bereit, verwendet Kurts bewährtes lokales Windows-Symbol, führt alle 33 bisherigen und 5 neuen Sitzungstests aus und baut ausschließlich den vollständigen portablen Windows-Programmordner.
+
+Erwartete Ausgabe:
+
+- Programmordner: `C:\ppd\serkal\testinstallationen\sitzungstest-33`
+- Startdatei: `start-serkal-sitzungstest-33.cmd`
+- ZIP für den zweiten PC: `C:\ppd\serkal\testinstallationen\serkal-sitzungstest-33.zip`
+- SHA-Datei: `serkal-sitzungstest-33.zip.sha256`
+
+Geprüft werden außerdem die eingepackte OAuth-Datei und der Ausschluss persönlicher Google-Token. Die Ausgabe verwendet das eigene Profil `%APPDATA%\SerKal-Session-Test-33` und ausschließlich `serkal-session-test-33.json` im Google-appDataFolder. Der echte Google-Kalender ist deaktiviert.
+
+Es wird kein Setup installiert, keine Verknüpfung angelegt und nichts nach `C:\ppd\serkal\veroeffentlichungen`, in das Website-Repository oder auf den Server kopiert.
+
+**Nächster Schritt:** Kurt führt die Bau-CMD auf Windows aus und meldet Endausgabe beziehungsweise Fehler. Erst nach erfolgreichem Bau beginnt die im CE-Dokument beschriebene praktische Abnahmematrix.
+
