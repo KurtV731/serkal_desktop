@@ -14,7 +14,7 @@ class DesktopCopy {
             return copy.writable(Number(stat.bavail)*Number(stat.bsize),bytes);}catch(_){return false;}
     }
     view(){const available=this.available();return {status:this.status,code:available?this.error:"COPY_LOW_SPACE",busy:this.busy,writable:this.initialized && !this.fatal() && available,dirty:!!this.state.dirty,authorityPending:!!this.state.adoption,
-        progress:this.progress||null,lastSynced:this.state.lastSynced||'',revision:this.state.base||''};}
+        message:this.message||'',google:this.google||null,progress:this.progress||null,lastSynced:this.state.lastSynced||'',revision:this.state.base||''};}
     async adoptLocal(){
         if(this.error==='COPY_VERSION_MISMATCH')copyError(this.error);
         if(this.busy)copyError('COPY_BUSY');
@@ -38,7 +38,7 @@ class DesktopCopy {
     async sync() {
         if(this.busy)return this.view();
         const previousError=this.error;
-        this.busy=true;this.status='syncing';this.error='';this.progress=null;this.onStatus(this.view());
+        this.busy=true;this.status='syncing';this.error='';this.message='';this.google=null;this.progress=null;this.onStatus(this.view());
         try {
             if(previousError==='COPY_LOCAL_STATE_INVALID')copyError(previousError);
             this.report('identity');
@@ -66,7 +66,7 @@ class DesktopCopy {
             this.initialized=true;this.error='';delete this.state.releaseMismatch;this.status=result.status;
             if(result.status==='saved'||result.status==='authority-applied'){this.state.lastSynced=new Date().toISOString();this.save();}
             if(result.status==='pending')this.schedule();
-        }catch(error){this.error=String(error.code||error.message||'COPY_FAILED');if(this.error==='COPY_VERSION_MISMATCH'||previousError==='COPY_VERSION_MISMATCH'){this.error='COPY_VERSION_MISMATCH';this.state.releaseMismatch=true;this.save();}this.status='error';if(!this.fatal() && this.state.base)this.initialized=true;
+        }catch(error){this.message=String(error.message||error);this.google=error.google||null;this.error=String(error.code||error.message||'COPY_FAILED');if(this.error==='COPY_VERSION_MISMATCH'||previousError==='COPY_VERSION_MISMATCH'){this.error='COPY_VERSION_MISMATCH';this.state.releaseMismatch=true;this.save();}this.status='error';if(!this.fatal() && this.state.base)this.initialized=true;
             if(this.state.dirty && !this.fatal()){clearTimeout(this.timer);this.timer=setTimeout(()=>this.sync(),30000);this.timer.unref?.();}}
         finally{this.busy=false;this.progress=null;this.onStatus(this.view());}
         return this.view();

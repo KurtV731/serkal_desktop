@@ -17,6 +17,7 @@ let exposed = null;
 const preloadSource = fs.readFileSync(path.resolve("2 src/common/preload.js"), "utf8");
 const context = {
     require(id) {
+        if(id === "../../serkal-session-test.json")return {enabled:false};
         if (id !== "electron") return require(id);
         return {
             contextBridge:{ exposeInMainWorld(_name, value){ exposed = value; } },

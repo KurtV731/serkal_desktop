@@ -26,14 +26,19 @@ function bt_(key, values, language) {
     return backendI18n.text(language || activeLanguage_, key, values);
 }
 
-const calendarLab_ = String(process.env.SERKAL_CALENDAR_LAB || "") === "1"
+// SESSION-33: isolated rehearsal; legacy production flow remains below for comparison.
+const sessionSettings_ = require('../../serkal-session-test.json');
+const sessionMode_ = sessionSettings_.session===true;
+const sessionTest_ = sessionSettings_.enabled
+    ? require('../common/session-test-profile').prepare(app.getPath('appData')) : null;
+const calendarLab_ = !sessionTest_ && String(process.env.SERKAL_CALENDAR_LAB || "") === "1"
     ? require("../common/calendar-lab.js").prepare(app.getPath("appData")) : null;
 const GOOGLE_CALENDAR_NAME = calendarLab_ ? calendarLab_.calendarName : "SerKal";
 const SERKAL_PROTOCOL = "serkal";
 const serkalSquirrelUninstall_ = process.argv.includes("--squirrel-uninstall");
 
 function maintainSerkalProtocol_() {
-    if (calendarLab_ || process.platform !== "win32" || !app.isPackaged) return false;
+    if (sessionTest_ || calendarLab_ || process.platform !== "win32" || !app.isPackaged) return false;
     try {
         if (serkalSquirrelUninstall_) {
             return app.removeAsDefaultProtocolClient(SERKAL_PROTOCOL);
@@ -54,6 +59,7 @@ maintainSerkalProtocol_();
 if (require("electron-squirrel-startup")) return;
 
 function configureSharedUserData_() {
+    if(sessionTest_){app.setPath('userData',sessionTest_.root);return;}
     if (calendarLab_) { app.setPath("userData", calendarLab_.root); return; }
     try {
         const appData = app.getPath("appData");
@@ -122,7 +128,7 @@ function serkalDisplayVersion_() {
 }
 
 function serkalWindowTitle_() {
-    const title = "SERKAL Desktop " + serkalDisplayVersion_() + (calendarLab_ ? " – " + bt_("CALENDAR_LAB") : "");
+    const title = "SERKAL Desktop " + serkalDisplayVersion_() + (sessionTest_ ? " – SITZUNGSTEST 34 / SESSION TEST" : calendarLab_ ? " – " + bt_("CALENDAR_LAB") : "");
     return app.isPackaged ? title : title + " – ENTWICKLUNG";
 }
 
@@ -184,6 +190,7 @@ function normalizeSettings_(raw) {
             out.calendar.googleCalendarId = String(raw.calendar.googleCalendarId || "").trim();
         }
     }
+    if(sessionTest_){out.archive.folderPath=sessionTest_.archive;out.calendar={mode:'none',googleCalendarId:''};}
     return out;
 }
 
@@ -844,7 +851,7 @@ async function archiveDeleteSeries_(payload) {
             });
         }
 
-        if (calendarEntries.length > 0 && calendarMode === "ics") {
+        if (calendarEntries.length > 0 && calendarMode === "ics" && !sessionMode_) {
             return {
                 ok:false,
                 message:bt_("DELETE_ICS_UNSUPPORTED")
@@ -1646,6 +1653,8 @@ async function googleOauthTokenRequest_(params) {
         headers:{ "content-type":"application/x-www-form-urlencoded" },
         body:new URLSearchParams(params)
     });
+    if(!response.ok)throw await require('../common/google-http-error').googleHttpError(response,{
+        url:'https://oauth2.googleapis.com/token',method:'POST',operation:'oauth-token',secrets:Object.values(params)});
     const data = await response.json().catch(() => null);
     if (!response.ok || !data || !data.access_token) {
         throw new Error((data && (data.error_description || data.error)) || bt_("GOOGLE_LOGIN_FAILED"));
@@ -1801,9 +1810,10 @@ async function googleSharedKeySync_(interactive) {
         const archive = await googleSharedArchiveSync_();
         return {ok:true,status:result.status,email:result.email,configured:!!result.apiKey,archive};
     } catch(error) {
+        logWrite_('ERROR','GOOGLE','Google connection failed',{code:error.code||'',google:error.google||null,message:String(error.message||error)});
         const code=String(error.code || error.message || "");
         const known=/^(SHARED_KEY_|TMDB_KEY_|GOOGLE_HTTP_|GOOGLE_IDENTITY_)[A-Z0-9_]+$/.test(code);
-        return {ok:false,code:known ? code : "SHARED_KEY_FAILED"};
+        return {ok:false,code:known ? code : "SHARED_KEY_FAILED",message:String(error.message||error),google:error.google||null};
     } finally { sharedKeySyncRunning_=false; }
 }
 
@@ -1812,6 +1822,25 @@ const copyLocalMode_ = !calendarLab_;
 let desktopCopy_;
 function copyManager_() {
     if(desktopCopy_)return desktopCopy_;
+    if(sessionMode_){
+        const {ArchiveSession}=require('../common/archive-session');
+        desktopCopy_=new ArchiveSession({folder:archiveFolderPath_,calendar:()=>sessionTest_?({mode:'',id:''}):readSettings_().calendar,
+            selectCalendar:calendar=>{if(!sessionTest_){const settings=readSettings_();settings.calendar={mode:calendar.mode||'none',googleCalendarId:calendar.id};writeSettings_(settings);}},
+            calendarSync:record=>sessionTest_?Promise.resolve():copyCalendarSync_(record),
+            calendarPrepare:record=>sessionTest_?Promise.resolve():copyCalendarSync_(record,true),
+            bootstrap:()=>require('../common/archive-copy').capture(archiveFolderPath_(),readSettings_().calendar),
+            connect:async()=>{
+                let token;try{token=JSON.parse(fs.readFileSync(googleSharedKeyTokenFile_(),'utf8'));}catch(_){}
+                if(token && Number(token.expiry_date||0)<=Date.now()+60000 && token.refresh_token)
+                    token=await googleOauthRefresh_(googleOauthClientConfig_(),token,googleSharedKeyWriteToken_);
+                if(!token || !token.access_token || Number(token.expiry_date||0)<=Date.now()+60000)
+                    throw Object.assign(new Error(bt_('SESSION_CONNECT')),{code:'COPY_CONNECT'});
+                return require('../common/archive-session-remote').connect(token.access_token,{name:sessionTest_?require('../common/archive-session-remote').TEST_NAME:require('../common/archive-session-remote').NAME,importLegacy:!sessionTest_});
+            },
+            onChange:()=>{sharedArchiveRevision_++;},
+            onStatus:status=>logWrite_(status.code?'WARN':'INFO','SYNC','Archive session',status)
+        });return desktopCopy_;
+    }
     const module=require("../common/archive-copy-desktop.js");
     const key=crypto.createHash("sha256").update(path.resolve(archiveFolderPath_()||".")).digest("hex");
     desktopCopy_=new module.DesktopCopy({
@@ -1842,17 +1871,17 @@ function copyManager_() {
         calendarSync:copyCalendarSync_,
         lock:async fn=>{const result=await archiveWithWriteLock_(fn);if(result && result.ok===false)throw Object.assign(new Error(result.code||"ARCHIVE_LOCK_BUSY"),{code:result.code||"ARCHIVE_LOCK_BUSY"});return result;},
         onChange:()=>{sharedArchiveRevision_++;},
-        onStatus:status=>logWrite_(status.code?"WARN":"INFO","SYNC",bt_("COPY_SYNC_LOG"),{status:status.status,code:status.code,dirty:status.dirty,progress:status.progress})
+        onStatus:status=>logWrite_(status.code?"WARN":"INFO","SYNC",bt_("COPY_SYNC_LOG"),{status:status.status,code:status.code,dirty:status.dirty,progress:status.progress,message:status.message||"",google:status.google||null})
     });
     return desktopCopy_;
 }
-async function copyCalendarSync_(record) {
+async function copyCalendarSync_(record,prepareOnly=false) {
     if(record.calendar.mode!=="google")return;
     const calendarToken=await googleOauthAccessToken_();
     await require(path.join(__dirname,"../common/google-identity")).verifyCalendarOwner(calendarToken,record.owner);
     const manager=copyManager_();manager.report("calendar-check");
     const preferred=String(readSettings_().calendar.googleCalendarId||"");
-    if(!record.calendar.id && !preferred){const created=await googleResolveSerkalCalendar_();record.calendar.id=created.id;manager.save();}
+    if(!record.calendar.id && !preferred){const created=await googleResolveSerkalCalendar_();record.calendar.id=created.id;if(!sessionMode_)manager.save();}
     const target=await require(path.join(__dirname,"../common/copy-calendar-target")).resolve({
         id:record.calendar.id,preferred,
         check:async id=>{
@@ -1868,13 +1897,14 @@ async function copyCalendarSync_(record) {
     });
     if(target.recovered){
         logWrite_("INFO","SYNC",bt_("COPY_CALENDAR_RECOVERED"),{vorher:googleCalendarIdForLog_(record.calendar.id),kalender:googleCalendarIdForLog_(target.id)});
-        record.calendar.id=target.id;manager.save();const settings=readSettings_();settings.calendar.googleCalendarId=target.id;writeSettings_(settings);
+        record.calendar.id=target.id;if(!sessionMode_)manager.save();const settings=readSettings_();settings.calendar.googleCalendarId=target.id;writeSettings_(settings);
     }
+    if(prepareOnly)return;
     manager.report("calendar-read");
     const entries=record.files.flatMap(f=>f.content.split(/\r?\n/).map(line=>archiveEntryFromLine_(f.name,{mtime:new Date(record.generatedAt)},line)).filter(Boolean));
     const events=await googleCalendarManagedEvents_(record.calendar.id,true,true);
     const protocol=require("../common/archive-calendar-copy.js");
-    const operations=protocol.plan(entries,events,record.revision);
+    const operations=protocol.plan(entries,events,record.revision,new Date().getFullYear(),sessionMode_);
     let completed=0;manager.report("calendar-write",0,operations.length);
     for(const op of operations) {
         manager.report("calendar-write",completed++,operations.length);
@@ -1885,7 +1915,7 @@ async function copyCalendarSync_(record) {
             if(previous.ok && op.body.extendedProperties?.private?.serkal==="announcement" && previous.data?.status==="cancelled")continue;
             if(previous.ok && protocol.signature(previous.data)===protocol.signature(op.body))continue;
         }
-        throw Object.assign(new Error("COPY_CALENDAR_FAILED"),{code:"COPY_CALENDAR_FAILED"});
+        throw Object.assign(new Error("COPY_CALENDAR_FAILED\n"+JSON.stringify(result.data||{})),{code:"COPY_CALENDAR_FAILED"});
     }
     manager.report("archive-upload");
 }
@@ -1983,6 +2013,7 @@ async function archiveApplyRequest_(request) {
 let sharedArchiveRunning_ = false;
 let sharedArchiveTimer_;
 function scheduleSharedArchive_() {
+    if(sessionMode_)return; // No upload on edits and no delayed background transfer.
     clearTimeout(sharedArchiveTimer_);
     sharedArchiveTimer_=setTimeout(() => { googleSharedArchiveSync_().catch(()=>{}); }, 1500);
 }
@@ -2035,7 +2066,15 @@ async function googleOauthAccessToken_() {
     return String(token.access_token);
 }
 
+async function googleResponseData_(response, url, method, accessToken) {
+    if(response.ok)return response.json().catch(()=>null);
+    const error=await require('../common/google-http-error').googleHttpError(response,{url,method,operation:'calendar',secrets:[accessToken]});
+    logWrite_('ERROR','GOOGLE','Google HTTP error',error.google);
+    try{return JSON.parse(error.google.responseText);}catch(_){return {error:{message:error.google.responseText}};}
+}
+
 async function googleCalendarJsonRequest_(method, url, body) {
+    if(sessionTest_)throw new Error('Calendar access is disabled in the isolated archive test.');
     const accessToken = await googleOauthAccessToken_();
     const response = await fetch(url, {
         method,
@@ -2045,7 +2084,7 @@ async function googleCalendarJsonRequest_(method, url, body) {
         },
         body:body === undefined ? undefined : JSON.stringify(body)
     });
-    const data = await response.json().catch(() => null);
+    const data = await googleResponseData_(response,url,method,accessToken);
     return { ok:response.ok, status:response.status, data };
 }
 
@@ -2236,6 +2275,7 @@ function googleCalendarIdForLog_(calendarId) {
 }
 
 async function googleCalendarApi_(method, calendarId, eventId, event) {
+    if(sessionTest_)throw new Error('Calendar access is disabled in the isolated archive test.');
     if (calendarLab_ && String(calendarId) !== String(readSettings_().calendar.googleCalendarId || "")) {
         throw new Error(bt_("CALENDAR_LAB_TARGET_REJECTED"));
     }
@@ -2264,7 +2304,7 @@ async function googleCalendarApi_(method, calendarId, eventId, event) {
             },
             body:event ? JSON.stringify(event) : undefined
         });
-        const data = await response.json().catch(() => null);
+        const data = await googleResponseData_(response,url,method,accessToken);
         const googleMessage = data && data.error && data.error.message ?
             String(data.error.message) : "";
         logWrite_(response.ok ? "TRACE" : "ERROR", "GOOGLE", bt_("GOOGLE_API_RESPONSE"), {
@@ -3575,6 +3615,7 @@ function tmdbTestResult_(result, lang) {
 }
 
 async function archiveWithWriteLock_(operation) {
+    if(sessionMode_)return operation(); // Own profile + Electron single instance; no persistent lock from a crashed session.
     const folder = archiveFolderPath_();
     if (!folder || !fs.existsSync(folder)) return {ok:false, message:bt_("ARCHIVE_FOLDER_UNSET")};
     try { return await require("../common/archive-lock.js").withWriteLock(folder, operation); }
@@ -3646,12 +3687,13 @@ function installIpc_() {
         }
     });
     ipcMain.handle("serkal:archive:load", async () => {
+        if(sessionMode_){const state=copyManager_().view();if(!state.writable)return {ok:true,daten:{entries:[]},count:0};}
         if(copyLocalMode_)return archiveLoad_();
         scheduleSharedArchive_(); await sharedArchiveObserve_(); return archiveUiView_();
     });
     ipcMain.handle("serkal:archive:sync", () => copyManager_().sync());
     ipcMain.handle("serkal:archive:adoptLocal", () => copyManager_().adoptLocal());
-    ipcMain.handle("serkal:archive:syncStatus", () => {const view=copyManager_().view();return {...view,message:view.code?bt_(view.code):""};});
+    ipcMain.handle("serkal:archive:syncStatus", () => {const view=copyManager_().view();return {...view,message:view.message||(view.code?bt_(view.code):"")};});
     ipcMain.handle("serkal:archive:revision", () => ({revision:sharedArchiveRevision_,shared:copyLocalMode_ || !!sharedArchiveView_}));
     archiveWriteHandler_("serkal:archive:insert", (_event, payload) => {
         logWrite_("TRACE", "PIPELINE", bt_("IPC_ARCHIVE_RECEIVED"), {
@@ -3681,7 +3723,7 @@ function installIpc_() {
             titel:String(payload && (payload.titel || payload.title || payload.name) || ""),
             tmdbId:Number(payload && (payload.tmdbId || payload.id) || 0) || null
         });
-        const result = copyLocalMode_ ? {ok:true,mode:"google",queued:true,message:bt_("COPY_PENDING")} : await googleCalendarInsertSeason_(payload);
+        const result = sessionTest_ ? {ok:true,mode:"none",queued:false,message:bt_('SESSION_LOCAL')} : copyLocalMode_ ? {ok:true,mode:"google",queued:true,message:bt_("COPY_PENDING")} : await googleCalendarInsertSeason_(payload);
         logWrite_(result && result.ok ? "TRACE" : "ERROR", "PIPELINE", bt_("IPC_CALENDAR_FINISHED"), {
             ok:Boolean(result && result.ok),
             skipped:Boolean(result && result.skipped),
@@ -3696,6 +3738,7 @@ function installIpc_() {
     ipcMain.handle("serkal:maintenance:last", () => {try{return JSON.parse(fs.readFileSync(path.join(app.getPath("userData"),"maintenance-last.json"),"utf8"));}catch(_){return null;}});
     archiveWriteHandler_("serkal:maintenance:run", async (_event,options) => { const result=await maintenanceRun_(options||{}); if(result && result.ok) scheduleSharedArchive_(); return result; });
     ipcMain.handle("serkal:calendar:createIcs", async (_event, payload) => {
+        if(sessionTest_)return {ok:false,message:'Calendar export is disabled in the isolated archive test.'};
         const result = calendarCreateIcs_(payload);
         if (result.ok) {
             try { await shell.openExternal(result.importUrl); }
@@ -3719,7 +3762,7 @@ function installIpc_() {
         return { ok:true, url };
     });
     ipcMain.handle("serkal:calendar:open", async (_event, settingsFromUi, lang) => {
-        const settings = settingsFromUi ? normalizeSettings_(settingsFromUi) : readSettings_();
+        const settings = sessionTest_ ? readSettings_() : settingsFromUi ? normalizeSettings_(settingsFromUi) : readSettings_();
         let mode = settings.calendar.mode;
         if (mode === "auto") mode = "ics";
         if (mode === "none") return { ok:false, action:"none", message:bt_("CALENDAR_DISABLED") };
@@ -4056,6 +4099,23 @@ function erstelleHauptfenster() {
             if(ui.lang)activeLanguage_=ui.lang==="en"?"en":"de";
             return {...ui,busy:ui.busy || maintenanceRunning_};
         };
+        if(sessionMode_){
+            require('../common/session-close').prepareSessionClose({read,
+                save:()=>hauptfenster.webContents.executeJavaScript('window.serkalSaveBeforeClose()'),
+                finish:()=>copyManager_().finish(),
+                notify:()=>dialog.showMessageBox(hauptfenster,{type:'info',message:bt_('EXIT_BUSY'),buttons:['OK']}),
+                choose:async(kind,result)=>{
+                    const detail=result?.message||'';
+                    const answer=await dialog.showMessageBox(hauptfenster,{type:'warning',
+                        message:bt_('SESSION_CLOSE_FAILED'),
+                        detail,buttons:[bt_('EXIT_DISCARD'),bt_('SESSION_KEEP_OPEN')],defaultId:1,cancelId:1});
+                    return answer.response===0?'discard':'cancel';
+                }
+            }).then(ok=>{if(ok&&!hauptfenster.isDestroyed()){closeApproved=true;hauptfenster.close();}})
+              .catch(error=>{logWrite_('ERROR','EXIT','Session close failed',{message:String(error.message||error),google:error.google||null});})
+              .finally(()=>{closeChecking=false;});
+            return;
+        }
         require("../common/close-guard").prepareClose({read,
             save:()=>hauptfenster.webContents.executeJavaScript("window.serkalSaveBeforeClose()"),
             status:async()=>copyLocalMode_?copyManager_().view():{dirty:false,busy:false},

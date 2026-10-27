@@ -40,6 +40,7 @@ const app = {
 const context = {
     console, URL, fetch:async()=>{ throw new Error("fetch not used"); },
     require(id) {
+        if(id === "../../serkal-session-test.json")return {enabled:false};
         if (id === "electron") return { app, BrowserWindow:function(){}, ipcMain, shell:{ openExternal:async()=>{} } };
         if (id === "electron-squirrel-startup") return false;
         return require(id);
