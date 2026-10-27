@@ -59,7 +59,7 @@ for /f "delims=" %%G in ('git rev-parse HEAD') do set "SERKAL_ACTUAL_COMMIT=%%G"
 if /I not "%SERKAL_ACTUAL_COMMIT%"=="%SERKAL_COMMIT%" goto :wrong_commit
 
 echo [3/11] Testkennung, Version und Isolation kontrollieren ...
-powershell -NoProfile -Command "$p=Get-Content -Raw package.json|ConvertFrom-Json;$r=Get-Content -Raw serkal-release.json|ConvertFrom-Json;$m=Get-Content -Raw '2 src\backend\main.js';if($p.name -ne 'serkal_session_test_33' -or $p.productName -ne 'SerKal Session Test 33' -or $p.version -ne $env:SERKAL_VERSION){exit 1};if($r.version -ne $env:SERKAL_VERSION -or [int]$r.number -ne 33){exit 2};if($m -notmatch 'SerKal-Session-Test-33' -or $m -notmatch 'serkal-session-test-33\.json'){exit 3}" || goto :wrong_version
+powershell -NoProfile -Command "$p=Get-Content -Raw package.json|ConvertFrom-Json;$r=Get-Content -Raw serkal-release.json|ConvertFrom-Json;$q=Get-Content -Raw serkal-session-test.json|ConvertFrom-Json;$profile=Get-Content -Raw '2 src\common\session-test-profile.js';$remote=Get-Content -Raw '2 src\common\archive-session-remote.js';if($p.name -ne 'serkal_session_test_33' -or $p.productName -ne 'SerKal Session Test 33' -or $p.version -ne $env:SERKAL_VERSION){exit 1};if($r.version -ne $env:SERKAL_VERSION -or [int]$r.number -ne 33){exit 2};if($q.enabled -ne $true -or [int]$q.testNumber -ne 33 -or $profile -notmatch 'SerKal-Session-Test-33' -or $remote -notmatch 'serkal-session-test-33\.json'){exit 3}" || goto :wrong_version
 
 echo [4/11] Bewaehrtes lokales Symbol und private OAuth-Grunddatei pruefen ...
 copy /y "%SERKAL_SOURCE_ICON%" "%SERKAL_BUILD_ICON%" >nul || goto :failed
