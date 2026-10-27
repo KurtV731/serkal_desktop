@@ -4391,3 +4391,25 @@ Der Build bleibt ein isolierter Teststand. Er ersetzt weder die öffentliche Des
 Kurt hat denselben isolierten Sitzungstest anschließend auf dem Laptop ausgeführt. Dort wurde als vierter Testeintrag **„Special Ops: Lioness (2023) [S03]“** angelegt und SerKal regulär beendet. Beim danach erfolgten Start des isolierten Prüfstands auf dem PC wurde das Google-Testarchiv mit allen vier Einträgen geladen; der auf dem Laptop angelegte Eintrag war auf dem PC vorhanden.
 
 Damit ist zusätzlich der vollständige geräteübergreifende Ablauf **Laptop lokal ändern → beim Beenden vollständig zu Google speichern → PC beim Start vollständig aus Google laden** praktisch bestanden. Die Geräte wurden dabei nacheinander und nicht parallel benutzt.
+
+
+---
+
+## Website-Chatty – 27.10.2026: HASA-Vorschlagsweg ist weiterhin nur ein Platzhalter – API-Übergabe jetzt dringend
+
+Status: **BLOCKIERENDER RESTAUFTRAG AN CE HASA / WEBSITE-UMSETZUNG DIREKT DANACH**
+
+Kurt weist zu Recht darauf hin, dass auf der öffentlichen HASA-Startseite seit Tagen nur „Der eigene Vorschlagsweg wird noch eingerichtet“ steht. Der aktuelle Repositorybefund bestätigt: In `02 Website/index.html` existieren lediglich Navigation und Platzhaltertext; im HASA-Repository ist kein freigegebener Empfangs-, Speicher- oder Verwaltungsweg für Vorschläge auffindbar. Der Website-Chatty darf nach der bisherigen Zuständigkeitsregel die API unter `C:\ppd\hasa\02 Website\api` nicht eigenmächtig verändern und keine scheinbar funktionierende Mail- oder Speicherautomatik erfinden.
+
+**Dringender Auftrag an CE HASA:** Bitte den technischen Vorschlagsweg festlegen und bereitstellen beziehungsweise dem Website-Chatty exakt übergeben:
+
+1. freigegebener HTTPS-Endpunkt unter `hasa.li/api/`;
+2. zulässige Felder und Höchstlängen (mindestens Betreff/Kategorie und Vorschlagstext; Name oder Kontakt nur freiwillig);
+3. Spam-/Missbrauchsschutz und verständliche Fehlercodes;
+4. Speicherort, Zugriffsschutz, Aufbewahrung und Löschweg;
+5. Datenschutztext sowie Festlegung, ob und wie Kurt die Vorschläge liest;
+6. Testanfrage ohne echte persönliche Daten und bestätigtes Ergebnis.
+
+**Website-Chatty übernimmt unmittelbar nach dieser Übergabe:** sichtbares Formular im vorhandenen HASA-Layout, Pflichtfeld-/Längenprüfung, klare Sende- und Fehlermeldungen, Datenschutz-Hinweis, mobile Prüfung und Ersetzung des Platzhalters. Bis der echte Empfänger geprüft ist, wird keine Attrappe eingebaut, die Texte entgegennimmt oder eine erfolgreiche Übertragung vortäuscht.
+
+Damit ist der Punkt nicht länger als unverbindliches „später“ behandelt: Der fehlende technische Teil ist jetzt als konkret abnehmbarer Auftrag mit klarer Zuständigkeit dokumentiert. Eine ehrliche Fertigmeldung oder ein Datum ist erst möglich, sobald CE HASA den Empfangsweg liefert; die Websiteoberfläche selbst ist danach keine offene Konzeptfrage mehr.
