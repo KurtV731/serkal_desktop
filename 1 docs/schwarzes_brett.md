@@ -4384,3 +4384,10 @@ Kurt hat den isolierten portablen Windows-Prüfstand aus dem festgeschriebenen C
 Damit ist der zentrale Desktop-Ablauf **Start laden → ausschließlich lokal arbeiten → beim regulären Beenden einmal vollständig speichern → beim Neustart wieder laden** praktisch nachgewiesen.
 
 Der Build bleibt ein isolierter Teststand. Er ersetzt weder die öffentliche Desktop-Version 1.2 noch deren Downloadartefakt und darf nicht veröffentlicht werden. Weitere fachliche Schritte, insbesondere Android-Sitzungsumbau und endgültige Übernahme in eine neue gemeinsame Produktfassung, bleiben beim CE.
+
+
+### Ergänzung: geräteübergreifender Desktop-Test Laptop → PC bestanden
+
+Kurt hat denselben isolierten Sitzungstest anschließend auf dem Laptop ausgeführt. Dort wurde als vierter Testeintrag **„Special Ops: Lioness (2023) [S03]“** angelegt und SerKal regulär beendet. Beim danach erfolgten Start des isolierten Prüfstands auf dem PC wurde das Google-Testarchiv mit allen vier Einträgen geladen; der auf dem Laptop angelegte Eintrag war auf dem PC vorhanden.
+
+Damit ist zusätzlich der vollständige geräteübergreifende Ablauf **Laptop lokal ändern → beim Beenden vollständig zu Google speichern → PC beim Start vollständig aus Google laden** praktisch bestanden. Die Geräte wurden dabei nacheinander und nicht parallel benutzt.
