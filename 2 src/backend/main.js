@@ -851,7 +851,7 @@ async function archiveDeleteSeries_(payload) {
             });
         }
 
-        if (calendarEntries.length > 0 && calendarMode === "ics") {
+        if (calendarEntries.length > 0 && calendarMode === "ics" && !sessionMode_) {
             return {
                 ok:false,
                 message:bt_("DELETE_ICS_UNSUPPORTED")
