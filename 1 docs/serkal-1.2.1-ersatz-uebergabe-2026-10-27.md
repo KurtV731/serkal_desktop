@@ -21,7 +21,7 @@ Die öffentliche Downloadversion wurde durch CE noch nicht ersetzt.
 - Für einen fehlgeschlagenen Google-Start gibt es den deutlich als lokal/fehlerhaft bezeichneten letzten bestätigten Stand; keine Dauersperre wegen Google-403. Bei erster Altübernahme kann der vorhandene lokale Bestand weiter benutzt werden.
 - Gespeichert wird der zuletzt vollständig abgeschlossene Stand. Keine Zusammenführung oder Revisionskette.
 - Neue und alte Geräte mit 1.2.1 verwenden gemeinsam **serkal-session-v1.json** im Google-appDataFolder.
-- Fehlt diese Datei beim Umstieg, wird die zuletzt bei Google geänderte alte v2-Kopie übernommen. Desktop kann bei fehlender Google-Kopie den vorhandenen lokalen TXT-Bestand als erste Sitzung übernehmen. Keine leere Ersteinrichtung über einen vorhandenen Bestand hinweg.
+- Fehlt diese Datei beim Umstieg, wird die zuletzt bei Google geänderte alte v2-Kopie übernommen. Desktop kann bei fehlender Google-Kopie den vorhandenen lokalen TXT-Bestand als erste Sitzung übernehmen. Ein vorhandener Google-v2-Bestand wird nicht durch einen leeren neuen Sitzungsbestand ersetzt.
 - Alte v2-Dateien werden nach dem Umstieg nicht mehr mit dem neuen Sitzungsbestand vermischt.
 - Google-Kalenderziele werden beim Abschluss vorbereitet; Archiveinträge werden einmal gespeichert; Kalendertermine danach aktualisiert. Ein Kalenderfehler verhindert den Archivupload nicht.
 - Persönliche, nicht von SerKal markierte Kalendertermine bleiben außerhalb dieser Aktualisierung. Für von SerKal verwaltete Termine ist der Sitzungsstand maßgeblich; alte manuelle Schutzkonflikte blockieren diesen Abschluss nicht mehr.
