@@ -4446,3 +4446,43 @@ Prüfungen: **39 Desktop-Testskripte**, letzter CI-Lauf https://github.com/KurtV
 Die Windows-EXE kann in dieser Umgebung ohne Kurts Windows-Bauplatz und private OAuth-Beilage nicht fertig erzeugt werden. Der gesamte festgeschriebene Bauweg liegt jetzt ausführbar bereit; Installer kann ihn direkt ausführen und anschließend die EXE samt Hash zurückmelden. Das ist kein noch offenes fachliches Konzeptlos.
 
 VelcroFists konkrete Google-403-Berechtigungs-/Projektursache ist ohne vollständige neue Antwort weiterhin offen. Die alte irreführende Dauersperre ist im neuen Ablauf beseitigt. Keine Behauptung einer serverseitigen Berechtigungsreparatur und noch keine öffentliche Website-Datei ersetzt. Nach echtem Windows-Bau und praktischer Abnahme die fertigen neuen Artefakte unverändert über den bestehenden Veröffentlichungsweg ersetzen.
+
+
+---
+
+## Installer – 27.10.2026: SerKal 1.2.1 / gemeinsamer Stand 35 real gebaut und vollständig bereitgelegt
+
+Status: **WINDOWS-ARTEFAKT GEBAUT UND GEPRÜFT / SIGNIERTE APK ÜBERNOMMEN UND HASHGEPRÜFT / PRAKTISCHE ABNAHME OFFEN / NICHT VERÖFFENTLICHEN**
+
+Die CE-Übergabe zur vollständigen Ersatzfassung wurde auf Kurts Windows-Bauplatz ausgeführt. Beide unveröffentlichten Abnahmeartefakte liegen gemeinsam unter:
+
+`C:\ppd\serkal\veroeffentlichungen\1.2.1`
+
+### Windows Desktop
+
+- Datei: `serkal-desktop.exe`
+- Produktversion: **1.2.1**
+- gemeinsamer Archivstand / releaseNumber: **35**
+- festgeschriebener Quellcommit: `fec9f40186f7dfd2bc1a071a91931547acdd95df`
+- Größe: **140883968 Byte**
+- SHA-256: `22a865b28be0eabc95cc2ebbd9eb935e4370e084804e6b4f282631d6a26d99d6`
+- Nachweise im selben Ordner: `serkal-desktop.exe.sha256` und `freigabenachweis.txt`
+
+Der vorbereitete Bauweg führte die 39 Tests sowie Paket-, OAuth- und Tokenprüfungen aus. Der erzeugte Installer wurde noch nicht praktisch abgenommen und noch nicht in den Website-Downloadordner kopiert.
+
+### Android
+
+- lokale Datei: `serkal-android.apk`
+- ursprüngliches CE-Artefakt: `035-SerKal-Android-1.2.1.apk`
+- Produktversion: **1.2.1**
+- Android versionCode: **44**
+- gemeinsamer Archivstand: **35**
+- Größe laut CE: **2285979 Byte**
+- von Kurt nach dem manuellen Kopieren und Umbenennen erneut geprüfte SHA-256:
+  `c0142f13bc00083db12c6c84e0363489ca65e2fdacd54776d4fc73260d179849`
+
+Die Android-Prüfsumme stimmt exakt mit dem signierten CE-Artefakt überein. Die Datei wurde damit unverändert übernommen.
+
+### Nächster Schritt
+
+Jetzt praktische Abnahme genau dieser beiden Dateien. Bis zu Kurts ausdrücklicher Freigabe keine Website-Kopie, kein Serverupload und kein öffentlicher Ersatz der bestehenden 1.2. Bei erfolgreicher Abnahme werden ausschließlich diese hashidentischen Dateien weitergereicht.
