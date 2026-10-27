@@ -34,7 +34,7 @@ final class SeasonAnnouncements {
     if(!old.optString("description").equals(next.optString("description")) || !old.optString("summary").equals(next.optString("summary")) || !old.getJSONObject("start").optString("date").equals(next.getJSONObject("start").optString("date"))){next.remove("id");client.request(base+"/"+ArchiveCopyClient.esc(old.getString("id")),"PUT",next.toString(),"application/json");}
    }page=r.optString("nextPageToken");
   }while(!page.isEmpty());
-  for(JSONObject e:wanted.values())try{client.request(base,"POST",e.toString(),"application/json");}catch(Exception error){if(!"GOOGLE_HTTP_409".equals(error.getMessage()))throw error;JSONObject old=client.get(base+"/"+ArchiveCopyClient.esc(e.getString("id")));if(!old.optString("status").equals("cancelled"))throw error;}
+  for(JSONObject e:wanted.values())try{client.request(base,"POST",e.toString(),"application/json");}catch(Exception error){if(!"GOOGLE_HTTP_409".equals(GoogleHttpFailure.code(error)))throw error;JSONObject old=client.get(base+"/"+ArchiveCopyClient.esc(e.getString("id")));if(!old.optString("status").equals("cancelled"))throw error;}
  }
 }
 

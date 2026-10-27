@@ -75,13 +75,13 @@ public class InputLayoutTest {
  }
  Object getUnchecked(Object object,String name){try{return get(object,name);}catch(Exception e){throw new RuntimeException(e);}}
  @Test public void successfulInsertUsesTheSameReset()throws Exception{
-  ActivityController<MainActivity> c=Robolectric.buildActivity(MainActivity.class).create();MainActivity a=c.get();AndroidArchiveCopy copy=null;
+  ActivityController<MainActivity> c=Robolectric.buildActivity(MainActivity.class).create();MainActivity a=c.get();AndroidArchiveSession copy=null;
   try{
-   seed(a);copy=new AndroidArchiveCopy(a,"123","",()->{});
-   set(copy,"state",new JSONObject().put("owner","123").put("base","").put("dirty",false).put("epoch",0).put("record",new ArchiveCopyTest().record()));
+   seed(a);copy=new AndroidArchiveSession(a,"123","",()->{});
+   set(copy,"record",new ArchiveCopyTest().record());
    set(copy,"loaded",true);set(a,"archiveCopy",copy);assertTrue(copy.writable());
    Method send=MainActivity.class.getDeclaredMethod("sendRequest",String.class,JSONObject.class);send.setAccessible(true);send.invoke(a,"insert",new SeasonInputTest().payload(false));
-   assertReset(a);assertEquals(2,ArchiveCodec.entries(((JSONObject)get(copy,"state")).getJSONObject("record")).length());
+   assertReset(a);assertEquals(2,ArchiveCodec.entries((JSONObject)get(copy,"record")).length());
   }finally{if(copy!=null)copy.close();c.destroy();}
  }
  @Test public void rejectedInsertKeepsTheInputForRetry()throws Exception{
