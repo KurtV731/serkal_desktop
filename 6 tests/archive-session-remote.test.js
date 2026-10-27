@@ -17,13 +17,13 @@ const copy=require('../2 src/common/archive-copy');
   else {assert(decodeURIComponent(url).includes(TEST_NAME));assert(!url.includes(copy.PREFIX));value={files};}
   return {ok:true,text:async()=>JSON.stringify(value)};
  };
- const remote=await connect('secret',{fetchImpl});assert.equal(await remote.load(),null);assert.equal(writes,0);
+ const remote=await connect('secret',{fetchImpl,name:TEST_NAME,importLegacy:false});assert.equal(await remote.load(),null);assert.equal(writes,0);
  const record={schema:2,releaseNumber:copy.RELEASE,owner:'user',revision:crypto.randomUUID(),parent:'',generatedAt:new Date().toISOString(),calendar:{mode:'',id:''},files:[]};
  await remote.save(record);assert.equal(writes,1);assert.equal((await remote.load()).revision,record.revision);
  const updated={...record,revision:crypto.randomUUID()};await remote.save(updated);assert.equal(files.length,1);assert.equal((await remote.load()).revision,updated.revision);
  // Simultaneous creation: choose most recently modified file without graph/conflict checks.
  payloads.set('duplicate',record);files.push({id:'duplicate',modifiedTime:'999'});assert.equal((await remote.load()).revision,record.revision);
- const bad=await connect('secret',{fetchImpl:async url=>url.includes('userinfo')?{ok:true,text:async()=>JSON.stringify({sub:'user',email_verified:true})}:{ok:false,status:403,text:async()=>'Full error: permission denied'}});
+ const bad=await connect('secret',{name:TEST_NAME,importLegacy:false,fetchImpl:async url=>url.includes('userinfo')?{ok:true,text:async()=>JSON.stringify({sub:'user',email_verified:true})}:{ok:false,status:403,text:async()=>'Full error: permission denied'}});
  await assert.rejects(bad.load(),e=>e.google.operation==='archive-list'&&e.google.responseText==='Full error: permission denied');
  console.log('session remote: isolated namespace, no initial upload, whole snapshot PATCH, duplicate first-save ordering and full 403 response passed');
 })().catch(error=>{console.error(error);process.exitCode=1;});

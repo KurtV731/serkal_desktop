@@ -34,8 +34,8 @@ const copy=require('../2 src/common/archive-copy');
   // Network failure during a session never prevents another local edit.
   edit(afterDelete,'Offline.txt','one');offline=true;const failed=await afterDelete.finish();assert.equal(failed.code,'GOOGLE_HTTP_403');assert(failed.dirty);assert(failed.writable);
   edit(afterDelete,'Offline.txt','two');
-  const badStart=make('failure');const startResult=await badStart.start();assert.equal(startResult.status,'error');assert.equal(startResult.busy,false);assert.equal(startResult.code,'GOOGLE_HTTP_403');assert.equal(startResult.writable,false);
-  offline=false;await badStart.sync();assert(badStart.view().writable);
+  const badStart=make('failure');const startResult=await badStart.start();assert.equal(startResult.status,'offline');assert.equal(startResult.busy,false);assert.equal(startResult.code,'GOOGLE_HTTP_403');assert.equal(startResult.writable,true);
+  offline=false;assert(badStart.view().writable);
   const restored=make('A');await restored.start();assert.equal(fs.readdirSync(restored.folder()).length,0);
   // Normal close auto-saves UI, then uploads once; no confirmation on successful close.
   let dirty=true,finished=0,choices=0;

@@ -9,8 +9,9 @@ async function prepareSessionClose({read,save,finish,choose,notify}){
         if(!saved||after.dirty||after.busy)return await choose('saveFailed')==='discard';
     }
     const result=await finish();
-    if(result.busy)return false;
-    if(result.dirty)return await choose('syncFailed',result)==='discard';
+    if(result.busy){await notify('busy');return false;}
+    if(result.warning)return await choose('calendarFailed',{message:result.warning})==='discard';
+    if(result.dirty||result.code)return await choose('syncFailed',result)==='discard';
     return true;
 }
 module.exports={prepareSessionClose};

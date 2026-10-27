@@ -15,11 +15,11 @@ const {createRequire}=require('node:module');
  global.fetch=fetchMock;
  const context={console,Buffer,URL,URLSearchParams,AbortSignal,process,fetch:fetchMock,
   setTimeout:(fn,ms)=>{timers.push(ms);return {unref(){}};},clearTimeout(){},__dirname:path.dirname(mainPath),
-  require:id=>id==='electron'?{app,ipcMain:{handle:(key,fn)=>handles.set(key,fn)},BrowserWindow:function(){},dialog:{},shell:{}}:id==='electron-squirrel-startup'?false:realRequire(id)};
+  require:id=>id==='../../serkal-session-test.json'?{enabled:true,session:true}:id==='electron'?{app,ipcMain:{handle:(key,fn)=>handles.set(key,fn)},BrowserWindow:function(){},dialog:{},shell:{}}:id==='electron-squirrel-startup'?false:realRequire(id)};
  vm.createContext(context);
  try{
   vm.runInContext('(function(){'+fs.readFileSync(mainPath,'utf8')+'\nglobalThis.api={installIpc_,copyManager_,scheduleSharedArchive_,readSettings_,googleCalendarJsonRequest_,googleCalendarApi_};})();',context);
-  const api=context.api;api.installIpc_();assert(userData.endsWith('SerKal-Session-Test-33'));
+  const api=context.api;api.installIpc_();assert(userData.endsWith('SerKal-Session-Test-34'));
   assert.equal(api.readSettings_().calendar.mode,'none');assert.equal(api.readSettings_().archive.folderPath,path.join(userData,'Archiv'));
   const manager=api.copyManager_();await manager.start();assert(manager.view().session);assert(manager.view().writable);
   const before=fetches;api.scheduleSharedArchive_();await handles.get('serkal:archive:sync')();assert.equal(fetches,before);assert.equal(timers.length,0);

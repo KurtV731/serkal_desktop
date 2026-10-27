@@ -3908,6 +3908,7 @@ const I18N = {
     BTN_SAVE_DOCK: '💾 Speichern',
     TT_SAVE_DOCK: 'Nachträgliche Änderungen an Archivnotizen und Status speichern',
     BTN_ARCHIVE_SYNC: "Jetzt synchronisieren",
+    SESSION_CALENDAR_WARNING: "Archiv gespeichert · Kalender nicht vollständig aktualisiert",
     SESSION_LOADING: "Archiv wird von Google geladen…",
     SESSION_SAVING: "Archiv wird bei Google gespeichert…",
     SESSION_PENDING: "Änderungen noch nicht bei Google gespeichert",
@@ -4106,6 +4107,7 @@ const I18N = {
     BTN_SAVE_DOCK: '💾 Save edits',
     TT_SAVE_DOCK: 'Save later edits to archive notes and status; Insert adds a new season',
     BTN_ARCHIVE_SYNC: "Sync now",
+    SESSION_CALENDAR_WARNING: "Archive saved · Calendar update incomplete",
     SESSION_LOADING: "Loading archive from Google…",
     SESSION_SAVING: "Saving archive to Google…",
     SESSION_PENDING: "Changes not yet saved to Google",
@@ -5215,7 +5217,8 @@ async function archiveCopyStatus_() {
       let text=info.busy?(info.status==='loading'?t('SESSION_LOADING'):t('SESSION_SAVING')):
         (state.isDirty||info.dirty)?t('SESSION_PENDING'):
         t('SESSION_READY');
-      if(info.code)text=t('SESSION_ERROR')+(info.message||info.code);
+      if(info.warning)text=t('SESSION_CALENDAR_WARNING')+'\n'+info.warning;
+      if(info.code)text=((state.isDirty||info.dirty)?t('SESSION_PENDING')+' · ':'')+t('SESSION_ERROR')+(info.message||info.code);
       label.textContent=text;label.style.whiteSpace='pre-wrap';
       const button=document.getElementById('btnArchiveSync');
       button.style.display=info.writable?'none':'';button.disabled=info.busy;

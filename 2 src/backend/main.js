@@ -27,7 +27,9 @@ function bt_(key, values, language) {
 }
 
 // SESSION-33: isolated rehearsal; legacy production flow remains below for comparison.
-const sessionTest_ = require('../../serkal-session-test.json').enabled
+const sessionSettings_ = require('../../serkal-session-test.json');
+const sessionMode_ = sessionSettings_.session===true;
+const sessionTest_ = sessionSettings_.enabled
     ? require('../common/session-test-profile').prepare(app.getPath('appData')) : null;
 const calendarLab_ = !sessionTest_ && String(process.env.SERKAL_CALENDAR_LAB || "") === "1"
     ? require("../common/calendar-lab.js").prepare(app.getPath("appData")) : null;
@@ -126,7 +128,7 @@ function serkalDisplayVersion_() {
 }
 
 function serkalWindowTitle_() {
-    const title = "SERKAL Desktop " + serkalDisplayVersion_() + (sessionTest_ ? " – SITZUNGSTEST 33 / SESSION TEST" : calendarLab_ ? " – " + bt_("CALENDAR_LAB") : "");
+    const title = "SERKAL Desktop " + serkalDisplayVersion_() + (sessionTest_ ? " – SITZUNGSTEST 34 / SESSION TEST" : calendarLab_ ? " – " + bt_("CALENDAR_LAB") : "");
     return app.isPackaged ? title : title + " – ENTWICKLUNG";
 }
 
@@ -1820,17 +1822,20 @@ const copyLocalMode_ = !calendarLab_;
 let desktopCopy_;
 function copyManager_() {
     if(desktopCopy_)return desktopCopy_;
-    if(sessionTest_){
+    if(sessionMode_){
         const {ArchiveSession}=require('../common/archive-session');
-        desktopCopy_=new ArchiveSession({folder:archiveFolderPath_,calendar:()=>({mode:'',id:''}),
-            selectCalendar:()=>{}, // This rehearsal has no access to a real calendar.
+        desktopCopy_=new ArchiveSession({folder:archiveFolderPath_,calendar:()=>sessionTest_?({mode:'',id:''}):readSettings_().calendar,
+            selectCalendar:calendar=>{if(!sessionTest_){const settings=readSettings_();settings.calendar={mode:calendar.mode||'none',googleCalendarId:calendar.id};writeSettings_(settings);}},
+            calendarSync:record=>sessionTest_?Promise.resolve():copyCalendarSync_(record),
+            calendarPrepare:record=>sessionTest_?Promise.resolve():copyCalendarSync_(record,true),
+            bootstrap:()=>require('../common/archive-copy').capture(archiveFolderPath_(),readSettings_().calendar),
             connect:async()=>{
                 let token;try{token=JSON.parse(fs.readFileSync(googleSharedKeyTokenFile_(),'utf8'));}catch(_){}
                 if(token && Number(token.expiry_date||0)<=Date.now()+60000 && token.refresh_token)
                     token=await googleOauthRefresh_(googleOauthClientConfig_(),token,googleSharedKeyWriteToken_);
                 if(!token || !token.access_token || Number(token.expiry_date||0)<=Date.now()+60000)
                     throw Object.assign(new Error(bt_('SESSION_CONNECT')),{code:'COPY_CONNECT'});
-                return require('../common/archive-session-remote').connect(token.access_token);
+                return require('../common/archive-session-remote').connect(token.access_token,{name:sessionTest_?require('../common/archive-session-remote').TEST_NAME:require('../common/archive-session-remote').NAME,importLegacy:!sessionTest_});
             },
             onChange:()=>{sharedArchiveRevision_++;},
             onStatus:status=>logWrite_(status.code?'WARN':'INFO','SYNC','Archive session',status)
@@ -1870,13 +1875,13 @@ function copyManager_() {
     });
     return desktopCopy_;
 }
-async function copyCalendarSync_(record) {
+async function copyCalendarSync_(record,prepareOnly=false) {
     if(record.calendar.mode!=="google")return;
     const calendarToken=await googleOauthAccessToken_();
     await require(path.join(__dirname,"../common/google-identity")).verifyCalendarOwner(calendarToken,record.owner);
     const manager=copyManager_();manager.report("calendar-check");
     const preferred=String(readSettings_().calendar.googleCalendarId||"");
-    if(!record.calendar.id && !preferred){const created=await googleResolveSerkalCalendar_();record.calendar.id=created.id;manager.save();}
+    if(!record.calendar.id && !preferred){const created=await googleResolveSerkalCalendar_();record.calendar.id=created.id;if(!sessionMode_)manager.save();}
     const target=await require(path.join(__dirname,"../common/copy-calendar-target")).resolve({
         id:record.calendar.id,preferred,
         check:async id=>{
@@ -1892,13 +1897,14 @@ async function copyCalendarSync_(record) {
     });
     if(target.recovered){
         logWrite_("INFO","SYNC",bt_("COPY_CALENDAR_RECOVERED"),{vorher:googleCalendarIdForLog_(record.calendar.id),kalender:googleCalendarIdForLog_(target.id)});
-        record.calendar.id=target.id;manager.save();const settings=readSettings_();settings.calendar.googleCalendarId=target.id;writeSettings_(settings);
+        record.calendar.id=target.id;if(!sessionMode_)manager.save();const settings=readSettings_();settings.calendar.googleCalendarId=target.id;writeSettings_(settings);
     }
+    if(prepareOnly)return;
     manager.report("calendar-read");
     const entries=record.files.flatMap(f=>f.content.split(/\r?\n/).map(line=>archiveEntryFromLine_(f.name,{mtime:new Date(record.generatedAt)},line)).filter(Boolean));
     const events=await googleCalendarManagedEvents_(record.calendar.id,true,true);
     const protocol=require("../common/archive-calendar-copy.js");
-    const operations=protocol.plan(entries,events,record.revision);
+    const operations=protocol.plan(entries,events,record.revision,new Date().getFullYear(),sessionMode_);
     let completed=0;manager.report("calendar-write",0,operations.length);
     for(const op of operations) {
         manager.report("calendar-write",completed++,operations.length);
@@ -1909,7 +1915,7 @@ async function copyCalendarSync_(record) {
             if(previous.ok && op.body.extendedProperties?.private?.serkal==="announcement" && previous.data?.status==="cancelled")continue;
             if(previous.ok && protocol.signature(previous.data)===protocol.signature(op.body))continue;
         }
-        throw Object.assign(new Error("COPY_CALENDAR_FAILED"),{code:"COPY_CALENDAR_FAILED"});
+        throw Object.assign(new Error("COPY_CALENDAR_FAILED\n"+JSON.stringify(result.data||{})),{code:"COPY_CALENDAR_FAILED"});
     }
     manager.report("archive-upload");
 }
@@ -2007,7 +2013,7 @@ async function archiveApplyRequest_(request) {
 let sharedArchiveRunning_ = false;
 let sharedArchiveTimer_;
 function scheduleSharedArchive_() {
-    if(sessionTest_)return; // No upload on edits and no delayed background transfer.
+    if(sessionMode_)return; // No upload on edits and no delayed background transfer.
     clearTimeout(sharedArchiveTimer_);
     sharedArchiveTimer_=setTimeout(() => { googleSharedArchiveSync_().catch(()=>{}); }, 1500);
 }
@@ -3609,7 +3615,7 @@ function tmdbTestResult_(result, lang) {
 }
 
 async function archiveWithWriteLock_(operation) {
-    if(sessionTest_)return operation(); // Own profile + Electron single instance; no persistent lock from a crashed session.
+    if(sessionMode_)return operation(); // Own profile + Electron single instance; no persistent lock from a crashed session.
     const folder = archiveFolderPath_();
     if (!folder || !fs.existsSync(folder)) return {ok:false, message:bt_("ARCHIVE_FOLDER_UNSET")};
     try { return await require("../common/archive-lock.js").withWriteLock(folder, operation); }
@@ -3681,7 +3687,7 @@ function installIpc_() {
         }
     });
     ipcMain.handle("serkal:archive:load", async () => {
-        if(sessionTest_){const state=copyManager_().view();if(!state.writable)return {ok:true,daten:{entries:[]},count:0};}
+        if(sessionMode_){const state=copyManager_().view();if(!state.writable)return {ok:true,daten:{entries:[]},count:0};}
         if(copyLocalMode_)return archiveLoad_();
         scheduleSharedArchive_(); await sharedArchiveObserve_(); return archiveUiView_();
     });
@@ -4093,7 +4099,7 @@ function erstelleHauptfenster() {
             if(ui.lang)activeLanguage_=ui.lang==="en"?"en":"de";
             return {...ui,busy:ui.busy || maintenanceRunning_};
         };
-        if(sessionTest_){
+        if(sessionMode_){
             require('../common/session-close').prepareSessionClose({read,
                 save:()=>hauptfenster.webContents.executeJavaScript('window.serkalSaveBeforeClose()'),
                 finish:()=>copyManager_().finish(),

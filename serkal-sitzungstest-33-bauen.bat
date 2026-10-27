@@ -1,4 +1,8 @@
 @echo off
+echo Dieser Zweig enthaelt bereits die gemeinsame Ersatzfassung 34. Bitte den aktuellen Ersatz-Bauweg verwenden.
+exit /b 1
+rem Vorheriger Testbau bleibt unten als Referenz.
+@echo off
 setlocal
 cd /d "%~dp0"
 title SerKal - isolierten Sitzungstest 33 bauen

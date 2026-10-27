@@ -28,7 +28,7 @@ function announcementPlan(entries,events,revision){
  }
  for(const body of desired.values())operations.push({method:'POST',id:'',body});return operations;
 }
-function plan(entries, events, revision, year=new Date().getFullYear()) {
+function plan(entries, events, revision, year=new Date().getFullYear(), replaceManaged=false) {
     const desired=new Map(),past=new Set();
     for(const entry of entries) {
         const dates=entry.activeDates||entry.dates||[],season=entry.seasonLabel||entry.staffelLabel;
@@ -54,7 +54,7 @@ function plan(entries, events, revision, year=new Date().getFullYear()) {
         if(!target && past.has(p.tmdbId+':'+p.season))continue;
         const stored=p.serkalSignature;
         // Foreign events and manual Calendar changes remain protected.
-        if(!stored || stored!==signature(event)) {
+        if(!replaceManaged && (!stored || stored!==signature(event))) {
             if(!target || signature(target)!==signature(event))throw Object.assign(new Error('COPY_CALENDAR_PROTECTED'),{code:'COPY_CALENDAR_PROTECTED'});
             seen.add(k);continue;
         }
