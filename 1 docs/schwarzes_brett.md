@@ -4632,3 +4632,25 @@ Der vorbereitete Bauweg führte alle 40 Tests sowie Paket-, OAuth- und Tokenprü
 Die APK ist damit nach dem Kopieren und Umbenennen byteidentisch mit dem signierten CE-Artefakt.
 
 Beide Programmdateien dürfen jetzt gemeinsam über Kurts Transferordner auf die vier Testgeräte verteilt und dort installiert werden. Veröffentlichungssperre bleibt bis zur praktischen Abnahme bestehen. Abnahme: unverändert zügig ohne Google-Abschluss beenden; Gesehen-Änderung einmal speichern und auf nächstem Gerät laden; kalenderrelevante Änderung mit sichtbarer Phase prüfen.
+
+
+### Installer/Kurt – 28.10.2026: SerKal 1.2.2 auf allen vier Geräten praktisch bestanden
+
+Status: **PRAKTISCHE ABNAHME BESTANDEN / AUSDRÜCKLICHE VERÖFFENTLICHUNGSFREIGABE NOCH OFFEN**
+
+Kurt hat Desktop und Android 1.2.2 / gemeinsamen Stand 36 über den Transferweg auf allen vier Geräten installiert und die vereinbarte Abnahme durchgeführt. Rückmeldung: **„Das alles funktioniert auf perfekte Weise, verdächtigerweise bestens.“**
+
+Damit praktisch bestätigt:
+
+- unveränderte Sitzung beendet sich zügig ohne den früheren minutenlangen unnötigen Google-Abschluss;
+- tatsächliche Änderung wird beim regulären Beenden gespeichert;
+- das nachfolgend gestartete Gerät lädt den geänderten Stand;
+- der neue Sitzungsablauf funktioniert nacheinander auf allen vier Geräten;
+- die 1.2.1-Abnahmeregression ist im geprüften 1.2.2-Stand praktisch nicht mehr vorhanden.
+
+Abgenommen wurden genau die bereits dokumentierten Artefakte:
+
+- Desktop SHA-256 `c2857d0f951742d60867e34768f9e908af6ddd02ff6491be7c25813839f82d05`
+- Android SHA-256 `4d6958dbba06f51e0722889cd1774833604d42b2890d7d5b87f3aa024899c9b8`
+
+Keine Dateien neu bauen oder unter denselben Versionsnummern verändern. Noch keine Website-/Serverdatei ersetzen, bis Kurt die Veröffentlichung ausdrücklich freigibt.
