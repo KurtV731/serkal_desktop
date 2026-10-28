@@ -3909,6 +3909,8 @@ const I18N = {
     TT_SAVE_DOCK: 'Nachträgliche Änderungen an Archivnotizen und Status speichern',
     BTN_ARCHIVE_SYNC: "Jetzt synchronisieren",
     SESSION_CALENDAR_WARNING: "Archiv gespeichert · Kalender nicht vollständig aktualisiert",
+    SESSION_CALENDAR_PENDING: "Archiv gespeichert · Kalenderabgleich beim Beenden noch offen",
+    "COPY_PHASE_calendar-wait": "Google-Kalender begrenzt Anfragen · Wiederholung nach Pause",
     SESSION_NO_CHANGES: "Keine Änderungen · Beenden ohne Übertragung",
     SESSION_LOCAL_DONE: "Lokal übernommen · Google wird beim Beenden aktualisiert",
     SESSION_LOCAL_APPLY: "Änderungen werden lokal übernommen…",
@@ -4117,6 +4119,8 @@ const I18N = {
     TT_SAVE_DOCK: 'Save later edits to archive notes and status; Insert adds a new season',
     BTN_ARCHIVE_SYNC: "Sync now",
     SESSION_CALENDAR_WARNING: "Archive saved · Calendar update incomplete",
+    SESSION_CALENDAR_PENDING: "Archive saved · Calendar update pending at exit",
+    "COPY_PHASE_calendar-wait": "Google Calendar request limit · waiting before retry",
     SESSION_NO_CHANGES: "No changes · exit without transfer",
     SESSION_LOCAL_DONE: "Applied locally · Google will be updated when exiting",
     SESSION_LOCAL_APPLY: "Applying local edits…",
@@ -4612,7 +4616,7 @@ function entryKeyFromArchiv_(it) {
 function updateSaveUi_() {
   try {
     if(state.sessionInfo){
-      const info=state.sessionInfo;let label=state.saveBusy?t('SESSION_LOCAL_APPLY'):(state.isDirty||info.dirty)?t('SESSION_PENDING'):t('SESSION_NO_CHANGES');
+      const info=state.sessionInfo;let label=state.saveBusy?t('SESSION_LOCAL_APPLY'):(state.isDirty||info.dirty)?t('SESSION_PENDING'):info.calendarPending?t('SESSION_CALENDAR_PENDING'):t('SESSION_NO_CHANGES');
       if(info.busy)label=document.getElementById('archiveSyncStatus')?.textContent||label;
       if(saveLamp){saveLamp.style.background=info.busy||state.saveBusy?'#f1c40f':state.isDirty||info.dirty?'#e76f51':'#2ecc71';saveLamp.title=label;}
       if(dockStatus)dockStatus.textContent=label;
@@ -5243,7 +5247,7 @@ async function archiveCopyStatus_() {
       
       let text=info.busy?(info.status==='loading'?t('SESSION_LOADING'):t('SESSION_SAVING')):
         (state.isDirty||info.dirty)?t('SESSION_PENDING'):
-        t('SESSION_NO_CHANGES');
+        info.calendarPending?t('SESSION_CALENDAR_PENDING'):t('SESSION_NO_CHANGES');
       if(info.warning)text=t('SESSION_CALENDAR_WARNING')+'\n'+info.warning;
       if(info.code)text=((state.isDirty||info.dirty)?t('SESSION_PENDING')+' · ':'')+t('SESSION_ERROR')+(info.message||info.code);
       if(info.busy&&info.progress){const p=info.progress;const phaseKey='COPY_PHASE_'+p.phase;text=t(phaseKey);if(p.total>0)text+=' · '+t('COPY_PROGRESS_COUNT',{current:p.current,total:p.total});text+=' · '+Math.floor((p.elapsedMs||0)/1000)+' s';}

@@ -10,7 +10,7 @@ async function prepareSessionClose({read,save,finish,choose,notify}){
     }
     const result=await finish();
     if(result.busy){await notify('busy');return false;}
-    if(result.warning)return await choose('calendarFailed',{message:result.warning})==='discard';
+    if(result.warning&&!result.dirty&&!result.code)return await choose('calendarFailed',{...result,message:result.warning})==='close';
     if(result.dirty||result.code)return await choose('syncFailed',result)==='discard';
     return true;
 }

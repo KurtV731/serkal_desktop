@@ -1889,9 +1889,17 @@ function sessionRequestSignal_(){
     if(deadline&&Date.now()>=deadline)throw Object.assign(new Error('SESSION_CLOSE_TIMEOUT'),{code:'SESSION_CLOSE_TIMEOUT'});
     return AbortSignal.timeout(Math.max(1,Math.min(15000,deadline?deadline-Date.now():15000)));
 }
+let sessionCalendarRequests_=null;
+function sessionCalendarRequest_(request){
+    return sessionMode_&&sessionCalendarRequests_?sessionCalendarRequests_.run(request):request();
+}
 async function copyCalendarSync_(record,prepareOnly=false,prepared=false) {
     if(record.calendar.mode!=="google")return;
     const manager=copyManager_();
+    if(sessionMode_&&!prepared)sessionCalendarRequests_=require("../common/calendar-rate-limit").create({
+        deadline:()=>manager.deadline,
+        onWait:detail=>{manager.report("calendar-wait");logWrite_("WARN","SYNC","Calendar rate limit: retrying with backoff",detail);}
+    });
     if(!prepared){
     const calendarToken=await googleOauthAccessToken_();
     await require(path.join(__dirname,"../common/google-identity")).verifyCalendarOwner(calendarToken,record.owner);
@@ -1934,11 +1942,10 @@ async function copyCalendarSync_(record,prepareOnly=false,prepared=false) {
         }
         throw Object.assign(new Error("COPY_CALENDAR_FAILED\n"+JSON.stringify(result.data||{})),{code:"COPY_CALENDAR_FAILED"});
     };
-    let cursor=0,failure=null;
-    const worker=async()=>{while(!failure&&cursor<operations.length){const op=operations[cursor++];try{await execute(op);}catch(error){failure=error;}finally{manager.report("calendar-write",++completed,operations.length);}}};
-    await Promise.all(Array.from({length:Math.min(4,operations.length)},worker));
-    if(failure)throw failure;
-    manager.report("archive-upload");
+    for(const op of operations){
+        await execute(op);
+        manager.report("calendar-write",++completed,operations.length);
+    }
 }
 
 
@@ -2096,6 +2103,9 @@ async function googleResponseData_(response, url, method, accessToken) {
 }
 
 async function googleCalendarJsonRequest_(method, url, body) {
+    return sessionCalendarRequest_(()=>googleCalendarJsonRequestRaw_(method,url,body));
+}
+async function googleCalendarJsonRequestRaw_(method, url, body) {
     if(sessionTest_)throw new Error('Calendar access is disabled in the isolated archive test.');
     const accessToken = await googleOauthAccessToken_();
     const response = await fetch(url, {
@@ -2108,7 +2118,7 @@ async function googleCalendarJsonRequest_(method, url, body) {
         body:body === undefined ? undefined : JSON.stringify(body)
     });
     const data = await googleResponseData_(response,url,method,accessToken);
-    return { ok:response.ok, status:response.status, data };
+    return { ok:response.ok, status:response.status, data, retryAfterMs:Math.max(0,Number(response.headers?.get("retry-after"))||0)*1000 };
 }
 
 let calendarRebuildRunning_ = false;
@@ -2298,6 +2308,9 @@ function googleCalendarIdForLog_(calendarId) {
 }
 
 async function googleCalendarApi_(method, calendarId, eventId, event) {
+    return sessionCalendarRequest_(()=>googleCalendarApiRaw_(method,calendarId,eventId,event));
+}
+async function googleCalendarApiRaw_(method, calendarId, eventId, event) {
     if(sessionTest_)throw new Error('Calendar access is disabled in the isolated archive test.');
     if (calendarLab_ && String(calendarId) !== String(readSettings_().calendar.googleCalendarId || "")) {
         throw new Error(bt_("CALENDAR_LAB_TARGET_REJECTED"));
@@ -2340,7 +2353,7 @@ async function googleCalendarApi_(method, calendarId, eventId, event) {
             ok:response.ok,
             googleMessage
         });
-        return { ok:response.ok, status:response.status, data };
+        return { ok:response.ok, status:response.status, data, retryAfterMs:Math.max(0,Number(response.headers?.get("retry-after"))||0)*1000 };
     } catch (err) {
         logWrite_("ERROR", "GOOGLE", bt_("GOOGLE_API_EXCEPTION"), {
             method:trace.method,
@@ -3619,10 +3632,12 @@ function serkalLanguage_(lang) {
     return String(lang || "de").toLowerCase().startsWith("en") ? "en" : "de";
 }
 
-function googleCalendarUrl_(_calendarId, lang) {
+function googleCalendarUrl_(calendarId, lang, email="") {
     const url = new URL("https://calendar.google.com/calendar/u/0/r");
     // Google Calendar understands `hl`; keep the external page aligned with SerKal.
     url.searchParams.set("hl", serkalLanguage_(lang));
+    if(calendarId)url.searchParams.set("cid",Buffer.from(calendarId,"utf8").toString("base64"));
+    if(email)url.searchParams.set("authuser",email);
     return url.toString();
 }
 
@@ -3786,13 +3801,20 @@ function installIpc_() {
         return { ok:true, url };
     });
     ipcMain.handle("serkal:calendar:open", async (_event, settingsFromUi, lang) => {
-        const settings = sessionTest_ ? readSettings_() : settingsFromUi ? normalizeSettings_(settingsFromUi) : readSettings_();
+        const settings = (sessionMode_||sessionTest_) ? readSettings_() : settingsFromUi ? normalizeSettings_(settingsFromUi) : readSettings_();
         let mode = settings.calendar.mode;
         if (mode === "auto") mode = "ics";
         if (mode === "none") return { ok:false, action:"none", message:bt_("CALENDAR_DISABLED") };
         if (mode === "ics") return { ok:false, action:"ics", message:bt_("CALENDAR_ICS_SELECTED") };
         if (mode === "google") {
-            const url = googleCalendarUrl_(settings.calendar.googleCalendarId, lang);
+            let email="";
+            // UI account hint only. Browser cookies and Chrome profiles remain browser-owned.
+            for(const file of [googleOauthTokenPath_(),googleSharedKeyTokenFile_()])try{
+                const token=JSON.parse(fs.readFileSync(file,"utf8"));
+                const claims=JSON.parse(Buffer.from(String(token.id_token||"").split(".")[1]||"","base64url").toString("utf8"));
+                if(claims.email_verified===true&&typeof claims.email==="string"){email=claims.email;break;}
+            }catch(_){}
+            const url = googleCalendarUrl_(settings.calendar.googleCalendarId, lang, email);
             const { openCalendarWindow } = require("../common/calendar-window.js");
             const { spawn } = require("node:child_process");
             const owner=BrowserWindow.fromWebContents(_event.sender);
@@ -4131,10 +4153,11 @@ function erstelleHauptfenster() {
                 notify:()=>dialog.showMessageBox(hauptfenster,{type:'info',message:bt_('EXIT_BUSY'),buttons:['OK']}),
                 choose:async(kind,result)=>{
                     const detail=result?.message||'';
+                    const calendarOnly=kind==='calendarFailed';
                     const answer=await dialog.showMessageBox(hauptfenster,{type:'warning',
-                        message:bt_('SESSION_CLOSE_FAILED'),
-                        detail,buttons:[bt_('EXIT_DISCARD'),bt_('SESSION_KEEP_OPEN')],defaultId:1,cancelId:1});
-                    return answer.response===0?'discard':'cancel';
+                        message:bt_(calendarOnly?'SESSION_CALENDAR_SAVED':'SESSION_CLOSE_FAILED'),
+                        detail,buttons:[bt_(calendarOnly?'SESSION_CLOSE_SAVED':'EXIT_DISCARD'),bt_('SESSION_KEEP_OPEN')],defaultId:1,cancelId:1});
+                    return answer.response===0?(calendarOnly?'close':'discard'):'cancel';
                 }
             }).then(ok=>{if(ok&&!hauptfenster.isDestroyed()){closeApproved=true;hauptfenster.close();}})
               .catch(error=>{logWrite_('ERROR','EXIT','Session close failed',{message:String(error.message||error),google:error.google||null});})

@@ -10,10 +10,11 @@ class ArchiveSession {
         this.status='loading';this.error='';this.message='';this.busy=false;this.loaded=false;this.dirty=false;
         this.owner='';this.confirmed=null;
         if(confirmedFile)try{const r=JSON.parse(fs.readFileSync(confirmedFile,'utf8'));this.confirmed=copy.validate(r,r.owner);}catch(_){}
-        this.baseline=null;this.calendarBaseline=null;this.forceSave=false;this.calendarPending=false;this.lastSynced='';this.progress=null;
+        this.baseline=null;this.calendarBaseline=null;this.forceSave=false;this.calendarPending=false;
+        if(confirmedFile)try{this.pendingOwner=JSON.parse(fs.readFileSync(confirmedFile+'.calendar-pending','utf8')).owner;}catch(_){}this.lastSynced='';this.progress=null;
     }
     view(){return {session:true,status:this.status,code:this.error,message:this.message,busy:this.busy,
-        writable:this.loaded&&!this.busy,dirty:this.dirty,progress:this.progress?{...this.progress,elapsedMs:Date.now()-(this.phaseStart||Date.now())}:null,lastSynced:this.lastSynced,
+        writable:this.loaded&&!this.busy,dirty:this.dirty,calendarPending:this.calendarPending,progress:this.progress?{...this.progress,elapsedMs:Date.now()-(this.phaseStart||Date.now())}:null,lastSynced:this.lastSynced,
         warning:this.warning||'',google:this.google||null,authorityPending:false,revision:this.revision||''};}
     report(phase,current=0,total=0){if(this.progress?.phase!==phase)this.phaseStart=Date.now();this.progress={phase,current,total};this.onStatus(this.view());}
     assertWrite(){if(this.busy)fail('SESSION_BUSY');if(!this.loaded)fail(this.error||'SESSION_NOT_LOADED');}
@@ -22,6 +23,12 @@ class ArchiveSession {
     changed(){this.assertWrite();this.dirty=this.hasChanges();this.status=this.dirty?'pending':'saved';this.onStatus(this.view());}
     async measure(phase,operation){const start=Date.now();let ok=false;this.report(phase);try{const result=await operation();ok=true;return result;}finally{this.onStatus({...this.view(),measurement:{phase,elapsedMs:Date.now()-start,ok}});}}
     closeUnchanged(){this.onStatus({...this.view(),measurement:{phase:'close-unchanged',elapsedMs:0,ok:true}});return {...this.view(),status:'unchanged',code:'',message:'',dirty:false};}
+    markCalendarPending(value){
+        this.calendarPending=value;this.pendingOwner=value?this.owner:null;
+        if(this.confirmedFile){const file=this.confirmedFile+'.calendar-pending';
+            if(value)copy.writeAtomic(file,{owner:this.owner});else fs.rmSync(file,{force:true});
+        }
+    }
     async start(){
         if(this.busy||this.loaded)return this.view();
         this.busy=true;this.error='';this.message='';this.google=null;this.status='loading';this.onStatus(this.view());
@@ -36,10 +43,12 @@ class ArchiveSession {
             copy.validate(current,remote.owner);
             this.installLocal(current);this.confirm(current);
             this.selectCalendar(current.calendar);this.owner=remote.owner;this.revision=current.revision;
+            this.calendarPending=this.pendingOwner===this.owner;
             this.loaded=true;this.baseline=copy.digest(current.files,current.calendar);this.calendarBaseline=this.calendarKey(current);this.forceSave=!!remote.migrated||!!seeded?.files?.length;this.dirty=this.forceSave;this.status=this.dirty?'pending':'saved';this.onChange();
         }catch(error){this.failed(error);
             // A Google access failure never makes the user's local archive read-only.
             if(this.confirmed&&(!this.owner||this.confirmed.owner===this.owner))try{this.installLocal(this.confirmed);this.selectCalendar(this.confirmed.calendar);if(!this.owner)this.owner=this.confirmed.owner;}catch(_){}
+            this.calendarPending=this.pendingOwner===this.owner;
             this.loaded=true;try{const r=this.local();this.baseline=copy.digest(r.files,r.calendar);this.calendarBaseline=this.calendarKey({...r,revision:'local',generatedAt:new Date().toISOString()});}catch(_){}this.status='offline';this.onChange();
         }
         finally{this.busy=false;this.progress=null;this.onStatus(this.view());}
@@ -73,9 +82,11 @@ class ArchiveSession {
             const before=JSON.stringify(record.calendar);let warning=null;const needsCalendar=this.calendarPending||this.calendarKey(record)!==this.calendarBaseline;
             try{if(needsCalendar)await this.measure('calendar-prepare',()=>this.calendarPrepare(record));this.selectCalendar(record.calendar);}catch(error){warning=error;}
             if(this.dirty||before!==JSON.stringify(record.calendar)){await this.measure('archive-upload',()=>remote.save(record));this.confirm(record);this.forceSave=false;this.baseline=copy.digest(record.files,record.calendar);}
+            // Persist only a retry flag, never a second working archive or Cloud upload.
+            if(needsCalendar)this.markCalendarPending(true);
             // Only update Calendar events once the archive write has succeeded.
             if(needsCalendar&&!warning)try{await this.measure('calendar-sync',()=>this.calendarSync(record));this.calendarBaseline=this.calendarKey(record);}catch(error){warning=error;}
-            this.calendarPending=!!warning;
+            this.markCalendarPending(!!warning);
             if(warning){this.warning=String(warning.message||warning);this.google=warning.google||null;}else this.warning='';
             this.revision=record.revision;this.dirty=false;this.status='saved';this.lastSynced=new Date().toISOString();
         }catch(error){this.failed(error);
