@@ -4512,3 +4512,38 @@ Kurt hat den manuellen Knopf freigegeben. Laut Obi-Wan gibt es keine Aufstiegsme
 In Forschungsplanung → Import & Datenbestand steht jetzt „Spielstand neu einlesen“. Nach Bestätigung wird ein neuer dauerhafter Speicherbereich für die Forschungs-/Schiffswerftstände und Gebäudestände aller Planeten verwendet. Alte Snapshots bleiben erhalten, gelten aber nicht mehr als aktueller Planungsstand. Die aktuelle Spielseite wird sofort gelesen; weitere Forschungs-/Gebäudeseiten muss der Nutzer besuchen. Nicht beobachtete Werte sind unbekannt, nicht null. Ziel, TechTree, Ereignisse und Galaxiedaten bleiben erhalten. Vergleichsbasis für technische Durchbrüche wird neu begonnen, damit keine Vergleiche über den manuellen Neustart hinweg entstehen.
 
 Quellstand a96fd39cf4e0bab6ee29c40760ea29ab2e4a550d; Regressionstest `01 Entwicklung/Tests/ascension-reset.cjs`. Node-Syntaxprüfung und isolierte Funktionstests: Abbrechen ohne Änderung, bestätigter Neustart, sofortiges Lesen, unbekannte Stufen, mehrere Planeten, Sicherung alter Werte, Ziel-/Ereigniserhalt, neue Vergleichsbasis und dauerhaft gewählte Speichergeneration. Keine Live-Abnahme behauptet. Kein Serverupdate erforderlich; stabile öffentliche 1.2 und produktive Server unverändert. Entwicklungskanal: `dev-1.3-alpha1/01 Entwicklung/Userscript/Aktuell/HASA-AKTUELL.user.js`.
+
+
+---
+
+## Installer/Kurt – 28.10.2026: Abnahmefehler 1.2.1 – Abschluss dauert auf allen vier Geräten über zwei Minuten
+
+Status: **REPRODUZIERT AUF ALLEN VIER GERÄTEN / VERÖFFENTLICHUNG GESPERRT / KORREKTUR DURCH CE SERKAL ERFORDERLICH**
+
+Kurt hat die neue SerKal-Fassung 1.2.1 über den Transferweg auf allen vier Geräten installiert. Positiver Befund auf allen Geräten:
+
+- Start meldet sinngemäß **„Von Google geladen · lokale Sitzung“**;
+- beim regulären Beenden erscheint **„Speichern auf Google“**.
+
+Der Abschluss ist jedoch praktisch nicht abnahmefähig: Das Speichern dauert auf allen vier Geräten **mehr als zwei Minuten**. Derselbe lange Abschluss tritt sogar dann auf, wenn SerKal nur geöffnet, angesehen und ohne irgendeine Änderung wieder beendet wurde.
+
+Damit ist nicht nur ein langsamer großer Änderungsupload betroffen. Eine unveränderte Sitzung wird offenbar ebenfalls als speicherpflichtiger Abschluss behandelt oder führt einen anderen vollständigen Abschlussweg aus. Ob die Zeit im Archivupload, Kalenderabgleich oder einem weiteren Abschlussabschnitt entsteht, ist noch nicht gemessen und darf nicht geraten werden.
+
+### Verbindlicher Korrekturauftrag an CE SerKal
+
+1. Eine Sitzung ohne fachliche Änderung muss als unverändert erkannt werden und ohne unnötigen Archivupload beziehungsweise vollständigen Kalenderabgleich zügig schließen.
+2. Bei tatsächlichen Änderungen bleibt der vereinbarte einmalige vollständige Archivabschluss erhalten, muss aber praktisch in angemessener Zeit fertig werden.
+3. Abschlussphasen Archiv und Kalender getrennt messbar/logbar machen, damit ein langsamer Abschnitt eindeutig erkennbar ist.
+4. Keine Rückkehr zu Hintergrundabfragen oder laufenden Einzeluploads.
+5. Fehler und Zeitüberschreitungen weiterhin vollständig und verständlich sichtbar machen; kein stilles Verwerfen einer geänderten Sitzung.
+6. Desktop und Android gemeinsam korrigieren und mit unveränderter sowie geänderter Sitzung testen.
+7. Da neue installierbare Artefakte nötig sind, zwingend neue höhere gemeinsame Versions-/Buildnummern vergeben; die bereits gebauten Artefakte 1.2.1/35/code44 nicht unter gleichem Namen neu erzeugen.
+
+### Abnahmebedingung
+
+- unverändert öffnen und beenden: kein unnötiges „Speichern auf Google“ und zeitnaher Abschluss;
+- eine Änderung vornehmen und beenden: genau ein erfolgreicher Abschluss;
+- nächstes Gerät starten: Änderung vorhanden;
+- alle vier Geräte nacheinander verwendbar, keine parallele Sitzung vorausgesetzt.
+
+Die Artefakte unter `C:\ppd\serkal\veroeffentlichungen\1.2.1` bleiben als fehlgeschlagener Abnahmestand erhalten. Sie werden nicht in den Website-Downloadordner übernommen und nicht öffentlich verteilt.
