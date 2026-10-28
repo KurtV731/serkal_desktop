@@ -3910,6 +3910,7 @@ const I18N = {
     BTN_ARCHIVE_SYNC: "Jetzt synchronisieren",
     SESSION_CALENDAR_WARNING: "Archiv gespeichert · Kalender nicht vollständig aktualisiert",
     SESSION_NO_CHANGES: "Keine Änderungen · Beenden ohne Übertragung",
+    SESSION_LOCAL_DONE: "Lokal übernommen · Google wird beim Beenden aktualisiert",
     SESSION_LOCAL_APPLY: "Änderungen werden lokal übernommen…",
     SESSION_APPLY_LOCAL: "Lokal übernehmen",
     SESSION_APPLY_TITLE: "Offene Bearbeitungen lokal übernehmen; Google wird erst beim Beenden aktualisiert",
@@ -4117,6 +4118,7 @@ const I18N = {
     BTN_ARCHIVE_SYNC: "Sync now",
     SESSION_CALENDAR_WARNING: "Archive saved · Calendar update incomplete",
     SESSION_NO_CHANGES: "No changes · exit without transfer",
+    SESSION_LOCAL_DONE: "Applied locally · Google will be updated when exiting",
     SESSION_LOCAL_APPLY: "Applying local edits…",
     SESSION_APPLY_LOCAL: "Apply locally",
     SESSION_APPLY_TITLE: "Apply open edits locally; Google is updated when exiting",
@@ -4994,7 +4996,7 @@ function saveDirtyChanges_(onComplete) {
 
     state.saveBusy = true;
     updateSaveUi_();
-    uiStatus(t('DIRTY_SAVING'), { spinner:true, kind:'info' });
+    uiStatus(t(state.sessionInfo?'SESSION_LOCAL_APPLY':'DIRTY_SAVING'), { spinner:true, kind:'info' });
 
     google.script.run
       .withSuccessHandler(function(res){
@@ -5019,7 +5021,7 @@ function saveDirtyChanges_(onComplete) {
             }
           } catch (_eFind) {}
         }
-        uiStatus(t('SAVE_DONE', {n:String((res && res.savedCount) || 0)}), { spinner:false, kind:'info' });
+        uiStatus(t(state.sessionInfo?'SESSION_LOCAL_DONE':'SAVE_DONE', {n:String((res && res.savedCount) || 0)}), { spinner:false, kind:'info' });
         finish(true);
       })
       .withFailureHandler(function(err){

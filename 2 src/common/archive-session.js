@@ -53,7 +53,7 @@ class ArchiveSession {
         for(const file of record.files)fs.writeFileSync(path.join(folder,file.name),file.content,'utf8');
     }
     confirm(record){this.confirmed=JSON.parse(JSON.stringify(record));if(this.confirmedFile)copy.writeAtomic(this.confirmedFile,this.confirmed);}
-    failed(error){this.error=String(error.code||'SESSION_FAILED');this.message=String(error.message||error);this.status='error';this.google=error.google||null;}
+    failed(error){this.error=['TimeoutError','AbortError'].includes(error.name)?'SESSION_CLOSE_TIMEOUT':String(error.code||'SESSION_FAILED');this.message=String(error.message||error);this.status='error';this.google=error.google||null;}
     // Old IPC callers can only retry the initial load. They cannot overwrite an active session.
     sync(){return this.loaded?Promise.resolve(this.view()):this.start();}
     adoptLocal(){return this.sync();}
