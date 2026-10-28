@@ -5,7 +5,7 @@ title SerKal Desktop 1.2.2 - Public-Installer bauen und pruefen
 
 set "SERKAL_REPO=https://github.com/KurtV731/serkal_desktop.git"
 for %%I in ("%~dp0.") do set "SERKAL_LOCAL_REPO=%%~fI"
-set "SERKAL_COMMIT=b6eceacab023e8ce050102c7a4fdc79893d3075c"
+set "SERKAL_COMMIT=2b953689d6eef9e981fcd323a950b4d2fcafac96"
 set "SERKAL_VERSION=1.2.2"
 set "SERKAL_RELEASE_NUMBER=36"
 set "SERKAL_ANDROID_VERSION_CODE=45"
