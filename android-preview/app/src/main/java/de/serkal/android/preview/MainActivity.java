@@ -104,7 +104,7 @@ public class MainActivity extends Activity {
             if(!archiveCopy.needsExitWarning()){finishAndRemoveTask();return;}
             TextView detail=text(archiveCopy.message(),12,TEXT);detail.setTextIsSelectable(true);ScrollView scroll=new ScrollView(this);scroll.addView(detail);
             dialogBuilder().setTitle(english?"Session closing report":"Abschluss der Sitzung").setView(scroll)
-                .setPositiveButton(english?"Close":"Beenden",(d,w)->finishAndRemoveTask())
+                .setPositiveButton(archiveCopy.calendarIncomplete()?(english?"Close – archive saved":"Beenden – Archiv gespeichert"):(english?"Close":"Beenden"),(d,w)->finishAndRemoveTask())
                 .setNegativeButton(english?"Keep open":"Geöffnet lassen",null).show();
         }));
     }
@@ -358,7 +358,7 @@ public class MainActivity extends Activity {
         if(archiveCopy==null || googleUser==null || !archiveCopy.owner.equals(googleUser.owner) || isFinishing())return;
         try {JSONObject local=archiveCopy.snapshot();if(local!=null){archiveSnapshot=local;archiveError="";renderArchive();}}catch(Exception error){archiveError=String.valueOf(error.getMessage());renderArchive();}
         String code=archiveCopy.status();String label;
-        if(code.equals("saved"))label=english ? "No changes · exit without transfer" : "Keine Änderungen · Beenden ohne Übertragung";
+        if(code.equals("saved"))label=archiveCopy.calendarIncomplete()?(english?"Archive saved · Calendar update pending at exit":"Archiv gespeichert · Kalenderabgleich beim Beenden noch offen"):(english ? "No changes · exit without transfer" : "Keine Änderungen · Beenden ohne Übertragung");
         else if(code.equals("authority-pending"))label=english ? "This device is locally set as authoritative · Google confirmation is pending" : "Dieser Rechner ist lokal als maßgeblich festgelegt · Google-Bestätigung steht aus";
         else if(code.equals("authority-applied"))label=english ? "The authoritative Google archive was applied. Local differences were replaced." : "Der verbindliche Google-Archivstand wurde übernommen. Abweichende lokale Einträge wurden ersetzt.";
         else if(code.equals("syncing"))label=english ? "Saving session to Google…" : "Sitzung wird bei Google gespeichert…";
@@ -374,6 +374,7 @@ public class MainActivity extends Activity {
         else if(code.equals("loading"))label=english ? "Loading archive…" : "Archiv wird geladen…";
         else label=english ? "Transfer pending · local copy preserved · retry Sync now" : "Übertragung ausstehend · lokale Kopie bleibt erhalten · Jetzt synchronisieren versuchen";
         if(!archiveCopy.message().isEmpty())label=(archiveCopy.hasChanges()?(english?"Changes will be saved to Google when exiting\n":"Änderungen werden beim Beenden bei Google gespeichert\n"):"")+(english?"Google error · working locally\n":"Google-Fehler · lokale Arbeit möglich\n")+archiveCopy.status()+(english?" · Full response: Log":" · Vollständige Antwort: Log");
+        if(archiveCopy.calendarIncomplete())label=(english?"Archive saved · Calendar update pending at exit":"Archiv gespeichert · Kalenderabgleich beim Beenden noch offen")+(archiveCopy.message().isEmpty()?"":(english?" · Full response: Log":" · Vollständige Antwort: Log"));
         if(copySyncStatus!=null){copySyncStatus.setText(label);copySyncStatus.setContentDescription(label);}
         if(copySyncButton!=null){copySyncButton.setEnabled(!archiveCopy.busy());copySyncButton.setVisibility(archiveCopy.status().equals("loading")||!archiveCopy.message().isEmpty()?View.VISIBLE:View.GONE);}
         if(authorityButton!=null){boolean available=archiveCopy.canMakeAuthoritative();authorityButton.setVisibility(available?View.VISIBLE:View.GONE);authorityButton.setEnabled(available);}
