@@ -4,9 +4,10 @@ const copy=require('./archive-copy');
 // The test namespace cannot read, rename or overwrite the public v2 archive.
 const NAME='serkal-session-v1.json';
 const TEST_NAME='serkal-session-test-34.json';
-async function connect(accessToken,{fetchImpl=fetch,name=NAME,importLegacy=true}={}){
+async function connect(accessToken,{fetchImpl=fetch,name=NAME,importLegacy=true,deadline=0}={}){
     async function request(url,method='GET',body,contentType='application/json',operation=''){
-        const response=await fetchImpl(url,{method,headers:{Authorization:'Bearer '+accessToken,'Content-Type':contentType},body,signal:AbortSignal.timeout(45000)});
+        if(deadline&&Date.now()>=deadline)throw Object.assign(new Error('SESSION_CLOSE_TIMEOUT'),{code:'SESSION_CLOSE_TIMEOUT'});
+        const response=await fetchImpl(url,{method,headers:{Authorization:'Bearer '+accessToken,'Content-Type':contentType},body,signal:AbortSignal.timeout(Math.max(1,Math.min(15000,deadline?deadline-Date.now():15000)))});
         if(!response.ok)throw await googleHttpError(response,{url,method,operation,secrets:[accessToken]});
         const text=await response.text();if(Buffer.byteLength(text)>64*1024*1024)throw Object.assign(new Error('COPY_TOO_LARGE'),{code:'COPY_TOO_LARGE'});
         return JSON.parse(text);

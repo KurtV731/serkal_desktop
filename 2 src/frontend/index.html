@@ -3909,9 +3909,18 @@ const I18N = {
     TT_SAVE_DOCK: 'Nachträgliche Änderungen an Archivnotizen und Status speichern',
     BTN_ARCHIVE_SYNC: "Jetzt synchronisieren",
     SESSION_CALENDAR_WARNING: "Archiv gespeichert · Kalender nicht vollständig aktualisiert",
+    SESSION_NO_CHANGES: "Keine Änderungen · Beenden ohne Übertragung",
+    SESSION_LOCAL_DONE: "Lokal übernommen · Google wird beim Beenden aktualisiert",
+    SESSION_LOCAL_APPLY: "Änderungen werden lokal übernommen…",
+    SESSION_APPLY_LOCAL: "Lokal übernehmen",
+    SESSION_APPLY_TITLE: "Offene Bearbeitungen lokal übernehmen; Google wird erst beim Beenden aktualisiert",
+    "COPY_PHASE_archive-connect": "Google-Verbindung herstellen",
+    "COPY_PHASE_calendar-prepare": "Kalenderabschluss vorbereiten",
+    "COPY_PHASE_calendar-sync": "Kalender aktualisieren",
+    COPY_PROGRESS_COUNT: "{current} von {total}",
     SESSION_LOADING: "Archiv wird von Google geladen…",
     SESSION_SAVING: "Archiv wird bei Google gespeichert…",
-    SESSION_PENDING: "Änderungen noch nicht bei Google gespeichert",
+    SESSION_PENDING: "Änderungen werden beim Beenden bei Google gespeichert",
     SESSION_READY: "Google-Archiv geladen · lokale Sitzung",
     SESSION_ERROR: "Google-/Archivfehler: ",
     SESSION_RETRY: "Laden von Google erneut versuchen",
@@ -3947,7 +3956,7 @@ const I18N = {
     DIRTY_PENDING: 'Ungespeicherte Änderungen ({n})',
     DIRTY_CLEAN: 'Alles gespeichert',
     DIRTY_SAVING: 'Speichere Änderungen …',
-    DIRTY_BLOCKED: 'Bitte erst speichern.',
+    DIRTY_BLOCKED: 'Bitte offene Bearbeitungen im Menü lokal übernehmen.',
     SAVE_NOTHING: 'Nichts zu speichern.',
     SAVE_DONE: '{n} Änderungen gespeichert.',
     SAVE_FAILED: 'Speichern fehlgeschlagen.',
@@ -4108,9 +4117,18 @@ const I18N = {
     TT_SAVE_DOCK: 'Save later edits to archive notes and status; Insert adds a new season',
     BTN_ARCHIVE_SYNC: "Sync now",
     SESSION_CALENDAR_WARNING: "Archive saved · Calendar update incomplete",
+    SESSION_NO_CHANGES: "No changes · exit without transfer",
+    SESSION_LOCAL_DONE: "Applied locally · Google will be updated when exiting",
+    SESSION_LOCAL_APPLY: "Applying local edits…",
+    SESSION_APPLY_LOCAL: "Apply locally",
+    SESSION_APPLY_TITLE: "Apply open edits locally; Google is updated when exiting",
+    "COPY_PHASE_archive-connect": "Connecting to Google",
+    "COPY_PHASE_calendar-prepare": "Preparing Calendar update",
+    "COPY_PHASE_calendar-sync": "Updating Calendar",
+    COPY_PROGRESS_COUNT: "{current} of {total}",
     SESSION_LOADING: "Loading archive from Google…",
     SESSION_SAVING: "Saving archive to Google…",
-    SESSION_PENDING: "Changes not yet saved to Google",
+    SESSION_PENDING: "Changes will be saved to Google when exiting",
     SESSION_READY: "Google archive loaded · working locally",
     SESSION_ERROR: "Google/archive error: ",
     SESSION_RETRY: "Retry loading from Google",
@@ -4146,7 +4164,7 @@ const I18N = {
     DIRTY_PENDING: 'Unsaved changes ({n})',
     DIRTY_CLEAN: 'Everything saved',
     DIRTY_SAVING: 'Saving changes …',
-    DIRTY_BLOCKED: 'Please save first.',
+    DIRTY_BLOCKED: 'Apply the open edits locally using the menu first.',
     SAVE_NOTHING: 'Nothing to save.',
     SAVE_DONE: '{n} changes saved.',
     SAVE_FAILED: 'Saving failed.',
@@ -4593,6 +4611,14 @@ function entryKeyFromArchiv_(it) {
  */
 function updateSaveUi_() {
   try {
+    if(state.sessionInfo){
+      const info=state.sessionInfo;let label=state.saveBusy?t('SESSION_LOCAL_APPLY'):(state.isDirty||info.dirty)?t('SESSION_PENDING'):t('SESSION_NO_CHANGES');
+      if(info.busy)label=document.getElementById('archiveSyncStatus')?.textContent||label;
+      if(saveLamp){saveLamp.style.background=info.busy||state.saveBusy?'#f1c40f':state.isDirty||info.dirty?'#e76f51':'#2ecc71';saveLamp.title=label;}
+      if(dockStatus)dockStatus.textContent=label;
+      if(btnSaveDock){btnSaveDock.textContent=t('SESSION_APPLY_LOCAL');btnSaveDock.title=t('SESSION_APPLY_TITLE');btnSaveDock.disabled=state.saveBusy||!state.isDirty;}
+      document.getElementById('btnAppMenu')?.classList.toggle('btnPrimary',!!state.isDirty);return;
+    }
     if (saveLamp) {
       saveLamp.style.background = state.saveBusy ? '#f1c40f' : (state.isDirty ? '#e76f51' : '#2ecc71');
       saveLamp.title = state.saveBusy ? t('DIRTY_SAVING') : (state.isDirty ? t('DIRTY_PENDING', {n:String(state.dirtyCount || 0)}) : t('DIRTY_CLEAN'));
@@ -4970,7 +4996,7 @@ function saveDirtyChanges_(onComplete) {
 
     state.saveBusy = true;
     updateSaveUi_();
-    uiStatus(t('DIRTY_SAVING'), { spinner:true, kind:'info' });
+    uiStatus(t(state.sessionInfo?'SESSION_LOCAL_APPLY':'DIRTY_SAVING'), { spinner:true, kind:'info' });
 
     google.script.run
       .withSuccessHandler(function(res){
@@ -4995,7 +5021,7 @@ function saveDirtyChanges_(onComplete) {
             }
           } catch (_eFind) {}
         }
-        uiStatus(t('SAVE_DONE', {n:String((res && res.savedCount) || 0)}), { spinner:false, kind:'info' });
+        uiStatus(t(state.sessionInfo?'SESSION_LOCAL_DONE':'SAVE_DONE', {n:String((res && res.savedCount) || 0)}), { spinner:false, kind:'info' });
         finish(true);
       })
       .withFailureHandler(function(err){
@@ -5213,18 +5239,22 @@ async function archiveCopyStatus_() {
     const info=await window.serkal.archive.syncStatus();
     const label=document.getElementById('archiveSyncStatus');
     if(info.session){
+      state.sessionInfo=info;
       
       let text=info.busy?(info.status==='loading'?t('SESSION_LOADING'):t('SESSION_SAVING')):
         (state.isDirty||info.dirty)?t('SESSION_PENDING'):
-        t('SESSION_READY');
+        t('SESSION_NO_CHANGES');
       if(info.warning)text=t('SESSION_CALENDAR_WARNING')+'\n'+info.warning;
       if(info.code)text=((state.isDirty||info.dirty)?t('SESSION_PENDING')+' · ':'')+t('SESSION_ERROR')+(info.message||info.code);
+      if(info.busy&&info.progress){const p=info.progress;const phaseKey='COPY_PHASE_'+p.phase;text=t(phaseKey);if(p.total>0)text+=' · '+t('COPY_PROGRESS_COUNT',{current:p.current,total:p.total});text+=' · '+Math.floor((p.elapsedMs||0)/1000)+' s';}
+      let progress=document.getElementById('sessionProgress');if(!progress){progress=document.createElement('progress');progress.id='sessionProgress';progress.style.cssText='display:none;width:160px;height:8px';label.parentNode.insertBefore(progress,label);}
+      progress.style.display=info.busy?'block':'none';if(info.progress?.total>0){progress.max=info.progress.total;progress.value=info.progress.current;}else progress.removeAttribute('value');
       label.textContent=text;label.style.whiteSpace='pre-wrap';label.style.maxHeight='64px';label.style.overflowY='auto';
       const button=document.getElementById('btnArchiveSync');
       button.style.display=info.writable?'none':'';button.disabled=info.busy;
       button.textContent=t('SESSION_RETRY');
       document.getElementById('btnArchiveAdoptLocal').style.display='none';
-      return;
+      updateSaveUi_();return;
     }
     let key=info.status==='saved'?'COPY_UI_SAVED':info.status==='syncing'?'COPY_UI_SYNCING':info.status==='pending'?'COPY_UI_PENDING':info.status==='authority-applied'?'COPY_UI_AUTHORITY_APPLIED':info.status==='loading'?'COPY_UI_LOADING':'COPY_UI_ERROR';
     if(info.code==='COPY_VERSION_MISMATCH')key='COPY_UI_VERSION_MISMATCH';

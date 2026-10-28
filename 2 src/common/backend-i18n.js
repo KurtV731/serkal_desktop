@@ -3,6 +3,7 @@
 // Central language catalogue for every text created by the Electron backend.
 // No user-visible backend message may be written directly at its call site.
 const PAIRS = {
+  SESSION_CALENDAR_CONNECT:["Kalenderverbindung fehlt. Bitte Google vor dem Beenden verbinden. Das Archiv wird unabhängig davon gespeichert.","Calendar connection is missing. Connect Google before closing. The archive is saved independently."],
   SESSION_CONNECT:["Bitte Google über TMDB · Google verbinden.", "Connect Google using TMDB · Google."],
   SESSION_LOCAL:["Für diese Testsitzung lokal gespeichert.", "Saved locally for this test session."],
   SESSION_CLOSE_FAILED:["Änderungen konnten nicht gespeichert werden. Beenden und diese Sitzung verwerfen?", "Changes could not be saved. Close and discard this session?"],

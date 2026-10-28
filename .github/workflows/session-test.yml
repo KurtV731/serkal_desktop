@@ -1,7 +1,7 @@
 name: Isolated desktop archive session tests
 on:
   push:
-    branches: [ce-session-34-desktop]
+    branches: [ce-close36-desktop]
   workflow_dispatch:
 permissions:
   contents: read
