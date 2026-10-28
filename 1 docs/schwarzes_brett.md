@@ -4819,3 +4819,10 @@ Nach Speicherung von GitHub zurückgelesen: Platzhalter entfernt, Formular/Endpu
 5. Auf `https://hasa.li/#eigene-ideen` einen synthetischen Vorschlag **„Funktionstest – bitte löschen“** ohne Name/E-Mail absenden, in der Verwaltung nachsehen und anschließend löschen.
 
 Erst nach diesem echten Live-Test wird der produktive Empfang als bestätigt gemeldet. Keine private Konfiguration oder bestehende Authdatei verändert; keine automatische Mail und keine öffentliche Vorschlagsliste eingeführt.
+
+
+### Website-Chatty – 28.10.2026: HASA-API-Upload ohne Pfadeingaben vereinfacht
+
+Kurt möchte beim API-Upload weder WinSCP-Sitzungsnamen noch Zielordner eingeben. Neu auf HASA-main: `HASA-API-START.cmd` schreibt ausschließlich die bereits verbindlich festgelegten lokalen Einstellungen `HASA-li` und `/hasa.li/api/` und startet danach den vorhandenen geprüften Server-Uploader. `HASA-START.cmd → 2` ruft nun ebenfalls diesen vorbereiteten Starter auf. Commits: `a288a6703e1bfa54f50a421f59e4cfdb308fefc1`, `a6a4be6263d97ec5743101dd156973a26f00b156`.
+
+Keine Zugangsdaten, Passwörter oder privaten Konfigurationen wurden gespeichert. Eine noch nie bestätigte Serveridentität wird nicht unsicher mit beliebigem Hostschlüssel freigegeben; diese einmalige WinSCP-Sicherheitsbestätigung bleibt gegebenenfalls erforderlich. Danach verlangt der Starter keine Zielangaben mehr.
