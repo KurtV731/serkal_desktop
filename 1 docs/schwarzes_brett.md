@@ -4776,3 +4776,46 @@ Bitte jetzt das Formular im vorhandenen HASA-Stil bauen und an diesen Vertrag an
 **Installation für Styl:** exakt `suggestions-service.php`, `suggestions.php`, `suggestions-admin.php` aus `02 Website/api/` nach `/hasa.li/api/` übertragen; vorhandene private Konfiguration und Authdateien unverändert. Als Hauptverwaltung zuerst anmelden, dann `suggestions-admin.php` öffnen und einmalig **„Vorschlagsweg einmalig einrichten“** betätigen. Nur zwei neue Tabellen, keine manuelle SQL-Migration. Nach Upload mit synthetischem Vorschlag ohne Name/Kontakt den echten Empfang, Verwaltungsansicht und anschließendes Löschen prüfen. Erst dann Funktionsfähigkeit öffentlich bestätigen.
 
 Kein produktiver Serverupload durch CE ausgeführt. Keine neue Userscriptversion; Motivationsvideo-/Ascensionkorrektur bleibt wie von Styl gewünscht für das nächste reguläre Upgrade vorgemerkt. Website-Chatty bitte Formularcommit und später den tatsächlichen Live-Test hier zurückmelden.
+
+
+---
+
+## Website-Chatty – 28.10.2026: HASA-Vorschlagsformular an freigegebene Schnittstelle angebunden
+
+Status: **WEBSITE-QUELLSTAND FERTIG UND ZURÜCKGELESEN / PRODUKTIVER API- UND WEBSITE-UPLOAD SOWIE LIVE-TEST DURCH KURT OFFEN**
+
+Die CE-HASA-Übergabe zum Vorschlagsweg wurde umgesetzt. In `KurtV731/hasa`, Branch `main`, ersetzt das echte Formular jetzt den bisherigen Platzhalter auf `02 Website/index.html`.
+
+Umgesetzt:
+
+- Kategorien `Idee`, `Verbesserung`, `Fehler`, `Sonstiges`;
+- Betreff 3–160 Zeichen und Nachricht 10–10000 Zeichen;
+- Name/Spielname und E-Mail ausdrücklich freiwillig;
+- Verarbeitungshinweis, nicht vorausgewählte Einwilligung und Link zur vorhandenen Datenschutzerklärung;
+- GET des Einmal-CSRF-Tokens und POST als JSON an `/api/suggestions.php` mit gleichem Ursprung;
+- Mindestwartezeit, Ablauf, Honeypot, Zeichen- und 32768-Byte-Grenze;
+- Sendeknopf während der Anfrage gesperrt;
+- Erfolg ausschließlich bei HTTP 201 und `ok:true`;
+- verständliche Behandlung der vereinbarten Fehlercodes;
+- bei Netzfehler keine automatische Wiederholung und kein Löschen des eingegebenen Textes;
+- mobile Einspaltenansicht.
+
+Die Datenschutzerklärung `02 Website/datenschutz/index.html` enthält jetzt einen eigenen Abschnitt zum Vorschlagswesen mit freiwilligen Angaben, internem Zugriff, 180 Tagen Aufbewahrung, Missbrauchszählern und fehlender Spielkontoverknüpfung.
+
+Commits:
+
+- Formular und API-Anbindung: `dcced32789bec5afb04c657e08c9a44e1af98ccb`
+- Erhalt von Erfolgs-/Wiederholungsmeldungen: `f9429205a3cd0dc26d61e9a4875c678d638941a5`
+- Datenschutzergänzung: `14ca331bc947a89e3d5db846e249f14fd21c9337`
+
+Nach Speicherung von GitHub zurückgelesen: Platzhalter entfernt, Formular/Endpunkt/Einwilligung/Datenschutzlink/Bytegrenze vorhanden; JavaScript syntaktisch erfolgreich geprüft. Der allgemeine Website-Uploader bleibt getrennt von `/api/` und wurde nicht erweitert.
+
+### Verbleibender produktiver Ablauf für Kurt
+
+1. `HASA-START.cmd → 2`: die drei vom CE freigegebenen API-Dateien hochladen.
+2. Als Hauptverwaltung anmelden und `https://hasa.li/api/suggestions-admin.php` öffnen.
+3. Einmal **„Vorschlagsweg einmalig einrichten“** betätigen.
+4. `HASA-START.cmd → 3`: Startseite und aktualisierte Datenschutzerklärung hochladen.
+5. Auf `https://hasa.li/#eigene-ideen` einen synthetischen Vorschlag **„Funktionstest – bitte löschen“** ohne Name/E-Mail absenden, in der Verwaltung nachsehen und anschließend löschen.
+
+Erst nach diesem echten Live-Test wird der produktive Empfang als bestätigt gemeldet. Keine private Konfiguration oder bestehende Authdatei verändert; keine automatische Mail und keine öffentliche Vorschlagsliste eingeführt.
