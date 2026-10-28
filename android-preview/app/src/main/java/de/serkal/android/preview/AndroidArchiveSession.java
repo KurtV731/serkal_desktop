@@ -55,10 +55,10 @@ final class AndroidArchiveSession {
         JSONObject c=value.getJSONObject("calendar");return ArchiveCodec.hash(files.toString()+"|"+c.optString("mode")+"|"+c.optString("id"));
     }
     static String calendarKey(JSONObject value)throws Exception{
-        JSONObject c=value.getJSONObject("calendar");if(!c.optString("mode").equals("google"))return c.toString();
+        JSONObject c=value.getJSONObject("calendar");if(!c.optString("mode").equals("google"))return c.optString("mode")+"|"+c.optString("id");
         List<String> events=new ArrayList<>();for(JSONObject e:CalendarCopy.desired(value)){JSONObject b=new JSONObject(e.toString());b.remove("id");events.add(b.toString());}
         for(JSONObject e:SeasonAnnouncements.desired(ArchiveCodec.entries(value))){JSONObject b=new JSONObject(e.toString());b.remove("id");events.add(b.toString());}
-        Collections.sort(events);return ArchiveCodec.hash(c.toString()+events.toString());
+        Collections.sort(events);return ArchiveCodec.hash(c.optString("mode")+"|"+c.optString("id")+events.toString());
     }
     synchronized boolean hasChanges(){try{return loaded&&(forceSave||!baseline.equals(digest(record)));}catch(Exception failure){return dirty;}}
     synchronized boolean requiresFinish(){return hasChanges()||calendarPending;}
@@ -73,7 +73,7 @@ final class AndroidArchiveSession {
         out.write((new JSONObject().put("time",now()).put("event","PHASE_END").put("phase",step).put("elapsedMs",Math.max(0,(System.nanoTime()-start)/1000000L)).put("ok",ok)+"\n").getBytes(StandardCharsets.UTF_8));}catch(Exception ignored){} }
     interface PhaseTask{void run()throws Exception;}
     private void runPhase(String step,PhaseTask task)throws Exception{report(step,0,0);long start=System.nanoTime();boolean ok=false;try{task.run();ok=true;}finally{time(step,start,ok);}}
-    synchronized void authorizationTime(long start){time("authorization",start,true);}
+    synchronized void authorizationTime(long start,boolean ok){time("authorization",start,ok);}
     private SessionArchiveClient client(){SessionArchiveClient client=factory.create(token);client.trace=(step,start,ok,failure)->{time(step,start,ok);if(failure!=null)log("GOOGLE_REQUEST_FAILED",failure);};client.progress=(step,done,count)->report(step,done,count);return client;}
 
     synchronized boolean busy(){return busy;}
@@ -81,8 +81,8 @@ final class AndroidArchiveSession {
     synchronized String message(){return message;}
     synchronized String calendarId(){return record.optJSONObject("calendar")==null?"":record.optJSONObject("calendar").optString("id");}
     synchronized JSONObject snapshot() throws Exception {return new JSONObject().put("owner",owner).put("epoch",epoch).put("generatedAt",record.getString("generatedAt")).put("entries",ArchiveCodec.entries(record));}
-    synchronized void edit(String action,JSONObject payload) throws Exception {if(!writable())throw new Exception("SESSION_BUSY");record=ArchiveCodec.edit(record,action,payload);dirty=hasChanges();epoch++;status="pending";changed();}
-    synchronized void maintenance(long expected,JSONArray patches) throws Exception {if(!writable())throw new Exception("SESSION_BUSY");if(expected!=epoch)throw new Exception("COPY_LOCAL_CHANGED");record=ArchiveCodec.maintenance(record,patches);dirty=hasChanges();epoch++;status="pending";changed();}
+    synchronized void edit(String action,JSONObject payload) throws Exception {if(!writable())throw new Exception("SESSION_BUSY");record=ArchiveCodec.edit(record,action,payload);dirty=hasChanges();epoch++;status=dirty?"pending":"saved";changed();}
+    synchronized void maintenance(long expected,JSONArray patches) throws Exception {if(!writable())throw new Exception("SESSION_BUSY");if(expected!=epoch)throw new Exception("COPY_LOCAL_CHANGED");record=ArchiveCodec.maintenance(record,patches);dirty=hasChanges();epoch++;status=dirty?"pending":"saved";changed();}
     synchronized boolean useOfflineCache(){if(confirmed!=null)try{record=new JSONObject(confirmed.toString());}catch(Exception ignored){}try{baseline=digest(record);calendarBaseline=calendarKey(record);}catch(Exception ignored){}loaded=true;status="offline";error="COPY_CONNECT";message="Google unavailable; working locally with the last confirmed archive.";return true;}
     synchronized boolean canMakeAuthoritative(){return false;}
     void makeAuthoritative(){} // Old menu callback is retained but hidden.

@@ -84,19 +84,19 @@ public class MainActivity extends Activity {
             dialogBuilder().setMessage(english?"A transfer is running. Close without saving?":"Eine Übertragung läuft. Ohne Speichern beenden?")
                 .setPositiveButton(english?"Close":"Beenden",(d,w)->finishAndRemoveTask()).setNegativeButton(english?"Keep open":"Geöffnet lassen",null).show();return;
         }
-        if(!archiveCopy.requiresFinish()){finishAndRemoveTask();return;}
+        if(!archiveCopy.requiresFinish()){archiveCopy.finish(()->finishAndRemoveTask());return;}
         exitPending=true;exitStarted=System.nanoTime();handler.post(closeProgressTicker);
         final java.util.concurrent.atomic.AtomicBoolean proceeding=new java.util.concurrent.atomic.AtomicBoolean();
-        final long authStart=System.nanoTime();
-        Runnable proceed=()->{if(isFinishing())return;if(proceeding.compareAndSet(false,true)){archiveCopy.authorizationTime(authStart);finishArchiveSession();}};
-        handler.postDelayed(proceed,10000);
+        final long authStart=System.nanoTime();final java.util.concurrent.atomic.AtomicBoolean authorized=new java.util.concurrent.atomic.AtomicBoolean();
+        Runnable proceed=()->{if(isFinishing())return;if(proceeding.compareAndSet(false,true)){archiveCopy.authorizationTime(authStart,authorized.get());finishArchiveSession();}};
+        handler.postDelayed(()->{if(!proceeding.get()){archiveCopy.recordFailure(new Exception("GOOGLE_AUTHORIZATION_TIMEOUT: refreshing Google access did not finish within 10 seconds"));proceed.run();}},10000);
         AuthorizationRequest request=AuthorizationRequest.builder().setRequestedScopes(java.util.Arrays.asList(
             new Scope("https://www.googleapis.com/auth/drive.appdata"),new Scope("openid"),new Scope("https://www.googleapis.com/auth/userinfo.email"),
             new Scope("https://www.googleapis.com/auth/calendar.app.created"),new Scope("https://www.googleapis.com/auth/calendar.calendarlist.readonly"))).build();
         Identity.getAuthorizationClient(this).authorize(request).addOnSuccessListener(result->{
-            if(!proceeding.get()&&!result.hasResolution()&&result.getAccessToken()!=null)archiveCopy.updateToken(result.getAccessToken());
+            if(!proceeding.get()&&!result.hasResolution()&&result.getAccessToken()!=null){archiveCopy.updateToken(result.getAccessToken());authorized.set(true);}
             proceed.run();
-        }).addOnFailureListener(error->proceed.run());
+        }).addOnFailureListener(error->{archiveCopy.recordFailure(error);proceed.run();});
     }
     private void finishArchiveSession(){
         archiveCopy.finish(()->handler.post(()->{
