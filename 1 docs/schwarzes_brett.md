@@ -4594,3 +4594,41 @@ Unten links auf Desktop jetzt „Keine Änderungen · Beenden ohne Übertragung�
 Neue Ausgabe: **C:\ppd\serkal\veroeffentlichungen\1.2.2**. Keine 1.2.1-Datei überschreiben. Diese CE-Umgebung hat keine Windows-EXE gebaut.
 
 Danach alle vier Geräte zuerst aktualisieren und nacheinander erneut prüfen: unverändert schließen ohne Speicheranzeige/Googlekontakt; eine Gesehen-Änderung speichern und auf nächstem Gerät laden; echte Kalenderänderung mit Fortschritt. Falls weiterhin langsam, neue Phasen-/HTTP-Zeiten auswerten. Reale schnelle Beendigung auf Kurts Geräten wird noch nicht als praktisch bestanden behauptet. Veröffentlichungssperre bleibt bestehen; keine Website-/Serverdatei ersetzt.
+
+
+---
+
+## Installer – 28.10.2026: SerKal 1.2.2 / Stand 36 real gebaut und für erneute Abnahme bereit
+
+Status: **WINDOWS-ARTEFAKT GEBAUT UND NACHGEWIESEN / SIGNIERTE APK HASHIDENTISCH ÜBERNOMMEN / PRAXISTEST AUF VIER GERÄTEN OFFEN / NICHT VERÖFFENTLICHEN**
+
+Die CE-Korrektur zur langsamen Beendigung wurde auf Kurts Windows-Bauplatz aus dem festgeschriebenen Quellstand gebaut. Der vollständige Abnahmeordner liegt unter:
+
+`C:\ppd\serkal\veroeffentlichungen\1.2.2`
+
+### Windows Desktop
+
+- Datei: `serkal-desktop.exe`
+- Version: **1.2.2**
+- gemeinsamer Stand / releaseNumber: **36**
+- Quellcommit: `2b953689d6eef9e981fcd323a950b4d2fcafac96`
+- Größe: **140886016 Byte**
+- SHA-256: `c2857d0f951742d60867e34768f9e908af6ddd02ff6491be7c25813839f82d05`
+- Nachweise im Ordner: `serkal-desktop.exe.sha256` und `freigabenachweis.txt`
+
+Der vorbereitete Bauweg führte alle 40 Tests sowie Paket-, OAuth- und Tokenprüfungen aus.
+
+### Android
+
+- lokale Datei: `serkal-android.apk`
+- ursprüngliches CE-Artefakt: `036-SerKal-Android-1.2.2.apk`
+- Version: **1.2.2**
+- Android versionCode: **45**
+- gemeinsamer Stand: **36**
+- Größe laut CE: **2290075 Byte**
+- von Kurt nach Übernahme erneut geprüfte SHA-256:
+  `4d6958dbba06f51e0722889cd1774833604d42b2890d7d5b87f3aa024899c9b8`
+
+Die APK ist damit nach dem Kopieren und Umbenennen byteidentisch mit dem signierten CE-Artefakt.
+
+Beide Programmdateien dürfen jetzt gemeinsam über Kurts Transferordner auf die vier Testgeräte verteilt und dort installiert werden. Veröffentlichungssperre bleibt bis zur praktischen Abnahme bestehen. Abnahme: unverändert zügig ohne Google-Abschluss beenden; Gesehen-Änderung einmal speichern und auf nächstem Gerät laden; kalenderrelevante Änderung mit sichtbarer Phase prüfen.
