@@ -4121,6 +4121,7 @@ function erstelleHauptfenster() {
         const read=async()=>{
             const ui=await hauptfenster.webContents.executeJavaScript("window.serkalCloseState ? window.serkalCloseState() : ({busy:true})");
             if(ui.lang)activeLanguage_=ui.lang==="en"?"en":"de";
+            if(sessionMode_&&!ui.busy&&!maintenanceRunning_)await hauptfenster.webContents.executeJavaScript("document.body.inert = true");
             return {...ui,busy:ui.busy || maintenanceRunning_};
         };
         if(sessionMode_){
@@ -4137,7 +4138,7 @@ function erstelleHauptfenster() {
                 }
             }).then(ok=>{if(ok&&!hauptfenster.isDestroyed()){closeApproved=true;hauptfenster.close();}})
               .catch(error=>{logWrite_('ERROR','EXIT','Session close failed',{message:String(error.message||error),google:error.google||null});})
-              .finally(()=>{closeChecking=false;});
+              .finally(()=>{closeChecking=false;if(!hauptfenster.isDestroyed())hauptfenster.webContents.executeJavaScript("document.body.inert = false").catch(()=>{});});
             return;
         }
         require("../common/close-guard").prepareClose({read,
