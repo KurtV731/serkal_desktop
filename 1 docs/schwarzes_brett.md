@@ -4654,3 +4654,45 @@ Abgenommen wurden genau die bereits dokumentierten Artefakte:
 - Android SHA-256 `4d6958dbba06f51e0722889cd1774833604d42b2890d7d5b87f3aa024899c9b8`
 
 Keine Dateien neu bauen oder unter denselben Versionsnummern verändern. Noch keine Website-/Serverdatei ersetzen, bis Kurt die Veröffentlichung ausdrücklich freigibt.
+
+
+---
+
+## Kurt/Installer – 28.10.2026: SerKal 1.2.2 ausdrücklich zur Publizierung freigegeben
+
+Status: **ENDGÜLTIG PRAKTISCH ABGENOMMEN / PUBLIKATION AUSDRÜCKLICH FREIGEGEBEN / WEBSITE-CHATTY JETZT BEAUFTRAGT**
+
+Kurt bestätigt nach der Installation und Nutzung auf allen vier Geräten:
+
+> „Läuft alles 1a. Meldungen sind logisch nachvollziehbar und verständlich. Änderungen auch an anderen Geräten direkt übernommen. Ausdrückliche Freigabe zur Publizierung.“
+
+Die zusätzliche Nachweisprüfung bestätigt einen verständlich gemeldeten, sicher behandelten Wartungsfehler: TMDB lieferte für „The Madison“, Staffel 2, HTTP 404. Die Wartung beendete sich kontrolliert; neue Staffeln wurden als Vorschläge ausgewiesen und nicht automatisch eingetragen. Die geprüften Google-Kalenderanfragen meldeten erfolgreiche HTTP-200-Antworten; der abschließende Archivstatus war `saved`, `writable=true`, `dirty=false`. Dieser transparente TMDB-Einzelfehler widerspricht Kurts Abnahme nicht.
+
+### Verbindliche Veröffentlichungsartefakte
+
+Ausschließlich die bereits praktisch geprüften Dateien aus:
+
+`C:\ppd\serkal\veroeffentlichungen\1.2.2`
+
+verwenden:
+
+- **Windows:** `serkal-desktop.exe`
+  - 140886016 Byte
+  - SHA-256 `c2857d0f951742d60867e34768f9e908af6ddd02ff6491be7c25813839f82d05`
+- **Android:** `serkal-android.apk`
+  - 2290075 Byte
+  - SHA-256 `4d6958dbba06f51e0722889cd1774833604d42b2890d7d5b87f3aa024899c9b8`
+
+Produktversion beider Plattformen: **1.2.2**, gemeinsamer Stand **36**, Android versionCode **45**.
+
+### Auftrag an Website-Chatty
+
+1. Genau diese beiden Dateien unverändert in den bestehenden öffentlichen SerKal-Download übernehmen.
+2. Vor dem Upload beide SHA-256 erneut gegen die oben festgeschriebenen Werte prüfen.
+3. Öffentliche Windows- und Android-Dateinamen bleiben `serkal-desktop.exe` und `serkal-android.apk`.
+4. Downloadseiten DE/EN sowie sichtbare Versionsangaben auf **1.2.2** aktualisieren, ohne neue Funktionsversprechen zu erfinden.
+5. Über den bestehenden geprüften Veröffentlichungsweg hochladen.
+6. Danach beide öffentlichen URLs tatsächlich prüfen und die vom Server gelieferten Dateien beziehungsweise ihre Größe/Hashidentität bestätigen.
+7. Ergebnis, öffentliche URLs und Website-Commit hier zurückmelden.
+
+Keine Neubauten, keine erneute APK-Signierung und keine inhaltliche Veränderung der freigegebenen Artefakte. Die frühere Veröffentlichungssperre für 1.2.2 ist mit Kurts ausdrücklicher Freigabe aufgehoben.
