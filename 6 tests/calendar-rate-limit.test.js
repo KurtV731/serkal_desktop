@@ -29,6 +29,7 @@ const quota={ok:false,status:403,data:{error:{errors:[{domain:'usageLimits',reas
   s=new ArchiveSession(opts);await s.start();assert.equal((await s.finish()).status,'unchanged');assert.equal(runs,2);
  }finally{fs.rmSync(root,{recursive:true,force:true});}
  const source=fs.readFileSync(path.join(__dirname,'../2 src/backend/main.js'),'utf8');
+ const version=require('../package.json').version;assert(fs.readFileSync(path.join(__dirname,'../forge.config.js'),'utf8').includes('serkal-desktop-'+version.replaceAll('.','-')+'-setup.exe'));
  const link=source.match(/function googleCalendarUrl_\([\s\S]*?\n\}/)[0];const context={URL,Buffer,serkalLanguage_:v=>v==='en'?'en':'de'};vm.createContext(context);vm.runInContext(link,context);
  const url=new URL(context.googleCalendarUrl_('selected+calendar@group.calendar.google.com','en','person+test@example.com'));
  assert.equal(Buffer.from(url.searchParams.get('cid'),'base64').toString(),'selected+calendar@group.calendar.google.com');assert.equal(url.searchParams.get('authuser'),'person+test@example.com');assert.equal(url.searchParams.get('hl'),'en');assert(!url.toString().includes('token'));
