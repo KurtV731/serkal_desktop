@@ -4501,3 +4501,14 @@ Ein isolierter Test direkt mit dem aktuell auf main gespeicherten stabilen Users
 Für eine belastbare automatische Korrektur fehlt ein eindeutiger Spielnachweis für den tatsächlich erfolgten Aufstieg und die Information, welche Werte Horizon dabei zurücksetzt beziehungsweise behält. Beispielsweise eignen sich eine echte Spielmeldung oder die relevante Spielseite bzw. ein sicherer Zähler vor/nach dem Aufstieg. Keine automatischen Spielfunktionen auslösen, keine Sitzungstoken öffentlich ablegen; alte Werte nicht anhand eines einzelnen niedrigen oder fehlenden Wertes pauschal löschen. Teilseiten weiterhin korrekt berücksichtigen. Regressionsprüfung muss Aufstieg und gewöhnliche Seitenwechsel gleichermaßen abdecken.
 
 Bis zum Nachweis bitte nicht behaupten, die frühere Aufstiegslösung sei in der aktuellen Fassung wirksam oder ein Versionswechsel allein behebe den Fehler. Kein Code, keine Serverdaten und keine öffentliche Fassung wurden bei dieser Diagnose geändert.
+
+
+## CE HASA – 28.10.2026: Knopf zum Neueinlesen nach Aufstieg
+
+Status: **1.3.0-alpha.3 im Entwicklungskanal bereit / lokale Regressionstests bestanden / praktische Abnahme offen**
+
+Kurt hat den manuellen Knopf freigegeben. Laut Obi-Wan gibt es keine Aufstiegsmeldung; der Startplanet kann behalten werden. Eine Positionsänderung oder schwankende Ascensionspunkte sind kein zuverlässiger Nachweis. Daher keine automatische Aufstiegserkennung behaupten.
+
+In Forschungsplanung → Import & Datenbestand steht jetzt „Spielstand neu einlesen“. Nach Bestätigung wird ein neuer dauerhafter Speicherbereich für die Forschungs-/Schiffswerftstände und Gebäudestände aller Planeten verwendet. Alte Snapshots bleiben erhalten, gelten aber nicht mehr als aktueller Planungsstand. Die aktuelle Spielseite wird sofort gelesen; weitere Forschungs-/Gebäudeseiten muss der Nutzer besuchen. Nicht beobachtete Werte sind unbekannt, nicht null. Ziel, TechTree, Ereignisse und Galaxiedaten bleiben erhalten. Vergleichsbasis für technische Durchbrüche wird neu begonnen, damit keine Vergleiche über den manuellen Neustart hinweg entstehen.
+
+Quellstand a96fd39cf4e0bab6ee29c40760ea29ab2e4a550d; Regressionstest `01 Entwicklung/Tests/ascension-reset.cjs`. Node-Syntaxprüfung und isolierte Funktionstests: Abbrechen ohne Änderung, bestätigter Neustart, sofortiges Lesen, unbekannte Stufen, mehrere Planeten, Sicherung alter Werte, Ziel-/Ereigniserhalt, neue Vergleichsbasis und dauerhaft gewählte Speichergeneration. Keine Live-Abnahme behauptet. Kein Serverupdate erforderlich; stabile öffentliche 1.2 und produktive Server unverändert. Entwicklungskanal: `dev-1.3-alpha1/01 Entwicklung/Userscript/Aktuell/HASA-AKTUELL.user.js`.
