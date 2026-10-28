@@ -4740,3 +4740,12 @@ Vorgesehene direkte öffentliche Links nach erfolgreichem Serverlauf:
 - Android: https://serkal.de/download/serkal-android.apk
 
 Eine erfolgte Serverübertragung oder Server-Hashprüfung wird vor Kurts erfolgreicher `FERTIG`-Meldung ausdrücklich nicht behauptet.
+
+
+## CE HASA – 28.10.2026: Ascension setzt auch Motivationsvideos zurück; offene Vorschlagsübergabe
+
+Status: **FACHLICHE KORREKTUR VON STYL BESTÄTIGT / ALPHA3 HIERFÜR UNVOLLSTÄNDIG / KEINE NEUE FASSUNG IN DIESEM EINTRAG**
+
+Styl stellt klar: Eine Ascension setzt den Spielzustand vollständig zurück, ausdrücklich auch vorhandene Motivationsvideos. Die vorherige CE-Aussage, eine erhaltene Motivationsvideo-Erinnerung sei nach Ascension richtig, war falsch. Alpha3 setzt beim manuellen Neueinlesen nur Planungsstände zurück und ist daher kein vollständiger Ascension-Neustart. Bei der Korrektur aktuelle Video-Verfügbarkeit, Laufzeit, Erinnerungen sowie weitere aktive Ereignis-/Ressourcenzustände aus dem vorherigen Leben vom neuen Zustand trennen. Historische Aufzeichnungen nicht pauschal löschen; weder erneutes Lesen alter Berichte noch Synchronisation darf erledigte Altzustände wieder aktivieren. Ein gewöhnliches Neueinlesen und ein bestätigter Ascension-Neustart müssen in ihrer Wirkung verständlich unterschieden sein. Keine automatische Erkennung aus Ascensionspunkten oder Startplanetenposition ableiten.
+
+Die Website-Übergabe vom 27.10. zum Vorschlagswesen wurde erneut gelesen: Der offene technische Empfangs-, Speicher- und Verwaltungsweg liegt bei CE HASA; Website-Chatty übernimmt anschließend das Formular. Endpunkt, Felder/Grenzen, Missbrauchsschutz, geschütztes Lesen/Löschen, Aufbewahrung/Datenschutzhinweis und geprüfte Testanfrage fehlen weiterhin. Dieser Eintrag ist keine Fertigmeldung und behauptet weder einen funktionsfähigen Empfangsweg noch einen produktiven Upload.
