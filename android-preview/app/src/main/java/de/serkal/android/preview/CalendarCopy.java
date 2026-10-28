@@ -2,6 +2,8 @@ package de.serkal.android.preview;
 
 import org.json.*;
 import java.util.*;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.*;
 
 final class CalendarCopy {
     static String signature(JSONObject e) throws Exception {
@@ -30,7 +32,8 @@ final class CalendarCopy {
         }return events;
     }
     static void synchronize(ArchiveCopyClient client,JSONObject record) throws Exception {synchronize(client,record,false);}
-    static void synchronize(ArchiveCopyClient client,JSONObject record,boolean replaceManaged) throws Exception {
+    static void synchronize(ArchiveCopyClient client,JSONObject record,boolean replaceManaged) throws Exception {synchronize(client,record,replaceManaged,null);}
+    static void synchronize(ArchiveCopyClient client,JSONObject record,boolean replaceManaged,SessionArchiveClient.Progress progress) throws Exception {
         JSONObject calendar=record.getJSONObject("calendar");if(!calendar.getString("mode").equals("google"))return;
         String id=calendar.getString("id");List<JSONObject> wanted=desired(record),announced=SeasonAnnouncements.desired(ArchiveCodec.entries(record));
         if(id.isEmpty()){if(wanted.isEmpty() && announced.isEmpty())return;throw new Exception("COPY_CALENDAR_ID_MISSING");}
@@ -51,11 +54,28 @@ final class CalendarCopy {
             else {seen.add(k);if(!signature(target).equals(signature(e))){JSONObject body=new JSONObject(target.toString());body.remove("id");actions.add(new JSONObject().put("method","PUT").put("id",e.getString("id")).put("body",body));}}
         }
         for(Map.Entry<String,JSONObject> e:desired.entrySet())if(!seen.contains(e.getKey()))actions.add(new JSONObject().put("method","POST").put("id","").put("body",e.getValue()));
-        for(JSONObject op:actions){String method=op.getString("method"),eventId=op.getString("id");JSONObject body=op.optJSONObject("body");
-            try{client.request(base+(eventId.isEmpty()?"":"/"+ArchiveCopyClient.esc(eventId)),method,body==null?null:body.toString(),"application/json");}
-            catch(Exception error){String code=GoogleHttpFailure.code(error);if(method.equals("DELETE") && ("GOOGLE_HTTP_404".equals(code)||"GOOGLE_HTTP_410".equals(code)))continue;
-                if(method.equals("POST") && "GOOGLE_HTTP_409".equals(code)){JSONObject old=client.get(base+"/"+ArchiveCopyClient.esc(body.getString("id")));if(signature(old).equals(signature(body)))continue;}throw error;}
+        if(progress!=null)progress.update("calendar-write",0,actions.size());
+        if(!replaceManaged){for(JSONObject op:actions)execute(client,base,op);return;}
+        AtomicInteger next=new AtomicInteger(),done=new AtomicInteger();AtomicReference<Exception> failed=new AtomicReference<>();
+        ExecutorService pool=Executors.newFixedThreadPool(Math.max(1,Math.min(4,actions.size())));
+        List<Future<?>> running=new ArrayList<>();
+        try{
+            for(int worker=0;worker<Math.min(4,actions.size());worker++)running.add(pool.submit(()->{
+                while(failed.get()==null){int index=next.getAndIncrement();if(index>=actions.size())break;
+                    try{execute(client,base,actions.get(index));}catch(Exception error){failed.compareAndSet(null,error);}
+                    finally{int finished=done.incrementAndGet();if(progress!=null)progress.update("calendar-write",finished,actions.size());}
+                }
+            }));
+            for(Future<?> task:running)task.get();if(failed.get()!=null)throw failed.get();
+        }finally{pool.shutdownNow();}
+    }
+    private static void execute(ArchiveCopyClient client,String base,JSONObject op)throws Exception{
+        String method=op.getString("method"),eventId=op.getString("id");JSONObject body=op.optJSONObject("body");
+        try{client.request(base+(eventId.isEmpty()?"":"/"+ArchiveCopyClient.esc(eventId)),method,body==null?null:body.toString(),"application/json");}
+        catch(Exception error){String code=GoogleHttpFailure.code(error);if(method.equals("DELETE")&&(code.equals("GOOGLE_HTTP_404")||code.equals("GOOGLE_HTTP_410")))return;
+            if(method.equals("POST")&&code.equals("GOOGLE_HTTP_409")){JSONObject old=client.get(base+"/"+ArchiveCopyClient.esc(body.getString("id")));if(signature(old).equals(signature(body)))return;}throw error;
         }
+
     }
 }
 

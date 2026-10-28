@@ -9,15 +9,17 @@ import java.nio.charset.StandardCharsets;
 class ArchiveCopyClient {
     final String token;
     ArchiveCopyClient(String token){this.token=token;}
+    protected int timeoutMillis()throws Exception{return 45000;}
+    protected void checkDeadline()throws Exception{}
     JSONObject request(String url,String method,String body,String type) throws Exception {
-        HttpURLConnection c=(HttpURLConnection)new URL(url).openConnection();c.setConnectTimeout(10000);c.setReadTimeout(45000);
+        HttpURLConnection c=(HttpURLConnection)new URL(url).openConnection();c.setConnectTimeout(Math.min(10000,timeoutMillis()));c.setReadTimeout(timeoutMillis());
         c.setRequestMethod(method.equals("PATCH")?"POST":method);if(method.equals("PATCH"))c.setRequestProperty("X-HTTP-Method-Override","PATCH");c.setRequestProperty("Authorization","Bearer "+token);c.setInstanceFollowRedirects(false);
         try {
             if(body!=null){c.setDoOutput(true);c.setRequestProperty("Content-Type",type);byte[] bytes=body.getBytes(StandardCharsets.UTF_8);c.setFixedLengthStreamingMode(bytes.length);try(OutputStream out=c.getOutputStream()){out.write(bytes);}}
             int status=c.getResponseCode();if(status==204)return new JSONObject();
             if(status<200 || status>299)throw GoogleHttpFailure.read(c,status,token);
             try(InputStream in=c.getInputStream();ByteArrayOutputStream out=new ByteArrayOutputStream()){
-                byte[] bytes=new byte[8192];int n;while((n=in.read(bytes))!=-1){out.write(bytes,0,n);if(out.size()>ArchiveCodec.LIMIT)throw new Exception("COPY_TOO_LARGE");}
+                byte[] bytes=new byte[8192];int n;while((n=in.read(bytes))!=-1){checkDeadline();out.write(bytes,0,n);if(out.size()>ArchiveCodec.LIMIT)throw new Exception("COPY_TOO_LARGE");}
                 return new JSONObject(out.toString("UTF-8"));
             }
         }finally{c.disconnect();}
