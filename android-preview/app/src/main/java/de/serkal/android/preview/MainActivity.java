@@ -104,7 +104,7 @@ public class MainActivity extends Activity {
             if(!archiveCopy.needsExitWarning()){finishAndRemoveTask();return;}
             TextView detail=text(archiveCopy.message(),12,TEXT);detail.setTextIsSelectable(true);ScrollView scroll=new ScrollView(this);scroll.addView(detail);
             dialogBuilder().setTitle(english?"Session closing report":"Abschluss der Sitzung").setView(scroll)
-                .setPositiveButton(english?"Close":"Beenden",(d,w)->finishAndRemoveTask())
+                .setPositiveButton(archiveCopy.calendarIncomplete()?(english?"Close – archive saved":"Beenden – Archiv gespeichert"):(english?"Close":"Beenden"),(d,w)->finishAndRemoveTask())
                 .setNegativeButton(english?"Keep open":"Geöffnet lassen",null).show();
         }));
     }

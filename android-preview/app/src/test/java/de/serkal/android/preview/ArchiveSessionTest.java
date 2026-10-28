@@ -68,6 +68,15 @@ public class ArchiveSessionTest {
             try{Thread.sleep(20);return new JSONObject().put("id","written");}finally{active.decrementAndGet();}
         }};
         CalendarCopy.synchronize(client,new ArchiveCopyTest().record(),true,(phase,current,total)->{assertEquals("calendar-write",phase);completed.set(current);});
-        assertEquals(2,completed.get());assertTrue(maximum.get()>=2);assertTrue(maximum.get()<=4);
+        assertEquals(2,completed.get());assertEquals(1,maximum.get());
     }
+    @Test public void calendarFailureIsRetriedAfterRestartWithoutAnotherArchiveUpload()throws Exception{
+        calendarDenied=true;AndroidArchiveSession first=make();load(first);first.edit("insert",entry());finish(first);
+        assertEquals(1,writes);assertTrue(first.requiresFinish());first.close();
+        AndroidArchiveSession second=make();try{load(second);assertFalse(second.hasChanges());assertTrue(second.requiresFinish());calendarDenied=false;
+            finish(second);assertEquals(1,writes);assertEquals(2,calendarWrites);assertFalse(second.needsExitWarning());
+        }finally{second.close();}
+        AndroidArchiveSession third=make();try{load(third);assertFalse(third.requiresFinish());}finally{third.close();}
+    }
+
 }

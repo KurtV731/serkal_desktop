@@ -22,12 +22,15 @@ final class AndroidArchiveSession {
     private Listener listener;
     private final ExecutorService worker=Executors.newSingleThreadExecutor();
     private final AtomicFile disk;
+    private final AtomicFile pendingCalendar;
     private final File logFile;
     private final Factory factory;
     AndroidArchiveSession(Context context,String owner,String token,Listener listener) throws Exception {this(context,owner,token,listener,SessionArchiveClient::new);}
     AndroidArchiveSession(Context context,String owner,String token,Listener listener,Factory factory) throws Exception {
         this.owner=owner;this.token=token;this.listener=listener;this.factory=factory;
         disk=new AtomicFile(new File(context.getFilesDir(),"session-confirmed-"+ArchiveCodec.hash(owner)+".json"));
+        pendingCalendar=new AtomicFile(new File(context.getFilesDir(),"session-calendar-pending-"+ArchiveCodec.hash(owner)+".json"));
+        try(InputStream in=pendingCalendar.openRead()){calendarPending=read(in).optBoolean("pending");}catch(FileNotFoundException absent){}
         logFile=new File(context.getFilesDir(),"serkal-session-log-"+ArchiveCodec.hash(owner)+".jsonl");
         try(InputStream in=disk.openRead()){confirmed=ArchiveCodec.validate(read(in),owner);}catch(FileNotFoundException absent){}
         catch(Exception invalid){log("CACHE_INVALID",invalid);}
@@ -42,6 +45,12 @@ final class AndroidArchiveSession {
     static JSONObject empty(String owner) throws Exception{return new JSONObject().put("schema",2).put("releaseNumber",ArchiveCodec.RELEASE).put("owner",owner).put("revision",UUID.randomUUID().toString()).put("parent","").put("generatedAt",now()).put("files",new JSONArray()).put("calendar",new JSONObject().put("mode","google").put("id",""));}
     private static JSONObject read(InputStream in) throws Exception {ByteArrayOutputStream out=new ByteArrayOutputStream();byte[] b=new byte[8192];int n;while((n=in.read(b))!=-1){out.write(b,0,n);if(out.size()>ArchiveCodec.LIMIT)throw new Exception("COPY_TOO_LARGE");}return new JSONObject(out.toString("UTF-8"));}
     private void saveConfirmed() throws Exception {FileOutputStream out=null;try{out=disk.startWrite();out.write(record.toString().getBytes(StandardCharsets.UTF_8));disk.finishWrite(out);confirmed=new JSONObject(record.toString());}catch(Exception e){if(out!=null)disk.failWrite(out);throw e;}}
+    private synchronized void markCalendarPending(boolean value)throws Exception{
+        calendarPending=value;
+        if(!value){pendingCalendar.delete();return;}
+        FileOutputStream out=null;try{out=pendingCalendar.startWrite();out.write("{\"pending\":true}".getBytes(StandardCharsets.UTF_8));pendingCalendar.finishWrite(out);}
+        catch(Exception failure){if(out!=null)pendingCalendar.failWrite(out);throw failure;}
+    }
     private void log(String event,Exception failure){try(FileOutputStream out=new FileOutputStream(logFile,true)){
         JSONObject row=new JSONObject().put("time",now()).put("event",event);
         if(failure!=null){row.put("code",GoogleHttpFailure.code(failure)).put("message",GoogleHttpFailure.clean(String.valueOf(failure.getMessage()),token));if(failure instanceof GoogleHttpFailure){GoogleHttpFailure g=(GoogleHttpFailure)failure;row.put("endpoint",g.endpoint).put("method",g.method).put("responseText",g.responseText);}}
@@ -65,7 +74,7 @@ final class AndroidArchiveSession {
     synchronized void report(String value,int done,int count){if(!value.equals(phase)){phase=value;phaseStart=System.nanoTime();}current=done;total=count;changed();}
     synchronized String progress(boolean english){
         if(!busy)return "";long seconds=Math.max(0,(System.nanoTime()-phaseStart)/1000000000L);
-        String label=phase.startsWith("calendar")?(english?"Updating Calendar":"Kalender aktualisieren"):phase.equals("archive-upload")?(english?"Saving archive to Google":"Archiv bei Google speichern"):phase.equals("archive-connect")?(english?"Connecting to Google":"Google-Verbindung herstellen"):(english?"Loading archive":"Archiv laden");
+        String label=phase.equals("calendar-wait")?(english?"Google Calendar request limit · waiting before retry":"Google-Kalender begrenzt Anfragen · Wiederholung nach Pause"):phase.startsWith("calendar")?(english?"Updating Calendar":"Kalender aktualisieren"):phase.equals("archive-upload")?(english?"Saving archive to Google":"Archiv bei Google speichern"):phase.equals("archive-connect")?(english?"Connecting to Google":"Google-Verbindung herstellen"):(english?"Loading archive":"Archiv laden");
         return label+(total>0?" · "+current+"/"+total:"")+" · "+seconds+" s";
     }
     synchronized int progressCurrent(){return current;}synchronized int progressTotal(){return total;}
@@ -105,12 +114,14 @@ final class AndroidArchiveSession {
             boolean calendarChanged=calendarPending||!calendarBaseline.equals(calendarKey(outgoing));
             String before=outgoing.getJSONObject("calendar").toString();
             try{if(calendarChanged){runPhase("calendar-prepare",()->client.prepareCalendar(outgoing));}}catch(Exception failure){calendarFailure=failure;log("CALENDAR_PREPARE_FAILED",failure);}
+            if(calendarChanged)markCalendarPending(true);
             if(write||!before.equals(outgoing.getJSONObject("calendar").toString())){runPhase("archive-upload",()->client.saveSession(outgoing));}
             if(calendarChanged&&calendarFailure==null)try{runPhase("calendar-read",()->client.updateCalendar(outgoing));calendarBaseline=calendarKey(outgoing);}catch(Exception failure){calendarFailure=failure;log("CALENDAR_SAVE_FAILED",failure);}
-            synchronized(this){record=outgoing;dirty=false;forceSave=false;baseline=digest(record);calendarPending=calendarFailure!=null;saveConfirmed();error=calendarFailure==null?"":GoogleHttpFailure.code(calendarFailure);message=calendarFailure==null?"":"Archive saved. Calendar update failed:\n"+calendarFailure.getMessage();status=calendarFailure==null?"saved":"calendar-warning";log("SESSION_FINISHED",null);}
+            synchronized(this){record=outgoing;dirty=false;forceSave=false;baseline=digest(record);markCalendarPending(calendarFailure!=null);saveConfirmed();error=calendarFailure==null?"":GoogleHttpFailure.code(calendarFailure);message=calendarFailure==null?"":"Archive saved to Google. Only the Calendar update is incomplete. It will be retried the next time you exit normally.\n"+calendarFailure.getMessage();status=calendarFailure==null?"saved":"calendar-warning";log("SESSION_FINISHED",null);}
         }catch(Exception failure){synchronized(this){error=GoogleHttpFailure.code(failure);message=String.valueOf(failure.getMessage());status="error";log("SESSION_SAVE_FAILED",failure);}}
         finally{synchronized(this){busy=false;}changed();if(complete!=null)complete.run();}});
     }
+    synchronized boolean calendarIncomplete(){return calendarPending&&!hasChanges();}
     synchronized boolean needsExitWarning(){return !error.isEmpty()||hasChanges()||calendarPending;}
     synchronized void close(){closed=true;listener=null;worker.shutdownNow();}
 }

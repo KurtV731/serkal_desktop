@@ -4,6 +4,7 @@ import java.net.*;
 import java.nio.charset.StandardCharsets;
 final class GoogleHttpFailure extends Exception {
     final String code,responseText,endpoint,method;
+    long retryAfterMillis;
     GoogleHttpFailure(int status,String text,String url,String method,String token){
         super("GOOGLE_HTTP_"+status+"\n"+clean(text,token));code="GOOGLE_HTTP_"+status;
         responseText=clean(text,token);this.method=method;this.endpoint=url.split("\\?",2)[0];
@@ -15,7 +16,9 @@ final class GoogleHttpFailure extends Exception {
         if(stream!=null)try(InputStream in=stream;ByteArrayOutputStream out=new ByteArrayOutputStream()){
             byte[] b=new byte[8192];int n;while((n=in.read(b))!=-1)out.write(b,0,n);text=out.toString("UTF-8");
         }
-        return new GoogleHttpFailure(status,text,connection.getURL().toString(),connection.getRequestMethod(),token);
+        GoogleHttpFailure failure=new GoogleHttpFailure(status,text,connection.getURL().toString(),connection.getRequestMethod(),token);
+        try{failure.retryAfterMillis=Math.max(0,Long.parseLong(connection.getHeaderField("Retry-After")))*1000;}catch(Exception ignored){}
+        return failure;
     }
     static void record(android.content.Context context,Exception error){
         try(FileOutputStream out=new FileOutputStream(new File(context.getFilesDir(),"google-errors.jsonl"),true)){

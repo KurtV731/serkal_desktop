@@ -55,20 +55,10 @@ final class CalendarCopy {
         }
         for(Map.Entry<String,JSONObject> e:desired.entrySet())if(!seen.contains(e.getKey()))actions.add(new JSONObject().put("method","POST").put("id","").put("body",e.getValue()));
         if(progress!=null)progress.update("calendar-write",0,actions.size());
-        if(!replaceManaged){for(JSONObject op:actions)execute(client,base,op);return;}
-        AtomicInteger next=new AtomicInteger(),done=new AtomicInteger();AtomicReference<Exception> failed=new AtomicReference<>();
-        ExecutorService pool=Executors.newFixedThreadPool(Math.max(1,Math.min(4,actions.size())));
-        List<Future<?>> running=new ArrayList<>();
-        try{
-            for(int worker=0;worker<Math.min(4,actions.size());worker++)running.add(pool.submit(()->{
-                while(failed.get()==null){int index=next.getAndIncrement();if(index>=actions.size())break;
-                    try{execute(client,base,actions.get(index));}catch(Exception error){failed.compareAndSet(null,error);}
-                    finally{int finished=done.incrementAndGet();if(progress!=null)progress.update("calendar-write",finished,actions.size());}
-                }
-            }));
-            for(Future<?> task:running)task.get();if(failed.get()!=null)throw failed.get();
-        }finally{pool.shutdownNow();}
+        int completed=0;
+        for(JSONObject op:actions){execute(client,base,op);if(progress!=null)progress.update("calendar-write",++completed,actions.size());}
     }
+
     private static void execute(ArchiveCopyClient client,String base,JSONObject op)throws Exception{
         String method=op.getString("method"),eventId=op.getString("id");JSONObject body=op.optJSONObject("body");
         try{client.request(base+(eventId.isEmpty()?"":"/"+ArchiveCopyClient.esc(eventId)),method,body==null?null:body.toString(),"application/json");}

@@ -9,10 +9,14 @@ class SessionArchiveClient extends ArchiveCopyClient {
     @Override protected int timeoutMillis()throws Exception{checkDeadline();return (int)Math.max(1,Math.min(15000,deadline==0?15000:deadline-System.currentTimeMillis()));}
     @Override protected void checkDeadline()throws Exception{if(deadline>0&&System.currentTimeMillis()>=deadline)throw new java.net.SocketTimeoutException("SESSION_CLOSE_TIMEOUT: Google completion exceeded 45 seconds");}
     @Override JSONObject request(String url,String method,String body,String type)throws Exception{
+        return url.contains("/calendar/v3/")?calendarRequests.run(()->requestOnce(url,method,body,type)):requestOnce(url,method,body,type);
+    }
+    protected JSONObject requestOnce(String url,String method,String body,String type)throws Exception{
         long start=System.nanoTime();boolean ok=false;Exception failed=null;
         try{JSONObject result=super.request(url,method,body,type);ok=true;return result;}catch(Exception error){failed=error;throw error;}
         finally{if(trace!=null)trace.done(url.contains("calendar/v3")?"calendar-http":url.contains("userinfo")?"identity-http":"archive-http",start,ok,failed);}
     }
+    private final CalendarRequestPolicy calendarRequests=new CalendarRequestPolicy(()->deadline,(attempt,millis)->{if(progress!=null)progress.update("calendar-wait",0,0);});
     boolean imported;
     SessionArchiveClient(String token){super(token);}
     private JSONObject latest() throws Exception {
