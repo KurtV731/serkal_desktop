@@ -4547,3 +4547,50 @@ Damit ist nicht nur ein langsamer großer Änderungsupload betroffen. Eine unver
 - alle vier Geräte nacheinander verwendbar, keine parallele Sitzung vorausgesetzt.
 
 Die Artefakte unter `C:\ppd\serkal\veroeffentlichungen\1.2.1` bleiben als fehlgeschlagener Abnahmestand erhalten. Sie werden nicht in den Website-Downloadordner übernommen und nicht öffentlich verteilt.
+
+
+## CE SerKal – 28.10.2026: Abnahmefehler „Beenden über zwei Minuten“ korrigiert – 1.2.2 / gemeinsame 36
+
+Status: **DESKTOP UND ANDROID KORRIGIERT, TESTS BESTANDEN / APK SIGNIERT FERTIG / NEUER WINDOWS-BAU UND ERNEUTE PRAXISABNAHME OFFEN / NICHT VERÖFFENTLICHEN**
+
+Der verbindliche Auftrag zur langsamen Beendigung ist umgesetzt. Kurt ergänzte während der Arbeit eine Verlaufsanzeige und die Frage nach dem alten Speichern-/Gespeichert-Hinweis unten links.
+Vollständige Übergabe: [SerKal 1.2.2 – Abschlusskorrektur und Anzeige](serkal-1.2.2-abschluss-korrektur-2026-10-28.md).
+
+Codebefund 1.2.1: Desktop setzte calendarPending=true und nahm deshalb auch unveränderte Sitzungen in den Abschluss; Android startete SDK-Autorisierung und Kalenderabschluss ohne vorgeschalteten unveränderten Schnellweg. Außerdem doppelte Kalenderprüfungen und serielle Ereignisabgleiche. Welcher konkrete Netzwerkabschnitt auf Kurts Geräten wie lange brauchte, ist weiterhin ohne Messung nicht bewiesen.
+
+Neue Regeln:
+- unverändert öffnen/beenden: **kein zusätzlicher Google-Aufruf, kein Upload, kein Kalenderabgleich, keine SDK-Autorisierung**;
+- tatsächlichen Snapshot vergleichen; ein falsches dirty-Signal allein reicht nicht;
+- reine Gesehen-Änderung: **ein vollständiger Archivupload, null Kalenderzugriffe**;
+- echte Kalenderänderung: einmaliger Abschluss mit maximal vier parallel bearbeiteten Ereignissen; alle begonnenen Anfragen werden vor Rückmeldung abgewartet;
+- keine interaktive Kalenderanmeldung beim Desktop-Beenden; fehlende Verbindung separat melden, Archiv trotzdem speichern;
+- Abschluss-Netzbudget 45 Sekunden, einzelne übliche Netz-Leseanfragen auf 15 Sekunden begrenzt, Android-SDK-Wartezeit zusätzlich maximal 10 Sekunden mit protokolliertem Fallback;
+- Archiv/Verbindung und Kalender getrennt mit elapsedMs und Ergebnis loggen; vollständige Fehlertexte bleiben erhalten. Keine Hintergrundabfragen oder laufenden Einzeluploads eingeführt.
+
+Anzeige umgesetzt: sichtbarer Fortschrittsbalken, aktuelle Phase und verstrichene Sekunden; bei Kalenderereignissen echte fertige Stückzahl x/y. Unbekannter Netzwerkfortschritt bleibt unbestimmt, keine erfundene Prozentzahl. Android aktualisiert den lokalen Abschlussstatus alle 500 ms.
+Unten links auf Desktop jetzt „Keine Änderungen · Beenden ohne Übertragung“ beziehungsweise „Änderungen werden beim Beenden bei Google gespeichert“. Der lokale Editor-Menüpunkt heißt **„Lokal übernehmen“**; offene Eingaben werden beim regulären Beenden weiterhin automatisch übernommen.
+
+### Neue gemeinsame Version und Quellen
+- Produktversion beider Plattformen **1.2.2**
+- gemeinsamer Stand **36**
+- Android versionCode **45**
+- Desktop festgeschriebener Bauquellcommit **2b953689d6eef9e981fcd323a950b4d2fcafac96**
+- Android gebauter Quellcommit **3938ade3e2cdb43ecf225295fc2e06de13dacfd3**
+- PR #14 / #15 in die regulären Desktop-/Androidzweige übernommen; keine zusätzliche APK aus dem Merge erzeugt.
+- **40 Desktop-Testskripte** lokal und GitHub-CI erfolgreich: https://github.com/KurtV731/serkal_desktop/actions/runs/40650624169
+- **77 Android-Tests, 0 Fehler, 0 Fehlschläge**, Release-Bau erfolgreich: https://github.com/KurtV731/serkal_desktop/actions/runs/40649884535
+- Neue Tests prüfen tatsächlichen unveränderten Exit ohne Google, echten Android-Beenden-Knopf ohne Autorisierung, nur Gesehen mit einem Archivupload ohne Kalender, richtige Kalenderprojektion trotz JSON-Schlüsselreihenfolge, Phasenmessungen, Deadline und begrenzte parallele Kalenderoperationen.
+
+### Fertige unveränderte Android-Datei
+- **036-SerKal-Android-1.2.2.apk**, **2290075 Byte**
+- SHA-256 **4d6958dbba06f51e0722889cd1774833604d42b2890d7d5b87f3aa024899c9b8**
+- bisheriger Schlüssel und Zertifikat geprüft, Signaturen v2/v3 gültig;
+- Paketkennung unverändert, echte APK-Metadaten 1.2.2/code45 geprüft, Manifest vor/nach Signieren bytegleich;
+- Kurt direkt bereitgestellt; keine Signaturgeheimnisse veröffentlicht.
+- Nach Übernahme als serkal-android.apk Hash erneut prüfen; nicht erneut bauen/signieren.
+
+### Direkter Auftrag an Installer
+**serkal-1-2-2-ersatz-bauen.bat** liegt auf main, bereits auf den genannten endgültigen Desktop-Quellstand festgeschrieben. Der vorhandene bewährte Windows-Bauweg wird benutzt: private OAuth-Beilage und Icon lokal übernehmen, alle 40 Tests ausführen, Setup/Ein-Datei-Hülle bauen, Hash und Freigabenachweis erzeugen.
+Neue Ausgabe: **C:\ppd\serkal\veroeffentlichungen\1.2.2**. Keine 1.2.1-Datei überschreiben. Diese CE-Umgebung hat keine Windows-EXE gebaut.
+
+Danach alle vier Geräte zuerst aktualisieren und nacheinander erneut prüfen: unverändert schließen ohne Speicheranzeige/Googlekontakt; eine Gesehen-Änderung speichern und auf nächstem Gerät laden; echte Kalenderänderung mit Fortschritt. Falls weiterhin langsam, neue Phasen-/HTTP-Zeiten auswerten. Reale schnelle Beendigung auf Kurts Geräten wird noch nicht als praktisch bestanden behauptet. Veröffentlichungssperre bleibt bestehen; keine Website-/Serverdatei ersetzt.
