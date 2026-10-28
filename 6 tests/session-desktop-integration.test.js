@@ -18,9 +18,11 @@ const {createRequire}=require('node:module');
   require:id=>id==='../../serkal-session-test.json'?{enabled:true,session:true}:id==='electron'?{app,ipcMain:{handle:(key,fn)=>handles.set(key,fn)},BrowserWindow:function(){},dialog:{},shell:{}}:id==='electron-squirrel-startup'?false:realRequire(id)};
  vm.createContext(context);
  try{
-  vm.runInContext('(function(){'+fs.readFileSync(mainPath,'utf8')+'\nglobalThis.api={installIpc_,copyManager_,scheduleSharedArchive_,readSettings_,googleCalendarJsonRequest_,googleCalendarApi_};})();',context);
+  vm.runInContext('(function(){'+fs.readFileSync(mainPath,'utf8')+'\nglobalThis.api={installIpc_,copyManager_,scheduleSharedArchive_,readSettings_,googleCalendarJsonRequest_,googleCalendarApi_,sessionCalendarKey_};})();',context);
   const api=context.api;api.installIpc_();assert(userData.endsWith('SerKal-Session-Test-34'));
   assert.equal(api.readSettings_().calendar.mode,'none');assert.equal(api.readSettings_().archive.folderPath,path.join(userData,'Archiv'));
+  const record={revision:'projection-test',generatedAt:new Date().toISOString(),calendar:{mode:'google',id:'calendar'},files:[{name:'Series (2027).txt',content:'S01; tmdb=42; eps=2; startOriginal=2027-03-01; dates=01.03.,08.03.; seen=0\n'}]};
+  const initialCalendar=api.sessionCalendarKey_(record);record.files[0].content=record.files[0].content.replace('seen=0','seen=1');record.calendar={id:'calendar',mode:'google'};assert.equal(api.sessionCalendarKey_(record),initialCalendar);
   const manager=api.copyManager_();await manager.start();assert(manager.view().session);assert(manager.view().writable);
   const before=fetches;api.scheduleSharedArchive_();await handles.get('serkal:archive:sync')();assert.equal(fetches,before);assert.equal(timers.length,0);
   const archive=api.readSettings_().archive.folderPath;fs.writeFileSync(path.join(archive,'Local.txt'),'S01; seen=1\n');manager.changed();assert.equal(fetches,before);
@@ -32,7 +34,7 @@ const {createRequire}=require('node:module');
   // Exercise the actual Electron manager -> status callback -> on-disk Log path.
   const detail=JSON.stringify({error:{message:'Permission denied '+'.'.repeat(12000),details:[{reason:'SERVICE_DISABLED',service:'drive.googleapis.com'}]}});
   global.fetch=async url=>url.includes('userinfo')?{ok:true,text:async()=>JSON.stringify({sub:'user',email_verified:true})}:{ok:false,status:403,text:async()=>detail};
-  manager.changed();await manager.finish();assert.equal(manager.view().code,'GOOGLE_HTTP_403');assert(manager.view().writable);
+  fs.appendFileSync(path.join(archive,"Local.txt"),"S02; seen=1\n");manager.changed();await manager.finish();assert.equal(manager.view().code,'GOOGLE_HTTP_403');assert(manager.view().writable);
   const logs=fs.readdirSync(archive).filter(name=>name.startsWith('!!SERKAL_LOG_'));
   const rows=logs.flatMap(name=>fs.readFileSync(path.join(archive,name),'utf8').trim().split('\n').map(line=>JSON.parse(line)));
   assert(rows.some(row=>{const value=JSON.parse(row.objekt||'{}');return value.google?.responseText===detail;}));

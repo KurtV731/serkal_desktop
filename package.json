@@ -1,7 +1,7 @@
 {
   "name": "serkal_desktop",
   "productName": "SerKal Desktop",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "SERKAL Desktop \u2013 lokales Archiv",
   "main": "2 src/backend/main.js",
   "scripts": {
@@ -11,7 +11,7 @@
     "test": "node \"6 tests/release-compatibility.test.js\" && node \"6 tests/season-policy.test.js\" && node \"6 tests/archive-smoke.test.js\" && node \"6 tests/maintenance-smoke.test.js\" && node \"6 tests/entry-flow-i18n.test.js\" && node \"6 tests/global-language.test.js\" && node \"6 tests/calendar-repair.test.js\" && node \"6 tests/oauth-packaging.test.js\" && node \"6 tests/i18n-catalog.test.js\" && node \"6 tests/no-standalone-german.test.js\" && node \"6 tests/tmdb-title-language.test.js\" && node \"6 tests/intelligent-series-input.test.js\" && node \"6 tests/shared-key.test.js\" && node \"6 tests/shared-archive.test.js\" && node \"6 tests/calendar-app-created.test.js\" && node \"6 tests/calendar-lab.test.js\" && node \"6 tests/calendar-rebuild.test.js\" && node \"6 tests/archive-lock.test.js\" && node \"6 tests/archive-requests.test.js\" && node \"6 tests/archive-observer.test.js\" && node \"6 tests/archive-auto-ui.test.js\" && node \"6 tests/archive-copy.test.js\" && node \"6 tests/archive-copy-desktop.test.js\" && node \"6 tests/archive-calendar-copy.test.js\" && node \"6 tests/google-identity.test.js\" && node \"6 tests/watch-providers.test.js\" && node \"6 tests/maintenance-report.test.js\" && node \"6 tests/copy-calendar-target.test.js\" && node \"6 tests/watched-toggle.test.js\" && node \"6 tests/season-announcements.test.js\" && node \"6 tests/archive-status-colors.test.js\" && node \"6 tests/close-guard.test.js\" && node \"6 tests/maintenance-follow.test.js\" && npm run test:session",
     "start:calendar-lab": "node scripts/start-calendar-lab.js",
     "start:calendar-rebuild": "node scripts/start-calendar-rebuild.js",
-    "test:session": "node \"6 tests/archive-session.test.js\" && node \"6 tests/archive-session-remote.test.js\" && node \"6 tests/google-http-error.test.js\" && node \"6 tests/session-profile.test.js\" && node \"6 tests/session-desktop-integration.test.js\" && node \"6 tests/session-calendar-migration.test.js\""
+    "test:session": "node \"6 tests/archive-session.test.js\" && node \"6 tests/archive-session-remote.test.js\" && node \"6 tests/google-http-error.test.js\" && node \"6 tests/session-profile.test.js\" && node \"6 tests/session-desktop-integration.test.js\" && node \"6 tests/session-calendar-migration.test.js\" && node \"6 tests/session-fast-close.test.js\""
   },
   "author": "Kurt Vogelsaenger",
   "private": true,

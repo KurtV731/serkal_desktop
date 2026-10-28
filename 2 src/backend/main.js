@@ -1649,6 +1649,7 @@ function googleOauthWriteToken_(token) {
 
 async function googleOauthTokenRequest_(params) {
     const response = await fetch("https://oauth2.googleapis.com/token", {
+        signal:sessionRequestSignal_(),
         method:"POST",
         headers:{ "content-type":"application/x-www-form-urlencoded" },
         body:new URLSearchParams(params)
@@ -1826,17 +1827,18 @@ function copyManager_() {
         const {ArchiveSession}=require('../common/archive-session');
         desktopCopy_=new ArchiveSession({folder:archiveFolderPath_,calendar:()=>sessionTest_?({mode:'',id:''}):readSettings_().calendar,
             selectCalendar:calendar=>{if(!sessionTest_){const settings=readSettings_();settings.calendar={mode:calendar.mode||'none',googleCalendarId:calendar.id};writeSettings_(settings);}},
-            calendarSync:record=>sessionTest_?Promise.resolve():copyCalendarSync_(record),
+            calendarSync:record=>sessionTest_?Promise.resolve():copyCalendarSync_(record,false,true),
+            calendarKey:sessionCalendarKey_,
             calendarPrepare:record=>sessionTest_?Promise.resolve():copyCalendarSync_(record,true),
             confirmedFile:path.join(app.getPath('userData'),'session-confirmed-'+crypto.createHash('sha256').update(path.resolve(archiveFolderPath_()||'.')).digest('hex')+'.json'),
             bootstrap:()=>{const folder=archiveFolderPath_();archiveEnsureFolder_(folder);return require('../common/archive-copy').capture(folder,readSettings_().calendar);},
-            connect:async()=>{
+            connect:async(options={})=>{
                 let token;try{token=JSON.parse(fs.readFileSync(googleSharedKeyTokenFile_(),'utf8'));}catch(_){}
                 if(token && Number(token.expiry_date||0)<=Date.now()+60000 && token.refresh_token)
                     token=await googleOauthRefresh_(googleOauthClientConfig_(),token,googleSharedKeyWriteToken_);
                 if(!token || !token.access_token || Number(token.expiry_date||0)<=Date.now()+60000)
                     throw Object.assign(new Error(bt_('SESSION_CONNECT')),{code:'COPY_CONNECT'});
-                return require('../common/archive-session-remote').connect(token.access_token,{name:sessionTest_?require('../common/archive-session-remote').TEST_NAME:require('../common/archive-session-remote').NAME,importLegacy:!sessionTest_});
+                return require('../common/archive-session-remote').connect(token.access_token,{name:sessionTest_?require('../common/archive-session-remote').TEST_NAME:require('../common/archive-session-remote').NAME,importLegacy:!sessionTest_,...options});
             },
             onChange:()=>{sharedArchiveRevision_++;},
             onStatus:status=>logWrite_(status.code?'WARN':'INFO','SYNC','Archive session',status)
@@ -1876,11 +1878,24 @@ function copyManager_() {
     });
     return desktopCopy_;
 }
-async function copyCalendarSync_(record,prepareOnly=false) {
+function sessionCalendarKey_(record){
+    if(record.calendar.mode!=='google')return JSON.stringify([record.calendar.mode,record.calendar.id]);
+    const entries=record.files.flatMap(f=>f.content.split(/\r?\n/).map(line=>archiveEntryFromLine_(f.name,{mtime:new Date(record.generatedAt)},line)).filter(Boolean));
+    const plan=require('../common/archive-calendar-copy').plan(entries,[],'projection',new Date().getFullYear(),true);
+    return JSON.stringify([record.calendar.mode,record.calendar.id,plan.map(op=>{const body={...op.body};delete body.id;return JSON.stringify(body);}).sort()]);
+}
+function sessionRequestSignal_(){
+    const deadline=sessionMode_&&desktopCopy_?desktopCopy_.deadline:0;
+    if(deadline&&Date.now()>=deadline)throw Object.assign(new Error('SESSION_CLOSE_TIMEOUT'),{code:'SESSION_CLOSE_TIMEOUT'});
+    return AbortSignal.timeout(Math.max(1,Math.min(15000,deadline?deadline-Date.now():15000)));
+}
+async function copyCalendarSync_(record,prepareOnly=false,prepared=false) {
     if(record.calendar.mode!=="google")return;
+    const manager=copyManager_();
+    if(!prepared){
     const calendarToken=await googleOauthAccessToken_();
     await require(path.join(__dirname,"../common/google-identity")).verifyCalendarOwner(calendarToken,record.owner);
-    const manager=copyManager_();manager.report("calendar-check");
+    manager.report("calendar-check");
     const preferred=String(readSettings_().calendar.googleCalendarId||"");
     if(!record.calendar.id && !preferred){const created=await googleResolveSerkalCalendar_();record.calendar.id=created.id;if(!sessionMode_)manager.save();}
     const target=await require(path.join(__dirname,"../common/copy-calendar-target")).resolve({
@@ -1900,6 +1915,7 @@ async function copyCalendarSync_(record,prepareOnly=false) {
         logWrite_("INFO","SYNC",bt_("COPY_CALENDAR_RECOVERED"),{vorher:googleCalendarIdForLog_(record.calendar.id),kalender:googleCalendarIdForLog_(target.id)});
         record.calendar.id=target.id;if(!sessionMode_)manager.save();const settings=readSettings_();settings.calendar.googleCalendarId=target.id;writeSettings_(settings);
     }
+    }
     if(prepareOnly)return;
     manager.report("calendar-read");
     const entries=record.files.flatMap(f=>f.content.split(/\r?\n/).map(line=>archiveEntryFromLine_(f.name,{mtime:new Date(record.generatedAt)},line)).filter(Boolean));
@@ -1907,17 +1923,21 @@ async function copyCalendarSync_(record,prepareOnly=false) {
     const protocol=require("../common/archive-calendar-copy.js");
     const operations=protocol.plan(entries,events,record.revision,new Date().getFullYear(),sessionMode_);
     let completed=0;manager.report("calendar-write",0,operations.length);
-    for(const op of operations) {
-        manager.report("calendar-write",completed++,operations.length);
+    const execute=async op=>{
+
         const result=await googleCalendarApi_(op.method,record.calendar.id,op.id,op.body);
-        if(result.ok || (op.method==="DELETE" && [404,410].includes(result.status)))continue;
+        if(result.ok || (op.method==="DELETE" && [404,410].includes(result.status)))return;
         if(op.method==="POST" && result.status===409) {
             const previous=await googleCalendarApi_("GET",record.calendar.id,op.body.id,null);
-            if(previous.ok && op.body.extendedProperties?.private?.serkal==="announcement" && previous.data?.status==="cancelled")continue;
-            if(previous.ok && protocol.signature(previous.data)===protocol.signature(op.body))continue;
+            if(previous.ok && op.body.extendedProperties?.private?.serkal==="announcement" && previous.data?.status==="cancelled")return;
+            if(previous.ok && protocol.signature(previous.data)===protocol.signature(op.body))return;
         }
         throw Object.assign(new Error("COPY_CALENDAR_FAILED\n"+JSON.stringify(result.data||{})),{code:"COPY_CALENDAR_FAILED"});
-    }
+    };
+    let cursor=0,failure=null;
+    const worker=async()=>{while(!failure&&cursor<operations.length){const op=operations[cursor++];try{await execute(op);}catch(error){failure=error;}finally{manager.report("calendar-write",++completed,operations.length);}}};
+    await Promise.all(Array.from({length:Math.min(4,operations.length)},worker));
+    if(failure)throw failure;
     manager.report("archive-upload");
 }
 
@@ -2063,6 +2083,7 @@ async function googleOauthAccessToken_() {
             console.warn("SERKAL Google-Token erneuern:", err);
         }
     }
+    if(sessionMode_&&desktopCopy_?.deadline)throw Object.assign(new Error(bt_('SESSION_CALENDAR_CONNECT')),{code:'SESSION_CALENDAR_CONNECT'});
     token = await googleOauthBrowserLogin_(cfg);
     return String(token.access_token);
 }
@@ -2078,6 +2099,7 @@ async function googleCalendarJsonRequest_(method, url, body) {
     if(sessionTest_)throw new Error('Calendar access is disabled in the isolated archive test.');
     const accessToken = await googleOauthAccessToken_();
     const response = await fetch(url, {
+        signal:sessionRequestSignal_(),
         method,
         headers:{
             authorization:"Bearer " + accessToken,
@@ -2298,6 +2320,7 @@ async function googleCalendarApi_(method, calendarId, eventId, event) {
             encodeURIComponent(calendarId) + "/events";
         const url = eventId ? (base + "/" + encodeURIComponent(eventId)) : base;
         const response = await fetch(url, {
+            signal:sessionRequestSignal_(),
             method,
             headers:{
                 authorization:"Bearer " + accessToken,
