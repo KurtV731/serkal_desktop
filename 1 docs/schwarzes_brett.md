@@ -4710,3 +4710,33 @@ Kurt meldet während der Publikationsvorbereitung zwei Verbesserungswünsche:
 2. **Desktop-Statuszeile außerhalb des Scrollbereichs:** Der Hinweis wie „Keine Änderungen · Beenden ohne Übertragung“ soll wie auf Android fest sichtbar sein und beim Scrollen der Inhalte stehen bleiben. Er muss ohne vorheriges Scrollen erkennbar sein; bei kleinen Fenstern und beiden Sprachen prüfen.
 
 Ausdrückliche Entscheidung von Kurt: Dafür jetzt keine Neufassung erstellen und nichts Zusätzliches publizieren. Die vorhandene Freigabe und der Veröffentlichungsauftrag für die unveränderten, geprüften 1.2.2-Artefakte bleiben bestehen. Dies ist eine Vormerkung für spätere Pflege, keine neue Veröffentlichungssperre.
+
+
+---
+
+## Website-Chatty – 28.10.2026: SerKal 1.2.2 Website-Quellstand und Prüfsummen veröffentlicht
+
+Status: **GITHUB-STAND FERTIG UND ZURÜCKGELESEN / LOKALE ARTEFAKTÜBERNAHME UND SERVERLAUF AUF KURTS WINDOWS-RECHNER NOCH AUSZUFÜHREN**
+
+Der ausdrücklich freigegebene Publikationsauftrag wurde im Repository `KurtV731/serkal-pages` umgesetzt:
+
+- deutsche und englische Downloadseite zeigen sichtbar Version **1.2.2** für Windows und Android;
+- öffentliche Dateinamen bleiben `serkal-desktop.exe` und `serkal-android.apk`;
+- Desktop-Prüfsumme aktualisiert auf `c2857d0f951742d60867e34768f9e908af6ddd02ff6491be7c25813839f82d05`;
+- Android-Prüfsumme aktualisiert auf `4d6958dbba06f51e0722889cd1774833604d42b2890d7d5b87f3aa024899c9b8`.
+
+Website-Commits:
+
+- DE-Downloadseite: `20b90e4785b86e3fb75857d262cf4d44a7af0484`
+- EN-Downloadseite: `6715b56de3c1f8b104b03ab70b1006d612e87913`
+- Desktop-SHA-256: `b4b9576c2385dbf7117c8cf1d643c392135d9165`
+- Android-SHA-256: `0deecb81f018cf62b6ff3cad30be492ec13afd83`
+
+Alle vier Dateien wurden nach Speicherung von GitHub zurückgelesen; Versionsangaben und beide vollständigen Hashwerte stimmen. Die Binärdateien befinden sich ausschließlich auf Kurts Windows-Rechner unter `C:\ppd\serkal\veroeffentlichungen\1.2.2`; diese GitHub-/Website-Umgebung besitzt keinen Zugriff auf das Laufwerk und kann den WinSCP-Serverlauf nicht selbst ausführen. Kurt übernimmt beide unveränderten Dateien nach `C:\ppd\serkal\serkal-pages\up\download` und startet danach `PULL-PD.BAT`. Dieses prüft beide Dateien gegen die nun festgeschriebenen Hashwerte und lädt nur bei Übereinstimmung hoch.
+
+Vorgesehene direkte öffentliche Links nach erfolgreichem Serverlauf:
+
+- Windows: https://serkal.de/download/serkal-desktop.exe
+- Android: https://serkal.de/download/serkal-android.apk
+
+Eine erfolgte Serverübertragung oder Server-Hashprüfung wird vor Kurts erfolgreicher `FERTIG`-Meldung ausdrücklich nicht behauptet.
