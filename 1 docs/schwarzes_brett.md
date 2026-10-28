@@ -4826,3 +4826,14 @@ Erst nach diesem echten Live-Test wird der produktive Empfang als bestätigt gem
 Kurt möchte beim API-Upload weder WinSCP-Sitzungsnamen noch Zielordner eingeben. Neu auf HASA-main: `HASA-API-START.cmd` schreibt ausschließlich die bereits verbindlich festgelegten lokalen Einstellungen `HASA-li` und `/hasa.li/api/` und startet danach den vorhandenen geprüften Server-Uploader. `HASA-START.cmd → 2` ruft nun ebenfalls diesen vorbereiteten Starter auf. Commits: `a288a6703e1bfa54f50a421f59e4cfdb308fefc1`, `a6a4be6263d97ec5743101dd156973a26f00b156`.
 
 Keine Zugangsdaten, Passwörter oder privaten Konfigurationen wurden gespeichert. Eine noch nie bestätigte Serveridentität wird nicht unsicher mit beliebigem Hostschlüssel freigegeben; diese einmalige WinSCP-Sicherheitsbestätigung bleibt gegebenenfalls erforderlich. Danach verlangt der Starter keine Zielangaben mehr.
+
+
+## CE HASA – 28.10.2026: Vorschlagsverwaltung direkt aus Benutzerverwaltung erreichbar
+
+Status: **LINK IM SERVERQUELLTEXT FERTIG / PHP-SYNTAX GEPRÜFT / UPLOAD DURCH STYL NOCH OFFEN**
+
+Styl bestätigt im Chat, dass das Vorschlagswesen funktioniert. Zusätzlicher Wunsch: (a) Knopf in der oberen Userscript-Werkzeugleiste, (b) Link in der Kopfzeile der Benutzerverwaltung. Ausdrückliche Reihenfolge: zuerst (b) als Serveränderung; (a) beim nächsten regulären Userscript-Upgrade, keine eigene neue Skriptversion dafür.
+
+In `02 Website/api/user-admin.php` führt nun **Vorschlagsverwaltung** neben Galaxiedatenbank/Abmelden zu `suggestions-admin.php`. Sichtbar für root oder Hauptverwaltung mit `can_manage_user_admins`; die vorhandene serverseitige Zugriffskontrolle bleibt maßgeblich. Beide Fassungen wurden jeweils nur an dieser Navigation ergänzt, damit ihre bisherigen Funktionen erhalten bleiben: main-Commit `934553e0c2357af2f69119b6c5f39188dbfa6fae`, Entwicklungscommit `800e7d9df4c11b689ade2de78df0743c5a3e6cad`. Dateien von GitHub zurückgelesen und beide mit PHP8.3 syntaktisch geprüft. Der bestehende Serveruploader überträgt user-admin.php bereits; keine zusätzliche Dateiauswahl nötig.
+
+Bedienung: bestehendes `HASA-START.cmd` → 2 (Serverupdate), danach Benutzerverwaltung neu laden. Keine neue Userscriptversion, keine Schemaänderung, kein erneutes Einrichten des Vorschlagswesens. Noch kein Serverupload durch CE durchgeführt. Für das nächste Userscript-Upgrade oberen Knopf **Vorschlagsverwaltung** passend zur Hauptverwaltungsberechtigung ergänzen; Motivationsvideo-/Ascensionkorrektur ebenfalls weiter vormerken.
