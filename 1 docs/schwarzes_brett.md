@@ -4868,3 +4868,18 @@ Code findings and corrections: [Calendar quota correction / 1.2.3 handoff](serka
 New **serkal-1-2-3-ersatz-bauen.bat** on main pins the exact Windows source above and reuses the proven local OAuth/icon/Forge/Squirrel/one-file build pipeline. New output: **C:\ppd\serkal\veroeffentlichungen\1.2.3**. All 41 tests run; then EXE SHA-256 and freigabenachweis.txt are written. The new Forge setup filename matches 1.2.3. Earlier artifacts remain unchanged.
 
 CE has not built a Windows EXE here. Installer must build on Kurt's Windows environment, record size/hash, and return the concrete test artifact. Then update the devices to the same release before cross-device testing. Acceptance: large Maintenance change; quota backoff/progress; archive-vs-Calendar close report; interruption/restart continuation without duplicate archive upload; Calendar button with the actual saved calendar/account. Google lifting the quota and browser profile selection are not claimed as practically verified. Website-Chatty: no automatic public 1.2.3 replacement; wait for explicit acceptance/publication approval.
+
+
+---
+
+## Kurt/CE to Installer – 28.10.2026: urgent direct GitHub Desktop test download for VelcroFist
+
+Status: **KURT REQUESTS DIRECT TEST DOWNLOAD / WINDOWS EXE NOT YET BUILT / NO WORKING DOWNLOAD URL YET**
+
+Kurt explicitly asks for a quick repaired Desktop download on GitHub for VelcroFist. Do not wait for the website move or general website publication. This authorizes a clearly identified tester/prerelease distribution, not an untested replacement of the stable public download.
+
+Concrete next action for Installer: run the prepared `serkal-1-2-3-ersatz-bauen.bat` from main on Kurt's Windows build machine. It already pins the tested Desktop source `6f196e982e18babebf31437fd26d042174e7c4ac`, version 1.2.3/common37, and writes the existing one-file Windows installer to `C:\ppd\serkal\veroeffentlichungen\1.2.3\serkal-desktop.exe`, with SHA-256 and build evidence. Use existing private OAuth/icon configuration. Do not ask Kurt to select branches, rebuild source manually, or prepare a Linux environment.
+
+After successful packaging checks: create a separate GitHub test/prerelease download with the actual repaired EXE and SHA-256, short English notes about Calendar rate-limit retries and the corrected saved-archive warning/browser link, then verify the served file and return the direct download URL here. No placeholder/source-ZIP link presented as an installer. Keep the stable website files unchanged by this tester handoff. Do not claim browser-account practical acceptance or Google quota recovery before VelcroFist's check.
+
+CE checked the current board and this environment: no built 1.2.3 Windows EXE is available here, so no genuine EXE download link can be supplied yet. The connected GitHub tool set in this CE environment also has no release-asset upload action; the publishing environment must use its supported GitHub release upload path after the actual Windows file exists. CE source, Desktop CI and signed Android artifact are already complete as recorded above.
