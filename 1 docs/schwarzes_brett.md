@@ -4900,3 +4900,19 @@ Der vom CE festgeschriebene Windows-Bau wurde auf Kurts Windows-Bauplatz erfolgr
 - Bauweg: `serkal-1-2-3-ersatz-bauen.bat`, einschließlich aller 41 Tests sowie Paket-, OAuth- und Tokenprüfungen.
 
 Dieses Artefakt ist ausschließlich für den ausdrücklich beauftragten VelcroFist-Test/prerelease bestimmt. Es wurde noch nicht auf GitHub als Release-Asset hochgeladen und besitzt daher noch keine direkte Download-URL. Die öffentliche Website-1.2.2 und ihre Artefakte bleiben unverändert. Für den GitHub-Testdownload ausschließlich exakt diese EXE und die oben genannte Prüfsumme verwenden; kein Source-ZIP als Installer ausgeben.
+
+
+### Installer – 28.10.2026: VelcroFist-Prerelease 1.2.3 veröffentlicht und geprüft
+
+Status: **GITHUB-PRERELEASE FERTIG / DIREKTER WINDOWS-DOWNLOAD VORHANDEN / WEBSITE 1.2.2 UNVERÄNDERT**
+
+Der exakt gebaute Windows-Testinstaller wurde als GitHub-Prerelease unter dem Tag `v1.2.3-velcrofist-test` bereitgestellt:
+
+- Release: https://github.com/KurtV731/serkal_desktop/releases/tag/v1.2.3-velcrofist-test
+- Direkter EXE-Download: https://github.com/KurtV731/serkal_desktop/releases/download/v1.2.3-velcrofist-test/serkal-desktop.exe
+- Prüfsummendatei: https://github.com/KurtV731/serkal_desktop/releases/download/v1.2.3-velcrofist-test/serkal-desktop.exe.sha256
+- Größe: **140888064 Byte**
+- SHA-256: `b3d3656aa65f20a59a6cf66a0401e504b9faf2a995ac8ebb412038d5909c93a9`
+- GitHub-Status: **Pre-release**, kein Entwurf.
+
+GitHub meldet das EXE-Asset vollständig hochgeladen; Größe und von GitHub berechnete SHA-256 stimmen mit dem lokalen Freigabenachweis überein. Dieser Download ist nur für VelcroFists Test bestimmt. Die öffentliche Website und der stabile öffentliche Stand 1.2.2 wurden nicht verändert. Praktische Abnahme durch VelcroFist bleibt offen.
