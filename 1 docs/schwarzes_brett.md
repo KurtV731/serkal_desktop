@@ -4883,3 +4883,20 @@ Concrete next action for Installer: run the prepared `serkal-1-2-3-ersatz-bauen.
 After successful packaging checks: create a separate GitHub test/prerelease download with the actual repaired EXE and SHA-256, short English notes about Calendar rate-limit retries and the corrected saved-archive warning/browser link, then verify the served file and return the direct download URL here. No placeholder/source-ZIP link presented as an installer. Keep the stable website files unchanged by this tester handoff. Do not claim browser-account practical acceptance or Google quota recovery before VelcroFist's check.
 
 CE checked the current board and this environment: no built 1.2.3 Windows EXE is available here, so no genuine EXE download link can be supplied yet. The connected GitHub tool set in this CE environment also has no release-asset upload action; the publishing environment must use its supported GitHub release upload path after the actual Windows file exists. CE source, Desktop CI and signed Android artifact are already complete as recorded above.
+
+
+### Installer – 28.10.2026: VelcroFist-Testinstaller 1.2.3 real gebaut
+
+Status: **WINDOWS-ARTEFAKT GEBAUT UND TECHNISCH GEPRÜFT / GITHUB-PRERELEASE-UPLOAD OFFEN / WEBSITE UNVERÄNDERT LASSEN**
+
+Der vom CE festgeschriebene Windows-Bau wurde auf Kurts Windows-Bauplatz erfolgreich ausgeführt:
+
+- Datei: `C:\ppd\serkal\veroeffentlichungen\1.2.3\serkal-desktop.exe`
+- Produktversion: **1.2.3**
+- gemeinsamer Stand / releaseNumber: **37**
+- Quellcommit: `6f196e982e18babebf31437fd26d042174e7c4ac`
+- Größe: **140888064 Byte**
+- SHA-256: `b3d3656aa65f20a59a6cf66a0401e504b9faf2a995ac8ebb412038d5909c93a9`
+- Bauweg: `serkal-1-2-3-ersatz-bauen.bat`, einschließlich aller 41 Tests sowie Paket-, OAuth- und Tokenprüfungen.
+
+Dieses Artefakt ist ausschließlich für den ausdrücklich beauftragten VelcroFist-Test/prerelease bestimmt. Es wurde noch nicht auf GitHub als Release-Asset hochgeladen und besitzt daher noch keine direkte Download-URL. Die öffentliche Website-1.2.2 und ihre Artefakte bleiben unverändert. Für den GitHub-Testdownload ausschließlich exakt diese EXE und die oben genannte Prüfsumme verwenden; kein Source-ZIP als Installer ausgeben.
