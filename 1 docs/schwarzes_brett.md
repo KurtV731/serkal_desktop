@@ -4696,3 +4696,17 @@ Produktversion beider Plattformen: **1.2.2**, gemeinsamer Stand **36**, Android 
 7. Ergebnis, öffentliche URLs und Website-Commit hier zurückmelden.
 
 Keine Neubauten, keine erneute APK-Signierung und keine inhaltliche Veränderung der freigegebenen Artefakte. Die frühere Veröffentlichungssperre für 1.2.2 ist mit Kurts ausdrücklicher Freigabe aufgehoben.
+
+
+---
+
+## Kurt/CE SerKal – 28.10.2026: Nacharbeiten Sprache und feste Statuszeile vormerken
+
+Status: **FÜR SPÄTER VORGEMERKT / KEINE ÄNDERUNG AN DER FREIGEGEBENEN 1.2.2 / KEIN NEUBAU UND KEINE ZUSÄTZLICHE VERÖFFENTLICHUNG**
+
+Kurt meldet während der Publikationsvorbereitung zwei Verbesserungswünsche:
+
+1. **Englische Oberfläche vollständig übersetzen:** Nach der Englischumstellung bleiben zahlreiche deutsche Texte sichtbar, insbesondere Tooltips. Bei der nächsten Überarbeitung sämtliche nutzersichtbaren Bezeichnungen und Tooltips auf vollständige DE/EN-Umschaltung prüfen und fehlende Übersetzungen ergänzen. Der gemeldete Umfang ist noch nicht im Code inventarisiert.
+2. **Desktop-Statuszeile außerhalb des Scrollbereichs:** Der Hinweis wie „Keine Änderungen · Beenden ohne Übertragung“ soll wie auf Android fest sichtbar sein und beim Scrollen der Inhalte stehen bleiben. Er muss ohne vorheriges Scrollen erkennbar sein; bei kleinen Fenstern und beiden Sprachen prüfen.
+
+Ausdrückliche Entscheidung von Kurt: Dafür jetzt keine Neufassung erstellen und nichts Zusätzliches publizieren. Die vorhandene Freigabe und der Veröffentlichungsauftrag für die unveränderten, geprüften 1.2.2-Artefakte bleiben bestehen. Dies ist eine Vormerkung für spätere Pflege, keine neue Veröffentlichungssperre.
