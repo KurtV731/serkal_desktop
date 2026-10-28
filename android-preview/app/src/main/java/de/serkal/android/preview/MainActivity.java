@@ -70,7 +70,12 @@ public class MainActivity extends Activity {
         statusText.setText(english?"Google connection cancelled. Your local archive is unchanged.":"Google-Verbindung abgebrochen. Dein lokales Archiv bleibt unverändert.");
     }
 
-    private boolean exitPending;
+    private boolean exitPending;private long exitStarted;
+    private android.widget.ProgressBar closeProgress;
+    private final Runnable closeProgressTicker=new Runnable(){public void run(){if(!exitPending||isFinishing())return;refreshCloseProgress();handler.postDelayed(this,500);}};
+    private void refreshCloseProgress(){if(archiveCopy==null)return;String text=archiveCopy.progress(english);if(text.isEmpty()&&exitPending)text=(english?"Checking Google connection":"Google-Verbindung prüfen")+" · "+((System.nanoTime()-exitStarted)/1000000000L)+" s";if(!text.isEmpty()&&copySyncStatus!=null)copySyncStatus.setText(text);
+        if(closeProgress!=null){closeProgress.setVisibility(exitPending?View.VISIBLE:View.GONE);int total=archiveCopy.progressTotal();closeProgress.setIndeterminate(total<=0);if(total>0){closeProgress.setMax(total);closeProgress.setProgress(archiveCopy.progressCurrent());}}
+    }
     private void exitSerKal(){
         if(exitPending)return;
         if(maintenanceBusy){statusText.setText(english?"Please wait for maintenance to finish.":"Bitte den Wartungslauf abschließen lassen.");return;}
@@ -79,18 +84,23 @@ public class MainActivity extends Activity {
             dialogBuilder().setMessage(english?"A transfer is running. Close without saving?":"Eine Übertragung läuft. Ohne Speichern beenden?")
                 .setPositiveButton(english?"Close":"Beenden",(d,w)->finishAndRemoveTask()).setNegativeButton(english?"Keep open":"Geöffnet lassen",null).show();return;
         }
-        exitPending=true;
+        if(!archiveCopy.requiresFinish()){archiveCopy.finish(()->finishAndRemoveTask());return;}
+        exitPending=true;exitStarted=System.nanoTime();handler.post(closeProgressTicker);
+        final java.util.concurrent.atomic.AtomicBoolean proceeding=new java.util.concurrent.atomic.AtomicBoolean();
+        final long authStart=System.nanoTime();final java.util.concurrent.atomic.AtomicBoolean authorized=new java.util.concurrent.atomic.AtomicBoolean();
+        Runnable proceed=()->{if(isFinishing())return;if(proceeding.compareAndSet(false,true)){archiveCopy.authorizationTime(authStart,authorized.get());finishArchiveSession();}};
+        handler.postDelayed(()->{if(!proceeding.get()){archiveCopy.recordFailure(new Exception("GOOGLE_AUTHORIZATION_TIMEOUT: refreshing Google access did not finish within 10 seconds"));proceed.run();}},10000);
         AuthorizationRequest request=AuthorizationRequest.builder().setRequestedScopes(java.util.Arrays.asList(
             new Scope("https://www.googleapis.com/auth/drive.appdata"),new Scope("openid"),new Scope("https://www.googleapis.com/auth/userinfo.email"),
             new Scope("https://www.googleapis.com/auth/calendar.app.created"),new Scope("https://www.googleapis.com/auth/calendar.calendarlist.readonly"))).build();
         Identity.getAuthorizationClient(this).authorize(request).addOnSuccessListener(result->{
-            if(!result.hasResolution()&&result.getAccessToken()!=null)archiveCopy.updateToken(result.getAccessToken());
-            finishArchiveSession();
-        }).addOnFailureListener(error->finishArchiveSession());
+            if(!proceeding.get()&&!result.hasResolution()&&result.getAccessToken()!=null){archiveCopy.updateToken(result.getAccessToken());authorized.set(true);}
+            proceed.run();
+        }).addOnFailureListener(error->{archiveCopy.recordFailure(error);proceed.run();});
     }
     private void finishArchiveSession(){
         archiveCopy.finish(()->handler.post(()->{
-            exitPending=false;if(isFinishing())return;
+            exitPending=false;handler.removeCallbacks(closeProgressTicker);if(isFinishing())return;refreshLocalCopy();
             if(!archiveCopy.needsExitWarning()){finishAndRemoveTask();return;}
             TextView detail=text(archiveCopy.message(),12,TEXT);detail.setTextIsSelectable(true);ScrollView scroll=new ScrollView(this);scroll.addView(detail);
             dialogBuilder().setTitle(english?"Session closing report":"Abschluss der Sitzung").setView(scroll)
@@ -344,14 +354,15 @@ public class MainActivity extends Activity {
     private AndroidArchiveSession archiveCopy;
 
     private void refreshLocalCopy() {
+        if(exitPending){refreshCloseProgress();return;}
         if(archiveCopy==null || googleUser==null || !archiveCopy.owner.equals(googleUser.owner) || isFinishing())return;
         try {JSONObject local=archiveCopy.snapshot();if(local!=null){archiveSnapshot=local;archiveError="";renderArchive();}}catch(Exception error){archiveError=String.valueOf(error.getMessage());renderArchive();}
         String code=archiveCopy.status();String label;
-        if(code.equals("saved"))label=english ? "Google archive loaded · working locally" : "Google-Archiv geladen · lokale Sitzung";
+        if(code.equals("saved"))label=english ? "No changes · exit without transfer" : "Keine Änderungen · Beenden ohne Übertragung";
         else if(code.equals("authority-pending"))label=english ? "This device is locally set as authoritative · Google confirmation is pending" : "Dieser Rechner ist lokal als maßgeblich festgelegt · Google-Bestätigung steht aus";
         else if(code.equals("authority-applied"))label=english ? "The authoritative Google archive was applied. Local differences were replaced." : "Der verbindliche Google-Archivstand wurde übernommen. Abweichende lokale Einträge wurden ersetzt.";
         else if(code.equals("syncing"))label=english ? "Saving session to Google…" : "Sitzung wird bei Google gespeichert…";
-        else if(code.equals("pending"))label=english ? "Changes not yet saved to Google" : "Änderungen noch nicht bei Google gespeichert";
+        else if(code.equals("pending"))label=english ? "Changes will be saved to Google when exiting" : "Änderungen werden beim Beenden bei Google gespeichert";
         else if(code.equals("COPY_VERSION_MISMATCH"))label=english ? "Different SerKal versions · install the same version on all devices" : "Unterschiedliche SerKal-Versionen · bitte auf allen Geräten dieselbe Version installieren";
         else if(code.equals("COPY_LOW_SPACE"))label=english ? "Not enough storage · reading only" : "Zu wenig freier Speicher · nur Lesen möglich";
         else if(code.equals("COPY_CONFLICT"))label=english ? "Newer archive on Google · local copy preserved" : "Neuerer Archivstand bei Google · lokale Kopie bleibt erhalten";
@@ -362,7 +373,7 @@ public class MainActivity extends Activity {
         else if(code.equals("COPY_ACCOUNT_CHANGED"))label=english ? "Google account does not match archive" : "Google-Konto passt nicht zum Archiv";
         else if(code.equals("loading"))label=english ? "Loading archive…" : "Archiv wird geladen…";
         else label=english ? "Transfer pending · local copy preserved · retry Sync now" : "Übertragung ausstehend · lokale Kopie bleibt erhalten · Jetzt synchronisieren versuchen";
-        if(!archiveCopy.message().isEmpty())label=(archiveCopy.hasChanges()?(english?"Changes not yet saved to Google\n":"Änderungen noch nicht bei Google gespeichert\n"):"")+(english?"Google error · working locally\n":"Google-Fehler · lokale Arbeit möglich\n")+archiveCopy.status()+(english?" · Full response: Log":" · Vollständige Antwort: Log");
+        if(!archiveCopy.message().isEmpty())label=(archiveCopy.hasChanges()?(english?"Changes will be saved to Google when exiting\n":"Änderungen werden beim Beenden bei Google gespeichert\n"):"")+(english?"Google error · working locally\n":"Google-Fehler · lokale Arbeit möglich\n")+archiveCopy.status()+(english?" · Full response: Log":" · Vollständige Antwort: Log");
         if(copySyncStatus!=null){copySyncStatus.setText(label);copySyncStatus.setContentDescription(label);}
         if(copySyncButton!=null){copySyncButton.setEnabled(!archiveCopy.busy());copySyncButton.setVisibility(archiveCopy.status().equals("loading")||!archiveCopy.message().isEmpty()?View.VISIBLE:View.GONE);}
         if(authorityButton!=null){boolean available=archiveCopy.canMakeAuthoritative();authorityButton.setVisibility(available?View.VISIBLE:View.GONE);authorityButton.setEnabled(available);}
@@ -654,6 +665,7 @@ public class MainActivity extends Activity {
     }
 
     @Override protected void onDestroy() {
+        handler.removeCallbacks(closeProgressTicker);
         requestGeneration++;
         googleGeneration++;
         archiveGeneration++;
@@ -1033,6 +1045,7 @@ public class MainActivity extends Activity {
         archiveRows=new LinearLayout(this);archiveRows.setOrientation(LinearLayout.VERTICAL);
         ScrollView archiveScroll=new ScrollView(this);archiveScroll.setFillViewport(true);archiveScroll.setVerticalScrollBarEnabled(true);archiveScroll.addView(archiveRows);right.addView(archiveScroll,new LinearLayout.LayoutParams(-1,0,1));
         copySyncButton=null;copySyncStatus=text("",9,MUTED);copySyncStatus.setMaxLines(2);copySyncStatus.setEllipsize(android.text.TextUtils.TruncateAt.END);right.addView(copySyncStatus);
+        closeProgress=new android.widget.ProgressBar(this,null,android.R.attr.progressBarStyleHorizontal);closeProgress.setVisibility(View.GONE);right.addView(closeProgress,new LinearLayout.LayoutParams(-1,dp(6)));
         copySyncStatus.setOnClickListener(v->{archiveDialogOpen=true;dialogBuilder().setTitle(english?"Synchronization":"Synchronisation").setMessage(copySyncStatus.getText()).setPositiveButton(english?"Close":"Schließen",null).setOnDismissListener(d->archiveDialogOpen=false).show();});
         renderArchive();
         columns.addView(right);

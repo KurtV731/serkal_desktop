@@ -37,7 +37,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[build apk]')
         with:
-          name: SerKal-Android-1.2.1-code44-unsigned
+          name: SerKal-Android-1.2.2-code45-unsigned
           path: |
             android-preview/app/build/outputs/apk/release/app-release-unsigned.apk
             android-preview/apksigner.jar
