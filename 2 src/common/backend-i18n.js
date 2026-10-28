@@ -3,6 +3,8 @@
 // Central language catalogue for every text created by the Electron backend.
 // No user-visible backend message may be written directly at its call site.
 const PAIRS = {
+  SESSION_CALENDAR_SAVED:["Das Archiv ist bei Google gespeichert. Nur der Kalenderabgleich ist noch offen. Beim nächsten regulären Beenden wird er erneut versucht.","Your archive is saved to Google. Only the Calendar update is incomplete. It will be retried the next time you exit normally."],
+  SESSION_CLOSE_SAVED:["Beenden – Archiv gespeichert","Close – archive saved"],
   SESSION_CALENDAR_CONNECT:["Kalenderverbindung fehlt. Bitte Google vor dem Beenden verbinden. Das Archiv wird unabhängig davon gespeichert.","Calendar connection is missing. Connect Google before closing. The archive is saved independently."],
   SESSION_CONNECT:["Bitte Google über TMDB · Google verbinden.", "Connect Google using TMDB · Google."],
   SESSION_LOCAL:["Für diese Testsitzung lokal gespeichert.", "Saved locally for this test session."],
