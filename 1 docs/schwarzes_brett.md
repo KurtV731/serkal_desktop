@@ -4925,3 +4925,18 @@ Status: **SECHS QUELLEN GELESEN / KONZEPT GESICHERT / KEIN NEUES USERSCRIPT**
 Styl regt angesichts des langen Chats und wachsenden Userscripts eine bedarfsweise Modulstruktur an und stellt Handelsübersicht/Börse/Lizenzen/Söldner/Arenen/Aggregate bereit. Fachliche erste Priorität: Planetenbörse mit Auktionsmeldungen in einer privaten Handelsstatistik verbinden. Styl bestätigt 14 Tage Auktionsdauer. Quelle belegt Auktionskennungen und Restsekunden; Beginn aus Messzeitpunkt+Restzeit−14 Tagen berechenbar. Übersichtsmeldung allein nennt keinen Planeten, daher Zuordnung nur mit Beleg oder eindeutigem nachvollziehbarem Abgleich, nicht geraten. Historischer Datei-Erfassungszeitpunkt noch nicht validiert; keine absoluten Kalenderzeiten erfunden.
 
 Arbeitsgrundlage: [HASA Handelsmodul und modulare Struktur](https://github.com/KurtV731/hasa/blob/main/03%20Dokumentation/handelsmodul-konzept-2026-10-29.md), Commit `d192b7b9a18d173bc64d2cf698e876d5474f86c5`, nach Speicherung zurückgelesen. Kern mit Berichtserfassung/Speicherung bleibt bereichsübergreifend aktiv; Fachmodule zunächst aus getrennten Quelldateien bauen und bei Nutzung aktivieren, echtes Nachladen erst mit festgeschriebenen kompatiblen Versionen. Bestehende offene CI-Kopienabweichungen nicht als erledigt behandeln. Keine Originale mit Sitzungs-/Aktionsparametern hochgeladen, keine Gebote oder Spielaktionen, keine Veröffentlichung privater Analysen. Noch kein Handelsparser oder Nachlademechanismus implementiert; dies ist die gesicherte Konzeption.
+
+
+---
+
+## CE SerKal – 29.10.2026: VelcroFist 1.2.3 follow-up — Calendar navigation remains open
+
+Status: **NO ERRORS REPORTED ON A SESSION WITH NOTHING TO UPDATE / LARGE-BATCH QUOTA RECOVERY NOT YET PRACTICALLY TESTED / CALENDAR BUTTON NOT ACCEPTED**
+
+VelcroFist's 00:28 report: no errors, but nothing needed updating. Calendar button opens a separate Firefox window in a different signed-in Google account and shows Add calendar. He asks whether accepting that dialog would change the account/calendar used by SerKal.
+
+Current Desktop source was checked: serkal:calendar:open reads saved settings and launches an external URL; it does not write the saved Calendar ID or replace Google OAuth tokens. The 1.2.3 URL supplies cid (base64 calendar ID) and authuser only when a locally stored ID token supplies an email. The screenshot demonstrates an Add-calendar browser flow, not the desired reliable opening of the existing calendar in its owning account. The account hint has not solved this user's browser-account selection; the actual hint present in his opened URL is unknown. Do not claim the Calendar-button repair has passed. The previous report already confirmed that API writes used the correct calendar and repaired all German titles.
+
+Advice for this report: cancel Add calendar; use the already working Google account/calendar directly in the browser for now. No deleting/rebuilding the archive or reconnecting SerKal is required for this navigation symptom. A browser-side Add operation is not a change to SerKal's stored write target. A session with zero updates does not prove recovery under a large Calendar batch.
+
+Follow-up scope: distinguish viewing an existing Calendar from subscribing/adding it, and resolve account-aware navigation without changing the working API target or browser profiles silently. No new source change, installer/APK build, or publication performed for this diagnostic entry. Keep 1.2.3 artifacts unchanged; any later installable correction needs a higher unique version.
