@@ -4940,3 +4940,18 @@ Current Desktop source was checked: serkal:calendar:open reads saved settings an
 Advice for this report: cancel Add calendar; use the already working Google account/calendar directly in the browser for now. No deleting/rebuilding the archive or reconnecting SerKal is required for this navigation symptom. A browser-side Add operation is not a change to SerKal's stored write target. A session with zero updates does not prove recovery under a large Calendar batch.
 
 Follow-up scope: distinguish viewing an existing Calendar from subscribing/adding it, and resolve account-aware navigation without changing the working API target or browser profiles silently. No new source change, installer/APK build, or publication performed for this diagnostic entry. Keep 1.2.3 artifacts unchanged; any later installable correction needs a higher unique version.
+
+
+---
+
+## Kurt/CE SerKal – 29.10.2026: credit bug reporters in release notes
+
+Status: **PERMANENT CHANGELOG RULE / NO PROGRAM BUILD OR PUBLICATION REQUIRED**
+
+Kurt requests that future bug-fix/changelog entries acknowledge the person whose concrete report prompted the fix, using a parenthetical **(Thanks to VelcroFist)** or the relevant reporter's public name/handle. This applies to the user-facing list of fixes in each new version. Preserve public handles; do not replace them with private real names or contact details. Credit the report accurately rather than attaching a name to unrelated work.
+
+For 1.2.3, credit VelcroFist for the Calendar rate-limit handling and the misleading archive-save/exit warning identified through his reports. Example wording:
+- Calendar requests are paced and retried with pauses when Google reports a request-rate limit. **(Thanks to VelcroFist)**
+- A Calendar-only failure no longer claims that the already saved archive was not saved. **(Thanks to VelcroFist)**
+
+He also reported the wrong browser-account/Add-calendar flow. Acknowledge his contribution when documenting its eventual correction, but do not currently list reliable Calendar navigation as fully fixed: his latest practical report confirms it remains open. Earlier fixes/releases should receive attribution only where a concrete reporter is documented. No new release notes, installer/APK or website publication was requested by this rule alone.

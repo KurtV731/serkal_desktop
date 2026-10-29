@@ -49,3 +49,7 @@ SHA-256: c540a17601786cc1e93fab35e408e0e5a94914985e246caf6f1c95be924c7705.
 Original certificate unchanged; v2/v3 signatures verified; version 1.2.3/code46 and package checked; signed and unsigned manifests byte-identical. Delivered directly to Kurt. No signing secrets published. Do not rebuild or re-sign this artifact.
 
 Windows source and build command are ready; CE has not produced a Windows EXE in this Linux environment. Installer must build on Kurt's Windows machine using the existing private OAuth configuration, then record EXE size/hash and practical acceptance. Do not publish 1.2.3 before acceptance.
+
+## Reporter acknowledgement for release notes
+
+Kurt's changelog rule of 29.10.2026: credit the public reporter handle in the relevant fix entry. The Calendar rate-limit handling and correction of the misleading archive-save/exit warning should each carry **(Thanks to VelcroFist)**. Credit his Calendar-navigation report in its eventual fix entry as well; the 29.10.2026 browser Add-calendar/account-selection follow-up remains open and must not be advertised as fully fixed.
