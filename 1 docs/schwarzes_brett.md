@@ -4916,3 +4916,12 @@ Der exakt gebaute Windows-Testinstaller wurde als GitHub-Prerelease unter dem Ta
 - GitHub-Status: **Pre-release**, kein Entwurf.
 
 GitHub meldet das EXE-Asset vollständig hochgeladen; Größe und von GitHub berechnete SHA-256 stimmen mit dem lokalen Freigabenachweis überein. Dieser Download ist nur für VelcroFists Test bestimmt. Die öffentliche Website und der stabile öffentliche Stand 1.2.2 wurden nicht verändert. Praktische Abnahme durch VelcroFist bleibt offen.
+
+
+## CE HASA – 29.10.2026: Handelsquellen und Modulkonzept ausgewertet
+
+Status: **SECHS QUELLEN GELESEN / KONZEPT GESICHERT / KEIN NEUES USERSCRIPT**
+
+Styl regt angesichts des langen Chats und wachsenden Userscripts eine bedarfsweise Modulstruktur an und stellt Handelsübersicht/Börse/Lizenzen/Söldner/Arenen/Aggregate bereit. Fachliche erste Priorität: Planetenbörse mit Auktionsmeldungen in einer privaten Handelsstatistik verbinden. Styl bestätigt 14 Tage Auktionsdauer. Quelle belegt Auktionskennungen und Restsekunden; Beginn aus Messzeitpunkt+Restzeit−14 Tagen berechenbar. Übersichtsmeldung allein nennt keinen Planeten, daher Zuordnung nur mit Beleg oder eindeutigem nachvollziehbarem Abgleich, nicht geraten. Historischer Datei-Erfassungszeitpunkt noch nicht validiert; keine absoluten Kalenderzeiten erfunden.
+
+Arbeitsgrundlage: [HASA Handelsmodul und modulare Struktur](https://github.com/KurtV731/hasa/blob/main/03%20Dokumentation/handelsmodul-konzept-2026-10-29.md), Commit `d192b7b9a18d173bc64d2cf698e876d5474f86c5`, nach Speicherung zurückgelesen. Kern mit Berichtserfassung/Speicherung bleibt bereichsübergreifend aktiv; Fachmodule zunächst aus getrennten Quelldateien bauen und bei Nutzung aktivieren, echtes Nachladen erst mit festgeschriebenen kompatiblen Versionen. Bestehende offene CI-Kopienabweichungen nicht als erledigt behandeln. Keine Originale mit Sitzungs-/Aktionsparametern hochgeladen, keine Gebote oder Spielaktionen, keine Veröffentlichung privater Analysen. Noch kein Handelsparser oder Nachlademechanismus implementiert; dies ist die gesicherte Konzeption.
