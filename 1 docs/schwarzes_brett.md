@@ -4981,3 +4981,16 @@ Umgesetzt in neuer `02 Website/api/event-catalog.php` und angepasster `events.ph
 **Nachweise:** [41056696105 – Matrix/Datenblätter](https://github.com/KurtV731/hasa/actions/runs/41056696105), [41056696112 – bestehende Ereignis-/Produktionsprüfungen](https://github.com/KurtV731/hasa/actions/runs/41056696112), [41056696078 – Release/Layout](https://github.com/KurtV731/hasa/actions/runs/41056696078) jeweils success. Neue Tests prüfen Familien/Aliase, Minentrennung, private Besitzer-/Rundenfilter auch für root, Datenblattabfragen, Pagination, HTML-Escaping, Desktop/Mobil und horizontale Erreichbarkeit weiterer Spalten. Erzeugte Desktop-/Mobilansichten zusätzlich angesehen; sechs geänderte Dateien nach Commit zurückgelesen.
 
 **Übernahme:** Bestehendes `HASA-START.cmd → 2` überträgt die zwei PHP-Dateien; danach Events/Scans neu laden. Keine SQL-Migration, keine Spielaktionen, keine produktiven Uploads durch CE. Userscript unverändert. Für nächste Entwicklungs-/Serverpakete die aktuelle Hauptzweig-Ansicht übernehmen; nicht mit alten events.php-Paketständen zurücksetzen. Praktische Abnahme mit Styls realen Daten noch offen.
+
+
+## CE HASA – 30.10.2026: Hauptquartier-Tooltip für Koloniepunkte vorbereitet
+
+Status: **FUNKTION IMPLEMENTIERT / FOKUSSIERTE NODE-PRÜFUNGEN BESTANDEN / FÜR NÄCHSTES REGULÄRES USERSCRIPT-UPGRADE, NICHT VERÖFFENTLICHT**
+
+Styl liefert Tabelle HQ-Stufe1–24 und wünscht Tooltip am Bauauftrag, aktuell geplante Stufe8 mit+1 Koloniepunkt. Die Tabelle gehört zum Hauptquartier; keine Verwechslung mit Koloniekontrollzentrum und keine automatisch entstehenden Koloniezentren.
+
+Featurezweig `feature/hq-kolonie-tooltip`, geprüfter Commit `2eccc86b03ab528e87e466fee90a78a89e924a65`. Hauptquartier-Kopf und aktiver Bauen-Knopf zeigen beispielsweise **„Geplante Stufe 8 → +1 Koloniepunkt (insgesamt 2)“**. Der laufende Bau verwendet die schon angezeigte Zielstufe, der noch nicht begonnene Ausbau die nächste Stufe. Stufen ohne Zuwachs entsprechend beschriftet; Stufe24 gibt+2, außerhalb gelieferter Tabelle keine Hochrechnung. Vorhandene Tooltips erhalten; kein mehrfaches Anhängen; unbekannte Stufe entfernt eigenen Hinweis. Keine Bauaktion ausgelöst.
+
+Alle24 Tabellenwerte und Grenzfälle lokal mit Node geprüft, zusätzlich Syntaxprüfung am integrierten Userscript; Quelltext nach GitHub-Commit zurückgelesen. Öffentliche main/stabile Fassung und automatisch verteilte Alpha3 unverändert. Vier Entwicklungskopien auf Featurezweig gleichgezogen, damit die Vorbereitung keine weitere Kopiendrift erzeugt. Keine pauschale Aussage über alle übrigen Entwicklungsprüfungen. Übernahme ins nächste reguläre Upgrade mit neuer Versionskennung; kein Serverupdate kann allein diesen Spielseiten-Tooltip ergänzen.
+
+Ereignisse: Styl findet die neue Hauptübersicht passend, die Datenblätter zu ausführlich. Für spätere Überarbeitung dort kleine gemeinsame persönliche Verlaufstabellen wie beim Video plus wenige Wiki-Links statt ausführlicher Wiki-Nacherzählung. Erst weitere Rückmeldungen sammeln, derzeit keine neue Änderung der Ereignisseiten.
