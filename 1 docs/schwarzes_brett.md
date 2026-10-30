@@ -4955,3 +4955,29 @@ For 1.2.3, credit VelcroFist for the Calendar rate-limit handling and the mislea
 - A Calendar-only failure no longer claims that the already saved archive was not saved. **(Thanks to VelcroFist)**
 
 He also reported the wrong browser-account/Add-calendar flow. Acknowledge his contribution when documenting its eventual correction, but do not currently list reliable Calendar navigation as fully fixed: his latest practical report confirms it remains open. Earlier fixes/releases should receive attribution only where a concrete reporter is documented. No new release notes, installer/APK or website publication was requested by this rule alone.
+
+
+
+## CE HASA – 30.10.2026: Ereignisstartseite als Vier-Gruppen-Schema mit Datenblättern
+
+Status: **SERVERQUELLTEXT AUF MAIN FERTIG / ALLE DREI PRÜFLÄUFE ERFOLGREICH / UPLOAD UND PERSÖNLICHE ABNAHME DURCH STYL OFFEN**
+
+Styl wünscht statt der umfangreichen Button-/Untergruppenliste eine Matrix: (1) positive planetengebundene, (2) positive accountweite, (3) negative planetengebundene, (4) negative accountweite Ereignisse. Punkt3 der diktierten Nachricht war doppelt global; beigefügtes Bild macht planetengebunden eindeutig. Kein neues Userscript und keine zusätzlichen Motivationsvideo-Untergruppen.
+
+**Codecommit:** [fe05cbc098382f1bb26f7ccfbde74f3edbc21ae0](https://github.com/KurtV731/hasa/commit/fe05cbc098382f1bb26f7ccfbde74f3edbc21ae0).
+**Vollständige Zuordnung/Entscheidungen:** [03 Dokumentation/ereignisschema-2026-10-30.md](https://github.com/KurtV731/hasa/blob/main/03%20Dokumentation/ereignisschema-2026-10-30.md).
+
+Umgesetzt in neuer `02 Website/api/event-catalog.php` und angepasster `events.php`:
+- Vier kompakte Tabellen, 41 zusammengefasste Ereignisfamilien, nach Originalreihenfolge innerhalb jeder Gruppe nummeriert.
+- Planetenspalten aus eigenen Produktionsbeobachtungen und eigenen Ereignisorten, Accountzustände ohne künstliche Planetenaufteilung.
+- Namen verlinken ein eigenes Datenblatt: Wirkung, Voraussetzungen, Dauer, zugehörige Meldungen und Ende/Verlust, wichtige Hinweise; private Historie der letzten30 Tage und Gesamtzähler der Meldungen dahinter.
+- Start/Fortsetzung/Reparatur/Verlust bleiben je Familie zusammen. Keine eigenständigen Hauptzeilen für Wassereinbruch-Reparatur, Seuchenphasen, Geisterflottenangriff, Roboter-Ausweitung, Mietvertragskündigung, Kometenausgänge oder Kristallverluste.
+- Vorhandene Videophasen bleiben ein einziger Hauptpunkt, keine neuen Video-Boxen, keine neuen Videodatensätze und keine Änderung an Video-/Ascensionerkennung. Aufgeschobene Ascensionkorrektur bleibt offen.
+- X bedeutet gespeicherte Meldung, nicht bestätigte laufende Wirkung; Haken gemeldetes Ende/Verlust, Punkt Einzelereignis, Strich kein Nachweis im Zeitraum. Reparatur einer Mineralmine erledigt keine offene Metallmine. Fehlende/unbekannte Daten bleiben unbekannt.
+- Noch unzugeordnete gespeicherte Betreffe bleiben unter einem geschlossenen Sammellink erreichbar, keine Löschung. ASFI und Sonden/Systeme bleiben als einfache Links erreichbar.
+- Geburtsschub, Laserkristalle und Hirndroge laut Text planetengebunden; Polsprung ebenfalls planetengebunden. Seuche wegen möglicher Ausbreitung/Quarantäne accountweit, Verlauf unterscheidet Ursprung und Reichweite. Gemischte/unklare Wiki-Effekte ausdrücklich im Datenblatt gekennzeichnet.
+- Wiki-Auszug stammt aus Revision14.10.2024. Unbekannte Dauer, ungefähre Werte und widersprüchliche Quellenwerte werden nicht als sichere aktuelle Spielregeln dargestellt. Original-PDF/Bilder nicht ins Repository übernommen.
+
+**Nachweise:** [41056696105 – Matrix/Datenblätter](https://github.com/KurtV731/hasa/actions/runs/41056696105), [41056696112 – bestehende Ereignis-/Produktionsprüfungen](https://github.com/KurtV731/hasa/actions/runs/41056696112), [41056696078 – Release/Layout](https://github.com/KurtV731/hasa/actions/runs/41056696078) jeweils success. Neue Tests prüfen Familien/Aliase, Minentrennung, private Besitzer-/Rundenfilter auch für root, Datenblattabfragen, Pagination, HTML-Escaping, Desktop/Mobil und horizontale Erreichbarkeit weiterer Spalten. Erzeugte Desktop-/Mobilansichten zusätzlich angesehen; sechs geänderte Dateien nach Commit zurückgelesen.
+
+**Übernahme:** Bestehendes `HASA-START.cmd → 2` überträgt die zwei PHP-Dateien; danach Events/Scans neu laden. Keine SQL-Migration, keine Spielaktionen, keine produktiven Uploads durch CE. Userscript unverändert. Für nächste Entwicklungs-/Serverpakete die aktuelle Hauptzweig-Ansicht übernehmen; nicht mit alten events.php-Paketständen zurücksetzen. Praktische Abnahme mit Styls realen Daten noch offen.
