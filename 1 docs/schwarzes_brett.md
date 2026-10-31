@@ -4994,3 +4994,27 @@ Featurezweig `feature/hq-kolonie-tooltip`, geprüfter Commit `2eccc86b03ab528e87
 Alle24 Tabellenwerte und Grenzfälle lokal mit Node geprüft, zusätzlich Syntaxprüfung am integrierten Userscript; Quelltext nach GitHub-Commit zurückgelesen. Öffentliche main/stabile Fassung und automatisch verteilte Alpha3 unverändert. Vier Entwicklungskopien auf Featurezweig gleichgezogen, damit die Vorbereitung keine weitere Kopiendrift erzeugt. Keine pauschale Aussage über alle übrigen Entwicklungsprüfungen. Übernahme ins nächste reguläre Upgrade mit neuer Versionskennung; kein Serverupdate kann allein diesen Spielseiten-Tooltip ergänzen.
 
 Ereignisse: Styl findet die neue Hauptübersicht passend, die Datenblätter zu ausführlich. Für spätere Überarbeitung dort kleine gemeinsame persönliche Verlaufstabellen wie beim Video plus wenige Wiki-Links statt ausführlicher Wiki-Nacherzählung. Erst weitere Rückmeldungen sammeln, derzeit keine neue Änderung der Ereignisseiten.
+
+
+---
+
+## CE SerKal – 31.10.2026: Kurt's 1.2.2 log proves Calendar reconciliation exceeds his edits
+
+Status: **USER LOG READ / SCOPE DEFECT CONFIRMED / EXACT REMOTE FIELD DIFFERENCES NOT YET KNOWN / NO NEW BUILD**
+
+Kurt reports one series inserted and another deleted; after two failed exit attempts he objects to hundreds of unrelated Calendar updates. Attached private log `log 403.txt` was read locally (299 lines); do not publish the original log or private Calendar ID.
+
+Concrete evidence:
+- UI explicitly reports build **1.2.2**. First close/apply attempt approximately 14:45:20; second at 15:24:43.
+- First archive-upload measurement succeeds in **1908 ms**. The second attempt has **no archive-upload phase**. This is not evidence of repeatedly rewriting the whole Google archive.
+- First Calendar plan **269 operations**, second **248**. The second attempt resumes remaining work but still includes many series other than the two user edits.
+- The log contains **57 prepared PUT requests** across the two attempts, including unrelated series. These are actual write requests, not merely listing/reading Calendar entries. Both attempts end in Calendar HTTP403 reason rateLimitExceeded; archive status is saved/dirty=false.
+- There is no repeated Calendar request stream during the long idle interval in this supplied log. The two request bursts correspond to the two completion attempts. Pending Calendar work is retried even without additional archive edits.
+
+Source finding in current archive-calendar-copy.plan: after any Calendar-relevant session change, the planner compares all desired archive events against the full managed Calendar and schedules PUT for every signature mismatch. It has no restriction to the series/season actually edited this session. Thus an unrelated pre-existing Calendar difference can enter this batch. The log lacks previous/current event bodies, so the exact field causing each unrelated mismatch (title, provider description, date, etc.) is NOT established; do not invent a specific cause.
+
+**1.2.3 is insufficient for this scope problem:** it paces requests, retries quota errors, persists pending state and corrects the exit message, but preserves the same whole-Calendar comparison. Do not tell Kurt the wider write scope is already repaired by installing 1.2.3.
+
+Required follow-up: capture the Calendar-relevant baseline per series/season, reconcile only explicitly changed/added/deleted scopes on ordinary close, and retain those scopes for partial failure/restart. Seen-only changes remain archive-only. Unrelated existing Calendar differences must not silently turn a two-series edit into hundreds of writes. Explicit full maintenance/repair or a genuinely changed Calendar target needs a separately clear scope rule. Add meaningful tests: large otherwise unchanged archive plus one insertion/deletion causes writes only in affected scopes; unchanged and watched-only sessions cause zero event writes; partial retry preserves completed work and scope. Log operation counts by create/update/delete and a meaningful reason for each selected difference, without private data leakage.
+
+The agreed complete Google archive snapshot once per changed session remains the current contract; changing that storage format is not required to correct the Calendar scope. This entry documents the confirmed defect and required behaviour, not completed implementation or another installable release. Credit the specific scope report to Kurt when fixed, following the reporter-acknowledgement rule.
