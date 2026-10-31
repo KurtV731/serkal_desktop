@@ -5,6 +5,8 @@ class SessionArchiveClient extends ArchiveCopyClient {
     static final String NAME="serkal-session-v1.json";
     interface Trace{void done(String step,long start,boolean ok,Exception failure);}
     interface Progress{void update(String step,int current,int total);}
+    interface Remaining{void update(Set<String> scopes)throws Exception;}
+    Set<String> calendarScopes;Remaining remainingScopes;java.util.function.Consumer<JSONObject> calendarPlan;
     Trace trace;Progress progress;long deadline;
     @Override protected int timeoutMillis()throws Exception{checkDeadline();return (int)Math.max(1,Math.min(15000,deadline==0?15000:deadline-System.currentTimeMillis()));}
     @Override protected void checkDeadline()throws Exception{if(deadline>0&&System.currentTimeMillis()>=deadline)throw new java.net.SocketTimeoutException("SESSION_CLOSE_TIMEOUT: Google completion exceeded 45 seconds");}
@@ -55,6 +57,6 @@ class SessionArchiveClient extends ArchiveCopyClient {
         }
     }
     void updateCalendar(JSONObject record) throws Exception {
-        CalendarCopy.synchronize(this,record,true,progress);
+        CalendarCopy.synchronize(this,record,true,progress,calendarScopes,remainingScopes);
     }
 }

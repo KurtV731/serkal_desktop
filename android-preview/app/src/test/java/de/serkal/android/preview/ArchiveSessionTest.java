@@ -79,4 +79,17 @@ public class ArchiveSessionTest {
         AndroidArchiveSession third=make();try{load(third);assertFalse(third.requiresFinish());}finally{third.close();}
     }
 
+    @Test public void onlyUnfinishedScopeSurvivesSessionRestart()throws Exception{
+        cloud=new ArchiveCopyTest().record();final java.util.List<java.util.Set<String>> seen=new java.util.ArrayList<>();final boolean[] fail={true};
+        AndroidArchiveSession.Factory factory=token->new Remote(){@Override void updateCalendar(JSONObject value)throws Exception{
+            seen.add(calendarScopes==null?null:new java.util.TreeSet<>(calendarScopes));
+            if(fail[0]){remainingScopes.update(java.util.Collections.singleton("999:S01"));throw new Exception("injected partial failure");}
+        }};
+        AndroidArchiveSession first=new AndroidArchiveSession(RuntimeEnvironment.getApplication(),"123","token",()->{},factory);
+        load(first);first.edit("notes",new JSONObject().put("tmdbId",42).put("seasonLabel","S01").put("note","OffsetDE: +1D"));finish(first);assertEquals(1,writes);first.close();
+        // The callback's durable remaining flag, rather than the old global dirty bit, controls retry.
+        AndroidArchiveSession second=new AndroidArchiveSession(RuntimeEnvironment.getApplication(),"123","token",()->{},factory);
+        try{load(second);assertTrue(second.requiresFinish());fail[0]=false;finish(second);assertEquals(java.util.Collections.singleton("999:S01"),seen.get(seen.size()-1));assertEquals(1,writes);assertFalse(second.requiresFinish());}finally{second.close();}
+    }
+
 }

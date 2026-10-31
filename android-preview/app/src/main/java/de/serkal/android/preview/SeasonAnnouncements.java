@@ -26,15 +26,18 @@ final class SeasonAnnouncements {
    }
   }return new ArrayList<>(wanted.values());
  }
- static void synchronize(ArchiveCopyClient client,String base,List<JSONObject> desired)throws Exception{
+ interface Completed{void done(String scope)throws Exception;}
+ static void synchronize(ArchiveCopyClient client,String base,List<JSONObject> desired)throws Exception{synchronize(client,base,desired,k->{});}
+ static void synchronize(ArchiveCopyClient client,String base,List<JSONObject> desired,Completed completed)throws Exception{
   if(desired.isEmpty())return;
   Map<String,JSONObject> wanted=new LinkedHashMap<>();for(JSONObject e:desired)wanted.put(e.getString("id"),e);
   String page="";do{JSONObject r=client.get(base+"?showDeleted=true&maxResults=2500&privateExtendedProperty=serkal%3Dannouncement&pageToken="+ArchiveCopyClient.esc(page));JSONArray items=r.optJSONArray("items");
-   if(items!=null)for(int i=0;i<items.length();i++){JSONObject old=items.getJSONObject(i),next=wanted.remove(old.optString("id"));if(next==null || old.optString("status").equals("cancelled"))continue;
-    if(!old.optString("description").equals(next.optString("description")) || !old.optString("summary").equals(next.optString("summary")) || !old.getJSONObject("start").optString("date").equals(next.getJSONObject("start").optString("date"))){next.remove("id");client.request(base+"/"+ArchiveCopyClient.esc(old.getString("id")),"PUT",next.toString(),"application/json");}
+   if(items!=null)for(int i=0;i<items.length();i++){JSONObject old=items.getJSONObject(i),next=wanted.remove(old.optString("id"));if(next==null)continue;if(old.optString("status").equals("cancelled")){completed.done(CalendarScope.group(next));continue;}
+    if(!old.optString("description").equals(next.optString("description")) || !old.optString("summary").equals(next.optString("summary")) || !old.getJSONObject("start").optString("date").equals(next.getJSONObject("start").optString("date"))){CalendarCopy.operationLog(client,"PUT",next,old);next.remove("id");client.request(base+"/"+ArchiveCopyClient.esc(old.getString("id")),"PUT",next.toString(),"application/json");}
+    completed.done(CalendarScope.group(next));
    }page=r.optString("nextPageToken");
   }while(!page.isEmpty());
-  for(JSONObject e:wanted.values())try{client.request(base,"POST",e.toString(),"application/json");}catch(Exception error){if(!"GOOGLE_HTTP_409".equals(GoogleHttpFailure.code(error)))throw error;JSONObject old=client.get(base+"/"+ArchiveCopyClient.esc(e.getString("id")));if(!old.optString("status").equals("cancelled"))throw error;}
+  for(JSONObject e:wanted.values()){try{CalendarCopy.operationLog(client,"POST",e,null);client.request(base,"POST",e.toString(),"application/json");}catch(Exception error){if(!"GOOGLE_HTTP_409".equals(GoogleHttpFailure.code(error)))throw error;JSONObject old=client.get(base+"/"+ArchiveCopyClient.esc(e.getString("id")));if(!old.optString("status").equals("cancelled"))throw error;}completed.done(CalendarScope.group(e));}
  }
 }
 
