@@ -52,7 +52,7 @@ module.exports = {
         name: 'SerKalDesktop',
         authors: 'Kurt Vogelsaenger',
         description: 'SERKAL Desktop – Serienkalender',
-        setupExe: 'serkal-desktop-1-2-3-setup.exe',
+        setupExe: 'serkal-desktop-1-2-4-setup.exe',
         setupIcon: '4 assets/icon/serkal.ico',
 
         // Squirrel versucht sonst zusaetzlich, Update.exe mit demselben Icon
