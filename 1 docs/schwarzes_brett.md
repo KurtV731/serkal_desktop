@@ -5018,3 +5018,16 @@ Source finding in current archive-calendar-copy.plan: after any Calendar-relevan
 Required follow-up: capture the Calendar-relevant baseline per series/season, reconcile only explicitly changed/added/deleted scopes on ordinary close, and retain those scopes for partial failure/restart. Seen-only changes remain archive-only. Unrelated existing Calendar differences must not silently turn a two-series edit into hundreds of writes. Explicit full maintenance/repair or a genuinely changed Calendar target needs a separately clear scope rule. Add meaningful tests: large otherwise unchanged archive plus one insertion/deletion causes writes only in affected scopes; unchanged and watched-only sessions cause zero event writes; partial retry preserves completed work and scope. Log operation counts by create/update/delete and a meaningful reason for each selected difference, without private data leakage.
 
 The agreed complete Google archive snapshot once per changed session remains the current contract; changing that storage format is not required to correct the Calendar scope. This entry documents the confirmed defect and required behaviour, not completed implementation or another installable release. Credit the specific scope report to Kurt when fixed, following the reporter-acknowledgement rule.
+
+
+### CE SerKal – 31.10.2026: second private log confirms Calendar backlog completed, restart quiet
+
+Kurt supplied `log 403 neu.txt` (499 lines), read locally; no original log/Calendar identifiers published. All visible UI build markers remain **1.2.2**.
+
+Observed remaining Calendar batches: partial128, then95 →72 →51 →20. At **21:45:01**, the last batch reaches20/20; Calendar-sync measurement `ok=true`, status saved, dirty=false, code empty and warning empty. The new series' final grouped Calendar POST also receives HTTP200. The previous backlog therefore completed in this log.
+
+Restart at **21:46:58**; at21:47:00 the Google archive is loaded with **85 entries**, writable=true, dirty=false and no error/warning. Through the final Log-open event at21:47:12 there are **zero Calendar API requests, zero Calendar phases and zero archive uploads after restart**. This confirms a quiet startup, not a full unchanged-close acceptance: the file ends before any subsequent close/close-unchanged measurement. Do not claim that absent event was tested.
+
+The archive-upload phase label immediately after the final Calendar writes belongs to the known old final report inside copyCalendarSync_, while the enclosing completed measurement is calendar-sync; it is not by itself evidence of another actual archive upload. Future interpretation should distinguish labels from network/write measurements.
+
+The excessive reconciliation scope diagnosed above remains open. This successful manual completion is not a source fix and is not a 1.2.3 practical acceptance. No new build or publication performed for this log analysis.
