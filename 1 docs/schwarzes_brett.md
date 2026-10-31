@@ -5031,3 +5031,36 @@ Restart at **21:46:58**; at21:47:00 the Google archive is loaded with **85 entri
 The archive-upload phase label immediately after the final Calendar writes belongs to the known old final report inside copyCalendarSync_, while the enclosing completed measurement is calendar-sync; it is not by itself evidence of another actual archive upload. Future interpretation should distinguish labels from network/write measurements.
 
 The excessive reconciliation scope diagnosed above remains open. This successful manual completion is not a source fix and is not a 1.2.3 practical acceptance. No new build or publication performed for this log analysis.
+
+
+---
+
+## CE SerKal – 31.10.2026: geänderte Kalenderstaffeln und Erledigungsflags umgesetzt – 1.2.4 / Stand38
+
+Status: **DESKTOP-/ANDROID-KORREKTUR ÜBERNOMMEN / 42 DESKTOP- UND 85 ANDROID-PRÜFUNGEN BESTANDEN / APK SIGNIERT FERTIG / WINDOWS-BAU UND GERÄTEABNAHME OFFEN / NICHT ÖFFENTLICH ABLÖSEN**
+
+Kurt beauftragt ausdrücklich die Korrektur der Kalenderlogik mit Markierungen für geänderte und erledigte Arbeiten. Umsetzung und genaue Grenzen: [Kalenderstaffeln und Flags 1.2.4](serkal-1.2.4-kalender-flags-2026-10-31.md). Englische Änderungenliste: [Release notes1.2.4](release-notes-1.2.4-en.md).
+
+- Pro Sitzung tatsächlichen Kalender-Sollinhalt je TMDB-Serie/Staffel vergleichen. Nur veränderte, neu aufgenommene, entfernte oder bereits offene Bereiche werden im normalen Abschluss schreibend abgeglichen. Unbeteiligte alte Kalenderabweichungen werden nicht mehr nebenbei repariert.
+- Gesehen-/Archivänderungen ohne Kalenderwirkung setzen keine neue Kalendermarkierung. Keine Rückkehr zu Hintergrundabfragen oder laufenden Edit-Uploads.
+- Vor dem ersten Kalender-Schreibvorgang genaue Restmenge dauerhaft im lokalen Profil speichern. Staffelflag erst nach letzter erfolgreicher Operation oder bestätigtem passenden Lesestand löschen. Bei Abbruch verbleiben nur offene Staffeln. Nach Neustart aktuellen Google-Archivstand verwenden und diese Restmenge fortsetzen; Kalender-Retry ohne weiteren Archivupload.
+- Kalender lesen bleibt zum Vergleich nötig; begrenzt sind Schreiboperationen. Expliziter Zielkalenderwechsel ist ein voller Zielabgleich. Alte1.2.3-Flags ohne Staffelumfang brauchen einmalig die alte volle Planung, bevor genaue Restflags gespeichert werden können. Keine erfundene Rekonstruktion dieser alten Flagdaten.
+- Planprotokolle zeigen Bereiche und Anlegen/Ändern/Löschen; Android nennt Ankündigungsprüfungen separat. Einzeloperationen nennen Grund/abweichende Feldnamen. Vollständige Google-Fehler, erfolgreiche Fortschrittszählung und Backoff bleiben erhalten.
+- Kalenderbutton/Browserkonto/Add-calendar ist weiterhin ein separater offener Fehler. Diese Version behauptet dessen Behebung nicht.
+
+### Nachweis
+Synthetischer Fall150 Serien/300 vorhandene, absichtlich abweichende Kalenderereignisse: eine Aufnahme und Löschung mit je zwei Terminen verursachen **genau vier zulässige Schreiboperationen, null PUTs für unbeteiligte Serien**. Kein Versprechen, dass Kurts konkrete Serien immer genau vier Operationen benötigen. Zusätzlich unverändert/Gesehen, Ankündigungsbereiche, Zielwechsel, partielle Fehler, gelöschte Erledigungsflags, Neustart mit nur offener Restmenge und kein zweiter Archivupload geprüft. Keine echten privaten Kalender-/Archivdaten verändert; Original-Logs bleiben privat.
+
+- Desktopquelle **52aafa693ec519de0e45bc235dcc870a1e9eec80**, PR#18 übernommen. **42 Testskripte** lokal und CI **41241477501** erfolgreich: https://github.com/KurtV731/serkal_desktop/actions/runs/41241477501 .
+- Android gebaute Quelle **aad44b929401d3c85c7bb9ec43405208249f53bb**, PR#19 übernommen. Finaler CI/Bau **41241688044**, **85 Tests,0 Fehler,0 Fehlschläge,0 übersprungen**: https://github.com/KurtV731/serkal_desktop/actions/runs/41241688044 . Kein zweites APK durch den Merge erzeugt.
+- Beide Produktversionen **1.2.4**, gemeinsamer Stand **38**, Android code **47**.
+- **038-SerKal-Android-1.2.4.apk**, **2294171 Byte**.
+- SHA-256 **1fc7f7faea8ba100d0b09455206b03808ff3be00d43c28cb555f1aa023ff976a**.
+- Bisheriges Zertifikat erhalten, v2/v3 verifiziert, Paket/Version/code geprüft, Manifest vor/nach Signieren bytegleich. APK Kurt direkt geliefert; keine Signaturgeheimnisse hier. Nicht erneut bauen/signieren.
+
+### Konkreter Auftrag an Installer
+**serkal-1-2-4-ersatz-bauen.bat** liegt auf main und pinnt die oben genannte finale Desktopquelle. Vorhandenen privaten OAuth-/Icon-/Forge-/Squirrel-/Ein-Datei-Weg verwenden;42 Tests und Paketprüfungen inklusive. Neue Ausgabe **C:\ppd\serkal\veroeffentlichungen\1.2.4**; keine älteren Dateien ersetzen. Windows-EXE mit Größe, SHA-256 und Freigabenachweis für Kurts Test liefern. Diese CE-Umgebung hat keine Windows-EXE gebaut. Späteren Testdownload getrennt von bestehenden1.2.3-Assets halten; keine vorhandene Release-Datei unter gleicher Versionsnummer ändern.
+
+Abnahme: alle beteiligten Geräte zunächst auf denselben Stand; große bestehende Sammlung, eine Aufnahme/eine Löschung; nur betroffene Kalenderstaffeln im Plan; unverändert schließen ohne Übertragung; bei vorübergehendem Fehler offene Staffeln behalten und nur diese nach Neustart fortsetzen. Reale Google-Quota-/Geräteabnahme und öffentliche Freigabe noch offen. Website-/öffentliche Dateien unverändert.
+
+Changelog-Zuschreibung: begrenzter Abgleich/Erledigungsflags **(Thanks to Kurt)**. Beibehaltene frühere Rate-Limit-Korrektur/verständliche Abschlussmeldung **(Thanks to VelcroFist)**.
