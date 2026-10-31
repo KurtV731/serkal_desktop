@@ -8,12 +8,14 @@ function signature(event) {
         String(p.tmdbId||''),String(p.season||''),String(p.episodeFrom||''),String(p.episodeTo||'')].join('|'));
 }
 function key(event) {const p=event.extendedProperties && event.extendedProperties.private || {};return [p.tmdbId,p.season,p.episodeFrom,p.episodeTo].join(':');}
-function announcementPlan(entries,events,revision){
+function group(event){const p=event.extendedProperties?.private||{};return p.serkal==='announcement'?p.announcementKey:p.tmdbId&&p.season?p.tmdbId+':'+p.season:'';}
+function announcementPlan(entries,events,revision,scope=null){
  const desired=new Map();
  for(const entry of entries)for(const a of entry.announcements||[]){
   const cardDate=a.date||[...(a.history||[])].reverse().find(h=>h.to)?.to;
   if(!/^\d{4}-\d{2}-\d{2}$/.test(cardDate||''))continue;
   const k=String(entry.tmdbId)+':S'+String(a.season).padStart(2,'0');
+  if(scope&&!scope.has(k))continue;
   const en=a.language==='en',next=new Date(cardDate+'T00:00:00Z');next.setUTCDate(next.getUTCDate()+1);
   const history=(a.history||[]).map(h=>en?'Recorded on '+h.capturedAt+': '+(h.from?'from '+h.from+' → ':'announced for ')+(h.to||'date unknown'):'Erfasst am '+h.capturedAt+': '+(h.from?'von '+h.from+' → ':'angekündigt für ')+(h.to||'Termin unbekannt'));
   const event={id:'serkal'+sha('sha1','announcement:'+k),summary:(en?'Announced season start: ':'Angekündigter Staffelstart: ')+a.title+' S'+String(a.season).padStart(2,'0'),description:[en?'Provisional start date. This card remains until you delete it.':'Vorläufiges Startdatum. Diese Karte bleibt bis zur manuellen Löschung bestehen.',...(a.episodeCount>0?[(en?'Expected episodes: ':'Erwartete Folgen: ')+a.episodeCount]:[]),...history].join('\n'),start:{date:cardDate},end:{date:next.toISOString().slice(0,10)},transparency:'transparent',extendedProperties:{private:{serkal:'announcement',announcementKey:k}}};
@@ -28,10 +30,12 @@ function announcementPlan(entries,events,revision){
  }
  for(const body of desired.values())operations.push({method:'POST',id:'',body});return operations;
 }
-function plan(entries, events, revision, year=new Date().getFullYear(), replaceManaged=false) {
+function plan(entries, events, revision, year=new Date().getFullYear(), replaceManaged=false, scopes=null) {
+    const scope=scopes===null?null:new Set(scopes);
     const desired=new Map(),past=new Set();
     for(const entry of entries) {
         const dates=entry.activeDates||entry.dates||[],season=entry.seasonLabel||entry.staffelLabel;
+        if(scope&&!scope.has(entry.tmdbId+':'+season))continue;
         if(entry.announcementOnly || !entry.tmdbId || !/^S\d{1,3}$/.test(season) || !dates.length)continue;
         if(dates.every(d=>d.slice(0,4)<String(year))){past.add(entry.tmdbId+':'+season);continue;}
         for(let i=0;i<dates.length;) {
@@ -46,8 +50,9 @@ function plan(entries, events, revision, year=new Date().getFullYear(), replaceM
             desired.set(key(event),event);i=last+1;
         }
     }
-    const operations=announcementPlan(entries,events,revision),seen=new Set();
+    const operations=announcementPlan(entries,scope?events.filter(e=>scope.has(group(e))):events,revision,scope),seen=new Set();
     for(const event of events) {
+        if(scope&&!scope.has(group(event)))continue;
         const p=event.extendedProperties && event.extendedProperties.private || {};
         if(p.serkal!=='1' || event.status==='cancelled')continue;
         const k=key(event),target=desired.get(k);
@@ -64,5 +69,10 @@ function plan(entries, events, revision, year=new Date().getFullYear(), replaceM
     for(const [k,body] of desired)if(!seen.has(k))operations.push({method:'POST',id:'',body});
     return operations;
 }
-module.exports={signature,key,plan};
+function projection(entries,year=new Date().getFullYear()){
+    const grouped={};
+    for(const op of plan(entries,[],'projection',year,true)){const k=group(op.body);(grouped[k]||=[]).push(signature(op.body));}
+    return Object.fromEntries(Object.entries(grouped).map(([k,v])=>[k,JSON.stringify(v.sort())]));
+}
+module.exports={signature,key,group,plan,projection};
 

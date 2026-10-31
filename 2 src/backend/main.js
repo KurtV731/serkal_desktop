@@ -1827,8 +1827,9 @@ function copyManager_() {
         const {ArchiveSession}=require('../common/archive-session');
         desktopCopy_=new ArchiveSession({folder:archiveFolderPath_,calendar:()=>sessionTest_?({mode:'',id:''}):readSettings_().calendar,
             selectCalendar:calendar=>{if(!sessionTest_){const settings=readSettings_();settings.calendar={mode:calendar.mode||'none',googleCalendarId:calendar.id};writeSettings_(settings);}},
-            calendarSync:record=>sessionTest_?Promise.resolve():copyCalendarSync_(record,false,true),
+            calendarSync:(record,scopes,remaining)=>sessionTest_?Promise.resolve():copyCalendarSync_(record,false,true,scopes,remaining),
             calendarKey:sessionCalendarKey_,
+            calendarProjection:sessionCalendarProjection_,
             calendarPrepare:record=>sessionTest_?Promise.resolve():copyCalendarSync_(record,true),
             confirmedFile:path.join(app.getPath('userData'),'session-confirmed-'+crypto.createHash('sha256').update(path.resolve(archiveFolderPath_()||'.')).digest('hex')+'.json'),
             bootstrap:()=>{const folder=archiveFolderPath_();archiveEnsureFolder_(folder);return require('../common/archive-copy').capture(folder,readSettings_().calendar);},
@@ -1878,6 +1879,12 @@ function copyManager_() {
     });
     return desktopCopy_;
 }
+function sessionCalendarProjection_(record){
+    const target=JSON.stringify([record.calendar.mode,record.calendar.id]);
+    if(record.calendar.mode!=='google')return {target,groups:{}};
+    const entries=record.files.flatMap(f=>f.content.split(/\r?\n/).map(line=>archiveEntryFromLine_(f.name,{mtime:new Date(record.generatedAt)},line)).filter(Boolean));
+    return {target,groups:require('../common/archive-calendar-copy').projection(entries)};
+}
 function sessionCalendarKey_(record){
     if(record.calendar.mode!=='google')return JSON.stringify([record.calendar.mode,record.calendar.id]);
     const entries=record.files.flatMap(f=>f.content.split(/\r?\n/).map(line=>archiveEntryFromLine_(f.name,{mtime:new Date(record.generatedAt)},line)).filter(Boolean));
@@ -1893,7 +1900,7 @@ let sessionCalendarRequests_=null;
 function sessionCalendarRequest_(request){
     return sessionMode_&&sessionCalendarRequests_?sessionCalendarRequests_.run(request):request();
 }
-async function copyCalendarSync_(record,prepareOnly=false,prepared=false) {
+async function copyCalendarSync_(record,prepareOnly=false,prepared=false,scopes=null,onRemaining=()=>{}) {
     if(record.calendar.mode!=="google")return;
     const manager=copyManager_();
     if(sessionMode_&&!prepared)sessionCalendarRequests_=require("../common/calendar-rate-limit").create({
@@ -1929,7 +1936,12 @@ async function copyCalendarSync_(record,prepareOnly=false,prepared=false) {
     const entries=record.files.flatMap(f=>f.content.split(/\r?\n/).map(line=>archiveEntryFromLine_(f.name,{mtime:new Date(record.generatedAt)},line)).filter(Boolean));
     const events=await googleCalendarManagedEvents_(record.calendar.id,true,true);
     const protocol=require("../common/archive-calendar-copy.js");
-    const operations=protocol.plan(entries,events,record.revision,new Date().getFullYear(),sessionMode_);
+    const operations=protocol.plan(entries,events,record.revision,new Date().getFullYear(),sessionMode_,scopes);
+    const eventById=new Map(events.map(event=>[event.id,event]));
+    const operationGroup=op=>protocol.group(op.body||eventById.get(op.id)||{});
+    const remaining=new Map();for(const op of operations){const k=operationGroup(op);remaining.set(k,(remaining.get(k)||0)+1);}
+    logWrite_("INFO","SYNC","Calendar plan",{scope:scopes===null?"full-target":"changed-series",scopes:scopes===null?null:scopes.length,create:operations.filter(o=>o.method==="POST").length,update:operations.filter(o=>o.method==="PUT").length,delete:operations.filter(o=>o.method==="DELETE").length});
+    onRemaining([...remaining.keys()]);
     let completed=0;manager.report("calendar-write",0,operations.length);
     const execute=async op=>{
 
@@ -1943,7 +1955,11 @@ async function copyCalendarSync_(record,prepareOnly=false,prepared=false) {
         throw Object.assign(new Error("COPY_CALENDAR_FAILED\n"+JSON.stringify(result.data||{})),{code:"COPY_CALENDAR_FAILED"});
     };
     for(const op of operations){
+        const previous=eventById.get(op.id),target=op.body;
+        const changedFields=previous&&target?['summary','description','start','end'].filter(k=>JSON.stringify(previous[k])!==JSON.stringify(target[k])):[];
+        logWrite_("TRACE","SYNC","Calendar operation",{method:op.method,scope:operationGroup(op),reason:op.method==='POST'?'missing':op.method==='DELETE'?'removed-or-duplicate':'changed-fields',changedFields});
         await execute(op);
+        const k=operationGroup(op),left=remaining.get(k)-1;if(left)remaining.set(k,left);else{remaining.delete(k);onRemaining([...remaining.keys()]);}
         manager.report("calendar-write",++completed,operations.length);
     }
 }
