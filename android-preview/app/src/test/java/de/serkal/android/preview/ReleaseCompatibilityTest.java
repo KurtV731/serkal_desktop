@@ -5,10 +5,10 @@ import java.util.*;
 import static org.junit.Assert.*;
 
 public class ReleaseCompatibilityTest {
- @Test public void sharedNumberIsThirtySeven(){assertEquals(37,ArchiveCodec.RELEASE);assertEquals("1.2.3",BuildConfig.VERSION_NAME);assertEquals(46,BuildConfig.VERSION_CODE);}
+ @Test public void sharedNumberIsThirtyEight(){assertEquals(38,ArchiveCodec.RELEASE);assertEquals("1.2.4",BuildConfig.VERSION_NAME);assertEquals(47,BuildConfig.VERSION_CODE);}
  @Test public void matchingAndLegacyRecordsAreAccepted()throws Exception{
   JSONObject r=new ArchiveCopyTest().record();ArchiveCodec.validate(r,"123");r.put("releaseNumber",30);ArchiveCodec.validate(r,"123");
-  ArchiveCodec.assertRelease("37");
+  ArchiveCodec.assertRelease("38");
   r.put("releaseNumber",31);ArchiveCodec.validate(r,"123");
  }
  @Test public void otherReleasesCannotBeLoadedOrChosenAsAuthority()throws Exception{
@@ -22,7 +22,7 @@ public class ReleaseCompatibilityTest {
  }
  @Test public void authorityOfLegacyRecordGetsCurrentReleaseWithoutChangingFiles()throws Exception{
   JSONObject r=new ArchiveCopyTest().record(),selected=ArchiveAuthority.select(r,"123","2026-10-25T00:00:00Z");
-  assertEquals(37,selected.getInt("releaseNumber"));assertEquals(r.getJSONArray("files").toString(),selected.getJSONArray("files").toString());
+  assertEquals(38,selected.getInt("releaseNumber"));assertEquals(r.getJSONArray("files").toString(),selected.getJSONArray("files").toString());
  }
  @Test public void uploadRejectsMismatchedVersionBeforeNetwork()throws Exception{
   final int[] writes={0};ArchiveCopyClient client=new ArchiveCopyClient("test"){@Override JSONObject request(String u,String m,String b,String t)throws Exception{writes[0]++;return new JSONObject().put("id","unused");}};
