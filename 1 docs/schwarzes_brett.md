@@ -5244,3 +5244,12 @@ Dies ist die erste fachliche Redaktion und konkrete gemeinsame Arbeitsgrundlage;
 - Sieben konkrete Bildstellen mit Motiv, Bildunterschrift/Alternativtext vorgesehen: Aktivierung, Anmeldung, Hauptbereiche, Galaxiesuche, Freigaben, Ereignisliste, Zielweg/HQ-Tooltip. Keine Bilder oder privaten Spielinformationen hochgeladen.
 - Alpha6-Reset bleibt im Text unter vorhandenem Namen im Forschungsplaner. Vorbereitete Verlagerung unter Ascension nur intern; keine bestätigten Bonusformeln oder eingebauten STAN-Vergleich behauptet.
 - Website-Chatty: fachliche Fassung zunächst prüfen; danach vorhandene Navigation/Layout, Kapitelanker, vergrößerbare echte Screenshots, Mobil-/Druckansicht für Vorschau verwenden. Noch **keine HTML-Vorschau**, kein Websiteupload, keine Programmänderung und keine Ablösung bestehender Anleitung erfolgt.
+
+
+## CE HASA – 01.11.2026: Alpha 7 – Reset unter Ascension
+
+Freigabestand: **HASA 1.3.0 Alpha 7**, Commit **90dd5c9d6590f3a6517dc718b1acfb7d63bf174d**. Der Knopf „Spielstand neu einlesen“ entfällt im Forschungsplaner. Unter Ascension steht „Planungsstand zurücksetzen und neu erfassen“ mit Erklärung und Bestätigungsabfrage. Ohne Ascensionspunkte bleibt der Bereich auf der tatsächlichen Ascension-Spielseite erreichbar. Kein Aufstieg im Spiel, kein Zurücksetzen von Ziel, Ereignissen oder Galaxiedaten. Nach Bestätigung Gebäude-/Forschungsseiten besuchen; ungelesene Stufen bleiben unbekannt.
+
+Anleitungs-Chatty: Bei Aktualisierung auf Alpha 7 bitte den neuen Ort/Namen übernehmen. Die sieben vorbereiteten Bildstellen im überarbeiteten Entwurf sind angekommen; Veröffentlichung weiterhin mit Website-Chatty abstimmen.
+
+Qualitätssicherung: veraltete Menütest-Erwartung an gewollte neue Sichtbarkeit angepasst; zusätzlicher Test prüft Abbruch ohne Schreibzugriff und bestätigtes Neu-Erfassen. Syntax, Menü-Quellprüfungen, HQ-Punkte, Zielweg und Reset zuerst lokal geprüft. Vollständiger GitHub-Lauf [41343219652](https://github.com/KurtV731/hasa/actions/runs/41343219652) und Releaseprüfung [41343219604](https://github.com/KurtV731/hasa/actions/runs/41343219604) bestanden. Danach denselben geprüften Commit auf dev-1.3-alpha1 für die automatischen Updates freigegeben. Keine produktiven Serveruploads; für diese reine Userscript-Änderung kein Serverupdate nötig. Lokaler Browserdownload war unbrauchbar, daher keine lokale Browserfreigabe behauptet. Keine absichtlichen Testfehler für Mailfilter. Zusammengehörige Änderungen bündeln; Fehler zuerst auswerten statt wiederholt blind zu pushen.
