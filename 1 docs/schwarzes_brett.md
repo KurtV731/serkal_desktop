@@ -5253,3 +5253,31 @@ Freigabestand: **HASA 1.3.0 Alpha 7**, Commit **90dd5c9d6590f3a6517dc718b1acfb7d
 Anleitungs-Chatty: Bei Aktualisierung auf Alpha 7 bitte den neuen Ort/Namen übernehmen. Die sieben vorbereiteten Bildstellen im überarbeiteten Entwurf sind angekommen; Veröffentlichung weiterhin mit Website-Chatty abstimmen.
 
 Qualitätssicherung: veraltete Menütest-Erwartung an gewollte neue Sichtbarkeit angepasst; zusätzlicher Test prüft Abbruch ohne Schreibzugriff und bestätigtes Neu-Erfassen. Syntax, Menü-Quellprüfungen, HQ-Punkte, Zielweg und Reset zuerst lokal geprüft. Vollständiger GitHub-Lauf [41343219652](https://github.com/KurtV731/hasa/actions/runs/41343219652) und Releaseprüfung [41343219604](https://github.com/KurtV731/hasa/actions/runs/41343219604) bestanden. Danach denselben geprüften Commit auf dev-1.3-alpha1 für die automatischen Updates freigegeben. Keine produktiven Serveruploads; für diese reine Userscript-Änderung kein Serverupdate nötig. Lokaler Browserdownload war unbrauchbar, daher keine lokale Browserfreigabe behauptet. Keine absichtlichen Testfehler für Mailfilter. Zusammengehörige Änderungen bündeln; Fehler zuerst auswerten statt wiederholt blind zu pushen.
+
+
+### Installer/Kurt – 01.11.2026: SerKal 1.2.4 / Stand 38 real gebaut und als gemeinsamer Testordner vorbereitet
+
+Status: **WINDOWS-ARTEFAKT GEBAUT UND NACHGEWIESEN / SIGNIERTE APK HASHIDENTISCH ÜBERNOMMEN / PRAKTISCHE GERÄTEABNAHME OFFEN / NICHT ÖFFENTLICH VERÖFFENTLICHEN**
+
+Der vom CE festgeschriebene Windows-Bau wurde auf Kurts Windows-Bauplatz erfolgreich mit `serkal-1-2-4-ersatz-bauen.bat` ausgeführt. Gemeinsamer Testordner:
+
+`C:\ppd\serkal\veroeffentlichungen\1.2.4`
+
+**Desktop**
+- Datei: `serkal-desktop.exe`
+- Version: **1.2.4**
+- gemeinsamer Stand / releaseNumber: **38**
+- Quellcommit: `52aafa693ec519de0e45bc235dcc870a1e9eec80`
+- Größe: **140890112 Byte**
+- SHA-256: `73250d7f67de8de49acc28e33dd1785c229feb92700a67a7e43b48cf3fe0b3bf`
+- Nachweise: `serkal-desktop.exe.sha256` und `freigabenachweis.txt`
+- Bauweg einschließlich aller 42 Tests sowie Paket-, OAuth- und Tokenprüfungen erfolgreich beendet.
+
+**Android**
+- Datei im Testordner: `serkal-android.apk`
+- ursprüngliches CE-Artefakt: `038-SerKal-Android-1.2.4.apk`
+- Version: **1.2.4**, gemeinsamer Stand **38**, Android versionCode **47**
+- Größe: **2294171 Byte**
+- nach Umbenennung erneut geprüfte SHA-256: `1fc7f7faea8ba100d0b09455206b03808ff3be00d43c28cb555f1aa023ff976a`
+
+Die APK ist damit byteidentisch mit dem vom CE signierten Artefakt. Beide Dateien liegen nun gemeinsam für Kurts praktische Geräteprüfung bereit. Keine vorhandene öffentliche Website-1.2.2 und kein 1.2.3-Prerelease wurden verändert. Veröffentlichung bleibt bis zur ausdrücklichen praktischen Abnahme gesperrt.
