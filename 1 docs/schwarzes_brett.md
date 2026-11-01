@@ -5116,3 +5116,14 @@ Styl nennt ausdrücklich das vorhandene Paar Ikan/Metallmine vom21.10.2026 05:26
 Prüfungen: lokale PHP-Syntax und26 Fokusprüfungen bestanden; **41294731208** Datenbank-/Katalog-/Browserprüfungen erfolgreich, einschließlich fremder Produktionsmessung, die den eigenen Betrag nicht beeinflussen darf; **41294731227** Release/Layout erfolgreich. Beispiel900Erz/h Ausfall über15:15:29 =≈13732Erz ist synthetischer Test, kein bestätigter Produktionswert von Styl.
 
 Übernahme **HASA-START.cmd → 2**, danach Ereignislisten Strg+F5. Kein neues Userscript, keine SQL-Migration, kein produktiver Upload durch CE. Produktionsmessungen existieren nur bei tatsächlich besuchter/erfasster Spielseite; fehlende Vergangenheit kann nicht nachträglich gemessen werden.
+
+
+## CE HASA – 01.11.2026: Koloniepunkte-Tooltip vorgezogen als 1.3 Alpha4 freigegeben
+
+Styl hat die bisher vorbereitete Änderung ausdrücklich als Zwischenupdate gewünscht. **1.3.0-alpha.4**, Commit **ada317f31eab2df232b92b49d99cb6d32604e0fe** auf **dev-1.3-alpha1**, nach Freigabe Userscript identisch zurückgelesen. Vier Entwicklungskopien synchron; stabile öffentliche1.2.0 und Backend unverändert.
+
+Tooltip Hauptquartier-Kopf/Bauen-Knopf: geplante Stufe8 → +1 Koloniepunkt (insgesamt2), Ziel24 → +2 (insgesamt10), übrige Stufen nach Styls Tabelle1–24. Laufende Bauten enthalten schon die Zielstufe; keine doppelte Erhöhung. Keine extrapolierten Stufen, keine Bauaktionen. Alte Titel erhalten.
+
+Gezielte Prüfung aller24 Tabellenstufen und Randfälle lokal bestanden. Vollständiger CI **41295610110 erfolgreich**, Browser-/PHP-/MariaDB-/Anmeldung-/Serverwerkzeug-/TechTreeprüfungen; Release/Layout **41295610135 erfolgreich**. Erster Lauf deckte eine alte Testumgebungs-Lücke auf (seitAlpha3 fehlendes STORAGE_TECHTREE_SPIELSTAND im isolierten Kolonisationsschiff-Test). Nur fehlenden Testschlüssel ergänzt, keine Produktfunktion entfernt; Wiederholung vollständig grün.
+
+Verteilung über bestehenden dev-UpdateURL, Tampermonkey **Nach Updates suchen**, danach Spiel neu laden. Kein Serverupload nötig. Gezieltes Zwischenupdate enthält nur den Tooltip; vorgemerkte Video-/Ascension- und obere Vorschlagsbuttonänderung noch offen. Neue Notiz in03 Dokumentation/hasa-1.3-alpha4.md.
