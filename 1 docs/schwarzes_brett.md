@@ -5088,3 +5088,18 @@ Codecommit **79195404f83248fde8a11602cabbbde3372bc404**; abschließende Testkorr
 Prüfläufe: **41292154715** Matrix/Datenbank/Informationen und Desktop/Mobil erfolgreich ([Link](https://github.com/KurtV731/hasa/actions/runs/41292154715)); **41292154816** Release/Layout erfolgreich; bestehende Ereignis-/Produktionsprüfungen für unveränderten Produktivcode **41292005704** erfolgreich. Der erste neue Kataloglauf scheiterte an einer zu breiten Annahme im gemeinsamen Testdatenbestand; gezielt nach Planet gefiltert und Ausnahmebehandlung im Test auf sicheren Fehlerstatus korrigiert, dann erfolgreich wiederholt. Keine Tests entfernt. Neue Desktop-/Mobilansichten zusätzlich visuell angesehen.
 
 **Übernehmen:** bestehendes `HASA-START.cmd → 2`, danach Ereignisseite mit Strg+F5 neu laden. Neu `event-information.php`, angepasst `event-catalog.php` und `events.php`; normaler API-Uploader nimmt alle mit. Kein neues Userscript, keine SQL-Migration, keine Änderung gespeicherter Berichte. Kein produktiver Serverupload durch CE. Praktische Abnahme mit Styls eigenen Daten offen.
+
+
+## CE HASA – 01.11.2026: Galaxiedatenbank – Systemfilter und dauerhaft sichtbare Seitennavigation
+
+Serverkorrektur auf main: Produktcode **2db506a391606e5f86cfa5e32559722608a5c050**, abschließender Browserprüfstand **c68a6cceb9aafa643d49c4c65e17ec5e092d0d3e**. galaxy.php nach Speicherung identisch zurückgelesen.
+
+- Leeres Systemfeld bedeutet alle Systeme, 0 ist eine ausdrücklich suchbare Systemnummer. Pfeile umlaufend 0 bis999; rechts aus leer startet1, links999. Kein Rückgriff auf die vorherige Nummer aus einem leeren Feld.
+- Eingabe in Suchbegriff, Planetenname oder Spieler sowie Öffnen weiterer Suchfelder leert die alte Systemnummer. Danach bewusst gesetzte Nummer darf mit Textfiltern kombiniert werden. Standort anzeigen stellt den gespeicherten letzten konkreten Standort wieder her.
+- Blättern verwendet weiter die abgeschickten Suchfilter und fügt keine frühere Systemnummer hinzu.
+- Zurück / Seite / Weiter bei mehreren Ergebnisseiten fest am unteren Fensterrand; zusätzlicher Inhaltsabstand verhindert Überdeckung der letzten Zeilen.
+- Bereichssuche beim späteren Claimen (z.B.1–99,500–749) vorgemerkt, noch nicht implementiert. Keine Änderung an Freigaberechten oder Datenbank.
+
+Browserprüfung **41293935468 erfolgreich**, einschließlich Rundlauf,0,unzulässiger1000, Namenssuche/Pagination, Standort und fixer Leiste beim Scrollen sowie schmalem Fenster. Release/Layout **41293935509 erfolgreich**. Frühere Browserdurchläufe scheiterten an noch alten Testannahmen und am asynchronen nativen details-toggle; diese Tests angepasst, keine Fehler verschwiegen oder Prüfungen entfernt.
+
+Übernahme durch Styl: **HASA-START.cmd → 2**, danach Galaxiedatenbank Strg+F5. Geändert wird serverseitig galaxy.php; kein neues Userscript, keine SQL-Migration, kein produktiver Upload durch CE.
