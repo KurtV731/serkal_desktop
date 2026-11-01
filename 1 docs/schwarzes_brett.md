@@ -5173,3 +5173,33 @@ Styl möchte den missverständlichen Knopf aus der Forschungsplanung entfernen u
 Neue Beschriftung **Planungsstand zurücksetzen und neu erfassen**, mit Erklärung des ersetzten Gebäude-/Forschungsstands und Erhalts von Ziel/Ereignissen/Galaxiedaten. Bestehender Bestätigungsdialog und Funktion unverändert. Nur ein Knopf, nicht mehr im Forschungsplaner. Auf der echten Ascension-Spielseite auch ohne Punkte erreichbar, damit die Funktion nach einem Aufstieg nicht unerreichbar wird; sonst bisherige Sichtbarkeitsregel beibehalten. Kein automatischer Spielaufstieg, keine erweiterte Video-/Ereignisresetwirkung behaupten.
 
 Vier Entwicklungskopien synchron. Lokale JS-Syntax und fokussierte Prüfung auf Platzierung, einmalige ID, Warnung und vorhandene Ereignisbindung bestanden. Kein produktiver Upload, kein Serverupdate. Vorbereitung, keine vorweggenommene praktische Abnahme.
+
+
+---
+
+## HASA-Anleitungs-Chatty – 01.11.2026: neue Spieleranleitung als eigener Prüfentwurf
+
+Status: **MARKDOWN-ENTWURF GESPEICHERT UND ZURÜCKGELESEN / ENTWICKLERPRÜFUNG OFFEN / KEINE WEBSITE-VERÖFFENTLICHUNG**
+
+Auf Kurts ausdrücklichen Auftrag: [HASA kennenlernen – Benutzeranleitung, erster Entwurf](https://github.com/KurtV731/hasa/blob/main/03%20Dokumentation/hasa-benutzeranleitung-entwurf-2026-11-01.md). Dokumentcommit im HASA-Repository **e34e59b3ddd054de07ddefea589fdb7e4df35072**. Bestehende Anleitungen erhalten, keine Programmänderung und kein produktiver Upload.
+
+Zielgruppe: Horizon-Spieler ohne technische Vorkenntnisse. Einstieg ausdrücklich **HASA aktivieren → Anmeldung** anhand der zwei gelieferten Alpha-6-Abbildungen; keine erneute Installationsanleitung. Freundliche Aufgabenwege und Beispiele für Galaxiedatenbank/Sonden, gegenseitige Datenfreigaben, Ereignisse/Nachrichtenhaken, Ressourcenfarben/-verlauf, Alarme, Forschungsplanung und Ascension. Updates nur kurz mit Verweis auf bestehende Hilfe. Öffentlich heißt der Projektverantwortliche **Styl**. Originalabbildungen, Spielquellen und Zugangsdaten nicht hochgeladen.
+
+### Tatsächlich untersuchte Stände
+- Zuerst gemeinsames Brett gelesen, Recherche-Blob **7a0715770a8635cea25fd80e9ed3bf2e5afc6bc9**.
+- HASA main **6d921971e97162e8c35bfca55f1b744285a9874a**, vorhandene Anleitungen/Hilfe/Releasevermerk, Websitequellen sowie Login, Freigaben, Galaxie- und Ereignisansichten.
+- Öffentlich stabile **1.2.0**, Stable-Userscript-Blob **0bdb70d8e6c40825e5c015bdc20154209f986e42**. Veröffentlichungsbeleg ist der bestehende Website-Liveprüfeintrag vom24.10.; keine neue Liveprüfung behauptet.
+- Test **1.3.0-alpha.6**, Ref **02d07256d995b969b426bbffbef97db598d2b78a**, Build **1.3.0-alpha6-hq-auswahl-tooltip-2026-11-01**, auf dev-1.3-alpha1 und Kurts Bildern belegt.
+- Reset-Verlagerung unter Ascension **aac1cdbc28d0f1c390547d731c3375e455f26253** nur vorbereitet, nicht als aktive Alpha6 beschrieben.
+- Neue Webansichten auf main (Matrix/kompakte Listen/Gewinn-Verlust/Systemfilter) ausdrücklich von bestätigtem Live-Serverstand getrennt.
+
+### Bitte durch CE HASA / Styl prüfen
+1. Welche Serveränderungen vom30.10./01.11. sind tatsächlich auf hasa.li übernommen? Ereignismatrix, Informationsliste/Hochrechnung und Suchnavigation getrennt bestätigen.
+2. Gilt aktuelle Kontoeinrichtung weiterhin über Verwaltung/Startpasswortwechsel? Keine unbelegte Selbstregistrierung versprechen.
+3. Alarmbedienung (Kreis, Bau-/Forschungsziel, Beenden/Ton) praktisch gegenprüfen.
+4. Ascensionkosten und mögliche Bonusformeln: keine allgemeine additive/multiplikative Wirkungszusage ohne Nachweis.
+5. Noch offene Video-/Ascensionkorrekturen und Auswirkungen auf Erinnerungen/Farben konkretisieren.
+6. Kommunikation rundenbezogener Freigaben beim Rundenwechsel bestätigen.
+7. Spätere bereinigte Screenshots und endgültige öffentliche Zielversion 1.2 oder1.3 festlegen.
+
+Die ausführlichen Fragen und festen Quelllinks stehen auch im Dokumentanhang. Kein Ersatz der öffentlichen Anleitung und keine Freigabe vorbereiteter Produktfunktionen durch diesen Entwurf.
