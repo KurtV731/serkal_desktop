@@ -5103,3 +5103,16 @@ Serverkorrektur auf main: Produktcode **2db506a391606e5f86cfa5e32559722608a5c050
 Browserprüfung **41293935468 erfolgreich**, einschließlich Rundlauf,0,unzulässiger1000, Namenssuche/Pagination, Standort und fixer Leiste beim Scrollen sowie schmalem Fenster. Release/Layout **41293935509 erfolgreich**. Frühere Browserdurchläufe scheiterten an noch alten Testannahmen und am asynchronen nativen details-toggle; diese Tests angepasst, keine Fehler verschwiegen oder Prüfungen entfernt.
 
 Übernahme durch Styl: **HASA-START.cmd → 2**, danach Galaxiedatenbank Strg+F5. Geändert wird serverseitig galaxy.php; kein neues Userscript, keine SQL-Migration, kein produktiver Upload durch CE.
+
+
+## CE HASA – 01.11.2026: Produktionsgewinn/-ausfall in Ereignislisten
+
+Auf Styls Rückmeldung umgesetzt, main **6d921971e97162e8c35bfca55f1b744285a9874a**, Code nach Speicherung identisch zurückgelesen. Positive Ereignisse Spalte Gewinn, negative Verlust. Gebäudeschäden sind davon ausdrücklich getrennte Zusatzangaben.
+
+Für reiche Metall-/Mineralvorkommen, Treibstoffsee und Wassereinbrüche werden eigene Produktionsmessungen desselben Planeten/derselben Runde geladen. Stundenabweichung zum mitgespeicherten Referenzwert (ersatzweise letzte Vorhermessung) über die tatsächliche Ereignisdauer stückweise integrieren. Nullwerte gültig. Erste Messung bis Beginn, letzte bis Ende fortgeschrieben; deshalb **≈ Hochrechnung**, kein exakter Lagerverlust und kein Beweis ausschließlicher Ereignisursache. Gleichzeitige Ausbauten/Videos/Verbrauchsänderungen können die gemessene Abweichung beeinflussen; dies wird in der Oberfläche erklärt. Laufende Vorgänge mit bisher kennzeichnen. Ohne passende historische Messung/Referenz konkrete Datenlücke statt pauschalem Unbekannt; keine historischen Werte erfinden.
+
+Styl nennt ausdrücklich das vorhandene Paar Ikan/Metallmine vom21.10.2026 05:26:37 mit15:15:29 Dauer. Dieses Paar nicht als fehlend darstellen. Reproduzierter Test bis20:42:06 ergibt54929 Sekunden. Erkennung des Minentyps robuster für Groß-/Kleinschreibung, HTML und Leerzeichen. Keine Behauptung, die produktive private Datenbank aus dieser Umgebung direkt gelesen zu haben. Mehrdeutige Starts/fehlende Koordinaten bleiben ohne geratene Zuordnung.
+
+Prüfungen: lokale PHP-Syntax und26 Fokusprüfungen bestanden; **41294731208** Datenbank-/Katalog-/Browserprüfungen erfolgreich, einschließlich fremder Produktionsmessung, die den eigenen Betrag nicht beeinflussen darf; **41294731227** Release/Layout erfolgreich. Beispiel900Erz/h Ausfall über15:15:29 =≈13732Erz ist synthetischer Test, kein bestätigter Produktionswert von Styl.
+
+Übernahme **HASA-START.cmd → 2**, danach Ereignislisten Strg+F5. Kein neues Userscript, keine SQL-Migration, kein produktiver Upload durch CE. Produktionsmessungen existieren nur bei tatsächlich besuchter/erfasster Spielseite; fehlende Vergangenheit kann nicht nachträglich gemessen werden.
