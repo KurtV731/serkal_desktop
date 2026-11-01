@@ -5153,3 +5153,14 @@ Lokale Syntax, Tabellen-/Tooltip-Randfälle einschließlich deaktiviertem Knopf,
 Tampermonkey beim vorhandenen Entwicklungs-HASA **Nach Updates suchen**, danach Spiel neu laden; Gebäude-/Forschungsseiten besuchen. **Nicht bei jedem Seitenwechsel Spielstand neu einlesen drücken**: das eröffnet absichtlich einen frischen Planungsstand. Für Zielweg Ziel/Grenzstufe wählen und Mindestliste lesen. Kein Serverupdate, keine SQL-Migration, kein produktiver Websiteupload durch CE. Praktische Abnahme mit Styls Spiel offen.
 
 Vorgemerkte Video-/Ascensionkorrektur und oberer Vorschlagsbutton bleiben weiterhin offen, in dieser Fassung nicht als erledigt ausgeben.
+
+
+## CE HASA – 01.11.2026: HQ-Tooltip an der tatsächlich erwarteten Stelle – Alpha6
+
+Styls Screenshot zeigt HEADQUARTER im HASA-Zielexplorer. Der bisherige Tooltip war nur an der Horizon-Gebäudezeile/Build-Aktion, nicht dort eingebunden. Diese Lücke korrigiert; nicht länger nur die Spielzeile als Antwort nennen.
+
+**1.3.0-alpha.6**, freigegeben dev-1.3-alpha1, Commit **02d07256d995b969b426bbffbef97db598d2b78a**. Neue hqPlanungsTooltip-Funktion am HEADQUARTER-Auswahlknopf, gewählten HQ-Ziel und Voraussetzungseinträgen. Belegte eigene Stufe verwendet, gewählte Zielstufe berücksichtigt; sonst konkrete fehlende Ist-Stufe und kompakte Tabelle1–24. Keine erfundenen Punkte oberhalb24, keine Bauaktionen. Kolonisationsschiff-Dauertooltips bleiben erhalten. Vier Entwicklungskopien zusammengeführt, aktive Datei nach Freigabe identisch zurückgelesen.
+
+CI **41307198086 vollständig erfolgreich**, Browser prüft jetzt realen HEADQUARTER-Auswahlknopf mit eigener7→geplant8(+1,gesamt2) sowie Ziel10(+1,gesamt3), Tabelle und erhaltene zehn Schiffsdauern. Release/Layout **41307198035 erfolgreich**. Erster Lauf scheiterte an verschobenen Array-Indizes im erweiterten Testbestand; HQ am Ende angehängt, bestehende Prüfungen nicht entfernt, dann alles bestanden.
+
+Übernahme Tampermonkey **Nach Updates suchen**, Spiel neu laden; kein Serverupdate. Persönliche STAN-Vergleichsanalyse nicht als neue Produktfunktion behaupten. Kurzen Helfer-Mailentwurf nur Kurt im Chat liefern, keine E-Mails versenden.
