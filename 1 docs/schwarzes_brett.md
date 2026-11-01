@@ -5127,3 +5127,29 @@ Tooltip Hauptquartier-Kopf/Bauen-Knopf: geplante Stufe8 → +1 Koloniepunkt (ins
 Gezielte Prüfung aller24 Tabellenstufen und Randfälle lokal bestanden. Vollständiger CI **41295610110 erfolgreich**, Browser-/PHP-/MariaDB-/Anmeldung-/Serverwerkzeug-/TechTreeprüfungen; Release/Layout **41295610135 erfolgreich**. Erster Lauf deckte eine alte Testumgebungs-Lücke auf (seitAlpha3 fehlendes STORAGE_TECHTREE_SPIELSTAND im isolierten Kolonisationsschiff-Test). Nur fehlenden Testschlüssel ergänzt, keine Produktfunktion entfernt; Wiederholung vollständig grün.
 
 Verteilung über bestehenden dev-UpdateURL, Tampermonkey **Nach Updates suchen**, danach Spiel neu laden. Kein Serverupload nötig. Gezieltes Zwischenupdate enthält nur den Tooltip; vorgemerkte Video-/Ascension- und obere Vorschlagsbuttonänderung noch offen. Neue Notiz in03 Dokumentation/hasa-1.3-alpha4.md.
+
+
+## CE HASA – 01.11.2026: 1.3 Alpha5 – Spielstandabgleich und erster Zielweg freigegeben
+
+Styl beauftragt ausdrücklich eine größere Alpha5 nach den Screenshots: Labor6 erfüllt Labor3 auf Gebäudeansicht, erscheint nach Wechsel zur Forschung wieder offen; laufende Physik12 erfüllt Physik10; alte6-offen-Zusammenfassung widerspricht den aktuellen Zählern. Gewünscht: ein Ziel verfolgen und nach Bau/Forschung die nächste sinnvolle Aktion vorgeschlagen bekommen.
+
+**Freigegeben 1.3.0-alpha.5 auf dev-1.3-alpha1**, Commit **f5c5cff6daeb6f3dfbb70ec8a92e875f379943cc**. Vier Entwicklungskopien nach Speicherung identisch geprüft, anschließend aktive Update-Datei nach Freigabe erneut identisch zurückgelesen. Öffentliche stabile1.2 unverändert, keine Serveränderung. Dokumentation: [hasa-1.3-alpha5.md](https://github.com/KurtV731/hasa/blob/dev-1.3-alpha1/03%20Dokumentation/hasa-1.3-alpha5.md).
+
+### Behobene Grundlagen
+- Planeten-ID/Koordinaten und ausdrücklich gelernte Namensaliasse verbinden Gebäude-/Forschungsseiten mit/ohne Auswahlbox. Keine letzte-Planet-Fallbacks. Gleichnamige Planeten ohne eindeutige ID/Position werden nicht geraten. Aliasänderungen tatsächlich persistent speichern; alte Ablagen erhalten.
+- Objekt-ID zuerst aus eigener Kopfzeile bzw. Datenattributen, sonst lokalem Körper statt benachbartem Bild im gemeinsamen Container.
+- Laufende Forschung Ziel12 zählt aktuell11, Ziel12 separat als läuft; Textfallback überschreibt den Befund nicht. Keine automatische Annahme des Abschlusses nur durch vergangene Zeit.
+- Offen nur bei bekanntem Ist unter Soll; ausreichend = erledigt; fehlender Istwert = noch nicht erfasst. Alte erfolgreiche Importmeldung mit eingefrorenen Zahlen ausgeblendet, aktuelle Anzeige separat berechnet. Fehler/Ladezustände weiterhin sichtbar.
+- Koloniepunkte-Tooltip auch am deaktivierten Bauen-Knopf bei fehlenden Rohstoffen.
+
+### Erster nutzbarer Zielweg
+Für gewählte Gebäude-/Forschungsstufe Abhängigkeiten rekursiv und pro Ausbaustufe ordnen; gemeinsame Schritte einmal, Erreichtes weglassen. Erster Schritt hervorgehoben, laufender Schritt gekennzeichnet. Nach neu beobachtetem Fortschritt/abweichendem Bau neu berechnet, gewähltes Ziel bleibt bei normalen Seitenwechseln gespeichert. Unbekannte Ist-Stufe, fehlender Graph, Zyklus oder500-Schrittgrenze sperren die definitive nächste Empfehlung und nennen die Lücke.
+
+**Keine falsche Fertigmeldung:** sichtbares Schiffs-/Verteidigungsbauangebot beweist keine gebaute Stückzahl. Hier nennt der Zielweg die fehlende Bestandsauswertung. Kein vollständiger Kolonisationsassistent und noch kein zeitoptimaler Ressourcen-/Energieplan. HQ10 ist als Styls Zwischenziel wählbar; keine unbestätigte feste Regel „zweite Kolonie braucht immer HQ10“ eingebaut. Freie Aufträge und Ressourcen im Spiel prüfen. Diese Grenzen sind auch in der UI sichtbar. Kein autonomes Spielen.
+
+### Nachweise und Übernahme
+Lokale Syntax, Tabellen-/Tooltip-Randfälle einschließlich deaktiviertem Knopf, acht Zielweg-/Renderprüfungen bestanden. Vollständiger finaler CI **41301065888 erfolgreich**, alle Browser-/PHP-/MariaDB-/Werkzeug-/TechTreeprüfungen; **41301065889 Release/Layout erfolgreich**. Browserfall scannt Labor6, wechselt ohne Planetenauswahlbox zur Forschung und findet weiterhin6; anderer ungelesener Planet bleibt unbekannt. Laufende Forschungszielstufe12=vorhanden11. Zielwegtest: Labor6/Physik11 erfüllen3/10, Abweichung entfernt erledigte Schritte, fehlende Daten/Zyklen blockieren, Zähler aktuell ohne alte6-offen-Meldung. Frühere vollständige Vorbereitungsläufe ebenfalls erfolgreich.
+
+Tampermonkey beim vorhandenen Entwicklungs-HASA **Nach Updates suchen**, danach Spiel neu laden; Gebäude-/Forschungsseiten besuchen. **Nicht bei jedem Seitenwechsel Spielstand neu einlesen drücken**: das eröffnet absichtlich einen frischen Planungsstand. Für Zielweg Ziel/Grenzstufe wählen und Mindestliste lesen. Kein Serverupdate, keine SQL-Migration, kein produktiver Websiteupload durch CE. Praktische Abnahme mit Styls Spiel offen.
+
+Vorgemerkte Video-/Ascensionkorrektur und oberer Vorschlagsbutton bleiben weiterhin offen, in dieser Fassung nicht als erledigt ausgeben.
