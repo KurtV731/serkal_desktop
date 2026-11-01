@@ -5232,3 +5232,15 @@ Screenshots zuschneiden, relevante Knöpfe markieren, lesbare Bildunterschriften
 Websitefassung: Inhaltsverzeichnis mit Kapitelankern, kurze Abschnitte, Bilder anklickbar vergrößerbar, mobile Lesbarkeit und Druckansicht. Bestehende Websitepfade/Navigation vor Änderung nachlesen statt neue Repositorys/URLs zu erfinden. Zunächst fachlich redigierten Entwurf und Formatierungsvorschau bereitstellen, kein produktiver Upload durch CE. Bestehende Anleitung bis zur abgestimmten Ablösung erhalten.
 
 Dies ist die erste fachliche Redaktion und konkrete gemeinsame Arbeitsgrundlage; keine Aussage, dass alle Server-/Praxisfragen bereits geklärt seien.
+
+
+## HASA-Anleitungs-Chatty – 01.11.2026: CE-Redaktion eingearbeitet, Bildstellen vorbereitet
+
+[Überarbeiteter Prüfentwurf – HASA Benutzerhandbuch 1.3](https://github.com/KurtV731/hasa/blob/main/03%20Dokumentation/hasa-benutzeranleitung-entwurf-2026-11-01.md), Dokumentcommit **de73365c45eacbf6d073bda05e213dc49ceb40bd**. Vollständige Datei nach Speicherung identisch zurückgelesen.
+
+- Zusammenhängendes Handbuch **1.3 · Stand01.11.2026 (Alpha6)**; wiederholte Versions-/Deploymentwarnungen aus Bedienungswegen in internen Prüfan­hang verlagert. Öffentliche stabile1.2 nicht zu1.3 erklärt.
+- Selbstregistrierung mit selbst gewähltem Passwort/E-Mail-Bestätigung und Passwort-vergessen-Weg integriert. Dafür zusätzlich dev-login.php, register.php, password-reset.php und password-set.php am Ref **02d07256d995b969b426bbffbef97db598d2b78a** gelesen. Tempus-Praxisbestätigung von CE/Styl übernommen, nicht als eigener Live-Test ausgegeben. Produktive Links/Serverfassung vor Veröffentlichung weiterhin abzugleichen.
+- Lokales ★ im Userscript von rechtmäßig sichtbarer Server-Berichtszahl in Webdatenbank unterschieden.
+- Sieben konkrete Bildstellen mit Motiv, Bildunterschrift/Alternativtext vorgesehen: Aktivierung, Anmeldung, Hauptbereiche, Galaxiesuche, Freigaben, Ereignisliste, Zielweg/HQ-Tooltip. Keine Bilder oder privaten Spielinformationen hochgeladen.
+- Alpha6-Reset bleibt im Text unter vorhandenem Namen im Forschungsplaner. Vorbereitete Verlagerung unter Ascension nur intern; keine bestätigten Bonusformeln oder eingebauten STAN-Vergleich behauptet.
+- Website-Chatty: fachliche Fassung zunächst prüfen; danach vorhandene Navigation/Layout, Kapitelanker, vergrößerbare echte Screenshots, Mobil-/Druckansicht für Vorschau verwenden. Noch **keine HTML-Vorschau**, kein Websiteupload, keine Programmänderung und keine Ablösung bestehender Anleitung erfolgt.
