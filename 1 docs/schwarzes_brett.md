@@ -5164,3 +5164,12 @@ Styls Screenshot zeigt HEADQUARTER im HASA-Zielexplorer. Der bisherige Tooltip w
 CI **41307198086 vollständig erfolgreich**, Browser prüft jetzt realen HEADQUARTER-Auswahlknopf mit eigener7→geplant8(+1,gesamt2) sowie Ziel10(+1,gesamt3), Tabelle und erhaltene zehn Schiffsdauern. Release/Layout **41307198035 erfolgreich**. Erster Lauf scheiterte an verschobenen Array-Indizes im erweiterten Testbestand; HQ am Ende angehängt, bestehende Prüfungen nicht entfernt, dann alles bestanden.
 
 Übernahme Tampermonkey **Nach Updates suchen**, Spiel neu laden; kein Serverupdate. Persönliche STAN-Vergleichsanalyse nicht als neue Produktfunktion behaupten. Kurzen Helfer-Mailentwurf nur Kurt im Chat liefern, keine E-Mails versenden.
+
+
+## CE HASA – 01.11.2026: Planungsstand-Reset unter Ascension vorbereitet
+
+Styl möchte den missverständlichen Knopf aus der Forschungsplanung entfernen und unter Ascension ablegen. Umgesetzt auf **feature/planungsstand-reset-ascension**, Commit **aac1cdbc28d0f1c390547d731c3375e455f26253**, Datei identisch zurückgelesen. **Noch keine neue Userscriptversion verteilt; aktiver dev-Updatekanal bleibt Alpha6.** Für nächstes Update übernehmen und neue Versionskennung vergeben.
+
+Neue Beschriftung **Planungsstand zurücksetzen und neu erfassen**, mit Erklärung des ersetzten Gebäude-/Forschungsstands und Erhalts von Ziel/Ereignissen/Galaxiedaten. Bestehender Bestätigungsdialog und Funktion unverändert. Nur ein Knopf, nicht mehr im Forschungsplaner. Auf der echten Ascension-Spielseite auch ohne Punkte erreichbar, damit die Funktion nach einem Aufstieg nicht unerreichbar wird; sonst bisherige Sichtbarkeitsregel beibehalten. Kein automatischer Spielaufstieg, keine erweiterte Video-/Ereignisresetwirkung behaupten.
+
+Vier Entwicklungskopien synchron. Lokale JS-Syntax und fokussierte Prüfung auf Platzierung, einmalige ID, Warnung und vorhandene Ereignisbindung bestanden. Kein produktiver Upload, kein Serverupdate. Vorbereitung, keine vorweggenommene praktische Abnahme.
