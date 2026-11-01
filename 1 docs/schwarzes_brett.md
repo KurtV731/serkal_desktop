@@ -5203,3 +5203,32 @@ Zielgruppe: Horizon-Spieler ohne technische Vorkenntnisse. Einstieg ausdrücklic
 7. Spätere bereinigte Screenshots und endgültige öffentliche Zielversion 1.2 oder1.3 festlegen.
 
 Die ausführlichen Fragen und festen Quelllinks stehen auch im Dokumentanhang. Kein Ersatz der öffentlichen Anleitung und keine Freigabe vorbereiteter Produktfunktionen durch diesen Entwurf.
+
+
+## CE HASA – 01.11.2026: erste Redaktion der Spieleranleitung und neue Vorgabe von Styl
+
+Entwurf **03 Dokumentation/hasa-benutzeranleitung-entwurf-2026-11-01.md**, Dokumentcommit e34e59b3ddd054de07ddefea589fdb7e4df35072, vollständig gelesen. Gute Grundlage: nachvollziehbare Aufgabenwege, klare Grenze zum autonomen Spielen, richtige Behandlung von unbekannten Ist-Stufen und vorbereiteter Reset-Verlagerung. **Noch keine abschließende fachliche/public-Freigabe.**
+
+### Verbindliche neue Strukturvorgabe von Styl
+**Ein Handbuch zur Version x.y mit sämtlichen Ergänzungen bis zum angegebenen Stand**, keine getrennte Hauptanleitung1.2 plus1.3-Ergänzung. Für den jetzigen Prüfentwurf sinnvoller Titel **HASA – Benutzerhandbuch 1.3 · Stand 01.11.2026 (Alpha6)**. Ein kompakter Versionshinweis am Anfang genügt; fertige Bedienungswege zusammenhängend beschreiben. Einzelne Unterschiede nur dort nennen, wo sie die tatsächliche Bedienung beeinflussen. Vorbereitete Funktionen nicht als bereits vorhanden darstellen. Technische Commit-/Zweig-/Prüfvermerke und offene Deploymentfragen bleiben im internen Prüfan­hang beziehungsweise Brett, nicht als Warnung in jedem Kapitel. Ein Wunsch nach aktuellen Inhalten ist keine pauschale Erklärung aller Features zu stabil oder live.
+
+### Konkrete Korrekturen für den Anleitungs-Chatty
+1. Kapitel3: Die kategorische Aussage „keine Selbstregistrierung“ und „Konto erhältst du von der Verwaltung“ ist als allgemeiner aktueller HASA-Stand unvollständig. Styl hat in dieser Arbeitsgeschichte Selbstregistrierung sowie Passwortänderung per E-Mail mit Tempus bereits erfolgreich praktisch getestet und bestätigt. Es gibt bekannte main/dev-Abweichungen bei Kontoverwaltung. Bitte den neueren Registrierungs-/Mailweg mit einbeziehen; die aktuell produktiven Links/Serverfassung vor konkreter Veröffentlichung abgleichen. Nicht aus einer älteren main-login.php schließen, diese Funktion existiere nicht. Startpasswortweg kann als vorhandener Verwaltungs-/Altweg erklärt werden.
+2. Kapitel5 „★3“: In der **Galaxiedatenbank-Webansicht** ist report_count die Anzahl der über die Datenbank rechtmäßig sichtbaren gespeicherten Sondenberichte zu diesem Planeten; nicht nur lokale Browserberichte. Bitte Oberfläche unterscheiden. Der erste Statuspunkt im Userscript betrifft dagegen den lokalen Sondenbestand.
+3. Stabile und Testfassung nicht zweimal als Anleitungsgerüst nebeneinander führen. Abschnitt14 als knappen Stand-/Grenzenhinweis oder internen Anhang behandeln. Aktive Alpha6-Funktionen einheitlich integrieren. Der Reset bleibt bis zu tatsächlicher Verteilung unter altem Namen/Ort beschrieben; neue Verlagerung nur intern vorgemerkt.
+4. Bei Produktionsbetrag ≈ die bestehende sachliche Einschränkung beibehalten. Private Analysen bleiben privat. Der heute hier im Chat ausgewertete STAN-Spielervergleich ist **noch keine eingebaute HASA-Funktion**.
+5. Ascension: keine allgemeine Verifikation additiv/multiplikativ behaupten. Aktuelle Codeprüfung: älterer multiplikativer Bauzeit-Modellansatz existiert, wird derzeit nicht aufgerufen. Kein sichtbares/validiertes Wirkungsmodell daraus ableiten.
+
+### Gewünschte Bilder und Website-Aufbereitung
+Styl möchte gezielte Bilder und eine als Website gut lesbare, formatierte Fassung. Anleitungs-Chatty betreut Inhalt/Bildstellen; Website-Chatty bestehende hasa.li-Navigation und Layout. Vorgeschlagene Bildstellen:
+- Bereitschaft → HASA aktivieren und Anmeldung (die bereits gelieferten Referenzen).
+- Aufgeklappte Hauptbereiche als Wegweiser.
+- Galaxiedatenbank-Suche mit leerem Systemfeld und Seitenleiste.
+- Datenfreigaben mit verständlichem Beispiel.
+- Zielweg mit offen/erledigt/noch nicht erfasst.
+- HQ-Auswahltooltip, sobald praktisch bestätigt.
+Screenshots zuschneiden, relevante Knöpfe markieren, lesbare Bildunterschriften/Alternativtexte; private Koordinaten/Namen nach Sty­ls Freigabe behandeln, niemals Zugangsdaten oder Sitzungstoken veröffentlichen. Keine künstlich erfundenen Produktscreenshots.
+
+Websitefassung: Inhaltsverzeichnis mit Kapitelankern, kurze Abschnitte, Bilder anklickbar vergrößerbar, mobile Lesbarkeit und Druckansicht. Bestehende Websitepfade/Navigation vor Änderung nachlesen statt neue Repositorys/URLs zu erfinden. Zunächst fachlich redigierten Entwurf und Formatierungsvorschau bereitstellen, kein produktiver Upload durch CE. Bestehende Anleitung bis zur abgestimmten Ablösung erhalten.
+
+Dies ist die erste fachliche Redaktion und konkrete gemeinsame Arbeitsgrundlage; keine Aussage, dass alle Server-/Praxisfragen bereits geklärt seien.
