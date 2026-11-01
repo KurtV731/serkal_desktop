@@ -5064,3 +5064,27 @@ Synthetischer Fall150 Serien/300 vorhandene, absichtlich abweichende Kalenderere
 Abnahme: alle beteiligten Geräte zunächst auf denselben Stand; große bestehende Sammlung, eine Aufnahme/eine Löschung; nur betroffene Kalenderstaffeln im Plan; unverändert schließen ohne Übertragung; bei vorübergehendem Fehler offene Staffeln behalten und nur diese nach Neustart fortsetzen. Reale Google-Quota-/Geräteabnahme und öffentliche Freigabe noch offen. Website-/öffentliche Dateien unverändert.
 
 Changelog-Zuschreibung: begrenzter Abgleich/Erledigungsflags **(Thanks to Kurt)**. Beibehaltene frühere Rate-Limit-Korrektur/verständliche Abschlussmeldung **(Thanks to VelcroFist)**.
+
+
+
+## CE HASA – 01.11.2026: Ereignisdetails jetzt Informationsliste, Datenblätter standardmäßig verborgen
+
+Status: **SERVERKORREKTUR AUF MAIN FERTIG / FOKUS-, DATENBANK- UND BROWSERPRÜFUNGEN BESTANDEN / UPLOAD DURCH STYL OFFEN**
+
+Styl verlangt hinter den Ereignisfamilien die fünf Spalten **Datum/Zeit · Event · Planet · Dauer · Verlust** statt ausführlicher sichtbarer Datenblätter und einzelner Meldungsartikel. Allgemeines Wissen nur auf Mausklick, nutzbare Bildschirmbreite ausnutzen.
+
+Codecommit **79195404f83248fde8a11602cabbbde3372bc404**; abschließende Testkorrektur **8e7323392a0ca783928c9cd2ff162051f700678f**. Geänderte Dateien nach Commit zurückgelesen. Fachnotiz: [ereignislisten-kompakt-2026-11-01.md](https://github.com/KurtV731/hasa/blob/main/03%20Dokumentation/ereignislisten-kompakt-2026-11-01.md).
+
+- Datenblatt/Wiki und Originaltexte sind jeweils in geschlossenen details-Bereichen, ohne open-Attribut.
+- Zusammengehöriger Beginn und eindeutiges Ende ergeben eine Vorgangszeile. Beispiel als synthetischer Test:21.10.2026 05:26:37 bis20:42:06 = **15:15:29**. Keine geschätzte Wiki-Dauer als Messwert ausgeben.
+- Metall-/Mineralmine und verschiedene Planeten getrennt. Unklare Position, mehrere mögliche Anfänge oder verwaiste Reparatur erzeugen keine geratene Zuordnung/Dauer.
+- Verluste nur aus ausdrücklich berichteten Schäden/Verlustangaben. Platzhalter/mögliche Schäden = unbekannt; ausdrücklich keine Schäden bleibt davon unterscheidbar. Keine theoretisch entgangene Förderung errechnet.
+- Beginn vor dem30-Tage-Fenster kann mit einer Reparatur im Fenster zusammengefasst werden. Pagination erst nach Zusammenfassung, damit Seitenwechsel keinen Vorgang künstlich trennt.
+- Video-Wirkungsdauer ab Aktivierung statt Eingang; Mietangebot nicht mit Vertragsbeginn gleichsetzen. Keine neue Video-/Ascensionerkennung oder andere Spielaktionen.
+- Globale Ereignisse in der Planetenspalte als Account, nicht als bloßem Nachrichtenabsenderort.
+- Bestehende Hauptübersicht bleibt; alte bekannte Betrefflinks führen ebenfalls zur zusammengefassten Familie, unbekannte Betreffe erhalten die kompakte Liste.
+- Die schmale Darstellung kam von620px maximaler body-Breite aus der gemeinsamen Auth-Seitengestaltung. Nur auf Ereignisseiten überschrieben; Login-/Passwortseiten bleiben unverändert. Auf1920px tatsächlich mehr als1700px Tabellenbreite geprüft, auf Mobilgeräten horizontal scrollbar, keine feste Listenhöhe.
+
+Prüfläufe: **41292154715** Matrix/Datenbank/Informationen und Desktop/Mobil erfolgreich ([Link](https://github.com/KurtV731/hasa/actions/runs/41292154715)); **41292154816** Release/Layout erfolgreich; bestehende Ereignis-/Produktionsprüfungen für unveränderten Produktivcode **41292005704** erfolgreich. Der erste neue Kataloglauf scheiterte an einer zu breiten Annahme im gemeinsamen Testdatenbestand; gezielt nach Planet gefiltert und Ausnahmebehandlung im Test auf sicheren Fehlerstatus korrigiert, dann erfolgreich wiederholt. Keine Tests entfernt. Neue Desktop-/Mobilansichten zusätzlich visuell angesehen.
+
+**Übernehmen:** bestehendes `HASA-START.cmd → 2`, danach Ereignisseite mit Strg+F5 neu laden. Neu `event-information.php`, angepasst `event-catalog.php` und `events.php`; normaler API-Uploader nimmt alle mit. Kein neues Userscript, keine SQL-Migration, keine Änderung gespeicherter Berichte. Kein produktiver Serverupload durch CE. Praktische Abnahme mit Styls eigenen Daten offen.
