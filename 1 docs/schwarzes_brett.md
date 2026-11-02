@@ -5319,3 +5319,20 @@ Store-Checkliste: Konto-/Identitätsstatus; AAB aus geprüfter Quelle; Paketname
 Deutsch mit Kurt, englische Texte für VelcroFist. Kurz und konkret; Fragen direkt beantworten. Kurt nutzt Diktat, kann versehentlich Stopp treffen; „weiter“ knüpft an laufenden Auftrag an. Aktuelle Screenshots sofort auswerten, keine unaufgeforderten langen Ausführungen und kein stilles Warten bei Begleitung durch Formulare. Er ist heute müde und möchte die Registrierung abschließen, danach Pause. Keine Müdigkeit des Modells als Erklärung behaupten.
 GitHub-App zuerst, Änderungen zurücklesen; ein gemeinsames Brett. Keine Geheimnisse/Keystorepasswörter ins Repository. Signierte Androiddatei vorhanden; Windowsbau erfolgt mit Installer an Kurts Windowsbauplatz. Keine Website-/Store-Veröffentlichung ohne konkrete Freigabe.
 
+
+
+## Kurt / CE SerKal – 02.11.2026: Public-Freigabe 1.2.4 – endgültiger Stand der 1.2-Reihe
+
+Status: **VON KURT ZUR ÖFFENTLICHEN VERÖFFENTLICHUNG FREIGEGEBEN / ÜBERNAHME UND LIVE-NACHWEIS DURCH INSTALLER/WEBSITE OFFEN**
+
+Kurt erklärt nach bestandener praktischer Prüfung die vorhandene1.2.4 zur endgültigen Fassung der1.2-Reihe und beauftragt deren Public Release. Diese konkrete Freigabe ersetzt die älteren Veröffentlichungssperren für exakt die nachfolgenden geprüften Artefakte. Keine Behauptung allgemeiner Fehlerfreiheit; bekannte Restpunkte bleiben dokumentiert. Anschließend Entwicklungspause; Zusatzwünsche sammeln, keine neue Funktionsversion jetzt beginnen.
+
+### Auftrag an Installer und Website
+1. Bereits geprüfte Dateien aus `C:\ppd\serkal\veroeffentlichungen\1.2.4` übernehmen, **nicht neu bauen**. Produktversion1.2.4 / Stand38 beibehalten; keine Rückbenennung auf1.2.0.
+2. Desktop `serkal-desktop.exe`:140890112Byte, SHA256 `73250d7f67de8de49acc28e33dd1785c229feb92700a67a7e43b48cf3fe0b3bf`.
+3. Android `serkal-android.apk` (=038-SerKal-Android-1.2.4.apk):2294171Byte, versionCode47, SHA256 `1fc7f7faea8ba100d0b09455206b03808ff3be00d43c28cb555f1aa023ff976a`.
+4. Über den vorhandenen Veröffentlichungsweg die bisherigen öffentlichen Dateien ersetzen; DE/EN-Downloadseiten, Versionsangaben und Änderungsübersicht konsistent auf1.2.4 setzen. Bestehende [englische Release Notes](release-notes-1.2.4-en.md) nutzen, Reporterhinweise einschließlich Thanks to VelcroFist erhalten. Keine offenen Wünsche als umgesetzt ausgeben.
+5. Öffentliche Downloads anschließend tatsächlich herunterladen und Größe/SHA256 mit diesen Freigabewerten vergleichen; Downloadlinks und sichtbare Versionsangaben prüfen. Erst danach hier **LIVE** mit URLs und Prüfergebnis melden. CE hat mit dieser Dokumentation keinen Serverupload ausgeführt.
+6. Google Play bleibt eigenständiger Veröffentlichungsweg: diese Freigabe der vorhandenen EXE/APK ist kein Beleg einer fertigen Play-Registrierung, eines AAB oder einer erfolgten Store-Einreichung. Die Store-Vorbereitung wartet bis Kurt weitermacht.
+
+Die Geräteabnahme ist bereits bestätigt; sie nicht erneut als offen führen. Nur reale Veröffentlichungs-/Downloadkontrollen noch abschließen. Alte1.2.3-Testlinks nicht als aktuelle Hauptfassung anbieten. Bekannter Kalenderknopf-/Browserkonto-Restpunkt blockiert Kurts nun ausdrücklich erteilte Freigabe nicht.
