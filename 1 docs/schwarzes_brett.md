@@ -15,6 +15,10 @@ weiteren Kommunikationsbretter. Die frühere HASA-Brettdatei wurde aus dem
 aktuellen HASA-Projektstand entfernt. Ihre Geschichte bleibt in Git erhalten.
 Alle laufenden Übergaben und Zuständigkeiten stehen auf diesem einen Brett.
 
+## Aktueller SerKal-Einstieg
+
+Für die Übernahme zuerst den Eintrag **„CE SerKal – 02.11.2026: aktueller Einstieg / Nachfolge und Play Store“** am Ende dieses Bretts lesen. Er aktualisiert die Nachfolge vom23.10.2026.
+
 ## 🚨🚨🚨 KNALLROTE VERBINDLICHE GITHUB-REGEL 🚨🚨🚨
 
 > **ACHTUNG – GILT AB SOFORT FÜR CE-, INSTALLER- UND WEBSITE-CHATTY**
@@ -5281,3 +5285,37 @@ Der vom CE festgeschriebene Windows-Bau wurde auf Kurts Windows-Bauplatz erfolgr
 - nach Umbenennung erneut geprüfte SHA-256: `1fc7f7faea8ba100d0b09455206b03808ff3be00d43c28cb555f1aa023ff976a`
 
 Die APK ist damit byteidentisch mit dem vom CE signierten Artefakt. Beide Dateien liegen nun gemeinsam für Kurts praktische Geräteprüfung bereit. Keine vorhandene öffentliche Website-1.2.2 und kein 1.2.3-Prerelease wurden verändert. Veröffentlichung bleibt bis zur ausdrücklichen praktischen Abnahme gesperrt.
+
+
+## CE SerKal – 02.11.2026: aktueller Einstieg / Nachfolge und Play Store
+
+Status: **1.2.4 VON KURT PRAKTISCH ABGENOMMEN / PLAY-CONSOLE-REGISTRIERUNG LÄUFT / STORE-VERÖFFENTLICHUNG NICHT ERFOLGT**
+
+Dieser Eintrag aktualisiert die ältere Nachfolgeübergabe vom23.10.; alte Konflikt-/Live-Sync-Verfahren nicht als heutigen Auftrag wiederherstellen.
+
+### Produkt und Abnahme
+Kurt meldet am01.11. ausdrücklich: „Alle Prüfungen mit Bravour bestanden.“ Gemeint ist die sechs Schritte umfassende Geräteprüfung von1.2.4 (unverändert schließen, Gesehen ändern ohne Kalenderwrites, Android/PC übernehmen, Testserie hinzufügen/löschen, Gerätewechsel, wieder unverändert schließen). Keine weiteren gleichartigen Praxistests ohne konkreten neuen Fehler verlangen. Dies ist die praktische Abnahme, keine pauschale Erlaubnis zur öffentlichen Veröffentlichung.
+
+Aktuell Desktop/Android1.2.4, gemeinsamer Stand38, Android versionCode47. Quellen und echte Artefakthashes stehen im Installer-Eintrag vom01.11. unmittelbar vor diesem Eintrag. Desktopquelle52aafa693ec519de0e45bc235dcc870a1e9eec80, Androidquelleaad44b929401d3c85c7bb9ec43405208249f53bb. Reguläre Fachbranches serkal-0.0.5-archiv-start und android-preview-0.0.5. Hauptbranch enthält Koordination, nicht automatisch den aktuellen App-Code.
+Fachdetails: [Kalenderflags1.2.4](serkal-1.2.4-kalender-flags-2026-10-31.md), [englische Release Notes](release-notes-1.2.4-en.md).
+
+Verbindlicher Ablauf: bei Start Googlearchiv laden, lokal arbeiten, geänderten kompletten Archivsnapshot einmal beim normalen Beenden speichern. Kein laufender Geräteabgleich. Kalender schreibt nur geänderte Serien/Staffeln; offene Erledigungsflags lokal persistent, keine erneute Archivübertragung beim bloßen Kalenderretry. Archivspeicherung und Kalendererfolg getrennt melden. Vorhandenes Kalender-Ratelimit/Backoff beibehalten. Bekannt offen: Kalenderknopf/Browserkontowahl bzw. Add-calendar-Umweg; API-Schreibziel dadurch nicht umgestellt. Nicht als repariert behaupten.
+
+### Heutige Priorität: Google Play
+Kurt richtet ein persönliches Entwicklerkonto ein, Entwicklername eigener Name. Öffentliches Supportpostfach support@serkal.de eingerichtet und bestätigt; separates Kontaktpostfach ebenfalls bestätigt. Private Kontakt-/Adress-/Telefon-/Zahlungsdaten hier nicht veröffentlichen.
+Sichtbar zuletzt: Kontaktformular abgeschlossen, Seite Nutzungsbedingungen mit Konto-erstellen-und-bezahlen-Knopf. Registrierung/Zahlung/Identitätsprüfung noch nicht durch eindeutigen Abschlussbeleg bestätigt; aus Kurts Bemerkung über Kosten keinen Zahlungserfolg ableiten. Nächste aktuelle Konsolenseite zeigen lassen und von dort weiterführen; frühere Felder nicht erneut abfragen.
+Planung laut Kurt: erste Fassung kostenlos; eventuell später Werbung, gegen Zahlung abschaltbar, weitere kostenpflichtige Fortsetzung möglich. Noch keine implementierte Werbe-/Billingfunktion, kein endgültiger Preis und kein Abo beschlossen.
+
+Store-Checkliste: Konto-/Identitätsstatus; AAB aus geprüfter Quelle; Paketname, Play-Signierung/Updatefähigkeit und OAuth-Zertifikat; aktuelle Ziel-API; DE/EN-Beschreibung, Icon/Screenshots/Kontakt; Datenschutz/Datensicherheit/Altersfreigabe und Prüferzugang; Play-Testinstallation und kontospezifische geschlossene Testpflicht; danach gesonderte Einreichungs-/Veröffentlichungsfreigabe. Keine neuen Store-Vorgaben als überprüft ausgeben, ohne offizielle aktuelle Anforderungen zu lesen. Vorhandene APK allein ist noch kein neues Play-Store-AAB.
+
+### Nachgelagerte Aufgaben
+- Zweite Prüfquelle für deutsche Serien-Veröffentlichungstermine: TMDB allein reicht Kurt nicht. The ArkS03 ist konkreter Anlass; Screenshots zeigen deutschen Anbieterhinweis und German-Release-Notizen für01.11.2026. Releaseindex allein beweist keinen offiziellen Streaming-Komplettstart. Aktueller tatsächlicher TMDB-Datensatz noch nicht geprüft.
+- Mindestens manuell über eigene Notiz deutschen Start oder alle Folgen ab Datum eingeben können; für Anzeige/Kalender auswerten und gegen Wartungsüberschreiben schützen. Noch nicht implementiert. Vorhandene datesDE/startDE/offsetDE/manuelle Flags zuerst prüfen, kein neues paralleles Datenmodell erfinden.
+- Diese Terminverbesserungen sind keine neue Voraussetzung für den Storestart.
+- Vorgemerkt: vollständige englische Tooltips/UI; Desktopstatus außerhalb Scrollbereich; Wartungsergebnis vereinheitlichen; Menüangleichung; System-/Datei-/Aufrufkartierung; lokaler Single-PC-ModusS nebenM; später Linux auf vorhandener Electronbasis. Vor Umsetzung aktuellen Abschlussplan/Brett auf bereits erledigte Teilpunkte prüfen.
+- Öffentliche Fehlerbehebungen mit Reporterhinweis, etwa „(Thanks to VelcroFist)“.
+
+### Umgang und Arbeitsgrenzen
+Deutsch mit Kurt, englische Texte für VelcroFist. Kurz und konkret; Fragen direkt beantworten. Kurt nutzt Diktat, kann versehentlich Stopp treffen; „weiter“ knüpft an laufenden Auftrag an. Aktuelle Screenshots sofort auswerten, keine unaufgeforderten langen Ausführungen und kein stilles Warten bei Begleitung durch Formulare. Er ist heute müde und möchte die Registrierung abschließen, danach Pause. Keine Müdigkeit des Modells als Erklärung behaupten.
+GitHub-App zuerst, Änderungen zurücklesen; ein gemeinsames Brett. Keine Geheimnisse/Keystorepasswörter ins Repository. Signierte Androiddatei vorhanden; Windowsbau erfolgt mit Installer an Kurts Windowsbauplatz. Keine Website-/Store-Veröffentlichung ohne konkrete Freigabe.
+
