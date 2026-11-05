@@ -15,6 +15,10 @@ weiteren Kommunikationsbretter. Die frühere HASA-Brettdatei wurde aus dem
 aktuellen HASA-Projektstand entfernt. Ihre Geschichte bleibt in Git erhalten.
 Alle laufenden Übergaben und Zuständigkeiten stehen auf diesem einen Brett.
 
+## Dauerhafter Prüfauftrag: Google Play
+
+Bei Android- und Store-Entscheidungen sowie jeder Nachfolgeübergabe den Eintrag **„CE SerKal – 05.11.2026: Google-Play-Richtlinien dauerhaft bei Entscheidungen berücksichtigen“** am Ende lesen. Er enthält konkrete Prüfpunkte und Fristen für2027; Quellen vor Umsetzung aktualisieren.
+
 ## Aktueller SerKal-Einstieg
 
 Für die Übernahme zuerst den Eintrag **„CE SerKal – 02.11.2026: aktueller Einstieg / Nachfolge und Play Store“** am Ende dieses Bretts lesen. Er aktualisiert die Nachfolge vom23.10.2026.
@@ -5336,3 +5340,45 @@ Kurt erklärt nach bestandener praktischer Prüfung die vorhandene1.2.4 zur endg
 6. Google Play bleibt eigenständiger Veröffentlichungsweg: diese Freigabe der vorhandenen EXE/APK ist kein Beleg einer fertigen Play-Registrierung, eines AAB oder einer erfolgten Store-Einreichung. Die Store-Vorbereitung wartet bis Kurt weitermacht.
 
 Die Geräteabnahme ist bereits bestätigt; sie nicht erneut als offen führen. Nur reale Veröffentlichungs-/Downloadkontrollen noch abschließen. Alte1.2.3-Testlinks nicht als aktuelle Hauptfassung anbieten. Bekannter Kalenderknopf-/Browserkonto-Restpunkt blockiert Kurts nun ausdrücklich erteilte Freigabe nicht.
+
+
+## CE SerKal – 05.11.2026: Google-Play-Richtlinien dauerhaft bei Entscheidungen berücksichtigen
+
+Absender: CE / Kurt. Empfänger: alle SerKal-Nachfolger, CE, Installer und Website. Status: **VERBINDLICHER PRÜFAUFTRAG / QUELLPRÜFUNG ERFOLGT / PAKET- UND GERÄTEMESSUNGEN OFFEN**.
+
+Kurt beauftragt ausdrücklich, die Google-Play-Anforderungen bei künftigen Entscheidungen mit zu berücksichtigen und Nachfolger über dieses gemeinsame Brett darauf hinzuweisen. Vor Änderungen an Android-Berechtigungen, Google-Autorisierung, Speicherung/Bildern, Build/SDKs, Werbung, Käufen, Zielgruppe oder Store-Verteilung diesen Eintrag lesen und die dann aktuellen offiziellen Vorgaben prüfen. Keine pauschale Konformität aus dieser Momentaufnahme ableiten. In weiteren Brettübergaben relevante Auswirkungen, Prüfergebnisse, offene Punkte und Fristen ausdrücklich mitführen.
+
+### Quellen und geprüfter Stand
+Vollständige Mitteilung vom29.10.2026 samt verlinkten Anforderungen am05.11.2026 gelesen:
+- https://support.google.com/googleplay/android-developer/answer/18100766?hl=en
+- https://support.google.com/googleplay/android-developer/answer/17492799
+- https://support.google.com/googleplay/android-developer/table/12921780
+- https://support.google.com/googleplay/android-developer/answer/16558241
+- https://support.google.com/googleplay/android-developer/answer/17594752
+- https://developer.android.com/google/play/age-signals/overview
+
+Quellprüfung: Android1.2.4 / Stand38 / versionCode47, Commit aad44b929401d3c85c7bb9ec43405208249f53bb; AndroidManifest.xml, app/build.gradle sowie relevante MainActivity-Abschnitte. Keine Prüfung des zusammengeführten Release-Manifests oder fertigen Play-AAB, keine Speichermessung und keine neue Implementierung durchgeführt.
+
+### A – Berechtigungen und neue APIs
+Quellmanifest fordert nur INTERNET; kein ACCESS_LOCAL_NETWORK, Kontakte, Standort, MANAGE_EXTERNAL_STORAGE, SMS/Anruflisten oder Accessibility-Service. Google-Drive-/Kalender-Internetzugriff ist kein Heimnetz-Gerätezugriff. Vor Store-Upload das fertige Paket einschließlich Bibliotheksmanifesten prüfen. Berechtigungen minimal halten; bei späterem Dateiexport nach Möglichkeit Systemauswahl statt umfassendem Dateizugriff.
+Standort-/Kontakt-/Anruflistenänderungen ab27.01.2027 nur bei tatsächlicher Nutzung relevant; AppFunctions ab14.04.2027 und lokale Netzwerk-/Manage-Contacts-Regeln ab25.08.2027 entsprechend API/Zielversion prüfen. KI-gestützte Entwicklung allein ist keine Nutzung von AppFunctions.
+
+### B – Speicherqualität ab Februar2027
+Speicherverbrauch einschließlich Hintergrund und Bitmap-Ressourcen prüfen. Poster-LruCache im Quellstand auf4MB begrenzt; das belegt nicht den Gesamtverbrauch. Strategie: viele Serien/Poster öffnen, Hintergrundwechsel, reale Speichermessung und später Android-vitals; bei Bedarf passend dekodierte Bilder und frühere Freigabe unbenutzter Ressourcen. Nicht ohne Befund umbauen.
+
+### C – DEX-Optimierung ab Februar2027
+Für Apps mit mehr als10MB DEX-Code gelten Mindestquoten von25% für Optimierung, Obfuskation und Shrinking. Paket-/Downloadgröße ist nicht DEX-Größe. Beim Play-Bau DEX-Größe feststellen; gegebenenfalls Release-Optimierung/R8 samt nötigen Regeln einrichten und Google-Autorisierung/Datenverarbeitung prüfen. Aktuelle Gradle-Datei enthält keine ausdrückliche Release-Optimierung. Kein fertiges konformes AAB behaupten.
+
+### D – Anmeldungswiederherstellung ab April2027
+Vorgaben zu Zero-Tap Sign-In Restoration für Apps mit Anmeldung prüfen. SerKal verwendet Identity AuthorizationClient mit Google-Scopes für Drive/Kalender/Identitätsinformationen; noch nicht abschließend geklärt, wie die Restore-Pflicht auf diesen Ablauf anzuwenden ist. Kein unbelegter Ausnahmestatus und keine automatische Umbaupflicht behaupten. Offizielle weitere Hinweise/gegebenenfalls Play-Support klären; falls erforderlich Restore Credentials integrieren und echten Gerätewechsel testen. Identitätswiederherstellung ersetzt keine OAuth-Zugriffsfreigabe. Zugangstoken nicht blind per Backup auf andere Geräte kopieren; allowBackup=false nicht unbedacht aufheben.
+
+### E – Händlerstatus und Monetarisierung
+Kurt hat im Formular Nicht-Händler ausgewählt; abschließende Speicherung noch nicht nachgewiesen. Persönliches Konto/kostenlose Erstfassung entscheiden den Status nicht allein: auch beabsichtigte regelmäßige kommerzielle Einnahmen sind laut Google relevant. Bei konkreter Werbung, In-App-Käufen oder kostenpflichtiger Fortsetzung Status erneut beurteilen und aktuell halten. Neue Konten müssen die Erklärung nach Kontoerstellung abgeben; bestehende bis01.02.2027.
+Keine implementierten Ads/Billing/Abos im geprüften Stand. Vor Einbau Zahlungsrichtlinien, Datenschutz/Datensicherheit und gegebenenfalls Werbe-SDK-/Kinderanforderungen prüfen. Rabatt-Abo-/KI-Kaufregeln oder Japan-Verkaufsfreigaben erst bei entsprechender tatsächlicher Funktion/Verteilung relevant.
+
+### F – Zielgruppe und sonstige Hinweise
+Altersfreigabe/Zielgruppe anhand tatsächlicher TMDB-Inhalte und Funktionen festlegen. Age Signals aus dieser Mitteilung nicht als pauschale sofortige Einbaupflicht ausgeben; regionale Anforderungen vor Verteilung prüfen. Keine Auto-Spiele-/XR-/Kryptofunktionen vorhanden.
+Google-Play-spezifische Vorgaben begründen keinen Umbau der Windows-/Ubuntu-Fassung. Gemeinsame Google-API-, Datenschutz- und sonstige tatsächlich einschlägige Anforderungen bleiben separat zu beachten.
+
+### Vorgehen und Nachfolge
+Beim nächsten Store-Paket: zusammengeführtes Manifest, DEX-Größe, Release-Konfiguration und aktuelle Ziel-API prüfen; reale Speicherprüfung einplanen. Restore-Anwendungsfall vor April2027 klären. Bereits bestandene allgemeine1.2.4-Geräteabnahme nicht erneut verlangen; neue Prüfungen auf diese konkreten offenen Risiken begrenzen. Entwicklungspause und Public-Freigabe vorhandener1.2.4-Artefakte bleiben bestehen; dieser Auftrag autorisiert keine ungeprüfte neue Version oder Store-Veröffentlichung. Keine automatische Erinnerung eingerichtet.
