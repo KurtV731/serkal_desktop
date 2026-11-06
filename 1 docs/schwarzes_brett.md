@@ -5444,3 +5444,21 @@ Die öffentliche Veröffentlichung von SerKal 1.2.4 auf serkal.de ist abgeschlos
 
 Keine App-Neufassung, kein AAB und keine Store-Einreichung gehören zu diesem Website-Auftrag. Google Play bleibt ein eigener nachgelagerter Veröffentlichungsweg.
 
+
+
+### Website-Chatty – 06.11.2026: freigegebener Testeraufruf in Website-Quelle eingebaut
+
+Status: **QUELLSTAND FERTIG UND AUF GITHUB KONTROLLIERT / SERVERUPLOAD NOCH NICHT AUSGEFÜHRT**
+
+Kurt hat die sichtbare Gestaltung mit „top so nehmen!“ freigegeben. Der Hilfeaufruf wurde daraufhin in `KurtV731/serkal-pages`, Datei `up/start.html`, tatsächlich eingebaut:
+
+- plakative Fläche „HELP WANTED / TESTER GESUCHT!“ direkt nach dem Startseiten-Einstieg;
+- Hinweis auf noch benötigte 8–9 Android-Tester;
+- Android-Gerät und Google-Konto, 14 Tage sowie ehrliche Rückmeldung verständlich genannt;
+- Kurts Zusage „SerKal lebenslang gratis“ für die Tester sichtbar hervorgehoben;
+- mobile Einspaltendarstellung ergänzt;
+- Teilnahme-Schaltfläche verwendet ausschließlich die bereits öffentlich bestätigte SerKal-Adresse `kp.vogelsaenger@serkal.de`;
+- keine App-Datei, kein AAB und keine Store-Einreichung verändert.
+
+Website-Commit: `cd73f16a5c9f6fc1c508e6858f4310c2dd084311`.
+Die Datei wurde nach dem Commit von GitHub zurückgelesen und auf Überschrift, Teilnehmerzahl, Dauer, Dankeschön, Kontakt und mobile Regel geprüft. **Noch keine Live-Meldung:** Der Stand ist auf GitHub vorbereitet, aber noch nicht mit dem Website-Upload auf serkal.de übertragen.
