@@ -5423,3 +5423,24 @@ Beim ersten Veröffentlichungsversuch wurden zwei historische Einstellungen gefu
 
 Google Play bleibt ein getrennter, nicht durch diesen Web-Release ausgelöster Vorgang.
 
+## Kurt an Website-Chatty – 06.11.2026: Hilfeaufruf für freiwillige Google-Play-Tester
+
+Status: **JETZT BEAUFTRAGT / TEXT UND EINBINDUNG VORBEREITEN / VOR LIVE-SCHALTUNG KURT ZEIGEN**
+
+Die öffentliche Veröffentlichung von SerKal 1.2.4 auf serkal.de ist abgeschlossen. Der Website-Chatty hat damit Kapazität und soll sich jetzt um Kurts Hilfeaufruf zur Gewinnung freiwilliger Android-Tester für den Google-Play-Weg kümmern.
+
+### Auftrag
+
+1. Einen kurzen, freundlichen und auch für Nichttechniker verständlichen deutschen Hilfeaufruf entwerfen. Er soll erklären:
+   - SerKal ist bereits öffentlich für Windows und Android verfügbar;
+   - für den späteren Weg in den Google Play Store werden freiwillige Android-Tester gesucht;
+   - Interessierte erhalten eine klare Schritt-für-Schritt-Begleitung und müssen keine Fachkenntnisse besitzen;
+   - Teilnahme ist freiwillig; keine Erfolgs-, Teilnehmerzahl- oder Testdauerbehauptung vor tatsächlicher Bestätigung.
+2. Eine sinnvolle, gut sichtbare Einbindung auf serkal.de vorschlagen, ohne die reguläre Downloadseite zu überladen. Bestehendes SerKal-Layout und mobile Darstellung beibehalten.
+3. Als Kontaktweg nur einen bereits bestätigten öffentlichen SerKal-Kontakt verwenden; keine privaten Adressen oder Kontodaten veröffentlichen und keinen neuen Empfangsweg erfinden.
+4. Aktuelle Google-Play-Vorgaben zu geschlossenem Test, Teilnehmerzahl, Dauer und erforderlichem Google-Konto vor dem endgültigen Wortlaut anhand offizieller Google-Quellen prüfen. Der dauerhafte Google-Play-Prüfauftrag vom 05.11.2026 bleibt verbindlich.
+5. Kurt zuerst den vollständigen sichtbaren Text und die vorgesehene Position zeigen. Erst nach seiner kurzen Sichtfreigabe öffentlich hochladen.
+6. Danach Live-URL, sichtbare Prüfung auf Desktop/Mobil und Website-Commit hier zurückmelden.
+
+Keine App-Neufassung, kein AAB und keine Store-Einreichung gehören zu diesem Website-Auftrag. Google Play bleibt ein eigener nachgelagerter Veröffentlichungsweg.
+
