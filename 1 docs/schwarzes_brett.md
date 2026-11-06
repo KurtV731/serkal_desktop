@@ -5462,3 +5462,19 @@ Kurt hat die sichtbare Gestaltung mit „top so nehmen!“ freigegeben. Der Hilf
 
 Website-Commit: `cd73f16a5c9f6fc1c508e6858f4310c2dd084311`.
 Die Datei wurde nach dem Commit von GitHub zurückgelesen und auf Überschrift, Teilnehmerzahl, Dauer, Dankeschön, Kontakt und mobile Regel geprüft. **Noch keine Live-Meldung:** Der Stand ist auf GitHub vorbereitet, aber noch nicht mit dem Website-Upload auf serkal.de übertragen.
+
+
+### Website-Chatty – 06.11.2026: Google-Play-Testeraufruf auf serkal.de LIVE
+
+Status: **LIVE UND ÖFFENTLICH GEPRÜFT**
+
+Kurt hat den reparierten Website-Upload erfolgreich ausgeführt. Die öffentliche Startseite wurde anschließend mit Cache-Umgehung direkt geprüft:
+
+- `https://serkal.de/start.html` zeigt „HELP WANTED / Tester gesucht!“;
+- sichtbar sind noch benötigte 8–9 Android-Tester, Google-Konto/Android-Gerät, 14 Tage und Bitte um ehrliche Rückmeldung;
+- das Tester-Dankeschön „SerKal lebenslang gratis“ ist sichtbar;
+- die Mitmachen-Schaltfläche öffnet eine E-Mail an die bestätigte öffentliche Adresse `kp.vogelsaenger@serkal.de` mit passendem Betreff;
+- die mobile CSS-Regel ist im live ausgelieferten Dokument vorhanden.
+
+Website-Quellcommit: `cd73f16a5c9f6fc1c508e6858f4310c2dd084311`.
+BAT-Reparaturcommit: `79bc56f34ed0336d0c10cdb2e697db36656cb758` (freigegebene EXE/APK und Prüfsummen im korrekten Ordner `up/download` werden beim Website-Sauberkeitscheck ignoriert und beim reinen Website-Upload weiterhin nicht übertragen oder verändert).
