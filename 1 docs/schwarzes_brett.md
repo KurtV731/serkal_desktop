@@ -5400,3 +5400,26 @@ Die ausdrücklich freigegebene SerKal-Fassung 1.2.4 / Stand 38 wurde ohne Neubau
 Alle sechs Dateien wurden von GitHub zurückgelesen und auf Version, Hashwerte und Reporterhinweise geprüft. Die freigegebenen Binärdateien selbst bleiben lokal unter `C:\ppd\serkal\veroeffentlichungen\1.2.4` und müssen unverändert nach `C:\ppd\serkal\serkal-pages\up\download` kopiert werden. Danach `C:\ppd\serkal\serkal-pages\PULL-PD.BAT` starten. Dieses holt den vorbereiteten GitHub-Stand, prüft beide lokalen Dateien gegen die neuen Hashwerte und lädt nur bei Übereinstimmung hoch.
 
 Noch keine LIVE-Meldung: Serverübertragung und anschließender Download-/Größen-/Hashnachweis sind offen. Google Play bleibt getrennt.
+
+### Installer/Website – 06.11.2026: SerKal 1.2.4 öffentlich LIVE
+
+Status: **PUBLIC RELEASE 1.2.4 / STAND 38 LIVE UND UNABHÄNGIG GEPRÜFT**
+
+Die von Kurt ausdrücklich freigegebene Fassung wurde unverändert auf `serkal.de` veröffentlicht. Der öffentliche Stand wurde nach dem Upload mit Cache-Umgehung geprüft:
+
+- deutsche Downloadseite: `https://serkal.de/download.html` zeigt Windows und Android 1.2.4;
+- englische Downloadseite: `https://serkal.de/download-en.html` zeigt Windows und Android 1.2.4;
+- Windows: `https://serkal.de/download/serkal-desktop.exe`, 140890112 Bytes, SHA-256 `73250d7f67de8de49acc28e33dd1785c229feb92700a67a7e43b48cf3fe0b3bf`;
+- Android: `https://serkal.de/download/serkal-android.apk`, 2294171 Bytes, SHA-256 `1fc7f7faea8ba100d0b09455206b03808ff3be00d43c28cb555f1aa023ff976a`;
+- beide öffentlichen Binärdateien wurden vollständig neu heruntergeladen; Größe und SHA-256 stimmen exakt mit den freigegebenen Artefakten überein;
+- die öffentlichen `.sha256`-Dateien enthalten ebenfalls diese Werte.
+
+Beim ersten Veröffentlichungsversuch wurden zwei historische Einstellungen gefunden: alter Host `ftp.webspace.bz` und falsches ALL-INKL-Ziel `/`. Der verbindliche Veröffentlichungsweg ist jetzt dauerhaft:
+
+- Host `w0223f39.kasserver.com`, Benutzer `w0223f39`;
+- Zielverzeichnis `/serkal.de/` entsprechend der KAS-Domainzuordnung;
+- `PULL-PD.BAT` erzwingt zusätzlich das Überschreiben der acht Release-Kerndateien, sodass abweichende Zeitstempel sie nicht mehr auslassen;
+- `NUR-WEBSITE-HOCHLADEN.BAT` verwendet ebenfalls Host, Benutzer und Zielverzeichnis von ALL-INKL.
+
+Google Play bleibt ein getrennter, nicht durch diesen Web-Release ausgelöster Vorgang.
+
