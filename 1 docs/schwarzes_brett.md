@@ -5382,3 +5382,21 @@ Google-Play-spezifische Vorgaben begründen keinen Umbau der Windows-/Ubuntu-Fas
 
 ### Vorgehen und Nachfolge
 Beim nächsten Store-Paket: zusammengeführtes Manifest, DEX-Größe, Release-Konfiguration und aktuelle Ziel-API prüfen; reale Speicherprüfung einplanen. Restore-Anwendungsfall vor April2027 klären. Bereits bestandene allgemeine1.2.4-Geräteabnahme nicht erneut verlangen; neue Prüfungen auf diese konkreten offenen Risiken begrenzen. Entwicklungspause und Public-Freigabe vorhandener1.2.4-Artefakte bleiben bestehen; dieser Auftrag autorisiert keine ungeprüfte neue Version oder Store-Veröffentlichung. Keine automatische Erinnerung eingerichtet.
+
+
+### Installer/Website – 06.11.2026: Public Release 1.2.4 auf GitHub vorbereitet
+
+Status: **WEBSITE-QUELLSTAND UND PRÜFSUMMEN FERTIG / SERVERUPLOAD UND LIVE-NACHWEIS DURCH KURT OFFEN**
+
+Die ausdrücklich freigegebene SerKal-Fassung 1.2.4 / Stand 38 wurde ohne Neubau für den vorhandenen Veröffentlichungsweg vorbereitet. Im Repository `KurtV731/serkal-pages`, Branch `main`:
+
+- deutsche Downloadseite auf 1.2.4: Commit `d9a47e4c005a6fb54797ad2ee9e336d6d241476c`;
+- englische Downloadseite auf 1.2.4: Commit `779e54974f17d49595bd3bcd3b4e18217a959039`;
+- deutsche Neuerungsseite um die Kalenderbereichs-/Erledigungsflag-Korrekturen, bekannten Restpunkt und `Danke an Kurt` / `Danke an VelcroFist` ergänzt: Commit `65b1c6ce3ec03a588c7850fd9a7c0d3e7baca96d`;
+- englische Neuerungsseite entsprechend mit `Thanks to Kurt` / `Thanks to VelcroFist`: Commit `0712b18d9b5f1b655866ded8a9b22ad2d7dc33b5`;
+- Desktop-Prüfsumme auf `73250d7f67de8de49acc28e33dd1785c229feb92700a67a7e43b48cf3fe0b3bf` gesetzt: Commit `00a32b23203a7a75ecf39ab40bb340f16147cffc`;
+- Android-Prüfsumme auf `1fc7f7faea8ba100d0b09455206b03808ff3be00d43c28cb555f1aa023ff976a` gesetzt: Commit `19ad3d5de3c4fe15d2f10414465c89d444c8819a`.
+
+Alle sechs Dateien wurden von GitHub zurückgelesen und auf Version, Hashwerte und Reporterhinweise geprüft. Die freigegebenen Binärdateien selbst bleiben lokal unter `C:\ppd\serkal\veroeffentlichungen\1.2.4` und müssen unverändert nach `C:\ppd\serkal\serkal-pages\up\download` kopiert werden. Danach `C:\ppd\serkal\serkal-pages\PULL-PD.BAT` starten. Dieses holt den vorbereiteten GitHub-Stand, prüft beide lokalen Dateien gegen die neuen Hashwerte und lädt nur bei Übereinstimmung hoch.
+
+Noch keine LIVE-Meldung: Serverübertragung und anschließender Download-/Größen-/Hashnachweis sind offen. Google Play bleibt getrennt.
