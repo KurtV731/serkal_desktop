@@ -5542,3 +5542,12 @@ Die angekündigte Prüfung wurde vollständig ausgeführt und anschließend auf 
 Canonical-, hreflang- und x-default-Angaben der Startseiten sowie die Sitemap wurden entsprechend vereinheitlicht. `/start.html` wurde aus der Sitemap entfernt und wird über `up/.htaccess` dauerhaft mit HTTP 301 auf `/` weitergeleitet. Die technische App-Startseite `/start` war bereits mit `noindex,nofollow` geschützt und blieb unverändert. Alle 25 HTML-Inhaltsseiten erhielten im Fußbereich eine kleine Deutsch/English-Verknüpfung; bei Seiten ohne direkte Übersetzung führt die andere Sprache zur passenden Startseite.
 
 Quellstand: `KurtV731/serkal-pages`, main, Commit `2f82e114497801323eb26c8f64acec4eceaa9dcd` (`seo: vereinheitliche deutsche Startseite unter /`). Noch nicht als live behaupten: Kurt muss den Stand lokal holen und mit `NUR-WEBSITE-HOCHLADEN.BAT` veröffentlichen. Danach sind insbesondere `/`, die 301-Weiterleitung von `/start.html`, die Sprachlinks und `sitemap.xml` öffentlich zu kontrollieren.
+
+
+## Website – 07.11.2026: Einheitlicher Siebener-Kopf, Siebener-Fuß und englische Werkstatt
+
+Kurt hat bei der Sichtkontrolle zu Recht mehrere Sonderseiten mit verkürzter Navigation bzw. fehlenden Projektlogos beanstandet. Daraufhin wurden alle 26 HTML-Seiten systematisch vereinheitlicht. Jede Seite besitzt nun oben exakt die sieben Bereiche Start, Download, Hilfe/Help, FAQ, Über/About SerKal, Rechtliches/Legal und Werkstatt/Workshop sowie alle drei Projektlogos SerKal, ChatGPT und TMDB. Im Fuß stehen ebenfalls exakt dieselben sieben Bereiche; die separate kleine Deutsch/English-Zeile zählt nicht als zusätzlicher Navigationsbereich. Der jeweilige aktuelle Bereich wird nur markiert, nicht aus der Siebener-Struktur entfernt.
+
+Die Werkstatt hat jetzt mit `up/werkstatt-en.html` eine eigene englische Ausgabe. Beide Werkstattseiten sind gegenseitig per canonical/hreflang verknüpft; Sitemap und englische Navigation wurden ergänzt. Der fehlerhafte wörtliche `\n`-Rest in `serkal-shell.css` wurde ebenfalls bereinigt.
+
+Quellstand: `KurtV731/serkal-pages`, main, Commit `4bde4d64772a388f2db1c645622e49c019cf4927` (`site: vereinheitliche Kopfzeilen und ergänze englische Werkstatt`). Noch nicht als live behaupten, bis Kurt den Stand mit `NUR-WEBSITE-HOCHLADEN.BAT` veröffentlicht und angesehen hat. Zusätzlich wurde ein englisches, hochformatiges Discord-Poster „TESTERS WANTED“ mit Ziel `serkal.de` erstellt; es ist kein Bestandteil dieses Website-Commits.
