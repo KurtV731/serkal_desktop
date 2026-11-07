@@ -5533,3 +5533,12 @@ Gemeinsame Hintergrundwarteschlange für nicht zeitkritische Sonden-/Galaxie-/Er
 Kontrollierter Teiltest mit 400 Gebäudevoraussetzungen: 2800 → 4 Speicherlesevorgänge, 1200 → 3 DOM-Abfragen, identische Ergebnisse. Lokal etwa 1,1–1,4 Sekunden → 3–5 ms. Keine Hochrechnung auf die gesamte Horizon-Seite oder Hetzers Rechner! Abnahme umfasst Planeten-/Generationswechsel, Cacheinvalidierung, Eingabe-/Sichtbarkeitspause, Queuezusammenfassung und bestehende Browser-/Serverregression. Prüflauf: https://github.com/KurtV731/hasa/actions/runs/42380280366 . Isolierte Tooltip-/Zielweg-Prüfaufbauten wurden um den neuen Lesekontext und den Planer-Wrapper ergänzt; fachliche Tooltip-Prüfungen bleiben erhalten.
 
 Keine PHP-/Datenbankänderung, kein Serverupload nötig. Nach bestandenem Prüflauf im bisherigen Entwicklungskanal bereitgestellt. Dokumentation: `03 Dokumentation/leistung-leerlauf-alpha9.md`; zusammenhängendes Benutzerhandbuch 1.3 um Abschnitt „Rücksicht auf deine Bedienung und andere Programme“ ergänzt. Website-Chatty übernimmt diesen Absatz bei der Handbuchaufbereitung. Stabile 1.2 und ihre Downloadadresse bleiben davon getrennt.
+
+
+## Website – 07.11.2026: Deutsche Hauptadresse und Sprachverlinkung vereinheitlicht
+
+Die angekündigte Prüfung wurde vollständig ausgeführt und anschließend auf Kurts ausdrückliche Freigabe umgesetzt. SerKal besitzt künftig nur noch eine maßgebliche deutsche Hauptadresse: `https://serkal.de/`. Der bisherige dünne Sprachauswahl-Index wurde durch die vollständige deutsche Startseite ersetzt. Alle deutschen internen Startlinks führen auf `/`; Englisch bleibt unter `/start-en.html`.
+
+Canonical-, hreflang- und x-default-Angaben der Startseiten sowie die Sitemap wurden entsprechend vereinheitlicht. `/start.html` wurde aus der Sitemap entfernt und wird über `up/.htaccess` dauerhaft mit HTTP 301 auf `/` weitergeleitet. Die technische App-Startseite `/start` war bereits mit `noindex,nofollow` geschützt und blieb unverändert. Alle 25 HTML-Inhaltsseiten erhielten im Fußbereich eine kleine Deutsch/English-Verknüpfung; bei Seiten ohne direkte Übersetzung führt die andere Sprache zur passenden Startseite.
+
+Quellstand: `KurtV731/serkal-pages`, main, Commit `2f82e114497801323eb26c8f64acec4eceaa9dcd` (`seo: vereinheitliche deutsche Startseite unter /`). Noch nicht als live behaupten: Kurt muss den Stand lokal holen und mit `NUR-WEBSITE-HOCHLADEN.BAT` veröffentlichen. Danach sind insbesondere `/`, die 301-Weiterleitung von `/start.html`, die Sprachlinks und `sitemap.xml` öffentlich zu kontrollieren.
