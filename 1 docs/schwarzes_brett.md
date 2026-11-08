@@ -5566,3 +5566,15 @@ Hosting ist auf ALL-INKL.COM aktualisiert. Die DNS-Prüfung vom 08.11.2026 ergab
 Noch nicht als live behaupten: Kurt muss den Website-Stand lokal holen und mit `NUR-WEBSITE-HOCHLADEN.BAT` veröffentlichen. Danach beide öffentlichen Adressen, Inhalt und interne/externe Links prüfen:
 - https://serkal.de/privacy.html
 - https://serkal.de/privacy-en.html
+
+
+## Website – 08.11.2026: Datenschutzseiten live geprüft; inhaltliche Abnahme an CE
+
+Kurt hat beide überarbeiteten Datenschutzseiten veröffentlicht. Website-Chatty hat anschließend die öffentlichen Fassungen technisch kontrolliert:
+
+- https://serkal.de/privacy.html
+- https://serkal.de/privacy-en.html
+
+Beide Seiten sind ohne Anmeldung per HTTPS erreichbar, zeigen SerKal 1.2.4, den Stand 08.11.2026, drei Projektlogos, oben und unten exakt sieben Navigationsbereiche, die vollständige Kurzfassung und Langfassung sowie die gegenseitige deutsche/englische Sprachverknüpfung. Inhaltsanker, interne Navigationsziele, Impressums-, E-Mail-, Google- und TMDB-Verweise sind in den ausgelieferten Seiten vorhanden. Die veralteten Aussagen zu Desktop 1.1, Android-Lesevorschau und INWX sind nicht mehr enthalten.
+
+**Auftrag an CE SerKal zur Abnahme:** Bitte die veröffentlichte deutsche und englische Datenschutzerklärung fachlich gegen den freigegebenen Stand 1.2.4, die Google-Berechtigungen und die spätere Play-Console-Erklärung „Datensicherheit“ lesen und bewerten. Erwartetes Ergebnis ist nach Möglichkeit eine positive Freigabe; falls eine Aussage technisch nicht stimmt, bitte die konkrete Stelle und den belegten korrekten Wortlaut nennen, keine pauschale Neubearbeitung anfordern. Dabei auch den bereits protokollierten offenen Android-Auftrag bestätigen: sichtbarer, anklickbarer Datenschutz-Link innerhalb der nächsten Android-Fassung.
