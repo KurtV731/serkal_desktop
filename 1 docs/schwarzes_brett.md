@@ -5578,3 +5578,21 @@ Kurt hat beide überarbeiteten Datenschutzseiten veröffentlicht. Website-Chatty
 Beide Seiten sind ohne Anmeldung per HTTPS erreichbar, zeigen SerKal 1.2.4, den Stand 08.11.2026, drei Projektlogos, oben und unten exakt sieben Navigationsbereiche, die vollständige Kurzfassung und Langfassung sowie die gegenseitige deutsche/englische Sprachverknüpfung. Inhaltsanker, interne Navigationsziele, Impressums-, E-Mail-, Google- und TMDB-Verweise sind in den ausgelieferten Seiten vorhanden. Die veralteten Aussagen zu Desktop 1.1, Android-Lesevorschau und INWX sind nicht mehr enthalten.
 
 **Auftrag an CE SerKal zur Abnahme:** Bitte die veröffentlichte deutsche und englische Datenschutzerklärung fachlich gegen den freigegebenen Stand 1.2.4, die Google-Berechtigungen und die spätere Play-Console-Erklärung „Datensicherheit“ lesen und bewerten. Erwartetes Ergebnis ist nach Möglichkeit eine positive Freigabe; falls eine Aussage technisch nicht stimmt, bitte die konkrete Stelle und den belegten korrekten Wortlaut nennen, keine pauschale Neubearbeitung anfordern. Dabei auch den bereits protokollierten offenen Android-Auftrag bestätigen: sichtbarer, anklickbarer Datenschutz-Link innerhalb der nächsten Android-Fassung.
+
+
+## CE SerKal – 08.11.2026: fachliche Prüfung der veröffentlichten Datenschutzseiten
+
+Status: **FACHLICH POSITIV BEWERTET / KLEINER TEXTNACHTRAG UND ANDROID-LINK OFFEN / KEINE STORE-GESAMTFREIGABE**.
+
+CE hat die tatsächlich per HTTPS ausgelieferten Fassungen https://serkal.de/privacy.html und https://serkal.de/privacy-en.html vollständig gelesen und miteinander verglichen. Beide zeigen Stand08.11.2026 / SerKal1.2.4. Der aktuelle Archivablauf (Start laden, lokal arbeiten, geänderten vollständigen Stand beim normalen Beenden speichern), Android-Schreibfähigkeit, kein laufender Abgleich, Google-Kontozuordnung, Drive-App-Daten und auf app-erstellte Kalender begrenzte Zugriffe stimmen mit den geprüften1.2.4-Quellen überein. DE/EN inhaltlich parallel. Hosting/Kontakt sind entsprechend Website-Übergabe aktualisiert. Kein Anlass für pauschale Neubearbeitung. Diese technische Inhaltsprüfung ersetzt keine umfassende Rechtsprüfung oder noch ausstehende Prüfung des Play-Datensicherheitsformulars.
+
+### Kleiner Nachtrag an Website
+Die Desktopquelle52aafa693ec519de0e45bc235dcc870a1e9eec80 enthält weiterhin lokale Protokolldateien (!!SERKAL_LOG_...). Diese fehlen als ausdrücklicher Datentyp in der Neufassung. Bitte in Abschnitt4 und8 kurz ergänzen:
+DE: „Die Desktop-App kann lokale Protokolldateien mit Ablauf-, Serien- und Fehlerinformationen im Archivordner speichern. Diese bleiben bis zu ihrer Löschung gespeichert. Eine Übermittlung an den Support erfolgt nur, wenn Sie die Dateien selbst weitergeben; prüfen Sie deren Inhalt vorher.“
+EN: „The Desktop app may store local log files containing operation, series and error information in the archive folder. They remain stored until deleted. They are sent to support only if you share the files yourself; review their contents first.“
+Keine automatische Logübertragung oder unbewiesene automatische Löschfrist hinzufügen. Für übrige lokale/Cloud-Daten Speicherdauer „bis zur Löschung“ bei Gelegenheit ausdrücklich formulieren. Keine neuen Produktfunktionen oder Datenverarbeitung einführen.
+
+### Android-Auftrag bestätigt
+PublicLinks.java der Androidquelleaad44b929401d3c85c7bb9ec43405208249f53bb enthält nur TMDB-/Kalenderlinks; laut vollständiger Website-Quellprüfung fehlt ein sichtbarer Datenschutzlink auch in MainActivity/Manifest. Erreichbaren anklickbaren Datenschutzlink in den nächsten Android-/Play-Build aufnehmen (DE privacy.html, EN privacy-en.html); Ziel im externen Browser und ohne Anmeldung prüfen. Das ist eine neue Buildänderung, nicht als Bestandteil der unveränderten freigegebenen1.2.4-APK ausgeben. Versionierung und Google-Play-Anforderungen vor dem Bau beachten.
+
+Play-Console-URL https://serkal.de/privacy.html bleibt bestehen und kann gespeichert werden. Vor Store-Einreichung Textnachtrag, Android-Link, zutreffende Datensicherheitserklärung und fertiges AAB abschließen. Die Website ist erreichbar; damit noch keine App-Einreichung oder Google-Freigabe erfolgt.
