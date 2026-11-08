@@ -5551,3 +5551,18 @@ Kurt hat bei der Sichtkontrolle zu Recht mehrere Sonderseiten mit verkürzter Na
 Die Werkstatt hat jetzt mit `up/werkstatt-en.html` eine eigene englische Ausgabe. Beide Werkstattseiten sind gegenseitig per canonical/hreflang verknüpft; Sitemap und englische Navigation wurden ergänzt. Der fehlerhafte wörtliche `\n`-Rest in `serkal-shell.css` wurde ebenfalls bereinigt.
 
 Quellstand: `KurtV731/serkal-pages`, main, Commit `4bde4d64772a388f2db1c645622e49c019cf4927` (`site: vereinheitliche Kopfzeilen und ergänze englische Werkstatt`). Noch nicht als live behaupten, bis Kurt den Stand mit `NUR-WEBSITE-HOCHLADEN.BAT` veröffentlicht und angesehen hat. Zusätzlich wurde ein englisches, hochformatiges Discord-Poster „TESTERS WANTED“ mit Ziel `serkal.de` erstellt; es ist kein Bestandteil dieses Website-Commits.
+
+
+## Website – 08.11.2026: Datenschutzerklärung auf SerKal 1.2.4 aktualisiert
+
+Auf Kurts Auftrag wurden die deutsche und englische Datenschutzerklärung anhand der freigegebenen SerKal-1.2.4-Quellen für Desktop (Quellstand `52aafa693ec519de0e45bc235dcc870a1e9eec80`) und Android (Quellstand `aad44b929401d3c85c7bb9ec43405208249f53bb`) vollständig überarbeitet. Maßgebliche Website-Commits in `KurtV731/serkal-pages`, main: Deutsch `9cb1593175b14373c4c2db521c98f0cc36896df7`, Englisch `c853a03c70ded069bc484f0bf8e0b2d47766e4ff`.
+
+Die Fassungen unter `up/privacy.html` und `up/privacy-en.html` sind inhaltlich parallel. Sie beschreiben jetzt den vollständigen Archivstand im Google-Drive-App-Datenbereich, lokale Verarbeitung, Rückschreiben bei Änderungen beim normalen Beenden, Android-Schreibfähigkeit und ausdrücklich keinen laufenden Geräteabgleich. Google-Kontozuordnung, Drive-App-Daten, Kalenderliste, von SerKal angelegte Kalender, lokale Zugangsinformationen, TMDB-Suche/Bilder/Anbieterinformationen, eigene Notizen sowie getrennte Löschwege für lokal/Drive/Kalender sind erklärt. Keine Funktionen der internen 1.3 werden als vorhanden dargestellt. Keine eingebauten Werbe-, Analyse- oder Zahlungsdienste behauptet.
+
+Hosting ist auf ALL-INKL.COM aktualisiert. Die DNS-Prüfung vom 08.11.2026 ergab `ns5.kasserver.com` und `ns6.kasserver.com`; Cloudflare wird daher nicht als aktiver Website-Dienst behauptet. Öffentliche Datenschutzkontaktadresse ist `support@serkal.de`, Verantwortlicher/Adresse wurden mit dem aktuellen Impressum abgeglichen. Kopf mit drei Logos und exakt sieben Navigationsbereichen sowie der entsprechende Siebener-Fuß blieben erhalten.
+
+**Konkreter Auftrag an CE Android:** Die freigegebene Android-App 1.2.4 enthält nach Quellprüfung weder in `AndroidManifest.xml` noch in `PublicLinks.java` oder `MainActivity.java` einen für Nutzer erreichbaren Datenschutz-Link. In den nächsten Android-Build ist im sichtbaren Hilfe-/Rechtliches-Bereich ein anklickbarer Link auf `https://serkal.de/privacy.html` einzubauen; bei englischer Oberfläche kann zusätzlich `https://serkal.de/privacy-en.html` verwendet werden. Vor Freigabe auf realem Gerät prüfen: ohne Anmeldung erreichbar, externer Browser öffnet die richtige HTML-Seite, keine neue Berechtigung erforderlich. Play-Console-Datensicherheit und App-Angaben müssen mit dieser Erklärung übereinstimmen.
+
+Noch nicht als live behaupten: Kurt muss den Website-Stand lokal holen und mit `NUR-WEBSITE-HOCHLADEN.BAT` veröffentlichen. Danach beide öffentlichen Adressen, Inhalt und interne/externe Links prüfen:
+- https://serkal.de/privacy.html
+- https://serkal.de/privacy-en.html
