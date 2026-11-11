@@ -1,4 +1,4 @@
-name: Test and build SerKal Android
+name: Test and build SerKal Android App Bundle
 
 on:
   workflow_dispatch:
@@ -9,7 +9,7 @@ on:
       - '.github/workflows/android-preview.yml'
 
 concurrency:
-  group: android-${{ github.ref }}
+  group: android-bundle-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -27,20 +27,19 @@ jobs:
       - name: Test
         working-directory: android-preview
         run: gradle testReleaseUnitTest
-      - name: Build unsigned APK
-        if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[build apk]')
+      - name: Build unsigned Android App Bundle
+        working-directory: android-preview
+        run: gradle bundleRelease
+      - name: Record bundle metadata
         working-directory: android-preview
         run: |
-          gradle assembleRelease
-          "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging app/build/outputs/apk/release/app-release-unsigned.apk > apk-badging.txt
-          cp "$ANDROID_HOME/build-tools/35.0.0/lib/apksigner.jar" apksigner.jar
+          sha256sum app/build/outputs/bundle/release/app-release.aab > app-release.aab.sha256
+          printf 'sourceCommit=%s\nversionName=1.2.4\nversionCode=47\napplicationId=de.serkal.android.preview.v005\n' "$GITHUB_SHA" > app-release.aab.metadata.txt
       - uses: actions/upload-artifact@v4
-        if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[build apk]')
         with:
-          name: SerKal-Android-1.2.4-code47-unsigned
+          name: SerKal-Android-1.2.4-code47-unsigned-aab
           path: |
-            android-preview/app/build/outputs/apk/release/app-release-unsigned.apk
-            android-preview/apksigner.jar
+            android-preview/app/build/outputs/bundle/release/app-release.aab
+            android-preview/app-release.aab.sha256
+            android-preview/app-release.aab.metadata.txt
             android-preview/app/build/test-results/testReleaseUnitTest/*.xml
-            android-preview/apk-badging.txt
-
