@@ -5613,3 +5613,32 @@ Neue und bestehende Browser-/Serverprüfungen bestanden: https://github.com/Kurt
 Handbuch 1.3 auf Stand 11.11.2026/Alpha10 ergänzt: Müllbedienung, Grenzen der automatischen Zuordnung, neue Ascension-Einblendregel und korrigierte Produktionslesung. Website-Chatty übernimmt diese Kapitel bei der vorgesehenen Handbuch-Aufbereitung; kein produktiver Websiteupload behauptet. Releasevermerk: `03 Dokumentation/release-alpha10.md`.
 
 **Nächster Messauftrag von Styl:** Beim nächsten Müllereignis angezeigte Baufläche vorher/während/nach erfolgreicher Entsorgung vergleichen; parallele Bauten als Störgröße beachten. Der vorliegende Originaltext sagt nur, dass Bauplatz belegt wird, nicht wie viel; er nennt 10.000 Minerale Endlager / 800 Minerale Sonnenentsorgung. Arbeitsplatz-/Konstruktionsflächenverlust wird nicht beziffert. Noch keine implementierte Bauflächenmesskurve und keine erfundene Rückrechnung für den bereits erledigten Fall. Private Originalquellen bleiben außerhalb von GitHub.
+
+
+### 2026-11-11 – Installer-Chatty – Google-Play-AAB 1.2.4 / interner Test
+
+Status: **AAB GEBAUT UND TECHNISCH GEPRÜFT / PRIVATE SIGNATUR AUF KURTS PC OFFEN**
+
+Auftrag: Für den internen Google-Play-Test ein signiertes Android App Bundle ohne Funktionsänderung aus demselben Quellstand wie die zuletzt freigegebene APK bereitstellen.
+
+Verbindlicher Stand:
+
+- Quellcommit der App: `aad44b929401d3c85c7bb9ec43405208249f53bb`
+- Version: `versionName 1.2.4`, `versionCode 47`, Release 38
+- Paketname: `de.serkal.android.preview.v005`
+- Play-Console-Abgleich durch Kurts Screenshot bestätigt: identischer Paketname
+- Buildzweig: `installer-play-aab-1.2.4`
+- erfolgreicher Workflow: https://github.com/KurtV731/serkal_desktop/actions/runs/43070887228
+- unsignierte AAB: `SerKal-Android-1.2.4-code47-unsigned.aab`
+- Größe: 2.184.964 Bytes
+- SHA-256 unsigniert: `94415d744b0e151a3416f3e01fe14668c6f648ce8c809964be094467b7766d86`
+
+Tests, Bundle-Bau, Übertragungsrekonstruktion und ZIP-Strukturprüfung waren erfolgreich. Es gab keine Änderung an App-Code, Texten oder Funktionen; geändert wurde nur die Bauanweisung auf dem eigenen Buildzweig.
+
+Für die endgültige Play-Datei muss dieselbe AAB noch mit dem bestehenden privaten Schlüssel signiert werden:
+
+- Schlüsseldatei: `SerKal-Android-Preview-Signing.jks`
+- Alias: `serkal-preview`
+- Zertifikat SHA-256: `7e24902dd88ed80fb84e0ffc3b188a1e0c88e30cb2a84247a03cf4ba416667eb`
+
+Der Schlüssel liegt gesichert vor; sein Kennwort ist absichtlich weder im Repository noch im Schwarzen Brett gespeichert. Installer-Chatty hat Kurt deshalb die unsignierte AAB, einen lokalen Signierstarter mit verdeckter Kennwortabfrage und einen Bau-/Prüfnachweis bereitgestellt. Erst nach erfolgreicher lokaler Signatur sind Signaturprüfung, endgültige Dateigröße und SHA-256 der hochzuladenden AAB nachzutragen. Noch kein Upload in die Play Console und keine öffentliche Veröffentlichung.
