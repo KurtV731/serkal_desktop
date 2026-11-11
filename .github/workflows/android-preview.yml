@@ -8,6 +8,9 @@ on:
       - 'serkal-release.json'
       - '.github/workflows/android-preview.yml'
 
+permissions:
+  contents: write
+
 concurrency:
   group: android-bundle-${{ github.ref }}
   cancel-in-progress: true
@@ -34,7 +37,7 @@ jobs:
         working-directory: android-preview
         run: |
           sha256sum app/build/outputs/bundle/release/app-release.aab > app-release.aab.sha256
-          printf 'sourceCommit=%s\nversionName=1.2.4\nversionCode=47\napplicationId=de.serkal.android.preview.v005\n' "$GITHUB_SHA" > app-release.aab.metadata.txt
+          printf 'sourceCommit=aad44b929401d3c85c7bb9ec43405208249f53bb\nversionName=1.2.4\nversionCode=47\napplicationId=de.serkal.android.preview.v005\n' > app-release.aab.metadata.txt
       - uses: actions/upload-artifact@v4
         with:
           name: SerKal-Android-1.2.4-code47-unsigned-aab
@@ -43,3 +46,14 @@ jobs:
             android-preview/app-release.aab.sha256
             android-preview/app-release.aab.metadata.txt
             android-preview/app/build/test-results/testReleaseUnitTest/*.xml
+      - name: Preserve bundle as text chunks on build branch
+        run: |
+          mkdir -p play-build-output
+          base64 -w0 android-preview/app/build/outputs/bundle/release/app-release.aab | split -b 400000 - play-build-output/app-release.aab.b64.part-
+          cp android-preview/app-release.aab.sha256 play-build-output/
+          cp android-preview/app-release.aab.metadata.txt play-build-output/
+          git config user.name "SerKal Build"
+          git config user.email "actions@users.noreply.github.com"
+          git add play-build-output
+          git commit -m "Preserve unsigned Play bundle output [skip ci]"
+          git push
