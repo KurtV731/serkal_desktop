@@ -41,8 +41,56 @@ public class MainActivity extends Activity {
     private String googleAccessToken = "";
     private SharedKeyClient.Result googleUser;
     private boolean googleBusy;
-    private int googleGeneration;
+    private volatile int googleGeneration;
     private int pendingGoogleGeneration;
+    private long googleStarted;
+    private volatile String googleStep = "idle";
+    private Runnable googleTimeout;
+    private boolean googleWelcomeOpen;
+
+    private void googleTrace(String event) {
+        GoogleHttpFailure.event(this,event,googleGeneration,googleStep,
+            googleStarted == 0 ? 0 : android.os.SystemClock.elapsedRealtime()-googleStarted);
+    }
+    private void stopGoogleTimeout() {
+        if(googleTimeout!=null)handler.removeCallbacks(googleTimeout);
+        googleTimeout=null;
+    }
+    private void googleStage(String step,long limitMillis) {
+        googleStep=step;googleTrace("STEP");stopGoogleTimeout();
+        final int generation=googleGeneration;
+        googleTimeout=()->{
+            if(generation!=googleGeneration || !googleBusy || isFinishing())return;
+            googleTrace("TIMEOUT");
+            // Invalidate before accepting any late SDK/network callback.
+            googleGeneration++;
+            try{finishActivity(GOOGLE_REQUEST);}catch(Exception ignored){}
+            googleFailure(new Exception("GOOGLE_AUTHORIZATION_TIMEOUT"));
+        };
+        handler.postDelayed(googleTimeout,limitMillis);
+    }
+    private void openPrivacy() {
+        try{startActivity(new android.content.Intent(android.content.Intent.ACTION_VIEW,
+            android.net.Uri.parse(english?"https://serkal.de/privacy-en.html":"https://serkal.de/privacy.html")));}
+        catch(Exception error){statusText.setText(english?"Privacy policy: https://serkal.de/privacy-en.html":"Datenschutz: https://serkal.de/privacy.html");}
+    }
+    private void showGoogleWelcome(boolean chooseAccount) {
+        if(googleWelcomeOpen)return;
+        googleWelcomeOpen=true;
+        AlertDialog welcome=dialogBuilder().setTitle(english?"Welcome to SerKal":"Willkommen bei SerKal")
+            .setMessage(english
+                ? "SerKal connects to your Google account to use your own archive and calendar.\n\nGoogle Drive: stores your SerKal archive and TMDB key in SerKal's hidden app-data area for use on your devices. This permission does not grant access to your other Drive documents.\n\nGoogle Calendar: reads your calendar list and creates and updates calendars and series events created by SerKal.\n\nYour account ID and email associate the archive with your account. You grant access directly to the app on this device. You can connect later through Menu > Google account."
+                : "SerKal verbindet sich mit deinem Google-Konto, um dein eigenes Archiv und deinen Kalender zu nutzen.\n\nGoogle Drive: speichert dein SerKal-Archiv und deinen TMDB-Schlüssel im verborgenen App-Datenbereich von SerKal für deine Geräte. Diese Berechtigung gibt keinen Zugriff auf deine anderen Drive-Dokumente.\n\nGoogle Kalender: liest deine Kalenderliste und erstellt und aktualisiert von SerKal angelegte Kalender und Serientermine.\n\nKontokennung und E-Mail ordnen das Archiv deinem Konto zu. Du erteilst den Zugriff direkt der App auf diesem Gerät. Später verbinden geht über Menü > Google-Konto.")
+            .setPositiveButton(english?"Continue to Google":"Weiter zu Google",(d,w)->{
+                getPreferences(0).edit().putBoolean("googleWelcomeAccepted",true).apply();connectGoogle(chooseAccount);
+            })
+            .setNegativeButton(english?"Later":"Später",(d,w)->restoreLocalArchive())
+            .setNeutralButton(english?"Privacy policy":"Datenschutz",null)
+            .setOnDismissListener(d->googleWelcomeOpen=false).create();
+        welcome.show();
+        welcome.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(v->openPrivacy());
+    }
+
 
     private AlertDialog.Builder dialogBuilder() {
         return new AlertDialog.Builder(new android.view.ContextThemeWrapper(this,
@@ -65,6 +113,8 @@ public class MainActivity extends Activity {
     }
 
     private void cancelGoogleConnection(){
+        googleTrace("CANCELLED");stopGoogleTimeout();
+        getPreferences(0).edit().putBoolean("googleAttemptPending",false).apply();
         googleGeneration++; googleBusy=false;
         if(googleUser==null)restoreLocalArchive();else if(!googleAccessToken.isEmpty())loadArchive();
         statusText.setText(english?"Google connection cancelled. Your local archive is unchanged.":"Google-Verbindung abgebrochen. Dein lokales Archiv bleibt unverändert.");
@@ -112,31 +162,39 @@ public class MainActivity extends Activity {
 
     private void connectGoogle(boolean chooseAccount) {
         if (googleBusy) return;
+        if(!getPreferences(0).getBoolean("googleWelcomeAccepted",false)){showGoogleWelcome(chooseAccount);return;}
         // Keep the current account, local archive and selection until a new login succeeds.
         googleBusy = true;
         final int generation = ++googleGeneration;
         pendingGoogleGeneration = generation;
+        googleStarted=android.os.SystemClock.elapsedRealtime();
+        getPreferences(0).edit().putBoolean("googleAttemptPending",true).apply();
+        googleStage("authorize",45000);
         statusText.setText(english ? "Connecting to Google…" : "Google wird verbunden…");
         AuthorizationRequest.Builder builder = AuthorizationRequest.builder().setRequestedScopes(java.util.Arrays.asList(
             new Scope("https://www.googleapis.com/auth/drive.appdata"),
             new Scope("openid"), new Scope("https://www.googleapis.com/auth/userinfo.email"),
             new Scope("https://www.googleapis.com/auth/calendar.app.created"), new Scope("https://www.googleapis.com/auth/calendar.calendarlist.readonly")));
         if (chooseAccount) builder.setPrompt(AuthorizationRequest.Prompt.SELECT_ACCOUNT);
-        Identity.getAuthorizationClient(this).authorize(builder.build())
+        try { Identity.getAuthorizationClient(this).authorize(builder.build())
             .addOnSuccessListener(result -> {
                 if (generation != googleGeneration || isFinishing()) return;
                 if (result.hasResolution()) {
+                    googleStage("account_and_permissions",120000);
                     try { startIntentSenderForResult(result.getPendingIntent().getIntentSender(), GOOGLE_REQUEST, null, 0, 0, 0); }
                     catch (Exception error) { googleFailure(error); }
                 } else useGoogleResult(result, generation);
             })
-            .addOnFailureListener(error -> { if (generation == googleGeneration) googleFailure(error); });
+            .addOnFailureListener(error -> { if (generation == googleGeneration) googleFailure(error); })
+            .addOnCanceledListener(() -> { if(generation==googleGeneration)cancelGoogleConnection(); });
+        } catch(Exception error) { if(generation==googleGeneration)googleFailure(error); }
     }
 
     @Override protected void onActivityResult(int requestCode, int resultCode, android.content.Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode != GOOGLE_REQUEST) return;
-        if (pendingGoogleGeneration != googleGeneration) return;
+        if (pendingGoogleGeneration != googleGeneration || !googleBusy){googleTrace("LATE_RESULT_IGNORED");return;}
+        googleTrace("ACTIVITY_RESULT_"+resultCode+(data==null?"_NO_DATA":""));
         if (resultCode != RESULT_OK || data == null) {
             cancelGoogleConnection();
             return;
@@ -146,6 +204,9 @@ public class MainActivity extends Activity {
     }
 
     private void useGoogleResult(AuthorizationResult result, int generation) {
+        if(generation!=googleGeneration || !googleBusy || isFinishing())return;
+        googleStage("permissions_returned",60000);
+        googleTrace(result.getGrantedScopes().contains("https://www.googleapis.com/auth/calendar.app.created")?"CALENDAR_PERMISSION_GRANTED":"CALENDAR_PERMISSION_NOT_GRANTED");
         if (!result.getGrantedScopes().contains("https://www.googleapis.com/auth/drive.appdata")) {
             googleFailure(new Exception("GOOGLE_PERMISSION_MISSING\nGoogle did not grant the required Drive app-data permission.")); return;
         }
@@ -154,17 +215,25 @@ public class MainActivity extends Activity {
         network.execute(() -> {
             try {
                 SharedKeyClient client = new SharedKeyClient(accessToken);
+                googleTrace("IDENTITY_REQUEST");
                 SharedKeyClient.Result user = client.identify();
+                googleTrace("IDENTITY_OK");
                 SharedKeyClient.Result value;Exception keyProblem=null;
-                try{value=client.load(user);}catch(Exception failure){value=user;keyProblem=failure;}
+                googleTrace("DRIVE_KEY_REQUEST");
+                try{value=client.load(user);googleTrace("DRIVE_KEY_OK");}catch(Exception failure){value=user;keyProblem=failure;googleTrace("DRIVE_KEY_FAILED");}
                 final SharedKeyClient.Result loaded=value;final Exception keyFailure=keyProblem;
                 String cached = loaded.key.isEmpty() ? KeyCache.load(this, user.owner) : "";
                 if (!loaded.key.isEmpty()) {
+                    googleTrace("TMDB_VALIDATE_REQUEST");
                     new TmdbClient(loaded.key).validate();
+                    googleTrace("TMDB_VALIDATE_OK");
+                    if(generation!=googleGeneration || isFinishing())return;
                     KeyCache.save(this, user.owner, loaded.key);
                 }
                 handler.post(() -> {
                     if (generation != googleGeneration || isFinishing()) return;
+                    googleTrace("CONNECTED");stopGoogleTimeout();
+                    getPreferences(0).edit().putBoolean("googleAttemptPending",false).apply();
                     googleBusy = false;
                     boolean accountChanged=googleUser==null || !googleUser.owner.equals(user.owner);
                     if(accountChanged){
@@ -226,11 +295,16 @@ public class MainActivity extends Activity {
     }
 
     private void googleFailure(Exception error) {
+        googleTrace("FAILED_"+error.getClass().getSimpleName());stopGoogleTimeout();
         GoogleHttpFailure.record(this,error);
+        getPreferences(0).edit().putBoolean("googleAttemptPending",false).apply();
         googleBusy = false;
         String code = error.getMessage() == null ? "" : error.getMessage();
         String message;
-        if (code.contains("SHARED_KEY_CONFLICT")) message = english ? "Different shared keys found. Nothing overwritten."
+        if(code.contains("GOOGLE_AUTHORIZATION_TIMEOUT"))message=english
+            ? "Google connection timed out. Open Menu > Google account to retry. Details are in Log."
+            : "Zeitüberschreitung bei der Google-Verbindung. Erneut versuchen über Menü > Google-Konto. Details stehen im Log.";
+        else if (code.contains("SHARED_KEY_CONFLICT")) message = english ? "Different shared keys found. Nothing overwritten."
             : "Unterschiedliche gemeinsame Schlüssel gefunden. Nichts überschrieben.";
         else if (code.contains("GOOGLE_HTTP_403")) message = english ? "Google denied access. Check Drive API and app-data permission."
             : "Google verweigert Zugriff. Drive-API und App-Daten-Berechtigung prüfen.";
@@ -405,8 +479,8 @@ public class MainActivity extends Activity {
                 }));
             }else archiveCopy.updateToken(googleAccessToken);
             archiveCopy.setListener(()->handler.post(()->{if(generation==googleGeneration && !isFinishing())refreshLocalCopy();}));
-            archiveBusy=false;archiveError="";refreshLocalCopy();archiveCopy.schedule(0);
-        }catch(Exception error){archiveError=String.valueOf(error.getMessage());renderArchive();}
+            archiveBusy=false;archiveError="";refreshLocalCopy();googleTrace("ARCHIVE_LOAD_SCHEDULED");archiveCopy.schedule(0);
+        }catch(Exception error){GoogleHttpFailure.record(this,error);googleTrace("ARCHIVE_LOAD_FAILED");archiveError=String.valueOf(error.getMessage());renderArchive();}
     }
     private void renderArchive() {
         if(archiveRows==null || archiveStatus==null) return;
@@ -540,6 +614,7 @@ public class MainActivity extends Activity {
             .setMessage(english
                 ? "Enter a series title; year and season are optional. Choose a result, then Add to archive. After saving, the fields are cleared for the next series.\n\nTap an archive entry to view it. Edit opens notes, watched status and deletion. Google and TMDB settings are in the archive menu."
                 : "Serientitel eingeben; Jahr und Staffel sind optional. Einen Treffer auswählen und mit Ins Archiv übernehmen. Nach dem Speichern sind die Felder für die nächste Serie wieder leer.\n\nEinen Archiveintrag zum Anzeigen antippen. Bearbeiten öffnet Notizen, Gesehen-Status und Löschen. Google- und TMDB-Einstellungen stehen im Archivmenü.")
+            .setNeutralButton(english?"Privacy policy":"Datenschutz",(d,w)->openPrivacy())
             .setPositiveButton(english?"Close":"Schließen",null).show();
     }
 
@@ -666,6 +741,8 @@ public class MainActivity extends Activity {
     }
 
     @Override protected void onDestroy() {
+        if(googleBusy)googleTrace("ACTIVITY_DESTROYED_DURING_LOGIN");
+        stopGoogleTimeout();
         handler.removeCallbacks(closeProgressTicker);
         requestGeneration++;
         googleGeneration++;
@@ -789,7 +866,14 @@ public class MainActivity extends Activity {
             dark=getPreferences(0).getBoolean("dark",true); setPalette();
             configureFullscreen_();
             buildScreen();
-            handler.post(() -> { if (!isFinishing()) connectGoogle(false); });
+            boolean interrupted=getPreferences(0).getBoolean("googleAttemptPending",false);
+            GoogleHttpFailure.event(this,"APP_START",0,"startup",0);
+            if(interrupted){
+                googleTrace("PREVIOUS_ATTEMPT_INTERRUPTED");
+                getPreferences(0).edit().putBoolean("googleAttemptPending",false).apply();
+                restoreLocalArchive();
+                statusText.setText(english?"Previous Google connection did not finish. Retry through Menu > Google account. Details are in Log.":"Die letzte Google-Verbindung wurde nicht abgeschlossen. Erneut versuchen über Menü > Google-Konto. Details stehen im Log.");
+            }else handler.post(() -> { if (!isFinishing()) connectGoogle(false); });
         } catch (Throwable error) {
             showStartupError_(error);
         }

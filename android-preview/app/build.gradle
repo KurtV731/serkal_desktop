@@ -5,13 +5,13 @@ def previewVersion = releaseInfo.version
 
 android {
     namespace 'de.serkal.android.preview'
-    compileSdk 35
+    compileSdk 36
 
     defaultConfig {
         // Stable application identity throughout the 0.0.5 previews.
         applicationId 'de.serkal.android.preview.v005'
         minSdk 24
-        targetSdk 35
+        targetSdk 36
         versionCode releaseInfo.androidVersionCode as int
         versionName previewVersion
         buildConfigField 'int', 'SERKAL_RELEASE', releaseInfo.number.toString()

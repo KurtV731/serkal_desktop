@@ -37,10 +37,10 @@ jobs:
         working-directory: android-preview
         run: |
           sha256sum app/build/outputs/bundle/release/app-release.aab > app-release.aab.sha256
-          printf 'sourceCommit=aad44b929401d3c85c7bb9ec43405208249f53bb\nversionName=1.2.4\nversionCode=47\napplicationId=de.serkal.android.preview.v005\n' > app-release.aab.metadata.txt
+          printf 'sourceCommit=${{ github.sha }}\nversionName=1.2.5\nversionCode=49\napplicationId=de.serkal.android.preview.v005\n' > app-release.aab.metadata.txt
       - uses: actions/upload-artifact@v4
         with:
-          name: SerKal-Android-1.2.4-code47-unsigned-aab
+          name: SerKal-Android-1.2.5-code49-unsigned-aab
           path: |
             android-preview/app/build/outputs/bundle/release/app-release.aab
             android-preview/app-release.aab.sha256
