@@ -5673,3 +5673,26 @@ Enthalten:
 Nächster technischer Schritt: bestehende private Upload-Signatur auf Kurts PC mit Alias `serkal-preview`, Ergebnis `SerKal-Android-1.2.5-code49.aab`; Signatur und SHA-256 der fertigen Datei prüfen. Erst dann als neuen Release im bestehenden internen Test hochladen. Kein neuer Paketname, kein neuer Teilnahme-Link und keine Deinstallation/Archivlöschung als Standardanweisung. Anschließend Update vom Play Store auf Pixel und Samsung A54 praktisch prüfen, beim Hänger neues Log auswerten. Reale Samsung-Ursache noch nicht bestätigt behoben.
 
 Fachlicher Bau-/Abnahmehinweis im Quellzweig: `1 docs/android/play-login-1.2.5.md`. Diese Notiz ist keine zweite Kommunikationsstelle. Bestehender interner Test 1.2.4 bleibt bis zum tatsächlichen Upload die verfügbare Play-Fassung.
+
+## Installer – 13.11.2026: Android 1.2.5 / Code 49 signiert und für Play geprüft
+
+Status: **PRIVATE SIGNATUR UND TECHNISCHE GEGENPRÜFUNG FERTIG / PLAY-UPLOAD UND GERÄTETEST OFFEN**.
+
+Kurt hat die unveränderte, geprüfte Code-49-AAB lokal mit dem bestehenden privaten Uploadschlüssel und Alias `serkal-preview` signiert. Ergebnis:
+
+- Datei: `SerKal-Android-1.2.5-code49.aab`
+- Größe: `2202622` Bytes
+- SHA-256 der fertigen AAB: `83a595ac57f4093283e8f9fbfd27e8fdc635f70daf9e67f04b70f9b40a8a3a88`
+- Signierer: `CN=SerKal Android Preview, O=SerKal, C=DE`
+- Signaturalgorithmus: `SHA256withRSA`, 3072-Bit-RSA
+- SHA-1 des lokalen Uploadzertifikats: `0D:63:F5:08:DC:1F:E1:4E:97:6C:22:1A:0C:27:98:D3:A1:51:59:86`
+- SHA-1 des Google-Play-App-Signierzertifikats für Android-OAuth: `F9:CD:54:1E:1B:0D:8E:92:29:8B:44:8A:C4:D6:1A:E2:74:9B:1A:9F`
+- SHA-256 des lokalen Uploadzertifikats: `7E:24:90:2D:D8:8E:D8:0F:B8:4E:0F:FC:3B:18:8A:1E:0C:88:E3:0C:B2:A8:42:47:A0:3C:F4:BA:41:66:67:EB`
+- Zertifikat gültig bis 22.02.2054
+
+Die lokale Signaturprüfung meldete `jar verified`. Die bekannten Hinweise zum selbstsignierten Uploadzertifikat, zur nicht öffentlichen Zertifikatskette und zum fehlenden Zeitstempel sind für diesen Android-Uploadschlüssel erwartet. Eine unabhängige Gegenprüfung bestätigte den endgültigen Datei-Hash, das erwartete Signierzertifikat, eine fehlerfreie ZIP/AAB-Struktur sowie 126 gegenüber der geprüften unsignierten AAB unveränderte Nutzdaten-Einträge. Hinzugekommen sind ausschließlich die Signaturdaten unter `META-INF`.
+
+Wichtig: Der lokale Signierablauf prüft den **Uploadschlüssel**. Für die Google-Anmeldung einer aus Google Play installierten App ist dagegen der **Play-App-Signierschlüssel** maßgeblich; dessen SHA-1 muss in der Android-OAuth-Konfiguration für das Paket `de.serkal.android.preview.v005` hinterlegt sein.
+
+Die Datei ist damit technisch zum Hochladen als neuer Release im **bestehenden internen Google-Play-Test** bereit. Noch nicht als hochgeladen oder auf Geräten getestet verbuchen. Nach dem Upload Play-Update auf Kurts Pixel und auf dem betroffenen Samsung A54 durchführen und insbesondere Willkommenstext, Google-Rückgabe, Timeout-Verhalten und neues lokales Login-Log prüfen.
+
