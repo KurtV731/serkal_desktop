@@ -5642,3 +5642,34 @@ Für die endgültige Play-Datei muss dieselbe AAB noch mit dem bestehenden priva
 - Zertifikat SHA-256: `7e24902dd88ed80fb84e0ffc3b188a1e0c88e30cb2a84247a03cf4ba416667eb`
 
 Der Schlüssel liegt gesichert vor; sein Kennwort ist absichtlich weder im Repository noch im Schwarzen Brett gespeichert. Installer-Chatty hat Kurt deshalb die unsignierte AAB, einen lokalen Signierstarter mit verdeckter Kennwortabfrage und einen Bau-/Prüfnachweis bereitgestellt. Erst nach erfolgreicher lokaler Signatur sind Signaturprüfung, endgültige Dateigröße und SHA-256 der hochzuladenden AAB nachzutragen. Noch kein Upload in die Play Console und keine öffentliche Veröffentlichung.
+
+
+## CE SerKal – 13.11.2026: Android 1.2.5 / Code 49 – Google-Anmeldediagnose und Einstieg
+
+Status: **QUELLSTAND, UNIT-TESTS UND UNSIGNIERTE AAB FERTIG / PRIVATE SIGNATUR, PLAY-UPLOAD UND GERÄTETEST OFFEN**.
+
+Kurt hat nach dem ersten externen Testerbericht ein Update des internen Play-Tests mit allen besprochenen Korrekturen beauftragt. Bericht: Samsung A54, Installation über Play-Testlink, keine bewusst eingerichteten Google-Einschränkungen; nach Kontofreigabe dauerhaft drehende Kontoauswahl, erneute Anmeldung bei Neustart, kein verwertbares App-Log. Ursache dieses Hängers weiterhin offen. Der zuvor bei Kurt korrigierte fehlende SHA-1 der Play-App-Signierung war ein separater Konfigurationsfehler; Anmeldung funktioniert bei Kurt nach zusätzlichem Android-OAuth-Client. Nicht pauschal als Lösung für Samsung ausgeben.
+
+Verbindlicher neuer Quellstand:
+- Repository: KurtV731/serkal_desktop
+- Branch: `ce-play-login-1.2.5`
+- App-/Testquellcommit: `d8f22dc08cb2b68b66d498882639405d204386c8`
+- Version 1.2.5, androidVersionCode 49, compile/targetSdk 36
+- applicationId unverändert `de.serkal.android.preview.v005`
+- gemeinsames Archivformat/Release 38 unverändert, kompatibel zum bisherigen Desktopstand
+- Grundlage: freigegebener Funktionsstand 1.2.4 auf installer-play-aab-1.2.4; keine ungeprüften internen 1.3-Funktionen übernommen.
+- erfolgreicher Test-/Bundlelauf: https://github.com/KurtV731/serkal_desktop/actions/runs/43388702074
+- Artefakt: `SerKal-Android-1.2.5-code49-unsigned-aab`
+- SHA-256 der unsignierten AAB: `fca9ea0112c5e2164a049c0197a89fe392ef7e4ca1633d7843a75f8c3b8df3dc`
+- AAB zusätzlich samt Hash/Metadaten als Base64-Teile unter `play-build-output/` auf demselben Branch gesichert.
+
+Enthalten:
+1. DE/EN-Willkommenshinweis VOR erster Google-Anfrage: Drive-App-Datenbereich (Archiv/TMDB-Schlüssel), Kalenderliste, von SerKal erstellte Kalender, Konto-ID/E-Mail zur Zuordnung. Weiter zu Google, Später und Datenschutz. Keine neuen Scopes.
+2. Offenen Website-Auftrag erledigt: Datenschutz-Link ohne Anmeldung in Hilfe und Willkommensdialog, DE privacy.html / EN privacy-en.html; Browseraufruf getestet.
+3. Login-Diagnose im vorhandenen Menü-Log auch ohne Archiv: UTC-Zeit, Version/Code, Android-API/Gerätemodell, Versuch/Schritt/Laufzeit, SDK-Rückgabe, ApiException-Statuscode, Abbruch, Task-Abbruch, Activity-Ende, Identitäts-/Drive-Schlüssel-/TMDB-Prüfung und Start des Archivladens. Neue Diagnoseereignisse enthalten keine Kontoadressen, Schlüssel, Tokens oder Archivdaten. Keine automatische Übermittlung. 256-KiB-Rotation mit einer Vorgängerdatei; bestehende separate HTTP-/Archivlogs bleiben bestehen.
+4. Begrenzte Wartezustände: authorize 45 s, Konto-/Berechtigungsdialog 120 s, anschließende Identitäts-/Schlüsselprüfung 60 s. Timeout protokolliert und sichtbar, späte Rückgaben verworfen. Nach unterbrochenem Lauf Hinweis und manuelle Wiederholung statt sofortiger automatischer Schleife.
+5. Robolectric-Tests für Erklärung/Später, Abbruchprotokoll, Timeout/späte Rückgabe und Datenschutz ohne Anmeldung. Bestehende Regression bestanden. Robolectric 4.14.1 auf unterstützte API 35 festgelegt; Produkt zielt auf API 36. AGP 8.7.3 meldet dazu weiterhin eine nicht blockierende compileSdk-Kompatibilitätsempfehlung, keine Fehlerfreiheit aller Buildwarnungen behaupten.
+
+Nächster technischer Schritt: bestehende private Upload-Signatur auf Kurts PC mit Alias `serkal-preview`, Ergebnis `SerKal-Android-1.2.5-code49.aab`; Signatur und SHA-256 der fertigen Datei prüfen. Erst dann als neuen Release im bestehenden internen Test hochladen. Kein neuer Paketname, kein neuer Teilnahme-Link und keine Deinstallation/Archivlöschung als Standardanweisung. Anschließend Update vom Play Store auf Pixel und Samsung A54 praktisch prüfen, beim Hänger neues Log auswerten. Reale Samsung-Ursache noch nicht bestätigt behoben.
+
+Fachlicher Bau-/Abnahmehinweis im Quellzweig: `1 docs/android/play-login-1.2.5.md`. Diese Notiz ist keine zweite Kommunikationsstelle. Bestehender interner Test 1.2.4 bleibt bis zum tatsächlichen Upload die verfügbare Play-Fassung.
