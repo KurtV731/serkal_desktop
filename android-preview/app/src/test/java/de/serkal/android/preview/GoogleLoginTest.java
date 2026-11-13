@@ -51,6 +51,7 @@ public class GoogleLoginTest {
         try{
             call(a,"showHelp",new Class<?>[]{});
             ShadowAlertDialog.getLatestAlertDialog().getButton(AlertDialog.BUTTON_NEUTRAL).performClick();
+            Shadows.shadowOf(android.os.Looper.getMainLooper()).idle();
             assertEquals("https://serkal.de/privacy.html",Shadows.shadowOf(a).getNextStartedActivity().getDataString());
             assertFalse((Boolean)get(a,"googleBusy"));
         }finally{c.destroy();}
