@@ -40,8 +40,19 @@ public class GoogleLoginTest {
             call(a,"googleStage",new Class<?>[]{String.class,long.class},"authorize",1000L);
             Shadows.shadowOf(android.os.Looper.getMainLooper()).idleFor(Duration.ofSeconds(1));
             assertFalse((Boolean)get(a,"googleBusy"));assertEquals(5,get(a,"googleGeneration"));
+            call(a,"onActivityResult",new Class<?>[]{int.class,int.class,android.content.Intent.class},505,android.app.Activity.RESULT_OK,null);
+            assertEquals(5,get(a,"googleGeneration"));
             assertTrue(((TextView)get(a,"statusText")).getText().toString().contains("Zeitüberschreitung"));
             String log=GoogleHttpFailure.readLog(a);assertTrue(log.contains("TIMEOUT"));assertTrue(log.contains("authorize"));
+        }finally{c.destroy();}
+    }
+    @Test public void helpOpensPrivacyWithoutGoogleLogin()throws Exception{
+        ActivityController<MainActivity> c=Robolectric.buildActivity(MainActivity.class).create();MainActivity a=c.get();
+        try{
+            call(a,"showHelp",new Class<?>[]{});
+            ShadowAlertDialog.getLatestAlertDialog().getButton(AlertDialog.BUTTON_NEUTRAL).performClick();
+            assertEquals("https://serkal.de/privacy.html",Shadows.shadowOf(a).getNextStartedActivity().getDataString());
+            assertFalse((Boolean)get(a,"googleBusy"));
         }finally{c.destroy();}
     }
     @Test public void cancellationIsPersistedWithoutAccountOrCredentials()throws Exception{

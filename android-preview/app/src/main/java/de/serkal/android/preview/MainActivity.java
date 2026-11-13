@@ -215,12 +215,15 @@ public class MainActivity extends Activity {
         network.execute(() -> {
             try {
                 SharedKeyClient client = new SharedKeyClient(accessToken);
+                if(generation!=googleGeneration || isFinishing())return;
                 googleTrace("IDENTITY_REQUEST");
                 SharedKeyClient.Result user = client.identify();
+                if(generation!=googleGeneration || isFinishing())return;
                 googleTrace("IDENTITY_OK");
                 SharedKeyClient.Result value;Exception keyProblem=null;
                 googleTrace("DRIVE_KEY_REQUEST");
                 try{value=client.load(user);googleTrace("DRIVE_KEY_OK");}catch(Exception failure){value=user;keyProblem=failure;googleTrace("DRIVE_KEY_FAILED");}
+                if(generation!=googleGeneration || isFinishing())return;
                 final SharedKeyClient.Result loaded=value;final Exception keyFailure=keyProblem;
                 String cached = loaded.key.isEmpty() ? KeyCache.load(this, user.owner) : "";
                 if (!loaded.key.isEmpty()) {
