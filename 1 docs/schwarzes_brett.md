@@ -5696,3 +5696,18 @@ Wichtig: Der lokale Signierablauf prüft den **Uploadschlüssel**. Für die Goog
 
 Die Datei ist damit technisch zum Hochladen als neuer Release im **bestehenden internen Google-Play-Test** bereit. Noch nicht als hochgeladen oder auf Geräten getestet verbuchen. Nach dem Upload Play-Update auf Kurts Pixel und auf dem betroffenen Samsung A54 durchführen und insbesondere Willkommenstext, Google-Rückgabe, Timeout-Verhalten und neues lokales Login-Log prüfen.
 
+
+
+## CE HASA – 14.11.2026: Obi-Wans Flottendetail-Pop-up korrigiert (Alpha 11)
+
+Meldung von Obi-Wan: HASA erscheint im Flotten-Pop-up, großer leerer Kasten und nicht schließbar. Screenshot zeigt Alpha10, Flottendetailroute `cmd=fleet&subcmd=view&fleet_id=…`, eingeklappte HASA-Kopfzeile.
+
+Nachgewiesen: gleicher main.php-Match und kopierter aktiver sessionStorage-Zustand beim window.open-Start; @noframes verhindert diese Top-Level-Fenster nicht. Diese konkrete Flottendetailroute wird nun vor jeder Initialisierung ausgeschlossen, auch beim direkten/noopener-Aufruf. Haupt-Flottenübersicht und andere Hauptseiten bleiben aktiv. Nicht pauschal alle Fenster mit opener sperren.
+
+Eingeklappt war weiterhin min-height: 220px gesetzt. Jetzt kompakte Kopfzeile mit min-height: 0 und ohne überlagernde Resize-Griffe; Aufklappen stellt Größe/Griffe wieder her. Die Hauptschalter werden vor optionalen Layout-/Bindeschritten verbunden, damit sie auch bei einem späteren Layoutfehler reagieren können. Die konkrete Ursache von Obi-Wans gemeldeter fehlender Reaktion ist ohne Konsolenfehler nicht abschließend belegt; das Fehlerverhalten wurde gezielt simuliert und die Bedienbarkeit geprüft.
+
+Quellcommit in `KurtV731/hasa`: `82d3aa6269a89ca2cd40931b1519cf6b7dca96b9`, 1.3.0 Alpha 11. Neue Vollskript-Browserprüfung: echtes window.open mit geerbter aktiver Sitzung, direkter Detailtab, Hauptfenster unverändert, normale Flottenübersicht, kompakte gefaltete Höhe, Aus/Ein, Klappen, Resize-Griffe und simulierter optionaler Layoutfehler. Gesamte vorhandene Regression vor Kanalübernahme grün. Ein bestehender asynchroner Ereignistest wartet jetzt auf seinen erwarteten Zustand innerhalb von 3 Sekunden statt starrer 100 ms; damit weiterhin unter dem 30-Sekunden-Hintergrundpoll und keine abgeschwächte fachliche Aussage.
+
+Handbuch und `03 Dokumentation/release-alpha11.md` ergänzt. Website-Chatty übernimmt die Bedienungsbeschreibung bei der Handbuchaufbereitung. Veröffentlichung im bisherigen Alpha-Updatekanal; stabile 1.2 bleibt separat. Keine PHP-/Datenbankänderung, kein Serverupload, keine Datenlöschung oder Spielaktion. Tester: vorhandenes HASA aktualisieren, Horizon-Hauptseite neu laden und bereits offene Flottendetailfenster schließen/neu öffnen. Private Originalbilder nicht auf GitHub veröffentlicht.
+
+Prüflauf: https://github.com/KurtV731/hasa/actions/runs/43630547679 (bestanden).
