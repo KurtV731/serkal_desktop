@@ -5711,3 +5711,12 @@ Quellcommit in `KurtV731/hasa`: `82d3aa6269a89ca2cd40931b1519cf6b7dca96b9`, 1.3.
 Handbuch und `03 Dokumentation/release-alpha11.md` ergänzt. Website-Chatty übernimmt die Bedienungsbeschreibung bei der Handbuchaufbereitung. Veröffentlichung im bisherigen Alpha-Updatekanal; stabile 1.2 bleibt separat. Keine PHP-/Datenbankänderung, kein Serverupload, keine Datenlöschung oder Spielaktion. Tester: vorhandenes HASA aktualisieren, Horizon-Hauptseite neu laden und bereits offene Flottendetailfenster schließen/neu öffnen. Private Originalbilder nicht auf GitHub veröffentlicht.
 
 Prüflauf: https://github.com/KurtV731/hasa/actions/runs/43630547679 (bestanden).
+
+
+## HASA – Alpha 12: Atommüllkorrektur (14.11.2026)
+
+Im Alpha-Updatekanal dev-1.3-alpha1 veröffentlicht: `40281d7eb4d2a301d0bd8fa3632bd14ab3126192`; geprüfter Quellcommit `43ca676594c21edc83497aded670cfadb5825eff`. Jede unterschiedliche Entsorgungsbestätigung erledigt eine ältere Ladung desselben Planeten. Mehrere Starts blockieren das Verrechnen nicht mehr; bei unklarer Zuordnung keine erfundene Ursprungs-ID anzeigen. Zwei Starts/zwei Enden entfernen die Warnung. Gelesene Originalmeldungen bleiben gegen Einzellöschung gesperrt (unabhängig von CSS-Klasse, echte Energiebehörde/Koordinaten prüfen). Keine Spielentscheidung automatisiert, kein PHP-/Datenbankupdate.
+
+Arbeitshypothese aus Styls zwei Messungen: Reaktorstufe 2 je Ladung 200 ts Bauplatz; andere Stufen/Forschungseinflüsse ungeprüft. Keine automatische Bauplatzmesskurve implementiert. Handbuch Hauptdatei auf main/dev ergänzt, Stand Alpha 12. Website kann diese Ergänzung übernehmen.
+
+Vollständige Regression erfolgreich: https://github.com/KurtV731/hasa/actions/runs/43650703696 . Einschließlich echtem Browser: Gelesen-Klassenwechsel erhält Löschschutz; zwei Ladungen/eine Bestätigung/eine offen, zwei Bestätigungen/keine offen, Dubletten und neue spätere Ladung.
