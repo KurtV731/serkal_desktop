@@ -5785,3 +5785,24 @@ Status: **LOKALER KANDIDAT ERFOLGREICH GEBAUT UND ALS UPDATE GESTARTET / ARCHIV 
 - Ein-Klick-Batch lief auf Kurts Windows-PC ohne Nachbesserung vollständig bis „zur Abnahme bereit“ durch. Die erzeugte Ein-Datei-EXE meldete „SerKal Desktop wurde erfolgreich installiert/aktualisiert“ und startete sichtbar als Version 1.2.5.
 - Vorhandenes Archiv wurde nach dem Update mit `92` Einträgen angezeigt; damit ist der Erhalt des bestehenden Archivs praktisch belegt.
 - Noch nicht als vollständig abgenommen gelten: Google-Verbindung sowie eine geeignete Kalenderübertragung einschließlich Fortschritt/Pausen/Erholung. Bis zu diesem Nachweis bleibt die Website-Public 1.2.4 unverändert.
+
+
+## CE SerKal – 16.11.2026: Desktop 1.2.6 – echte Fenster für Google-Abschluss (Kurts wiederholte Vorgabe)
+
+Status: **VERBINDLICHER KORREKTURAUFTRAG AUFGENOMMEN / URSACHE IM QUELLCODE BESTÄTIGT / NOCH NICHT IMPLEMENTIERT ODER ABGENOMMEN**.
+
+Kurt beanstandet nach Installation des 1.2.5-Kandidaten erneut die bildschirmfüllende Google-Abschlussseite „SerKal ist mit Google Kalender verbunden. Dieses Fenster kann jetzt geschlossen werden.“ Gewünscht ist seit längerem ein echtes separat schließbares Fenster in normaler Größe. Eine Browserseite mit dem Wort „Fenster“ erfüllt diesen Auftrag nicht. Dieser Punkt gehört in Desktop **1.2.6**, kein stiller Austausch der bereits installierten 1.2.5 unter derselben Versionsnummer.
+
+Bestätigte Quelle: freigegebener Anwendungsstand `7be1db9003ba5bd4b4ff8c5efb291595229ceb85`, `2 src/backend/main.js`, `googleOauthBrowserLogin_`. Er öffnet die Anmeldung mit `shell.openExternal(authUrl)` im normalen Systembrowser. Der lokale OAuth-Rückruf liefert nach Erfolg lediglich HTML mit dem obigen Satz; er erzeugt kein eigenes Fenster und steuert die Größe des Browserfensters nicht. Dieser Teil wurde von CE mit 1.2.5 unverändert freigegeben; es ist kein Verpackungsfehler des Installers.
+
+Abnahmekriterien für die Korrektur:
+- Der Google-Anmelde-/Abschlussablauf soll in einem separaten normalen Fenster bedienbar sein, mit sichtbarer Titelleiste/Schließen-Schaltfläche und begrenzter Anfangsgröße auf dem jeweiligen Bildschirm; kein erzwungenes maximiertes/Vollbildfenster und keine Übernahme eines bestehenden großen Browser-Tabs als vermeintliches Dialogfenster.
+- Nach Abschluss SerKal wieder erreichbar/fokussiert; klare kurze Rückmeldung DE/EN. Erfolg, Abbruch und Fehler testen.
+- Eine kleinere HTML-Karte innerhalb derselben großen Browserseite gilt nicht als Umsetzung. Ebenso wenig ein neuer Text, der diese Seite nur „Fenster“ nennt.
+- Google-Anmeldung weiter im unterstützten externen Systembrowser durchführen, nicht als eingebettete Electron-Anmeldeseite. Das konkrete Öffnen eines separaten Browserfensters und dessen Rückkehr/Schließen muss im Zielbrowser praktisch geprüft werden; keine pauschale Schließzusage für fremde Browserfenster.
+- Vor Freigabe auf Kurts Windows-PC mit seinem tatsächlichen Browser prüfen, Screenshot des vollständigen Fensters/der Titelleiste als Abnahmenachweis. Unit-/CI-Erfolg allein bestätigt die Fensterbedienung nicht.
+- Sonstige Wünsche für 1.2.6 gesondert sammeln; diese Notiz erklärt keinen neuen Build für fertig. Vorhandene Kalenderstabilisierung aus 1.2.5 übernehmen, Public und Archiv unverändert lassen.
+
+Zusatzbefund, noch kein zweiter umgesetzter Auftrag: Auch SerKals Hauptfenster ruft im aktuellen Code `maximize()` beim Start auf. Bei der Umsetzung Fensterrollen sauber trennen; der vorliegende Screenshot zeigt ausdrücklich die Google-Abschlussseite.
+
+Google-Grundlage zum externen Browser: https://developers.google.com/identity/protocols/oauth2/native-app und https://developers.google.com/identity/protocols/oauth2/policies (16.11.2026 geprüft).
