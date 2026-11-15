@@ -26,7 +26,7 @@ jobs:
         with:
           node-version: "24"
 
-      - name: Create CI-only OAuth fixture
+      - name: Create CI-only OAuth and icon fixtures
         shell: pwsh
         run: |
           $private = 'C:\ppd\serkal\serkal_private'
@@ -43,6 +43,16 @@ jobs:
             }
           }
           '@ | Set-Content -Encoding utf8 -LiteralPath (Join-Path $private 'google_oauth_client.json')
+
+          # The real candidate uses Kurt's established local SerKal ICO. CI uses a
+          # known-valid Windows ICO only to exercise the complete packaging path.
+          $iconFolder = 'C:\ppd\serkal\serkal_dev\serkal_desktop\4 assets\icon'
+          New-Item -ItemType Directory -Path $iconFolder -Force | Out-Null
+          Add-Type -AssemblyName System.Drawing
+          $systemIcon = [Drawing.Icon]::ExtractAssociatedIcon((Join-Path $env:WINDIR 'System32\notepad.exe'))
+          if (-not $systemIcon) { throw 'CI konnte kein gueltiges Windows-ICO erzeugen.' }
+          $iconStream = [IO.File]::Create((Join-Path $iconFolder 'serkal.ico'))
+          try { $systemIcon.Save($iconStream) } finally { $iconStream.Dispose(); $systemIcon.Dispose() }
 
       - name: Run the exact one-click build batch
         shell: cmd
