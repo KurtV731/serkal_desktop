@@ -5770,3 +5770,18 @@ Status: **EIN-KLICK-BAUWEG UNTER WINDOWS VOLLSTÄNDIG BESTANDEN / ECHTER LOKALER
 - Unabhängiger endgültiger Windows-Lauf erfolgreich: https://github.com/KurtV731/serkal_desktop/actions/runs/43768725267 (Job `132979598957`). Nachweis: Quellstand `7be1db9003ba5bd4b4ff8c5efb291595229ceb85`, 43 Testprogramme, Setup- und Ein-Datei-Installer-Bau, SHA-Prüfung, Dateiversion `1.2.5.0`, eingebettetes Setup bytegleich zum gebauten Setup, stille Installation und tatsächlicher Start von SerKal 1.2.5 über zwölf Sekunden.
 - Der Windows-Vorlauf verwendete absichtlich nur eine ungültige CI-OAuth-Testdatei und ein technisch gültiges Windows-Testsymbol. Seine EXE wird deshalb **nicht verteilt**. Vorlauf-Dateigröße `140190208` Bytes, SHA-256 `e7265ef188dc5608b7c80369d73620b75bc943969334c2fe93586b219d07c1d5` – nur zur Reproduzierbarkeit des Vorlaufs, nicht als Freigabehash.
 - Nächster Schritt: denselben geprüften Starter lokal auf Kurts Windows-PC mit vorhandener echter Desktop-OAuth-Grunddatei und bewährtem SerKal-Symbol ausführen. Danach den dort erzeugten Kandidaten installieren und die in Auftragspunkt 5 genannte Sicht-/Upgrade-/Google-/Kalenderprüfung durchführen. Erst Kurts Abnahme erlaubt den Austausch der Public 1.2.4.
+
+
+### Installer-Praxisstand 15.11.2026, 23:47 Uhr – echter lokaler Kandidat gebaut und installiert
+
+Status: **LOKALER KANDIDAT ERFOLGREICH GEBAUT UND ALS UPDATE GESTARTET / ARCHIV ERHALTEN / GOOGLE- UND KALENDERPRAXIS NOCH OFFEN / KEIN PUBLIC-AUSTAUSCH**.
+
+- Kandidat: `C:\ppd\serkal\veroeffentlichungen\1.2.5\kandidat-20261115-234153-21736\serkal-desktop.exe`
+- Sichtbare Version: `SerKal Desktop 1.2.5`
+- Release-Stand: `38`
+- Anwendungsquellstand: `7be1db9003ba5bd4b4ff8c5efb291595229ceb85`
+- Dateigröße: `140890624` Bytes
+- SHA-256: `19a9aa1db7ad7bded7e43b84f04e8097440bc5bcec0d0b57d35f252844f26f9f`
+- Ein-Klick-Batch lief auf Kurts Windows-PC ohne Nachbesserung vollständig bis „zur Abnahme bereit“ durch. Die erzeugte Ein-Datei-EXE meldete „SerKal Desktop wurde erfolgreich installiert/aktualisiert“ und startete sichtbar als Version 1.2.5.
+- Vorhandenes Archiv wurde nach dem Update mit `92` Einträgen angezeigt; damit ist der Erhalt des bestehenden Archivs praktisch belegt.
+- Noch nicht als vollständig abgenommen gelten: Google-Verbindung sowie eine geeignete Kalenderübertragung einschließlich Fortschritt/Pausen/Erholung. Bis zu diesem Nachweis bleibt die Website-Public 1.2.4 unverändert.
