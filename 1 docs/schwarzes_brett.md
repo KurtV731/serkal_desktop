@@ -5758,3 +5758,15 @@ Kurt beauftragt Desktop 1.2.5 zum Versionsgleichlauf mit Android 1.2.5 und zur S
 6. **Public 1.2.4 bleibt währenddessen unverändert verfügbar.** Erst nach Kurts praktischer Abnahme exakt diese EXE übernehmen. Websiteersatz vollständig vorbereiten/hochladen und prüfen, dann am Ziel atomar austauschen; Rückweg zur bisherigen Datei behalten. Anschließend öffentliche Datei herunterladen und Hash/Version kontrollieren. Keine vorgezogene Versions-/Downloadbehauptung durch Website.
 
 Die Android-Anmeldeschleife und TMDB-Ersteinrichtung bleiben getrennte offene Themen; diese Desktop-Kalenderkorrektur behauptet dafür keine Lösung.
+
+
+### Installer-Zwischenstand 15.11.2026 – Windows-Vorlauf bestanden
+
+Status: **EIN-KLICK-BAUWEG UNTER WINDOWS VOLLSTÄNDIG BESTANDEN / ECHTER LOKALER KANDIDAT MIT KURTS PRIVATER OAUTH-DATEI UND SERKAL-SYMBOL NOCH ZU BAUEN / PUBLIC 1.2.4 UNVERÄNDERT**.
+
+- Installer-Arbeitsbranch: `installer-desktop-1.2.5`; aktueller Vorlauf-Commit `358a6a42b104eeea225ec97d2f533742e0246444`.
+- Veraltete Angaben in der Ein-Datei-Hülle vor dem ersten Nutzerlauf korrigiert: Assembly-/Dateiversion `1.2.5.0`, eingebetteter Setupname `serkal-desktop-1-2-5-setup.exe`.
+- Der Starter prüft Node 24+, C#-Compiler, Quellcommit, alle Versionsangaben, Installerhülle, OAuth-Grunddatei, Token-Ausschluss und jetzt zusätzlich die technische Struktur des lokalen Windows-ICO. Das bewährte lokale Desktop-Symbol wird gegenüber der im Repository liegenden ungeeigneten Binärdatei bevorzugt; alternativ kann `SERKAL_DESKTOP_ICON_FILE` gesetzt werden.
+- Unabhängiger Windows-Lauf erfolgreich: https://github.com/KurtV731/serkal_desktop/actions/runs/43768203366 (Job `132977972018`). Nachweis: Quellstand `7be1db9003ba5bd4b4ff8c5efb291595229ceb85`, 43 Testprogramme, Setup- und Ein-Datei-Installer-Bau, SHA-Prüfung, Dateiversion `1.2.5.0`, eingebettetes Setup bytegleich zum gebauten Setup, stille Installation und tatsächlicher Start von SerKal 1.2.5 über zwölf Sekunden.
+- Der Windows-Vorlauf verwendete absichtlich nur eine ungültige CI-OAuth-Testdatei und ein technisch gültiges Windows-Testsymbol. Seine EXE wird deshalb **nicht verteilt**. Vorlauf-Dateigröße `140190208` Bytes, SHA-256 `32d069d70892b06cdafe467a8246d14f93147ff9b0770fea87a816fc7607bc3c` – nur zur Reproduzierbarkeit des Vorlaufs, nicht als Freigabehash.
+- Nächster Schritt: denselben geprüften Starter lokal auf Kurts Windows-PC mit vorhandener echter Desktop-OAuth-Grunddatei und bewährtem SerKal-Symbol ausführen. Danach den dort erzeugten Kandidaten installieren und die in Auftragspunkt 5 genannte Sicht-/Upgrade-/Google-/Kalenderprüfung durchführen. Erst Kurts Abnahme erlaubt den Austausch der Public 1.2.4.
