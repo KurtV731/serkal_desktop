@@ -8,7 +8,7 @@ const {connect}=require('../2 src/common/archive-session-remote');
  let cloud={schema:2,releaseNumber:copy.RELEASE,owner:'user',revision:crypto.randomUUID(),parent:'',generatedAt:new Date().toISOString(),calendar:{mode:'google',id:'calendar'},files:[{name:'Series.txt',content:'seen=0|date=2027-03-01',sha256:copy.hash('seen=0|date=2027-03-01')}]};
  const events=[];const session=new ArchiveSession({folder:()=>root,calendar:()=>({mode:'google',id:'calendar'}),selectCalendar:()=>{},
   connect:async()=>{connects++;return {owner:'user',load:async()=>structuredClone(cloud),save:async record=>{writes++;cloud=structuredClone(record);}};},
-  calendarKey:r=>r.files.map(f=>f.content.split('|')[1]).join('|'),calendarPrepare:async()=>{prepares++;},calendarSync:async()=>{calendars++;if(failCalendar)throw Error('Full Calendar failure');},onStatus:e=>events.push(e)});
+  calendarKey:r=>r.files.map(f=>f.content.split('|')[1]).join('|'),calendarPrepare:async()=>{prepares++;},calendarSync:async()=>{assert(session.deadline-Date.now()>290000);calendars++;if(failCalendar)throw Error('Full Calendar failure');},onStatus:e=>events.push(e)});
  const edit=text=>{fs.writeFileSync(path.join(root,'Series.txt'),text);session.changed();};
  try{
   await session.start();let result=await session.finish();assert.equal(result.status,'unchanged');assert.equal(connects,1);assert.equal(writes,0);assert.equal(prepares,0);assert.equal(calendars,0);assert(!events.some(e=>e.status==='syncing'));

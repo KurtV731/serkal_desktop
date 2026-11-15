@@ -1897,15 +1897,19 @@ function sessionRequestSignal_(){
     return AbortSignal.timeout(Math.max(1,Math.min(15000,deadline?deadline-Date.now():15000)));
 }
 let sessionCalendarRequests_=null;
-function sessionCalendarRequest_(request){
-    return sessionMode_&&sessionCalendarRequests_?sessionCalendarRequests_.run(request):request();
+function sessionCalendarRequest_(request,method="GET"){
+    return sessionMode_&&sessionCalendarRequests_?sessionCalendarRequests_.run(request,{write:["POST","PUT","PATCH","DELETE"].includes(method)}):request();
 }
 async function copyCalendarSync_(record,prepareOnly=false,prepared=false,scopes=null,onRemaining=()=>{}) {
     if(record.calendar.mode!=="google")return;
     const manager=copyManager_();
     if(sessionMode_&&!prepared)sessionCalendarRequests_=require("../common/calendar-rate-limit").create({
         deadline:()=>manager.deadline,
-        onWait:detail=>{manager.report("calendar-wait");logWrite_("WARN","SYNC","Calendar rate limit: retrying with backoff",detail);}
+        onWait:detail=>{
+            const progress=manager.progress||{};
+            manager.report(detail.kind==='batch'?"calendar-pause":"calendar-wait",progress.current||0,progress.total||0,{remainingMs:detail.remainingMs});
+            if(detail.remainingMs===detail.delayMs)logWrite_(detail.kind==='batch'?"INFO":"WARN","SYNC","Calendar request pause",detail);
+        }
     });
     if(!prepared){
     const calendarToken=await googleOauthAccessToken_();
@@ -2119,7 +2123,7 @@ async function googleResponseData_(response, url, method, accessToken) {
 }
 
 async function googleCalendarJsonRequest_(method, url, body) {
-    return sessionCalendarRequest_(()=>googleCalendarJsonRequestRaw_(method,url,body));
+    return sessionCalendarRequest_(()=>googleCalendarJsonRequestRaw_(method,url,body),method);
 }
 async function googleCalendarJsonRequestRaw_(method, url, body) {
     if(sessionTest_)throw new Error('Calendar access is disabled in the isolated archive test.');
@@ -2324,7 +2328,7 @@ function googleCalendarIdForLog_(calendarId) {
 }
 
 async function googleCalendarApi_(method, calendarId, eventId, event) {
-    return sessionCalendarRequest_(()=>googleCalendarApiRaw_(method,calendarId,eventId,event));
+    return sessionCalendarRequest_(()=>googleCalendarApiRaw_(method,calendarId,eventId,event),method);
 }
 async function googleCalendarApiRaw_(method, calendarId, eventId, event) {
     if(sessionTest_)throw new Error('Calendar access is disabled in the isolated archive test.');

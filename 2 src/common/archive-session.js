@@ -17,7 +17,7 @@ class ArchiveSession {
     view(){return {session:true,status:this.status,code:this.error,message:this.message,busy:this.busy,
         writable:this.loaded&&!this.busy,dirty:this.dirty,calendarPending:this.calendarPending,progress:this.progress?{...this.progress,elapsedMs:Date.now()-(this.phaseStart||Date.now())}:null,lastSynced:this.lastSynced,
         warning:this.warning||'',google:this.google||null,authorityPending:false,revision:this.revision||''};}
-    report(phase,current=0,total=0){if(this.progress?.phase!==phase)this.phaseStart=Date.now();this.progress={phase,current,total};this.onStatus(this.view());}
+    report(phase,current=0,total=0,detail={}){if(this.progress?.phase!==phase)this.phaseStart=Date.now();this.progress={...detail,phase,current,total};this.onStatus(this.view());}
     assertWrite(){if(this.busy)fail('SESSION_BUSY');if(!this.loaded)fail(this.error||'SESSION_NOT_LOADED');}
     local(){const r=copy.capture(this.folder(),this.calendar());if(r.calendar.mode==='none')r.calendar.mode='';return r;}
     hasChanges(){try{const r=this.local();return this.forceSave||copy.digest(r.files,r.calendar)!==this.baseline;}catch(_){return this.dirty;}}
@@ -91,6 +91,9 @@ class ArchiveSession {
             if(this.dirty||before!==JSON.stringify(record.calendar)){await this.measure('archive-upload',()=>remote.save(record));this.confirm(record);this.forceSave=false;this.baseline=copy.digest(record.files,record.calendar);}
             // Only update Calendar events once the archive write has succeeded.
             if(needsCalendar&&!warning)try{
+                // Archive upload retains its 45-second bound. Large Calendar batches get
+                // their own five-minute budget, including pacing and recovery waits.
+                this.deadline=Date.now()+300000;
                 const projected=this.calendarProjection?.(record)||null;
                 await this.measure('calendar-sync',()=>this.calendarSync(record,scopes,remaining=>{
                     this.markCalendarPending(remaining.length>0,remaining);

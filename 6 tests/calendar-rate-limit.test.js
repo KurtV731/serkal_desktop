@@ -9,13 +9,38 @@ const quota={ok:false,status:403,data:{error:{errors:[{domain:'usageLimits',reas
  const options={now:()=>clock,sleep:async ms=>{delays.push(ms);clock+=ms;},random:()=>0};
  const policy=create(options);let attempts=0;
  const result=await policy.run(async()=>{starts.push(clock);return ++attempts<3?quota:{ok:true};});
- assert(result.ok);assert.deepEqual(delays,[1000,2000]);assert.equal(attempts,3);
+ assert(result.ok);assert.deepEqual(delays,[1000,1000,1000]);assert.equal(attempts,3);
  await Promise.all(Array.from({length:12},()=>policy.run(async()=>{active++;maximum=Math.max(maximum,active);starts.push(clock);await Promise.resolve();active--;return {ok:true};})));
  assert.equal(maximum,1);for(let i=1;i<starts.length;i++)assert(starts[i]-starts[i-1]>=250);
  clock=0;let calls=0;const stop=create({...options,deadline:()=>1500});assert.equal(await stop.run(async()=>{calls++;return quota;}),quota);assert.equal(calls,2);
  assert.equal(await stop.run(async()=>{throw Error('must not send after quota exhausted');}),quota);
  assert(!limited({status:403,data:{error:{errors:[{reason:'forbidden'}]}}}));assert(limited({status:429}));
  let permanent=0;await create(options).run(async()=>{permanent++;return {status:403,data:{error:{errors:[{reason:'forbidden'}]}}};});assert.equal(permanent,1);
+ // A real-sized 200-request run continues on one exit, with nine proactive pauses.
+ clock=0;let completed=0;const waits=[];
+ const large=create({...options,deadline:()=>300000,onWait:detail=>waits.push(detail)});
+ for(let n=0;n<200;n++)await large.run(async()=>{completed++;return {ok:true};},{write:true});
+ assert.equal(completed,200);assert.equal(waits.filter(w=>w.kind==='batch'&&w.remainingMs===w.delayMs).length,9);
+ assert(clock>45000&&clock<300000);assert(waits.every(w=>w.remainingMs>0));
+ // Reads and rejected writes do not count towards the successful-write batch.
+ clock=0;let batchWaits=0;const mixed=create({...options,batchSize:2,onWait:d=>{if(d.kind==='batch'&&d.remainingMs===d.delayMs)batchWaits++;}});
+ for(let n=0;n<20;n++)await mixed.run(async()=>({ok:true}));
+ await mixed.run(async()=>({status:403}),{write:true});
+ for(let n=0;n<2;n++)await mixed.run(async()=>({ok:true}),{write:true});
+ assert.equal(batchWaits,0);await mixed.run(async()=>({ok:true}),{write:true});assert.equal(batchWaits,1);
+ // Recovery must cover a minute window, not give up after just seven seconds.
+ clock=0;let recoveryCalls=0;
+ const recovery=create({...options,onWait:detail=>waits.push(detail),deadline:()=>300000});
+ assert((await recovery.run(async()=>++recoveryCalls<=6?quota:{ok:true})).ok);
+ assert.equal(recoveryCalls,7);assert(clock>=63000);
+ clock=0;let exhausted=0;const bounded=create(options);
+ assert.equal(await bounded.run(async()=>{exhausted++;return quota;}),quota);assert.equal(exhausted,8);
+ assert.equal(await bounded.run(async()=>{throw Error('blocked queue must not send');}),quota);
+ clock=0;let retryAfterCalls=0;const retryAfter=create({...options,deadline:()=>300000});
+ await retryAfter.run(async()=>++retryAfterCalls===1?{...quota,retryAfterMs:65000}:{ok:true});assert.equal(clock,65000);
+ clock=0;let beforeDeadline=0;const batchBound=create({...options,deadline:()=>3000,batchSize:2,batchPauseMs:5000});
+ await batchBound.run(async()=>{beforeDeadline++;return {ok:true};},{write:true});await batchBound.run(async()=>{beforeDeadline++;return {ok:true};},{write:true});
+ await assert.rejects(batchBound.run(async()=>{beforeDeadline++;return {ok:true};},{write:true}),/SESSION_CLOSE_TIMEOUT/);assert.equal(beforeDeadline,2);
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'serkal-calendar-retry-')),folder=path.join(root,'archive');fs.mkdirSync(folder);
  let content='date=2027-01-01';let cloud={schema:2,releaseNumber:copy.RELEASE,owner:'owner',revision:crypto.randomUUID(),parent:'',generatedAt:new Date().toISOString(),files:[{name:'Series.txt',content,sha256:copy.hash(content)}],calendar:{mode:'google',id:'calendar'}};
  let uploads=0,runs=0,fail=true;
