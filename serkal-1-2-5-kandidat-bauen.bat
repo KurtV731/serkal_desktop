@@ -18,7 +18,10 @@ set "SERKAL_SETUP=%SERKAL_BUILD_DIR%\out\make\squirrel.windows\x64\serkal-deskto
 set "SERKAL_DESKTOP=%SERKAL_DEST_DIR%\serkal-desktop.exe"
 set "SERKAL_DESKTOP_NEW=%SERKAL_DESKTOP%.neu"
 set "SERKAL_DESKTOP_SHA=%SERKAL_DESKTOP%.sha256"
-set "SERKAL_SOURCE_ICON=%SERKAL_LOCAL_REPO%\4 assets\icon\serkal.ico"
+set "SERKAL_SOURCE_ICON="
+if defined SERKAL_DESKTOP_ICON_FILE if exist "%SERKAL_DESKTOP_ICON_FILE%" set "SERKAL_SOURCE_ICON=%SERKAL_DESKTOP_ICON_FILE%"
+if not defined SERKAL_SOURCE_ICON if exist "C:\ppd\serkal\serkal_dev\serkal_desktop\4 assets\icon\serkal.ico" set "SERKAL_SOURCE_ICON=C:\ppd\serkal\serkal_dev\serkal_desktop\4 assets\icon\serkal.ico"
+if not defined SERKAL_SOURCE_ICON if exist "%SERKAL_LOCAL_REPO%\4 assets\icon\serkal.ico" set "SERKAL_SOURCE_ICON=%SERKAL_LOCAL_REPO%\4 assets\icon\serkal.ico"
 set "SERKAL_BUILD_ICON=%SERKAL_BUILD_DIR%\4 assets\icon\serkal.ico"
 set "SERKAL_SOURCE_WRAPPER=%SERKAL_LOCAL_REPO%\5 tools\installer\SerKalInstaller.cs"
 set "SERKAL_BUILD_WRAPPER=%SERKAL_BUILD_DIR%\5 tools\installer\SerKalInstaller.cs"
@@ -42,8 +45,9 @@ where node >nul 2>&1 || goto :missing_node
 where npm >nul 2>&1 || goto :missing_npm
 node -e "const m=Number(process.versions.node.split('.')[0]);process.exit(m>=24?0:1)" || goto :wrong_node
 if not exist "%WINDIR%\Microsoft.NET\Framework64\v4.0.30319\csc.exe" if not exist "%WINDIR%\Microsoft.NET\Framework\v4.0.30319\csc.exe" goto :missing_csc
-if not exist "%SERKAL_SOURCE_ICON%" if exist "C:\ppd\serkal\serkal_dev\serkal_desktop\4 assets\icon\serkal.ico" set "SERKAL_SOURCE_ICON=C:\ppd\serkal\serkal_dev\serkal_desktop\4 assets\icon\serkal.ico"
+if not defined SERKAL_SOURCE_ICON goto :missing_icon
 if not exist "%SERKAL_SOURCE_ICON%" goto :missing_icon
+powershell -NoProfile -Command "$ErrorActionPreference='Stop';$b=[IO.File]::ReadAllBytes($env:SERKAL_SOURCE_ICON);if($b.Length -lt 22 -or $b[0] -ne 0 -or $b[1] -ne 0 -or $b[2] -ne 1 -or $b[3] -ne 0){throw 'Keine gueltige Windows-ICO-Datei'};$n=[BitConverter]::ToUInt16($b,4);if($n -lt 1 -or $n -gt 64 -or $b.Length -lt (6+16*$n)){throw 'ICO-Verzeichnis ungueltig'};for($i=0;$i -lt $n;$i++){$p=6+16*$i;$size=[BitConverter]::ToUInt32($b,$p+8);$offset=[BitConverter]::ToUInt32($b,$p+12);if($size -lt 40 -or $offset -lt (6+16*$n) -or ([uint64]$offset+[uint64]$size) -gt [uint64]$b.Length){throw ('ICO-Eintrag '+$i+' ungueltig')}};Write-Host ('Windows-ICO: OK ('+$n+' Groessen, '+$b.Length+' Bytes)')" || goto :invalid_icon
 if not exist "%SERKAL_SOURCE_WRAPPER%" goto :missing_wrapper
 if not defined SERKAL_GOOGLE_OAUTH_FILE goto :missing_oauth
 if not exist "%SERKAL_GOOGLE_OAUTH_FILE%" goto :missing_oauth
@@ -154,6 +158,11 @@ goto :stop
 :missing_icon
 echo FEHLER: Das bewaehrte lokale SerKal-Symbol fehlt:
 echo %SERKAL_SOURCE_ICON%
+goto :stop
+:invalid_icon
+echo FEHLER: Die gefundene Datei ist kein technisch gueltiges Windows-ICO:
+echo %SERKAL_SOURCE_ICON%
+echo Bitte das bewaehrte lokale Desktop-Symbol ueber SERKAL_DESKTOP_ICON_FILE angeben.
 goto :stop
 :missing_wrapper
 echo FEHLER: Die gepruefte Installerhuelle fuer 1.2.5 fehlt:
