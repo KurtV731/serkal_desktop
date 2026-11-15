@@ -20,6 +20,8 @@ set "SERKAL_DESKTOP_NEW=%SERKAL_DESKTOP%.neu"
 set "SERKAL_DESKTOP_SHA=%SERKAL_DESKTOP%.sha256"
 set "SERKAL_SOURCE_ICON=%SERKAL_LOCAL_REPO%\4 assets\icon\serkal.ico"
 set "SERKAL_BUILD_ICON=%SERKAL_BUILD_DIR%\4 assets\icon\serkal.ico"
+set "SERKAL_SOURCE_WRAPPER=%SERKAL_LOCAL_REPO%\5 tools\installer\SerKalInstaller.cs"
+set "SERKAL_BUILD_WRAPPER=%SERKAL_BUILD_DIR%\5 tools\installer\SerKalInstaller.cs"
 
 if not defined SERKAL_GOOGLE_OAUTH_FILE if exist "C:\ppd\serkal\serkal_private\google_oauth_client.json" set "SERKAL_GOOGLE_OAUTH_FILE=C:\ppd\serkal\serkal_private\google_oauth_client.json"
 if not defined SERKAL_GOOGLE_OAUTH_FILE if exist "G:\Meine Ablage\ppd\serkal_private\google_oauth_client.json" set "SERKAL_GOOGLE_OAUTH_FILE=G:\Meine Ablage\ppd\serkal_private\google_oauth_client.json"
@@ -38,8 +40,11 @@ echo.
 where git >nul 2>&1 || goto :missing_git
 where node >nul 2>&1 || goto :missing_node
 where npm >nul 2>&1 || goto :missing_npm
+node -e "const m=Number(process.versions.node.split('.')[0]);process.exit(m>=24?0:1)" || goto :wrong_node
+if not exist "%WINDIR%\Microsoft.NET\Framework64\v4.0.30319\csc.exe" if not exist "%WINDIR%\Microsoft.NET\Framework\v4.0.30319\csc.exe" goto :missing_csc
 if not exist "%SERKAL_SOURCE_ICON%" if exist "C:\ppd\serkal\serkal_dev\serkal_desktop\4 assets\icon\serkal.ico" set "SERKAL_SOURCE_ICON=C:\ppd\serkal\serkal_dev\serkal_desktop\4 assets\icon\serkal.ico"
 if not exist "%SERKAL_SOURCE_ICON%" goto :missing_icon
+if not exist "%SERKAL_SOURCE_WRAPPER%" goto :missing_wrapper
 if not defined SERKAL_GOOGLE_OAUTH_FILE goto :missing_oauth
 if not exist "%SERKAL_GOOGLE_OAUTH_FILE%" goto :missing_oauth
 if exist "%SERKAL_BUILD_DIR%" goto :build_exists
@@ -55,9 +60,10 @@ cd /d "%SERKAL_BUILD_DIR%" || goto :failed
 git checkout --detach "%SERKAL_COMMIT%" || goto :failed
 for /f "delims=" %%G in ('git rev-parse HEAD') do set "SERKAL_ACTUAL_COMMIT=%%G"
 if /I not "%SERKAL_ACTUAL_COMMIT%"=="%SERKAL_COMMIT%" goto :wrong_commit
+copy /y "%SERKAL_SOURCE_WRAPPER%" "%SERKAL_BUILD_WRAPPER%" >nul || goto :failed
 
-echo [3/10] Stabile Versionsangaben und Dateinamen kontrollieren ...
-powershell -NoProfile -Command "$p=Get-Content -Raw package.json|ConvertFrom-Json;$r=Get-Content -Raw serkal-release.json|ConvertFrom-Json;$f=Get-Content -Raw forge.config.js;if($p.version -ne $env:SERKAL_VERSION){exit 1};if($r.version -ne $env:SERKAL_VERSION -or [int]$r.number -ne [int]$env:SERKAL_RELEASE_NUMBER -or [int]$r.androidVersionCode -ne [int]$env:SERKAL_ANDROID_VERSION_CODE){exit 2};if($f -notmatch 'serkal-desktop-1-2-5-setup\.exe'){exit 3}" || goto :wrong_version
+echo [3/10] Stabile Versionsangaben, Wrapper und Dateinamen kontrollieren ...
+powershell -NoProfile -Command "$p=Get-Content -Raw package.json|ConvertFrom-Json;$r=Get-Content -Raw serkal-release.json|ConvertFrom-Json;$f=Get-Content -Raw forge.config.js;$w=Get-Content -Raw -LiteralPath $env:SERKAL_BUILD_WRAPPER;if($p.version -ne $env:SERKAL_VERSION){exit 1};if($r.version -ne $env:SERKAL_VERSION -or [int]$r.number -ne [int]$env:SERKAL_RELEASE_NUMBER -or [int]$r.androidVersionCode -ne [int]$env:SERKAL_ANDROID_VERSION_CODE){exit 2};if($f -notmatch 'serkal-desktop-1-2-5-setup\.exe'){exit 3};if($w -notmatch 'AssemblyVersion\("1\.2\.5\.0"\)' -or $w -notmatch 'AssemblyFileVersion\("1\.2\.5\.0"\)' -or $w -notmatch 'serkal-desktop-1-2-5-setup\.exe'){exit 4}" || goto :wrong_version
 
 echo [4/10] Bewaehrtes lokales Symbol und private OAuth-Grunddatei pruefen ...
 copy /y "%SERKAL_SOURCE_ICON%" "%SERKAL_BUILD_ICON%" >nul || goto :failed
@@ -113,6 +119,14 @@ goto :stop
 :missing_npm
 echo FEHLER: npm wurde nicht gefunden.
 goto :stop
+:wrong_node
+echo FEHLER: Node.js 24 oder neuer wird fuer diesen geprueften Bauweg benoetigt.
+echo Gefunden:
+node --version 2^>nul
+goto :stop
+:missing_csc
+echo FEHLER: Der Windows-C#-Compiler fuer die Ein-Datei-Installerhuelle fehlt.
+goto :stop
 :missing_oauth
 echo FEHLER: google_oauth_client.json wurde nicht gefunden.
 echo Falls sie woanders liegt, vor dem Start setzen:
@@ -140,6 +154,10 @@ goto :stop
 :missing_icon
 echo FEHLER: Das bewaehrte lokale SerKal-Symbol fehlt:
 echo %SERKAL_SOURCE_ICON%
+goto :stop
+:missing_wrapper
+echo FEHLER: Die gepruefte Installerhuelle fuer 1.2.5 fehlt:
+echo %SERKAL_SOURCE_WRAPPER%
 goto :stop
 :missing_packaged_oauth
 echo FEHLER: google_oauth_client.json fehlt im gebauten Paket.
