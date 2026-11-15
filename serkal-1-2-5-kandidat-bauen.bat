@@ -7,6 +7,7 @@ set "SERKAL_REPO=https://github.com/KurtV731/serkal_desktop.git"
 for %%I in ("%~dp0.") do set "SERKAL_LOCAL_REPO=%%~fI"
 set "SERKAL_COMMIT=7be1db9003ba5bd4b4ff8c5efb291595229ceb85"
 set "SERKAL_VERSION=1.2.5"
+set "SERKAL_WRAPPER_COMMIT=4de425195bd66da9801d747f887fcf7d158bf8d0"
 set "SERKAL_RELEASE_NUMBER=38"
 set "SERKAL_ANDROID_VERSION_CODE=47"
 for /f %%T in ('powershell -NoProfile -Command "Get-Date -Format yyyyMMdd-HHmmss"') do set "SERKAL_BUILD_STAMP=%%T"
@@ -23,7 +24,6 @@ if defined SERKAL_DESKTOP_ICON_FILE if exist "%SERKAL_DESKTOP_ICON_FILE%" set "S
 if not defined SERKAL_SOURCE_ICON if exist "C:\ppd\serkal\serkal_dev\serkal_desktop\4 assets\icon\serkal.ico" set "SERKAL_SOURCE_ICON=C:\ppd\serkal\serkal_dev\serkal_desktop\4 assets\icon\serkal.ico"
 if not defined SERKAL_SOURCE_ICON if exist "%SERKAL_LOCAL_REPO%\4 assets\icon\serkal.ico" set "SERKAL_SOURCE_ICON=%SERKAL_LOCAL_REPO%\4 assets\icon\serkal.ico"
 set "SERKAL_BUILD_ICON=%SERKAL_BUILD_DIR%\4 assets\icon\serkal.ico"
-set "SERKAL_SOURCE_WRAPPER=%SERKAL_LOCAL_REPO%\5 tools\installer\SerKalInstaller.cs"
 set "SERKAL_BUILD_WRAPPER=%SERKAL_BUILD_DIR%\5 tools\installer\SerKalInstaller.cs"
 
 if not defined SERKAL_GOOGLE_OAUTH_FILE if exist "C:\ppd\serkal\serkal_private\google_oauth_client.json" set "SERKAL_GOOGLE_OAUTH_FILE=C:\ppd\serkal\serkal_private\google_oauth_client.json"
@@ -48,7 +48,6 @@ if not exist "%WINDIR%\Microsoft.NET\Framework64\v4.0.30319\csc.exe" if not exis
 if not defined SERKAL_SOURCE_ICON goto :missing_icon
 if not exist "%SERKAL_SOURCE_ICON%" goto :missing_icon
 powershell -NoProfile -Command "$ErrorActionPreference='Stop';$b=[IO.File]::ReadAllBytes($env:SERKAL_SOURCE_ICON);if($b.Length -lt 22 -or $b[0] -ne 0 -or $b[1] -ne 0 -or $b[2] -ne 1 -or $b[3] -ne 0){throw 'Keine gueltige Windows-ICO-Datei'};$n=[BitConverter]::ToUInt16($b,4);if($n -lt 1 -or $n -gt 64 -or $b.Length -lt (6+16*$n)){throw 'ICO-Verzeichnis ungueltig'};for($i=0;$i -lt $n;$i++){$p=6+16*$i;$size=[BitConverter]::ToUInt32($b,$p+8);$offset=[BitConverter]::ToUInt32($b,$p+12);if($size -lt 40 -or $offset -lt (6+16*$n) -or ([uint64]$offset+[uint64]$size) -gt [uint64]$b.Length){throw ('ICO-Eintrag '+$i+' ungueltig')}};Write-Host ('Windows-ICO: OK ('+$n+' Groessen, '+$b.Length+' Bytes)')" || goto :invalid_icon
-if not exist "%SERKAL_SOURCE_WRAPPER%" goto :missing_wrapper
 if not defined SERKAL_GOOGLE_OAUTH_FILE goto :missing_oauth
 if not exist "%SERKAL_GOOGLE_OAUTH_FILE%" goto :missing_oauth
 if exist "%SERKAL_BUILD_DIR%" goto :build_exists
@@ -64,7 +63,9 @@ cd /d "%SERKAL_BUILD_DIR%" || goto :failed
 git checkout --detach "%SERKAL_COMMIT%" || goto :failed
 for /f "delims=" %%G in ('git rev-parse HEAD') do set "SERKAL_ACTUAL_COMMIT=%%G"
 if /I not "%SERKAL_ACTUAL_COMMIT%"=="%SERKAL_COMMIT%" goto :wrong_commit
-copy /y "%SERKAL_SOURCE_WRAPPER%" "%SERKAL_BUILD_WRAPPER%" >nul || goto :failed
+git fetch --no-tags origin "%SERKAL_WRAPPER_COMMIT%" || goto :missing_wrapper
+git checkout "%SERKAL_WRAPPER_COMMIT%" -- "5 tools/installer/SerKalInstaller.cs" || goto :missing_wrapper
+if not exist "%SERKAL_BUILD_WRAPPER%" goto :missing_wrapper
 
 echo [3/10] Stabile Versionsangaben, Wrapper und Dateinamen kontrollieren ...
 powershell -NoProfile -Command "$ErrorActionPreference='Stop';$p=Get-Content -Raw package.json|ConvertFrom-Json;$r=Get-Content -Raw serkal-release.json|ConvertFrom-Json;$f=Get-Content -Raw forge.config.js;$w=Get-Content -Raw -LiteralPath $env:SERKAL_BUILD_WRAPPER;if($p.version -ne $env:SERKAL_VERSION){throw ('package.json: '+$p.version)};if($r.version -ne $env:SERKAL_VERSION -or [int]$r.number -ne [int]$env:SERKAL_RELEASE_NUMBER -or [int]$r.androidVersionCode -ne [int]$env:SERKAL_ANDROID_VERSION_CODE){throw ('serkal-release.json: version='+$r.version+', number='+$r.number+', androidVersionCode='+$r.androidVersionCode)};if(-not $f.Contains('serkal-desktop-1-2-5-setup.exe')){throw 'forge.config.js: Setupname 1.2.5 fehlt'};$required=@('[assembly: AssemblyVersion(\"1.2.5.0\")]','[assembly: AssemblyFileVersion(\"1.2.5.0\")]','serkal-desktop-1-2-5-setup.exe');foreach($value in $required){if(-not $w.Contains($value)){throw ('Installerhuelle: '+$value+' fehlt')}};Write-Host 'Versionen und Installerhuelle: OK'" || goto :wrong_version
@@ -165,8 +166,8 @@ echo %SERKAL_SOURCE_ICON%
 echo Bitte das bewaehrte lokale Desktop-Symbol ueber SERKAL_DESKTOP_ICON_FILE angeben.
 goto :stop
 :missing_wrapper
-echo FEHLER: Die gepruefte Installerhuelle fuer 1.2.5 fehlt:
-echo %SERKAL_SOURCE_WRAPPER%
+echo FEHLER: Die festgeschriebene Installerhuelle fuer 1.2.5 konnte nicht geladen werden.
+echo Wrapper-Commit: %SERKAL_WRAPPER_COMMIT%
 goto :stop
 :missing_packaged_oauth
 echo FEHLER: google_oauth_client.json fehlt im gebauten Paket.
