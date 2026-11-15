@@ -5720,3 +5720,41 @@ Im Alpha-Updatekanal dev-1.3-alpha1 veröffentlicht: `40281d7eb4d2a301d0bd8fa363
 Arbeitshypothese aus Styls zwei Messungen: Reaktorstufe 2 je Ladung 200 ts Bauplatz; andere Stufen/Forschungseinflüsse ungeprüft. Keine automatische Bauplatzmesskurve implementiert. Handbuch Hauptdatei auf main/dev ergänzt, Stand Alpha 12. Website kann diese Ergänzung übernehmen.
 
 Vollständige Regression erfolgreich: https://github.com/KurtV731/hasa/actions/runs/43650703696 . Einschließlich echtem Browser: Gelesen-Klassenwechsel erhält Löschschutz; zwei Ladungen/eine Bestätigung/eine offen, zwei Bestätigungen/keine offen, Dubletten und neue spätere Ladung.
+
+
+## CE SerKal – 15.11.2026: Desktop 1.2.5 – Kalenderstabilisierung und verbindlicher Installer-Auftrag
+
+Status: **QUELLSTAND GEPRÜFT UND ZUM WINDOWS-KANDIDATENBAU FREIGEGEBEN / WINDOWS- UND GOOGLE-PRAXISABNAHME OFFEN / KEIN PUBLIC-AUSTAUSCH AUSGEFÜHRT**.
+
+Kurt beauftragt Desktop 1.2.5 zum Versionsgleichlauf mit Android 1.2.5 und zur Stabilisierung großer Kalenderübertragungen. CE hat den bestehenden Desktop-1.2.4-Release gezielt weitergeführt. Nicht den älteren Desktop-Code auf main als Bauquelle verwenden.
+
+### Unveränderlicher Stand und Nachweise
+
+- Repository: KurtV731/serkal_desktop; Branch `ce-desktop-1.2.5`.
+- **Anwendungs-/Testquellstand zum Bauen:** `7be1db9003ba5bd4b4ff8c5efb291595229ceb85`.
+- Basis: freigegebener Desktop 1.2.4 `52aafa693ec519de0e45bc235dcc870a1e9eec80`.
+- Bau-Starter-Commit (nur zusätzlicher Starter, Anwendung identisch): `4c45ad95ecce2c4623d7ee3d57dc921c065cf2b1`.
+- [Starter serkal-1-2-5-kandidat-bauen.bat](https://github.com/KurtV731/serkal_desktop/blob/4c45ad95ecce2c4623d7ee3d57dc921c065cf2b1/serkal-1-2-5-kandidat-bauen.bat), fest auf den obigen Anwendungscommit eingestellt.
+- [Technische Übergabe](https://github.com/KurtV731/serkal_desktop/blob/7be1db9003ba5bd4b4ff8c5efb291595229ceb85/1%20docs/desktop-1.2.5-kalenderstabilisierung.md) und [englische Release Notes](https://github.com/KurtV731/serkal_desktop/blob/7be1db9003ba5bd4b4ff8c5efb291595229ceb85/1%20docs/release-notes-1.2.5-en.md).
+- **43 Testprogramme lokal bestanden, unabhängig GitHub Actions erfolgreich:** https://github.com/KurtV731/serkal_desktop/actions/runs/43763597314 (Quellcommit 7be1db9…, Job 132963616917, npm test success).
+- Gemeinsames Archivformat/Stand **38 unverändert**. Bestehendes Android 1.2.5/Code49 bleibt unverändert. Desktop 1.2.4 und Android 1.2.5 sind beim Archiv weiterhin kompatibel; die Produktversionen werden mit diesem Desktop-Update angeglichen.
+
+### Umgesetzt und geprüft
+
+1. Bereits vorhandene Scope-Abgrenzung und Signaturvergleiche aus 1.2.4 erhalten: nur geänderte Serien/Staffeln; identische Google-Termine überspringen. VelcroFists ursprünglicher Bericht bezog sich auf Desktop **1.2.3**, nicht auf Android und nicht auf einen nachgewiesenen Scope-Rückfall in 1.2.4.
+2. Sequentielle Kalenderanfragen mit mindestens 250 ms Abstand; zusätzlich **zwei Sekunden Pause nach 20 erfolgreichen Schreibaktionen**, vor der nächsten Schreibaktion. Reine Leseanfragen und abgewiesene Versuche zählen nicht zu diesen 20. Zentrale Policy-Vorgaben, erste praktisch zu erprobende Werte, keine garantierte Google-Grenze.
+3. 429 sowie passende Rate-Limit-Gründe bei 403: bis zu sieben automatische Wiederholungen mit wachsender Wartezeit (1/2/4/8/16/32/32 Sekunden plus Zufallsanteil), längeres Retry-After beachten. Keine blinde Wiederholung gewöhnlicher Berechtigungsfehler.
+4. Bisheriger 45-Sekunden-Gesamtabschluss als Engpass erkannt: Archiv behält seine bisherige Begrenzung; der Kalenderabgleich erhält nach bestätigtem Archivschreiben ein eigenes begrenztes Fünf-Minuten-Fenster inklusive Pausen.
+5. Countdown für Pausen/Wiederholungen und bisheriger Fortschritt DE/EN; Logeintrag pro Pause. Dauerhaft offene Staffelmarkierungen bleiben erhalten; beim Wiederanlauf gleiche Staffel gegen tatsächliche Google-Termine neu vergleichen, damit schon erledigte Einzeltermine nicht erneut geschrieben werden. Kein neues lokales Einzeltermin-Journal und kein zweiter Archivupload für unveränderte Kalenderwiederholungen.
+6. Neue Prüfung der tatsächlichen Produktions-Schreibschleife: **200 Termine einer Staffel; Abbruch nach 70; nächster Lauf mit neuer Revision schreibt nur noch 130**, keine doppelten POSTs, danach null Schreibvorgänge. 200 geprüfte Termine mit nur einer Abweichung ergeben einen PUT. Weitere Tests prüfen 200 gedrosselte Anfragen, neun Batchpausen, Erholung nach über einer Minute, Retry-After, erschöpfte Wiederholungen und Zeitablauf ohne weitere Anfrage. Alle Google-Antworten in diesen Tests simuliert.
+
+### Auftrag an Installer (jetzt konkret ausführbar)
+
+1. Den verlinkten Starter aus dem festgelegten Starter-Commit beziehen und **genau Quellcommit 7be1db9…** bauen. Kein `git pull main`, kein Ausweichen auf andere Quellen/alte EXE bei Fehlern.
+2. Bestehende private Desktop-OAuth-Grunddatei und das bewährte lokale SerKal-Symbol verwenden. Keine persönlichen Tokens mitliefern. Starter prüft Voraussetzungen, Version/Stand, npm ci, alle 43 Tests, Windows-Setup, gepackte OAuth-Datei und Token-Ausschluss sowie Ein-Datei-Installer/Hash.
+3. Pro Aufruf neue Bauordner und Kandidatenordner unter `C:\ppd\serkal\veroeffentlichungen\1.2.5\kandidat-<Zeitstempel>-<Zufall>`. Vorherige Kandidaten und aktuelle Public werden nicht gelöscht/überschrieben. Starter unter Windows noch auszuführen; hier nur statisch geprüft.
+4. Bei Fehler Ursache beheben und denselben Quellstand in einem neuen Versuch bauen. Fehler und tatsächlichen Bauzustand berichten; keine veraltete Datei als erfolgreichen neuen Build ausgeben.
+5. Fertige EXE mit Quellcommit, Größe, SHA256 und Test-/Startnachweis hier zurückmelden. Sichtbare Version **1.2.5**, bestehende Installation aktualisieren, Archiv erhalten, Google-Anmeldung und große echte Kalenderübertragung einschließlich Fortschritt/Erholung prüfen. Zunächst möglichst Prüfkalender verwenden. Keine Public-Freigabe aus den Simulationstests ableiten.
+6. **Public 1.2.4 bleibt währenddessen unverändert verfügbar.** Erst nach Kurts praktischer Abnahme exakt diese EXE übernehmen. Websiteersatz vollständig vorbereiten/hochladen und prüfen, dann am Ziel atomar austauschen; Rückweg zur bisherigen Datei behalten. Anschließend öffentliche Datei herunterladen und Hash/Version kontrollieren. Keine vorgezogene Versions-/Downloadbehauptung durch Website.
+
+Die Android-Anmeldeschleife und TMDB-Ersteinrichtung bleiben getrennte offene Themen; diese Desktop-Kalenderkorrektur behauptet dafür keine Lösung.
