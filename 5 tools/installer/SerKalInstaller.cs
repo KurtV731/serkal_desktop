@@ -12,13 +12,13 @@ using System.Windows.Forms;
 [assembly: AssemblyDescription("SerKal Desktop Installation und Aktualisierung")]
 [assembly: AssemblyCompany("Kurt Vogelsaenger")]
 [assembly: AssemblyProduct("SerKal Desktop")]
-[assembly: AssemblyVersion("1.2.0.0")]
-[assembly: AssemblyFileVersion("1.2.0.0")]
+[assembly: AssemblyVersion("1.2.5.0")]
+[assembly: AssemblyFileVersion("1.2.5.0")]
 
 internal static class SerKalInstaller
 {
     private const string ResourceName = "SerKal.Setup.exe";
-    private const string SetupFileName = "serkal-desktop-1-2-setup.exe";
+    private const string SetupFileName = "serkal-desktop-1-2-5-setup.exe";
 
     [STAThread]
     private static int Main()
