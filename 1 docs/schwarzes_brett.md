@@ -5806,3 +5806,18 @@ Abnahmekriterien für die Korrektur:
 Zusatzbefund, noch kein zweiter umgesetzter Auftrag: Auch SerKals Hauptfenster ruft im aktuellen Code `maximize()` beim Start auf. Bei der Umsetzung Fensterrollen sauber trennen; der vorliegende Screenshot zeigt ausdrücklich die Google-Abschlussseite.
 
 Google-Grundlage zum externen Browser: https://developers.google.com/identity/protocols/oauth2/native-app und https://developers.google.com/identity/protocols/oauth2/policies (16.11.2026 geprüft).
+
+
+### Kurts Praxisabnahme 16.11.2026, 00:06 Uhr – Kandidat 1.2.5 noch nicht freigegeben
+
+Status: **GOOGLE-VERBINDUNG FUNKTIONIERT / SICHTBARE RÜCKMELDUNG FEHLERHAFT / OAUTH-BEDIENUNG WEITERHIN NICHT WIE BEAUFTRAGT / KEINE PUBLIC-FREIGABE**.
+
+Der lokale Kandidat `kandidat-20261115-234153-21736` erreichte mit `kp.vogelsaenger@gmail.com` erfolgreich die Google-Rückmeldung „SerKal ist mit Google Kalender verbunden“. Nach Rückkehr meldete SerKal jedoch:
+
+`Archivstand für Android bereit: undefined Einträge.`
+
+Das ist nachweislich falsch; dieselbe laufende Installation zeigte das erhaltene Archiv unmittelbar zuvor mit **92 Einträgen**. Die Google-Verbindung selbst ist damit belegt, die sichtbare Abschlussmeldung verarbeitet die Archivanzahl aber fehlerhaft. Keine Abnahme als „fertig“, bis der Wert zuverlässig aus dem tatsächlich geladenen Archiv übernommen und mit `92 Einträge` (bzw. dem jeweils echten Wert) angezeigt wird.
+
+Außerdem öffnet der Google-OAuth-Ablauf weiterhin bildschirmfüllende Browserseiten bzw. einen normalen Browser-Tab. Kurt hat wiederholt ein echtes begrenztes Fenster verlangt. Die Erfolgsseite behauptet „Dieses Fenster kann jetzt geschlossen werden“, schließt den normalen Browser-Tab aber nicht selbst. Dieser Bedienmangel ist bei der Korrektur verbindlich mit zu behandeln.
+
+Auftrag an CE: Ursache beider Punkte im Quellcode beheben, passende Regressionstests ergänzen und einen neuen klar versionierten Kandidatenstand übergeben. Installer baut den jetzigen 1.2.5-Kandidaten nicht als Public aus. Die vorhandene Public 1.2.4 bleibt unverändert.
