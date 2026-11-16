@@ -1,7 +1,7 @@
 name: Isolated desktop archive session tests
 on:
   push:
-    branches: [ce-desktop-1.2.5]
+    branches: [ce-desktop-1.2.6]
   workflow_dispatch:
 permissions:
   contents: read
@@ -14,3 +14,25 @@ jobs:
         with:
           node-version: '24'
       - run: npm test
+
+  browser-window:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install isolated browser-test tools
+        shell: pwsh
+        run: npm install --prefix "$env:RUNNER_TEMP/serkal-browser-deps" --ignore-scripts --no-package-lock playwright@1.62.1
+      - name: Real external browser window with existing maximized browser
+        shell: pwsh
+        run: |
+          $env:NODE_PATH="$env:RUNNER_TEMP/serkal-browser-deps/node_modules"
+          node "6 tests/google-auth-window.browser.cjs"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: desktop-1.2.6-browser-window-evidence
+          path: test-results/

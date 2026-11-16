@@ -1687,18 +1687,21 @@ function googleOauthBrowserLogin_(cfg, options = {}) {
         const challenge = crypto.createHash("sha256").update(verifier).digest("base64url");
         let finished = false;
         let timeout = null;
+        let browserOpened = false;
 
         const finish = (err, token, server) => {
             if (finished) return;
             finished = true;
             if (timeout) clearTimeout(timeout);
             try { server.close(); } catch (_closeErr) {}
+            if(browserOpened)bringSerkalToFront_();
             if (err) reject(err);
             else resolve(token);
         };
 
         const server = http.createServer(async (req, res) => {
             try {
+                if(finished){res.writeHead(410);res.end();return;}
                 const callback = new URL(req.url || "/", "http://127.0.0.1");
                 if (callback.searchParams.get("state") !== state) {
                     res.writeHead(400, { "content-type":"text/plain; charset=utf-8" });
@@ -1709,7 +1712,7 @@ function googleOauthBrowserLogin_(cfg, options = {}) {
                 const code = callback.searchParams.get("code");
                 if (oauthError || !code) {
                     res.writeHead(400, { "content-type":"text/html; charset=utf-8" });
-                    res.end("<!doctype html><meta charset='utf-8'><body><p>" + bt_("GOOGLE_CANCEL_PAGE") + "</p></body>");
+                    res.end(require("../common/google-auth-window").resultPage(bt_("GOOGLE_CANCEL_PAGE")));
                     finish(new Error(oauthError || "Google hat keinen Anmeldecode geliefert."), null, server);
                     return;
                 }
@@ -1729,14 +1732,15 @@ function googleOauthBrowserLogin_(cfg, options = {}) {
                 if (requestedScopes === GOOGLE_CALENDAR_SCOPES && !googleOauthTokenHasRequiredScope_(token)) {
                     throw new Error(bt_("GOOGLE_NARROW_SCOPE_REQUIRED"));
                 }
+                if(finished){res.writeHead(410);res.end();return;}
                 writeToken(token);
                 res.writeHead(200, { "content-type":"text/html; charset=utf-8" });
-                res.end("<!doctype html><meta charset='utf-8'><title>SerKal</title><body style='font:20px Arial;padding:40px;background:#f6f3ff;color:#172033'><p>" + bt_("GOOGLE_SUCCESS_PAGE") + "</p></body>");
+                res.end(require("../common/google-auth-window").resultPage(bt_("GOOGLE_SUCCESS_PAGE")));
                 finish(null, token, server);
             } catch (err) {
                 try {
-                    res.writeHead(500, { "content-type":"text/plain; charset=utf-8" });
-                    res.end(bt_("GOOGLE_SIGNIN_FAILED"));
+                    res.writeHead(500, { "content-type":"text/html; charset=utf-8" });
+                    res.end(require("../common/google-auth-window").resultPage(bt_("GOOGLE_SIGNIN_FAILED")));
                 } catch (_responseErr) {}
                 finish(err, null, server);
             }
@@ -1757,8 +1761,17 @@ function googleOauthBrowserLogin_(cfg, options = {}) {
             authUrl.searchParams.set("state", state);
             authUrl.searchParams.set("code_challenge", challenge);
             authUrl.searchParams.set("code_challenge_method", "S256");
-            try { await shell.openExternal(authUrl.toString()); }
-            catch (err) { finish(err, null, server); }
+            try {
+                const opened=await require("../common/google-auth-window").open(authUrl.toString(),{
+                    area:screen.getDisplayNearestPoint(screen.getCursorScreenPoint()).workArea
+                });
+                browserOpened=true;
+                logWrite_("INFO","GOOGLE","Google sign-in opened in separate browser window",{browser:opened.browser});
+            }
+            catch (err) {
+                if(err.code==="GOOGLE_WINDOW_BROWSER_MISSING")err.message=bt_("GOOGLE_WINDOW_BROWSER_MISSING");
+                finish(err, null, server);
+            }
         });
 
         timeout = setTimeout(() => {
@@ -2067,7 +2080,12 @@ function scheduleSharedArchive_() {
 }
 async function googleSharedArchiveSync_() {
     if (calendarLab_) return {status:"disabled"};
-    if(copyLocalMode_){const result=await copyManager_().sync();return {status:result.status==="saved"?"ready":result.status==="pending"?"busy":"failed",code:result.code};}
+    if(copyLocalMode_){
+        const result=await copyManager_().sync();
+        const loaded=archiveLoad_();
+        if(!loaded.ok||!Number.isSafeInteger(loaded.count)||loaded.count<0)return {status:"failed",code:"ARCHIVE_READ_FAILED"};
+        return {status:result.status==="saved"?"ready":result.status==="pending"?"busy":"failed",code:result.code,count:loaded.count,session:sessionMode_};
+    }
     if(sharedArchiveRunning_) { scheduleSharedArchive_(); return {status:"busy"}; }
     sharedArchiveRunning_=true;
     try {

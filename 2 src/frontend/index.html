@@ -3793,6 +3793,8 @@ function setDetailsdesc_(it, originTag) {
 const I18N = {
   de: {
     SHAREDARCHIVE_READY:"Archivstand für Android bereit: {count} Einträge.",
+    SHAREDARCHIVE_LOADED:"Archiv geladen: {count} Einträge.",
+    SHAREDARCHIVE_COUNT_UNKNOWN:"Die Archivanzahl konnte nicht ermittelt werden.",
     SHAREDARCHIVE_OTHER:"Der Archivstand wird von deinem anderen Desktop bereitgestellt.",
     SHAREDARCHIVE_FAILED:"Archivübertragung fehlgeschlagen. TMDB-Verbindung bleibt bestehen.",
     SHAREDKEY_MISSING:"Noch kein gemeinsamer TMDB-Schlüssel. Zuerst ein Gerät mit vorhandenem Schlüssel verbinden.",
@@ -4004,6 +4006,8 @@ const I18N = {
 },
   en: {
     SHAREDARCHIVE_READY:"Archive snapshot ready for Android: {count} entries.",
+    SHAREDARCHIVE_LOADED:"Archive loaded: {count} entries.",
+    SHAREDARCHIVE_COUNT_UNKNOWN:"The archive count could not be determined.",
     SHAREDARCHIVE_OTHER:"Your other Desktop provides the archive snapshot.",
     SHAREDARCHIVE_FAILED:"Archive upload failed. TMDB connection remains available.",
     SHAREDKEY_MISSING:"No shared TMDB key yet. Connect a device with an existing key first.",
@@ -9509,7 +9513,12 @@ try {
       var archiveText='';
       if(result.archive) {
         var status=result.archive.status;
-        if(status==='ready'||status==='published') archiveText=t('SHAREDARCHIVE_READY').replace('{count}',String(result.archive.count));
+        if(status==='ready'||status==='published'||(result.archive.session&&status==='busy')) {
+          var count=result.archive.count;
+          archiveText=Number.isSafeInteger(count)&&count>=0
+            ? t(result.archive.session?'SHAREDARCHIVE_LOADED':'SHAREDARCHIVE_READY').replace('{count}',String(count))
+            : t('SHAREDARCHIVE_COUNT_UNKNOWN');
+        }
         else if(status==='other-desktop') archiveText=t('SHAREDARCHIVE_OTHER');
         else if(status==='failed') archiveText=t('SHAREDARCHIVE_FAILED');
       }
