@@ -5980,3 +5980,32 @@ Der Installer hat wegen Kurts Rückenschmerzen den unmittelbaren Veröffentlichu
 6. Änderungen über GitHub veröffentlichen, danach die Live-Seiten DE/EN praktisch prüfen und Commit sowie geprüfte URLs hier zurückmelden.
 
 Quellen für die Fortschreibung: Release-Notiz 1.2.5 auf `ce-desktop-1.2.5`, Release-Notiz 1.2.6 auf `ce-desktop-1.2.6`, die Freigabe-/Praxisabschnitte dieses Bretts sowie die öffentlichen 1.2-Seiten. Keine Änderung an der veröffentlichten EXE.
+
+
+## Website – 16.11.2026: Nachlauf zu Desktop 1.2.6 in GitHub fertig
+
+Status: **VIER WEBSITE-QUELLSEITEN FORTGESCHRIEBEN UND VON GITHUB ZURÜCKGEPRÜFT / SERVERUPLOAD NOCH AUSSTEHEND**.
+
+Der verbindliche Website-Nachauftrag nach der Veröffentlichung von Desktop 1.2.6 wurde umgesetzt:
+
+- `up/neu-in-1.2.html`, Commit `06cbdd453f88a4c9150611c129fad3a8c851f758`;
+- `up/whats-new-1.2.html`, Commit `e279b9ce3a8eb36e270f27d258fabb9989dd98a4`;
+- `up/werkstatt.html`, Commit `c3348aec459d3326896193b7a40dbdb30069b89f`;
+- `up/werkstatt-en.html`, Commit `293fb802662d0c7e965ac284f1e7e2cdeb78242d`.
+
+Deutsch und Englisch trennen jetzt ausdrücklich den öffentlichen Stand: Windows **1.2.6**, Android **1.2.4**, gemeinsamer Archivstand 38. Die 1.2.5-Kalenderstabilisierung (nur geänderte Bereiche, Pausen nach 20 Schreibvorgängen, sichtbarer Countdown bei Google-Limits, eigenes Zeitfenster und Fortsetzung offener Arbeit) sowie die 1.2.6-Korrekturen (separates normales Google-Fenster, Rückkehr zu SerKal, echte Archivzahl statt `undefined`) sind zusammengefasst.
+
+Die Werkstatt DE/EN enthält einen neuen Meilenstein vom 16.11.2026 über den Weg von 1.2.0 über die Kalenderstabilisierung bis zur öffentlichen Desktop-1.2.6. Als noch offen für eine spätere Desktop-Version stehen sichtbar:
+1. bessere gleichzeitige Sichtbarkeit von Google-Fenster und SerKal-Hinweis;
+2. dauerhaft sichtbarer echter Google-Verbindungsstatus, möglichst mit verwendetem Konto;
+3. bekannter Browserumweg „Kalender hinzufügen“, bis ein praktisch geprüfter Fix vorliegt.
+
+Alle vier Dateien wurden nach dem Commit von GitHub zurückgelesen. Jeweils bestätigt: Desktop 1.2.6, Android 1.2.4, offene Restpunkte, drei Projektlogos sowie exakt sieben Bereiche oben und unten. Die bereits vom Installer aktualisierten Downloadseiten DE/EN waren konsistent und mussten nicht erneut verändert werden. Keine EXE, APK oder Prüfsumme angefasst.
+
+Noch nicht als live behaupten: Kurt muss den neuen Website-Stand veröffentlichen. Danach sind diese vier öffentlichen URLs praktisch zu prüfen:
+- https://serkal.de/neu-in-1.2.html
+- https://serkal.de/whats-new-1.2.html
+- https://serkal.de/werkstatt.html
+- https://serkal.de/werkstatt-en.html
+
+Künftige Übergaben nach einer Desktop-Veröffentlichung sollen weiterhin die zwei Blöcke **„Jetzt behoben/veröffentlicht“** und **„Noch offen/nächste Version“** enthalten.
