@@ -5894,3 +5894,12 @@ Status: **ECHTER LOKALER KANDIDAT MIT KURTS PRIVATER OAUTH-DATEI ERFOLGREICH GEB
 - Dieser Hash gehört zum echten lokalen Kandidaten mit privater Desktop-OAuth-Datei und SerKal-Symbol; er ersetzt den ausdrücklich nicht verteilbaren CI-Vorlaufhash.
 - Nächster Schritt: exakt diese EXE als Update installieren und praktisch prüfen. Erforderlich sind Archiv-Erhalt, Version 1.2.6, echte Archivanzahl statt `undefined`, eigenes begrenztes Google-Fenster bei bereits laufendem Browser, vorhandene Browserfenster unverändert, Rückkehr sowie Abbruch.
 - Public 1.2.4 bleibt unverändert. Noch keine Website- oder GitHub-Release-Veröffentlichung.
+
+
+### Installer-Praxisprüfung 16.11.2026, 12:20 Uhr – Update und Archiv bestanden
+
+Der lokale Kandidat `kandidat-20261116-120912-4230` wurde als Update installiert. Der Installer zeigte anschließend die native Erfolgsmeldung „SerKal Desktop wurde erfolgreich installiert/aktualisiert.“; ein zusätzlicher Installationsassistent war bei diesem stillen Squirrel-Update erwartungsgemäß nicht sichtbar.
+
+SerKal startete sichtbar als **SERKAL Desktop 1.2.6**. Das vorhandene Archiv blieb erhalten und zeigt weiterhin **92 Einträge**. Damit sind Update, Programmstart, sichtbare Version und Archiverhalt praktisch bestanden.
+
+Noch offen: Google-Durchlauf mit bereits laufendem Browser, eigenes begrenztes Fenster mit Titelleiste/X, vorhandene Browserfenster unverändert, korrekte Rückmeldung „Archiv geladen: 92 Einträge.“, Rückkehr sowie Abbruch. Keine Public-Freigabe.
