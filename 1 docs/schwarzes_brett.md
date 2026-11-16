@@ -5878,3 +5878,19 @@ Status: **FESTGESCHRIEBENER EIN-KLICK-BAUWEG UND WINDOWS-CI BESTANDEN / ECHTER L
 - Nächster Schritt: dieselbe geprüfte Batch einmal auf Kurts Windows-PC ausführen. Dort verwendet sie die vorhandene private Desktop-OAuth-Datei und das bewährte SerKal-Symbol und erzeugt einen neuen eindeutigen Kandidaten unter `C:\ppd\serkal\veroeffentlichungen\1.2.6\kandidat-...`.
 - Danach exakt diese lokale EXE als Update installieren und praktisch prüfen: Archiv bleibt erhalten; sichtbare Version 1.2.6; reale Anzahl statt `undefined`; Google-Anmeldung bei bereits laufendem Browser in eigenem normalem Fenster mit Titelleiste/X; vorhandene Browserfenster unverändert; Rückkehr sowie Abbruch. Erst Kurts Abnahme erlaubt die unveränderte Veröffentlichung.
 - Public 1.2.4, Kandidat 1.2.5 und alle vorhandenen Archive bleiben unangetastet.
+
+
+### Installer-Praxisstand 16.11.2026, 12:12 Uhr – echter lokaler Kandidat 1.2.6 gebaut
+
+Status: **ECHTER LOKALER KANDIDAT MIT KURTS PRIVATER OAUTH-DATEI ERFOLGREICH GEBAUT / INSTALLATION UND PRAXISABNAHME NOCH AUSSTEHEND / KEIN PUBLIC-AUSTAUSCH**.
+
+- Kandidat: `C:\ppd\serkal\veroeffentlichungen\1.2.6\kandidat-20261116-120912-4230\serkal-desktop.exe`
+- Sichtbare Sollversion: `SerKal Desktop 1.2.6`
+- Release-Stand: `38`
+- Anwendungsquellstand: `07903512a7ac2de4521182ec8b9a89e4cb030a86`
+- Dateigröße: `140893184` Bytes
+- SHA-256: `4cd5128dce6c01771ecb0e80271b4a56b7b1047faa80eb0f72eabcab30aaef16`
+- Die geprüfte Ein-Klick-Batch lief auf Kurts Windows-PC vollständig bis „zur Abnahme bereit“ durch und erzeugte Freigabenachweis, EXE und SHA-Datei im neuen eindeutigen Kandidatenordner.
+- Dieser Hash gehört zum echten lokalen Kandidaten mit privater Desktop-OAuth-Datei und SerKal-Symbol; er ersetzt den ausdrücklich nicht verteilbaren CI-Vorlaufhash.
+- Nächster Schritt: exakt diese EXE als Update installieren und praktisch prüfen. Erforderlich sind Archiv-Erhalt, Version 1.2.6, echte Archivanzahl statt `undefined`, eigenes begrenztes Google-Fenster bei bereits laufendem Browser, vorhandene Browserfenster unverändert, Rückkehr sowie Abbruch.
+- Public 1.2.4 bleibt unverändert. Noch keine Website- oder GitHub-Release-Veröffentlichung.
