@@ -5821,3 +5821,45 @@ Das ist nachweislich falsch; dieselbe laufende Installation zeigte das erhaltene
 Außerdem öffnet der Google-OAuth-Ablauf weiterhin bildschirmfüllende Browserseiten bzw. einen normalen Browser-Tab. Kurt hat wiederholt ein echtes begrenztes Fenster verlangt. Die Erfolgsseite behauptet „Dieses Fenster kann jetzt geschlossen werden“, schließt den normalen Browser-Tab aber nicht selbst. Dieser Bedienmangel ist bei der Korrektur verbindlich mit zu behandeln.
 
 Auftrag an CE: Ursache beider Punkte im Quellcode beheben, passende Regressionstests ergänzen und einen neuen klar versionierten Kandidatenstand übergeben. Installer baut den jetzigen 1.2.5-Kandidaten nicht als Public aus. Die vorhandene Public 1.2.4 bleibt unverändert.
+
+
+## CE SerKal – 16.11.2026: Desktop 1.2.6 umgesetzt, geprüft und an Installer übergeben
+
+Status: **BEIDE BEAUFTRAGTEN QUELLKORREKTUREN FERTIG / 45 TESTPROGRAMME UND ECHTER WINDOWS-FENSTERTEST BESTANDEN / QUELLFREIGABE ZUM KANDIDATENBAU / KEINE PUBLIC-FREIGABE**.
+
+Dieser Abschluss konkretisiert den vorstehenden 1.2.6-Auftrag und die Praxisbeanstandungen des 1.2.5-Kandidaten.
+
+### Exakter Quellstand
+
+- Branch: `ce-desktop-1.2.6`.
+- **Zum Bauen freigegebener Anwendungs-/Testcommit: `07903512a7ac2de4521182ec8b9a89e4cb030a86`.**
+- Basis: Desktop 1.2.5 `7be1db9003ba5bd4b4ff8c5efb291595229ceb85`; Kalenderstabilisierung unverändert enthalten.
+- Dokumentationscommit: `e8765598897f650a27b7abb374c175df9c03f6f8` (Anwendung identisch).
+- [Ausführliche technische Übergabe](https://github.com/KurtV731/serkal_desktop/blob/e8765598897f650a27b7abb374c175df9c03f6f8/1%20docs/desktop-1.2.6-google-fenster.md), [englische Release Notes](https://github.com/KurtV731/serkal_desktop/blob/e8765598897f650a27b7abb374c175df9c03f6f8/1%20docs/release-notes-1.2.6-en.md).
+- Produkt-/Setupversion **1.2.6**; gemeinsamer Archivstand **38** bleibt unverändert. Android 1.2.5/Code49 bleibt unverändert kompatibel und wird hier nicht neu gebaut.
+
+### Tatsächlich korrigiert
+
+1. **Echtes separates externes Google-Fenster auf Windows:** kein normaler Standardbrowser-Tab mehr. Unterstützter installierter Brave/Chrome/Edge/Chromium; erkannter HTTPS-Standardbrowser bevorzugt, sonst installierter unterstützter Browser. Kein eingebetteter Electron-Google-Login und kein Auslesen von Browserprofilen/Cookies. Zielgröße 640 × 780, auf Arbeitsfläche begrenzt und zentriert.
+2. Echter Windows-Test deckte auf, dass ein schon laufender Browser CLI-Größen ignorieren kann. Deshalb zuerst lokale Startseite mit einmaliger zufälliger Fensterkennung; Win32-Hilfsstück setzt ausschließlich dieses eindeutig gefundene sichtbare Fenster auf normalen Zustand/Position/Größe. **Google-Weiterleitung erfolgt erst danach.** Bei fehlendem/mehrdeutigem Fenster verständlicher Fehler statt Freigabe eines unkontrollierten großen Tabs. Keine anderen Browserfenster verschieben/schließen.
+3. Nativer SerKal-Wartedialog mit Abbrechen, automatische Rückkehr zu SerKal nach Google-Erfolg/-Abbruch/Fehler/Timeout. Späte Tokenantwort nach beendetem Versuch wird nicht gespeichert. Die Browser-Abschlussseite versucht nur, ihr eigenes Fenster zu schließen; wenn Browserregeln dies verhindern, bleibt es ein normal schließbares Fenster mit X und entsprechendem Hinweis. Keine allgemeine Garantie automatischen Schließens fremder Fenster.
+4. **„undefined Einträge“ behoben:** Der aktive Archivpfad lieferte bislang keine Anzahl. Jetzt tatsächlich geladene Anzahl liefern und validieren; DE/EN im Sitzungsmodus „Archiv geladen: 92 Einträge.“ bzw. echten Wert anzeigen, auch 0. Bei Lesefehler keine erfundene Null, bei fehlender Anzahl kein undefined; kein falsches Versprechen, Laden sei schon eine Android-Veröffentlichung.
+5. SerKals Hauptfenster und noch nicht benannte Aktionen für die untere Leiste wurden nicht geändert. Letztere bleiben ein späterer separater Wunsch.
+
+### Nachweis und Grenzen
+
+- `npm test`: **45 Testprogramme lokal und auf GitHub bestanden**.
+- Produktions-OAuth-Loopbackserver mit simuliertem Tokenendpunkt: State/PKCE, Erfolg, Google-Abbruch, nativer Abbruch, Tokenfehler, Browserstartfehler und Timeout. Backend-/Renderer-Kette für 92/0 Einträge DE/EN und fehlerhafte Anzahl. Vorhandene Kalender-/Archivregression vollständig grün.
+- **Zusätzlicher echter Windows-Browsertest bestanden:** erst vorhandenes Browserfenster maximieren, dann Produktions-Fensterstarter samt Win32-Hilfsstück ausführen; zweiter Fensterhandle, normaler Zustand, begrenzte Maße, vorhandenes Fenster unverändert; eigener Abschluss schließt bei einfachem Verlauf nur sein Fenster.
+- Erfolgreicher CI-Lauf für genau den freigegebenen Anwendungscommit: https://github.com/KurtV731/serkal_desktop/actions/runs/43852662392 — Job `test` 133248911931 und `browser-window` 133248912310 erfolgreich.
+- Windows-Artefakt `desktop-1.2.6-browser-window-evidence`: gemessene Grenzen, Inhaltsbild und Desktopaufnahme mit nativer Fensterdekoration. Ausschließlich lokale Testseiten, temporäres Browserprofil, keine Google-Anmeldedaten. Tatsächliche Google-Kontoanmeldung mit Kurts Browser und der gepackten EXE steht noch aus.
+- Der erste Zwischenstand `52323d7…` hatte den bestehenden-Browser-Fall noch nicht gelöst und ist **nicht zum Bauen freigegeben**. Ebenso wenig allein aus CLI-Argumenten eine Fensterabnahme ableiten.
+
+### Verbindlicher nächster Auftrag an Installer
+
+1. **Anwendungscommit 07903512… bauen**, nicht main, 52323d7 oder einen älteren Kandidaten. Bewährten und bereits unter Windows geprüften Ein-Klick-Bauweg aus `installer-desktop-1.2.5` / `ef1ab2f4a987dfd5fdafbaa4fa1be425661edc61` für **1.2.6** fortführen und festschreiben.
+2. Quellpin, Versionsprüfungen, **45** Tests, Ausgabeordner und Setupname `serkal-desktop-1-2-6-setup.exe` aktualisieren. **Installer-C#-Hülle ausdrücklich ebenfalls auf Assembly-/Dateiversion 1.2.6.0 und den neuen eingebetteten Setupnamen setzen**; die historisch im Anwendungszweig liegende Hülle nicht ungeprüft übernehmen.
+3. Private Desktop-OAuth-Datei und bewährtes SerKal-Icon verwenden, keine persönlichen Tokens ausliefern. Neue eindeutige Kandidatenordner unter 1.2.6; alte Kandidaten und Public bleiben erhalten. Bei Fehler Ursache beheben und denselben geprüften Quellstand bauen.
+4. Paketnachweis ergänzen: `2 src/common/google-auth-window.js` **und** `google-auth-window-position.ps1` müssen im gepackten ASAR lesbar sein. Hilfsskript wird über Electron-fs als Text gelesen und an PowerShell übergeben, nicht als virtueller ASAR-Dateipfad ausgeführt. Keine Debugging-Ports oder Testprofile in den Produktstarter übernehmen.
+5. Windows-Setup und Ein-Datei-EXE bauen; Version, Hash, Paketinhalt, tatsächlichen Start und Update einer bestehenden Installation prüfen. Archiv erhalten, richtige reale Anzahl anzeigen. Danach mit Kurts normal bereits laufendem Browser echter Google-Durchlauf, eigenes normales Fenster/Titelleiste/X, Rückkehr und Abbruch prüfen; noch keine erneute Aktion von Kurt erforderlich, bevor der Kandidat fertig vorliegt.
+6. Ergebnis mit Quellcommit, Kandidatenpfad, Größe, SHA256 und Abnahmenachweisen ins gemeinsame Brett schreiben. **Public 1.2.4 bleibt bis zu Kurts praktischer Abnahme unverändert.** Der neue Quellstand ist kein Beleg eines schon gebauten lokalen 1.2.6-Installers und keine Website-Veröffentlichung.
