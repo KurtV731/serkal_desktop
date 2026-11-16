@@ -5903,3 +5903,16 @@ Der lokale Kandidat `kandidat-20261116-120912-4230` wurde als Update installiert
 SerKal startete sichtbar als **SERKAL Desktop 1.2.6**. Das vorhandene Archiv blieb erhalten und zeigt weiterhin **92 Einträge**. Damit sind Update, Programmstart, sichtbare Version und Archiverhalt praktisch bestanden.
 
 Noch offen: Google-Durchlauf mit bereits laufendem Browser, eigenes begrenztes Fenster mit Titelleiste/X, vorhandene Browserfenster unverändert, korrekte Rückmeldung „Archiv geladen: 92 Einträge.“, Rückkehr sowie Abbruch. Keine Public-Freigabe.
+
+
+### Kurts Praxisbefund 16.11.2026, 12:23 Uhr – Google-Fenster vorhanden, Hinweis wird verdeckt
+
+Status: **SEPARATES BEGRENZTES GOOGLE-FENSTER BESTÄTIGT / ABLAUF NOCH NICHT BEDIENBAR ABGENOMMEN / KEINE PUBLIC-FREIGABE**.
+
+Der Kandidat 1.2.6 öffnet die Google-Anmeldung nun tatsächlich in einem eigenen normalen Browserfenster mit sichtbarer Titelleiste, Minimieren/Maximieren und X. Damit ist der Kern der Fensterkorrektur praktisch sichtbar.
+
+Unmittelbar davor erscheint in SerKal der native Hinweis „Die Google-Anmeldung wird in einem separaten Browserfenster geöffnet …“ mit **Abbrechen**. Dieses kleine SerKal-Fenster blitzt jedoch nur kurz auf und wird sofort vom größeren Google-Fenster überdeckt. Kurt konnte den Text nur lesen, weil er das erwartete und das Google-Fenster anschließend bewusst zur Seite schob. Ein unvorbereiteter Benutzer bemerkt Hinweis und Abbruchmöglichkeit nicht.
+
+Verbindliche Nachbesserung: Den Erklärschritt nicht zeitgleich hinter dem Browserfenster verstecken. Bevorzugter eindeutiger Ablauf: zuerst sichtbarer nativer SerKal-Dialog mit einer bewussten Schaltfläche **„Google-Anmeldung öffnen“**; erst nach deren Betätigung Browserfenster starten und den Dialog in den Warte-/Abbruchzustand wechseln. Alternativ wäre nur eine praktisch gleichwertige Lösung zulässig, bei der Erklärung und Abbruch jederzeit sichtbar und erreichbar bleiben. Ein kurzes Aufblitzen gilt nicht als bestanden.
+
+Der laufende Durchgang darf zur Prüfung von Google-Erfolg, Rückkehr und korrekter Archivzahl 92 beendet werden. Public 1.2.4 bleibt unverändert.
