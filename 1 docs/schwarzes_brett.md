@@ -5938,3 +5938,18 @@ Zusätzlich zur späteren Verbesserung der Fensteranordnung wünscht Kurt für D
 - Bei bestehender Verbindung nach Möglichkeit die tatsächlich verwendete Google-Konto-Adresse anzeigen; bei fehlender Verbindung einen eindeutigen neutralen Status.
 - Die Anzeige muss den wirklichen Verbindungs-/Kontostand wiedergeben und darf nicht allein aus einer alten lokalen Einstellung ableiten, dass die Anmeldung noch gültig sei.
 - Genaue Ecke, Platzbedarf und Darstellung werden bei 1.2.7 zusammen mit den bereits vorgemerkten Änderungen festgelegt. Keine Änderung am geprüften Kandidaten 1.2.6.
+
+
+### Kurts endgültige Praxisabnahme 16.11.2026 – Desktop 1.2.6 zur Veröffentlichung freigegeben
+
+Status: **PRAKTISCHE ABNAHME BESTANDEN / EXAKTER LOKALER KANDIDAT VON KURT ZUR UNVERÄNDERTEN VERÖFFENTLICHUNG FREIGEGEBEN**.
+
+- Der Google-Durchlauf wurde auf Kurts Windows-PC erfolgreich beendet. Das eigene begrenzte Browserfenster mit sichtbarer Titelleiste und X zeigte die Abschlussseite „Google-Verbindung hergestellt“.
+- Nach dem Schließen dieses Browserfensters meldete SerKal korrekt das verwendete Konto `kp.vogelsaenger@gmail.com` und **„Archiv geladen: 92 Einträge.“**. Der frühere Fehler `undefined Einträge` ist damit praktisch behoben.
+- Das Google-Fenster verdeckte dabei den kleineren nativen SerKal-Abschlussdialog. Kurt bestätigt ausdrücklich: Dies ist der bereits dokumentierte kleine Bedienfehler für 1.2.7 und kein Freigabestopper für 1.2.6.
+- Kurt hat die Veröffentlichung ausdrücklich angeordnet. Freigegeben ist ausschließlich die bereits geprüfte Datei
+  `C:\\ppd\\serkal\\veroeffentlichungen\\1.2.6\\kandidat-20261116-120912-4230\\serkal-desktop.exe`
+  mit **140893184 Bytes** und SHA-256 **`4cd5128dce6c01771ecb0e80271b4a56b7b1047faa80eb0f72eabcab30aaef16`**.
+- Diese Datei jetzt **unverändert** als öffentlichen Website-Download `serkal-desktop.exe` und als GitHub-Release übernehmen. Keine Neuberechnung, kein Umbau und kein Ersatz durch das CI-Artefakt.
+- Nach Upload die öffentliche Datei erneut herunterladen und Größe, SHA-256 und sichtbare Version 1.2.6 prüfen. Bis zur erfolgreichen Gegenprüfung Rückweg zur bisherigen Public 1.2.4 erhalten.
+- Release-/Downloadhinweis aufnehmen: Das neue Google-Browserfenster kann den SerKal-Hinweis verdecken; bei Bedarf das Google-Fenster kurz zur Seite schieben.
