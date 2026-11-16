@@ -4,9 +4,9 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),os=require('nod
 const {chromium}=require('playwright'),policy=require('../2 src/common/google-auth-window');
 (async()=>{
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'serkal-browser-window-'));
- let browser,child,server;
+ let browser,child,server;const marker='SerKal Google '+'b'.repeat(24);
  try{
-  server=http.createServer((req,res)=>{res.setHeader('Content-Type','text/html; charset=utf-8');res.end(req.url==='/done'?policy.resultPage('Google connection established. Return to SerKal.'):'<!doctype html><title>SerKal – test sign-in</title><h1>SerKal sign-in window</h1><p>Local test page. No Google account is used.</p>');});
+  server=http.createServer((req,res)=>{res.setHeader('Content-Type','text/html; charset=utf-8');res.end(req.url==='/done'?policy.resultPage('Google connection established. Return to SerKal.'):'<!doctype html><title>'+marker+'</title><h1>SerKal sign-in window</h1><p>Local test page. No Google account is used.</p>');});
   await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));const url='http://127.0.0.1:'+server.address().port;
   const executable=await policy.findBrowser();
   const args=['about:blank'];
@@ -24,8 +24,8 @@ const {chromium}=require('playwright'),policy=require('../2 src/common/google-au
   await session.send('Browser.setWindowBounds',{windowId:oldWindow.windowId,bounds:{windowState:'maximized'}});
   const before=await session.send('Browser.getWindowBounds',{windowId:oldWindow.windowId});
   await policy.open('https://accounts.google.com/o/oauth2/v2/auth?state=local-test',{
-   area:{x:0,y:0,width:1280,height:900},spawn:(exe,actualArgs,options)=>{
-    assert.equal(exe,executable);actualArgs[actualArgs.length-1]='--app='+url;actualArgs.push('--user-data-dir='+root);
+   area:{x:0,y:0,width:1280,height:900},marker,startUrl:url+'/google-start',spawn:(exe,actualArgs,options)=>{
+    assert.equal(exe,executable);actualArgs.push('--user-data-dir='+root);
     if(process.platform!=='win32')actualArgs.push('--no-sandbox');
     return cp.spawn(exe,actualArgs,options);
    }

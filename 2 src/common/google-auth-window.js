@@ -27,20 +27,36 @@ async function findBrowser({platform=process.platform,env=process.env,exists=fs.
  }
  throw Object.assign(new Error('GOOGLE_WINDOW_BROWSER_MISSING'),{code:'GOOGLE_WINDOW_BROWSER_MISSING'});
 }
+async function positionWindowsWindow(marker,area,{execFile=cp.execFile}={}){
+ const b=bounds(area);if(!/^SerKal Google [a-f0-9]{24}$/.test(marker))throw Error('GOOGLE_WINDOW_MARKER_INVALID');
+ const script=fs.readFileSync(path.join(__dirname,'google-auth-window-position.ps1'),'utf8');
+ await new Promise((resolve,reject)=>execFile('powershell.exe',['-NoProfile','-NonInteractive','-Command',script],{
+  windowsHide:true,timeout:15000,env:{...process.env,SERKAL_OAUTH_WINDOW_TITLE:marker,SERKAL_OAUTH_WINDOW_X:String(b.x),SERKAL_OAUTH_WINDOW_Y:String(b.y),SERKAL_OAUTH_WINDOW_WIDTH:String(b.width),SERKAL_OAUTH_WINDOW_HEIGHT:String(b.height)}
+ },error=>error?reject(Object.assign(new Error('GOOGLE_WINDOW_POSITION_FAILED'),{code:'GOOGLE_WINDOW_POSITION_FAILED'})):resolve()));
+}
 function argumentsFor(url,area){
  const target=new URL(url);if(target.origin!=='https://accounts.google.com'||target.pathname!=='/o/oauth2/v2/auth')throw Error('GOOGLE_WINDOW_URL_INVALID');
  const b=bounds(area);return ['--new-window','--window-size='+b.width+','+b.height,'--window-position='+b.x+','+b.y,'--app='+target.toString()];
 }
-async function open(url,{area,spawn=cp.spawn,...discovery}={}){
+async function open(url,{area,startUrl,marker,spawn=cp.spawn,position=positionWindowsWindow,...discovery}={}){
  const args=argumentsFor(url,area),executable=await findBrowser(discovery);
+ if(!/^SerKal Google [a-f0-9]{24}$/.test(marker||''))throw Error('GOOGLE_WINDOW_MARKER_INVALID');
+ const start=new URL(startUrl);if(start.hostname!=='127.0.0.1'||start.protocol!=='http:'||start.pathname!=='/google-start')throw Error('GOOGLE_WINDOW_START_INVALID');
+ args[args.length-1]='--app='+start.toString();
  await new Promise((resolve,reject)=>{
   const child=spawn(executable,args,{detached:true,stdio:'ignore',shell:false,windowsHide:false});
   child.once('error',reject);child.once('spawn',()=>{child.unref();resolve();});
  });
+ if((discovery.platform||process.platform)==='win32')await position(marker,area);
  return {browser:path.win32.basename(executable)};
+}
+function startPage(marker,authUrl,state){
+ if(!/^SerKal Google [a-f0-9]{24}$/.test(marker))throw Error('GOOGLE_WINDOW_MARKER_INVALID');
+ argumentsFor(authUrl);
+ return "<!doctype html><meta charset='utf-8'><title>"+marker+"</title><p>SerKal · Google …</p><script>setInterval(async function(){try{var r=await fetch('/google-ready?state='+"+JSON.stringify(state)+",{cache:'no-store'});if((await r.json()).ready)location.replace("+JSON.stringify(authUrl)+");}catch(e){}},200);</script>";
 }
 function resultPage(message){
  const escape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  return "<!doctype html><html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>SerKal</title></head><body style='font:18px system-ui;padding:24px;background:#f6f3ff;color:#172033'><p>"+escape(message)+"</p><script>setTimeout(function(){window.close();},300);</script></body></html>";
 }
-module.exports={open,findBrowser,argumentsFor,bounds,resultPage,registryValue,commandExecutable};
+module.exports={open,findBrowser,argumentsFor,bounds,resultPage,startPage,positionWindowsWindow,registryValue,commandExecutable};

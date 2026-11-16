@@ -1688,11 +1688,15 @@ function googleOauthBrowserLogin_(cfg, options = {}) {
         let finished = false;
         let timeout = null;
         let browserOpened = false;
+        let browserReady=false,authorizationUrl="";
+        const browserMarker="SerKal Google "+crypto.randomBytes(12).toString("hex");
+        const waitingDialog = new AbortController();
 
         const finish = (err, token, server) => {
             if (finished) return;
             finished = true;
             if (timeout) clearTimeout(timeout);
+            waitingDialog.abort();
             try { server.close(); } catch (_closeErr) {}
             if(browserOpened)bringSerkalToFront_();
             if (err) reject(err);
@@ -1707,6 +1711,13 @@ function googleOauthBrowserLogin_(cfg, options = {}) {
                     res.writeHead(400, { "content-type":"text/plain; charset=utf-8" });
                     res.end(bt_("GOOGLE_LOGIN_INVALID"));
                     return;
+                }
+                if(callback.pathname==="/google-start"){
+                    res.writeHead(200,{"content-type":"text/html; charset=utf-8","cache-control":"no-store"});
+                    res.end(require("../common/google-auth-window").startPage(browserMarker,authorizationUrl,state));return;
+                }
+                if(callback.pathname==="/google-ready"){
+                    res.writeHead(200,{"content-type":"application/json","cache-control":"no-store"});res.end(JSON.stringify({ready:browserReady}));return;
                 }
                 const oauthError = callback.searchParams.get("error");
                 const code = callback.searchParams.get("code");
@@ -1761,15 +1772,24 @@ function googleOauthBrowserLogin_(cfg, options = {}) {
             authUrl.searchParams.set("state", state);
             authUrl.searchParams.set("code_challenge", challenge);
             authUrl.searchParams.set("code_challenge_method", "S256");
+            authorizationUrl=authUrl.toString();
             try {
+                dialog.showMessageBox(serkalMainWindow_,{
+                    type:"info",title:bt_("GOOGLE_WINDOW_TITLE"),message:bt_("GOOGLE_WINDOW_WAIT"),
+                    buttons:[bt_("SHAREDKEY_CANCEL")],defaultId:0,cancelId:0,signal:waitingDialog.signal
+                }).then(()=>{
+                    if(!finished)finish(Object.assign(new Error(bt_("GOOGLE_CANCEL_PAGE")),{code:"SHARED_KEY_CANCELLED"}),null,server);
+                }).catch(err=>finish(err,null,server));
                 const opened=await require("../common/google-auth-window").open(authUrl.toString(),{
-                    area:screen.getDisplayNearestPoint(screen.getCursorScreenPoint()).workArea
+                    area:screen.getDisplayNearestPoint(screen.getCursorScreenPoint()).workArea,
+                    marker:browserMarker,startUrl:redirectUri+"/google-start?state="+encodeURIComponent(state)
                 });
-                browserOpened=true;
+                if(finished)return;
+                browserOpened=true;browserReady=true;
                 logWrite_("INFO","GOOGLE","Google sign-in opened in separate browser window",{browser:opened.browser});
             }
             catch (err) {
-                if(err.code==="GOOGLE_WINDOW_BROWSER_MISSING")err.message=bt_("GOOGLE_WINDOW_BROWSER_MISSING");
+                if(["GOOGLE_WINDOW_BROWSER_MISSING","GOOGLE_WINDOW_POSITION_FAILED"].includes(err.code))err.message=bt_(err.code);
                 finish(err, null, server);
             }
         });
