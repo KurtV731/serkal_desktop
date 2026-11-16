@@ -5953,3 +5953,30 @@ Status: **PRAKTISCHE ABNAHME BESTANDEN / EXAKTER LOKALER KANDIDAT VON KURT ZUR U
 - Diese Datei jetzt **unverändert** als öffentlichen Website-Download `serkal-desktop.exe` und als GitHub-Release übernehmen. Keine Neuberechnung, kein Umbau und kein Ersatz durch das CI-Artefakt.
 - Nach Upload die öffentliche Datei erneut herunterladen und Größe, SHA-256 und sichtbare Version 1.2.6 prüfen. Bis zur erfolgreichen Gegenprüfung Rückweg zur bisherigen Public 1.2.4 erhalten.
 - Release-/Downloadhinweis aufnehmen: Das neue Google-Browserfenster kann den SerKal-Hinweis verdecken; bei Bedarf das Google-Fenster kurz zur Seite schieben.
+
+
+### Installer/Website – 16.11.2026: Desktop 1.2.6 veröffentlicht; Website-Nachlauf verbindlich
+
+Status: **PUBLIC UND GITHUB-RELEASE ERFOLGREICH / LIVE-HASH BESTÄTIGT / WEBSITE-DOKUMENTATION NOCH ZU VERVOLLSTÄNDIGEN**.
+
+- Kurt führte den vorbereiteten Ein-Klick-Veröffentlichungsstarter fehlerfrei aus.
+- Öffentliche Website-Datei: `https://serkal.de/download/serkal-desktop.exe`.
+- Live-SHA-256 bestätigt: `4cd5128dce6c01771ecb0e80271b4a56b7b1047faa80eb0f72eabcab30aaef16`; damit bytegleich mit dem praktisch abgenommenen Kandidaten.
+- Die deutsche und englische Downloadseite zeigen Desktop **1.2.6** und den bekannten Hinweis zur möglichen Fensterüberdeckung.
+- GitHub-Release **v1.2.6**, Titel „SerKal Desktop 1.2.6“, enthält `serkal-desktop.exe` mit **140893184 Bytes**.
+
+#### Verbindlicher Nachauftrag an Website-Chatty
+
+Der Installer hat wegen Kurts Rückenschmerzen den unmittelbaren Veröffentlichungsweg einschließlich der beiden Downloadseiten übernommen. Das ersetzt nicht die dauerhafte Website-Pflege. Website-Chatty liest diesen Eintrag und erledigt als nächsten zusammenhängenden Website-Auftrag:
+
+1. `neu-in-1.2.html` und `whats-new-1.2.html` fachlich bis **Desktop 1.2.6** fortführen. Der aktuelle öffentliche Text endet bei 1.2.4. Änderungen 1.2.1 bis 1.2.6 aus den freigegebenen Commits und Release-Unterlagen zusammenfassen; keine internen Zwischenstände als öffentlich verfügbar darstellen.
+2. Das Werkstattbuch DE/EN um den Weg von 1.2.0 über Kalenderstabilisierung bis zur veröffentlichten 1.2.6 ergänzen. Künftig bei jedem wirklich veröffentlichten SerKal-Meilenstein prüfen, ob ein kurzer Werkstatteintrag sinnvoll ist; nicht jede interne Testfassung aufblasen.
+3. Auf Download-/Neu-/Werkstattseiten konsistent festhalten: Windows ist 1.2.6; Android bleibt derzeit 1.2.4 beziehungsweise der getrennte Play-Teststand. Keinen falschen Versionsgleichlauf behaupten.
+4. Sichtbar beziehungsweise in der passenden Neu-Seite als bekannte Restpunkte für eine spätere **Desktop 1.2.7** führen:
+   - Das separate Google-Browserfenster kann den kleineren SerKal-Hinweis/Abschlussdialog verdecken; Fensteranordnung verbessern.
+   - Ein dauerhaft sichtbarer echter Google-Verbindungsstatus, möglichst mit tatsächlich verwendetem Konto, fehlt auf Desktop noch.
+   - Der schon bei 1.2.4 dokumentierte Browserumweg „Kalender hinzufügen“ bleibt als Restpunkt stehen, solange CE keinen nachgewiesenen Fix meldet.
+5. Nach jeder künftigen Desktop-Veröffentlichung dem Auftraggeber ausdrücklich zwei kurze Blöcke liefern: **„Jetzt behoben/veröffentlicht“** und **„Noch offen/nächste Version“**. Damit gehen Restpunkte beim Rollenwechsel nicht verloren.
+6. Änderungen über GitHub veröffentlichen, danach die Live-Seiten DE/EN praktisch prüfen und Commit sowie geprüfte URLs hier zurückmelden.
+
+Quellen für die Fortschreibung: Release-Notiz 1.2.5 auf `ce-desktop-1.2.5`, Release-Notiz 1.2.6 auf `ce-desktop-1.2.6`, die Freigabe-/Praxisabschnitte dieses Bretts sowie die öffentlichen 1.2-Seiten. Keine Änderung an der veröffentlichten EXE.
