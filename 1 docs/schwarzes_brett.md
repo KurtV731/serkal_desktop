@@ -5916,3 +5916,15 @@ Unmittelbar davor erscheint in SerKal der native Hinweis „Die Google-Anmeldung
 Verbindliche Nachbesserung: Den Erklärschritt nicht zeitgleich hinter dem Browserfenster verstecken. Bevorzugter eindeutiger Ablauf: zuerst sichtbarer nativer SerKal-Dialog mit einer bewussten Schaltfläche **„Google-Anmeldung öffnen“**; erst nach deren Betätigung Browserfenster starten und den Dialog in den Warte-/Abbruchzustand wechseln. Alternativ wäre nur eine praktisch gleichwertige Lösung zulässig, bei der Erklärung und Abbruch jederzeit sichtbar und erreichbar bleiben. Ein kurzes Aufblitzen gilt nicht als bestanden.
 
 Der laufende Durchgang darf zur Prüfung von Google-Erfolg, Rückkehr und korrekter Archivzahl 92 beendet werden. Public 1.2.4 bleibt unverändert.
+
+
+### Kurts Entscheidung 16.11.2026 – Fensterüberdeckung kein Freigabestopper für 1.2.6
+
+Diese Entscheidung präzisiert und ersetzt den strengeren Freigabestatus des unmittelbar vorstehenden Praxisbefunds:
+
+- Das separate begrenzte Google-Fenster der 1.2.6 ist grundsätzlich gelungen und darf in dieser Form freigegeben werden, sofern die übrigen noch laufenden Prüfungen bestehen.
+- Dass das Google-Fenster den kleinen SerKal-Erklär-/Abbruchdialog zunächst verdecken kann, ist ein **bekannter kleiner Bedienfehler**, aber **kein Freigabestopper für Desktop 1.2.6**.
+- Die bereits gebaute und gehashte Kandidaten-EXE wird dafür nicht verändert. Ein Eingriff in Programm oder Installer würde einen neuen Kandidaten erfordern und die bisherige Abnahme entwerten.
+- Für die Veröffentlichung von 1.2.6 soll auf Downloadseite beziehungsweise in den Release-Hinweisen kurz stehen: Bei der Google-Anmeldung kann das neue Browserfenster den SerKal-Hinweis verdecken; bei Bedarf das Google-Fenster kurz zur Seite schieben.
+- Für eine spätere **Desktop 1.2.7** vormerken: Fenster nach Möglichkeit so anordnen, dass Google-Anmeldung und SerKal-Hinweis gleichzeitig sichtbar bleiben. Keine zusätzliche Bestätigungsschaltfläche als bereits beschlossene Lösung festlegen; konkrete Umsetzung erst dann prüfen.
+- Vor der Freigabe von 1.2.6 bleiben nur die laufenden Funktionsprüfungen offen: Google-Erfolg/Rückkehr und korrekte reale Archivzahl statt `undefined`.
