@@ -98,7 +98,7 @@ for /f "delims=" %%F in ('dir /s /b "%SERKAL_BUILD_DIR%\out\app.asar" 2^>nul') d
 if not defined SERKAL_PACKAGED_ASAR goto :missing_packaged_asar
 set "SERKAL_ASAR_LIST=%SERKAL_BUILD_DIR%\asar-list.txt"
 call npx --no-install asar list "%SERKAL_PACKAGED_ASAR%" > "%SERKAL_ASAR_LIST%" || goto :asar_check_failed
-powershell -NoProfile -Command "$ErrorActionPreference='Stop';$text=(Get-Content -Raw -LiteralPath $env:SERKAL_ASAR_LIST).Replace('\\','/');$required=@('/2 src/common/google-auth-window.js','/2 src/common/google-auth-window-position.ps1');foreach($value in $required){if(-not $text.Contains($value)){throw ('ASAR: '+$value+' fehlt')}};Write-Host 'Google-Fensterdateien im ASAR: OK'" || goto :asar_check_failed
+powershell -NoProfile -Command "$ErrorActionPreference='Stop';$text=(Get-Content -Raw -LiteralPath $env:SERKAL_ASAR_LIST).Replace('\','/');$required=@('/2 src/common/google-auth-window.js','/2 src/common/google-auth-window-position.ps1');foreach($value in $required){if(-not $text.Contains($value)){throw ('ASAR: '+$value+' fehlt')}};Write-Host 'Google-Fensterdateien im ASAR: OK'" || goto :asar_check_failed
 del /f /q "%SERKAL_ASAR_LIST%" >nul 2>&1
 
 echo [10/11] Ein-Datei-Installer erzeugen ...
