@@ -1,0 +1,128 @@
+name: Desktop 1.2.6 installer preflight
+
+on:
+  push:
+    branches:
+      - installer-desktop-1.2.6
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-practical-smoke:
+    runs-on: windows-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout installer preparation
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Create CI-only OAuth and icon fixtures
+        shell: pwsh
+        run: |
+          $private = 'C:\ppd\serkal\serkal_private'
+          New-Item -ItemType Directory -Path $private -Force | Out-Null
+          @'
+          {
+            "installed": {
+              "client_id": "ci-only-not-for-distribution.apps.googleusercontent.com",
+              "project_id": "serkal-installer-preflight",
+              "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+              "token_uri": "https://oauth2.googleapis.com/token",
+              "client_secret": "ci-only-not-for-distribution",
+              "redirect_uris": ["http://localhost"]
+            }
+          }
+          '@ | Set-Content -Encoding utf8 -LiteralPath (Join-Path $private 'google_oauth_client.json')
+
+          $iconFolder = 'C:\ppd\serkal\serkal_dev\serkal_desktop\4 assets\icon'
+          New-Item -ItemType Directory -Path $iconFolder -Force | Out-Null
+          Add-Type -AssemblyName System.Drawing
+          $systemIcon = [Drawing.Icon]::ExtractAssociatedIcon((Join-Path $env:WINDIR 'System32\notepad.exe'))
+          if (-not $systemIcon) { throw 'CI konnte kein gueltiges Windows-ICO erzeugen.' }
+          $iconStream = [IO.File]::Create((Join-Path $iconFolder 'serkal.ico'))
+          try { $systemIcon.Save($iconStream) } finally { $iconStream.Dispose(); $systemIcon.Dispose() }
+
+      - name: Run the exact one-click build batch
+        shell: cmd
+        run: |
+          (echo.) | call serkal-1-2-6-kandidat-bauen.bat
+          if errorlevel 1 exit /b 1
+
+      - name: Verify wrapper, embedded setup and hash
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $candidateDir = Get-ChildItem 'C:\ppd\serkal\veroeffentlichungen\1.2.6' -Directory |
+            Sort-Object LastWriteTime -Descending | Select-Object -First 1
+          if (-not $candidateDir) { throw 'Kein Kandidatenordner erzeugt.' }
+          $candidate = Join-Path $candidateDir.FullName 'serkal-desktop.exe'
+          $shaFile = $candidate + '.sha256'
+          $proof = Join-Path $candidateDir.FullName 'freigabenachweis.txt'
+          if (-not (Test-Path -LiteralPath $candidate -PathType Leaf)) { throw 'Kandidaten-EXE fehlt.' }
+          if (-not (Test-Path -LiteralPath $shaFile -PathType Leaf)) { throw 'SHA-Datei fehlt.' }
+          if (-not (Test-Path -LiteralPath $proof -PathType Leaf)) { throw 'Freigabenachweis fehlt.' }
+
+          $actualHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $candidate).Hash.ToLower()
+          $recordedHash = ((Get-Content -Raw -LiteralPath $shaFile).Trim() -split '\s+')[0].ToLower()
+          if ($actualHash -ne $recordedHash) { throw 'SHA-256 stimmt nicht.' }
+
+          $proofText = Get-Content -Raw -LiteralPath $proof
+          if (-not $proofText.Contains('version=1.2.6')) { throw 'Freigabenachweis nennt nicht 1.2.6.' }
+          if (-not $proofText.Contains('sourceCommit=07903512a7ac2de4521182ec8b9a89e4cb030a86')) { throw 'Freigabenachweis nennt falschen Quellstand.' }
+
+          $version = [Diagnostics.FileVersionInfo]::GetVersionInfo($candidate)
+          if ($version.FileVersion -ne '1.2.6.0') { throw "Wrapper-Dateiversion ist $($version.FileVersion), erwartet 1.2.6.0." }
+          if ($version.ProductName -ne 'SerKal Desktop') { throw "Falscher Produktname: $($version.ProductName)" }
+
+          $runId = $candidateDir.Name.Substring('kandidat-'.Length)
+          $buildDir = "C:\ppd\serkal\build\release-1.2.6-$runId"
+          $setup = Join-Path $buildDir 'out\make\squirrel.windows\x64\serkal-desktop-1-2-6-setup.exe'
+          if (-not (Test-Path -LiteralPath $setup -PathType Leaf)) { throw 'Squirrel-Setup fehlt.' }
+
+          $assembly = [Reflection.Assembly]::LoadFile($candidate)
+          if (@($assembly.GetManifestResourceNames()) -notcontains 'SerKal.Setup.exe') { throw 'Eingebettetes Setup fehlt.' }
+          $extracted = Join-Path $env:RUNNER_TEMP 'SerKal.Setup.extracted.exe'
+          $stream = $assembly.GetManifestResourceStream('SerKal.Setup.exe')
+          try {
+            $file = [IO.File]::Create($extracted)
+            try { $stream.CopyTo($file) } finally { $file.Dispose() }
+          } finally { $stream.Dispose() }
+          if ((Get-FileHash $extracted -Algorithm SHA256).Hash -ne (Get-FileHash $setup -Algorithm SHA256).Hash) {
+            throw 'Eingebettetes Setup weicht vom gebauten Setup ab.'
+          }
+
+          "candidate=$candidate" | Out-File -FilePath $env:GITHUB_ENV -Append
+          "setup=$setup" | Out-File -FilePath $env:GITHUB_ENV -Append
+          "sha256=$actualHash" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - name: Install setup and launch packaged app
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $setupProcess = Start-Process -FilePath $env:setup -ArgumentList '--silent' -PassThru -Wait
+          if ($setupProcess.ExitCode -ne 0) { throw "Squirrel-Setup meldet $($setupProcess.ExitCode)." }
+
+          $app = Get-ChildItem $env:LOCALAPPDATA -Filter 'SerKal Desktop.exe' -File -Recurse -ErrorAction SilentlyContinue |
+            Where-Object { $_.FullName -match 'app-1\.2\.6' } |
+            Select-Object -First 1
+          if (-not $app) { throw 'Installierte SerKal-Desktop-1.2.6-EXE wurde nicht gefunden.' }
+
+          $appVersion = [Diagnostics.FileVersionInfo]::GetVersionInfo($app.FullName)
+          if ($appVersion.ProductVersion -notmatch '^1\.2\.6') {
+            throw "Installierte Produktversion ist $($appVersion.ProductVersion)."
+          }
+
+          $process = Start-Process -FilePath $app.FullName -PassThru
+          Start-Sleep -Seconds 12
+          $process.Refresh()
+          if ($process.HasExited) { throw "SerKal beendete sich beim Start mit Code $($process.ExitCode)." }
+          Stop-Process -Id $process.Id -Force
+          Write-Host "WINDOWS-PREFLIGHT OK: gebaut, Hash geprüft, installiert und SerKal 1.2.6 gestartet."
+          Write-Host "CI verwendet absichtlich eine ungültige OAuth-Fixture; dieses Artefakt wird nicht verteilt."
