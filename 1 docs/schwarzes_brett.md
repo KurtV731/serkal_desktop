@@ -5863,3 +5863,18 @@ Dieser Abschluss konkretisiert den vorstehenden 1.2.6-Auftrag und die Praxisbean
 4. Paketnachweis ergänzen: `2 src/common/google-auth-window.js` **und** `google-auth-window-position.ps1` müssen im gepackten ASAR lesbar sein. Hilfsskript wird über Electron-fs als Text gelesen und an PowerShell übergeben, nicht als virtueller ASAR-Dateipfad ausgeführt. Keine Debugging-Ports oder Testprofile in den Produktstarter übernehmen.
 5. Windows-Setup und Ein-Datei-EXE bauen; Version, Hash, Paketinhalt, tatsächlichen Start und Update einer bestehenden Installation prüfen. Archiv erhalten, richtige reale Anzahl anzeigen. Danach mit Kurts normal bereits laufendem Browser echter Google-Durchlauf, eigenes normales Fenster/Titelleiste/X, Rückkehr und Abbruch prüfen; noch keine erneute Aktion von Kurt erforderlich, bevor der Kandidat fertig vorliegt.
 6. Ergebnis mit Quellcommit, Kandidatenpfad, Größe, SHA256 und Abnahmenachweisen ins gemeinsame Brett schreiben. **Public 1.2.4 bleibt bis zu Kurts praktischer Abnahme unverändert.** Der neue Quellstand ist kein Beleg eines schon gebauten lokalen 1.2.6-Installers und keine Website-Veröffentlichung.
+
+
+## Installer – 16.11.2026: Desktop 1.2.6 Windows-Vorlauf vollständig bestanden
+
+Status: **FESTGESCHRIEBENER EIN-KLICK-BAUWEG UND WINDOWS-CI BESTANDEN / ECHTER LOKALER KANDIDAT MIT KURTS PRIVATER OAUTH-DATEI NOCH ZU BAUEN / PUBLIC 1.2.4 UNVERÄNDERT**.
+
+- Installer-Branch: `installer-desktop-1.2.6`; geprüfter Stand `bba2ffa51e7b68fde084c0d1ef84d7f0ae8fac90`.
+- Neue Ein-Klick-Batch: `serkal-1-2-6-kandidat-bauen.bat`; festgeschriebener Batchstand `ea40c24a9a0cb0d8ad916a23b061abb7ece3a339`.
+- Installerhülle: `fb1d00dd6e43c0ece7f34302f15f7b8a24b93268`, Assembly-/Dateiversion `1.2.6.0`, eingebetteter Setupname `serkal-desktop-1-2-6-setup.exe`.
+- Die Batch baut ausschließlich den freigegebenen Anwendungscommit `07903512a7ac2de4521182ec8b9a89e4cb030a86`, kontrolliert Produkt-/Setupversion, Release 38, private OAuth-Grunddatei, gültiges Windows-ICO, alle 45 Testprogramme, Token-Ausschluss und zusätzlich die beiden Dateien `2 src/common/google-auth-window.js` sowie `google-auth-window-position.ps1` im gepackten ASAR.
+- Unabhängiger Windows-Vorlauf vollständig erfolgreich: https://github.com/KurtV731/serkal_desktop/actions/runs/43853868443 (Job `build-and-practical-smoke`). Nachgewiesen wurden Ein-Klick-Bau, 45 Tests, ASAR-Inhalt, SHA-Datei, Wrapper-Version, bytegleiche eingebettete Setup-Ressource, stille Installation und tatsächlicher Start von SerKal Desktop 1.2.6 über zwölf Sekunden.
+- CI-Vorlaufdatei: `140196352` Bytes, SHA-256 `842210b96842fa789b01ff6c3888ab79982189f2d70f1967c4f296642670ee83`. **Nicht verteilen:** Sie enthält absichtlich nur eine ungültige CI-OAuth-Fixture und ein technisches Testsymbol.
+- Nächster Schritt: dieselbe geprüfte Batch einmal auf Kurts Windows-PC ausführen. Dort verwendet sie die vorhandene private Desktop-OAuth-Datei und das bewährte SerKal-Symbol und erzeugt einen neuen eindeutigen Kandidaten unter `C:\ppd\serkal\veroeffentlichungen\1.2.6\kandidat-...`.
+- Danach exakt diese lokale EXE als Update installieren und praktisch prüfen: Archiv bleibt erhalten; sichtbare Version 1.2.6; reale Anzahl statt `undefined`; Google-Anmeldung bei bereits laufendem Browser in eigenem normalem Fenster mit Titelleiste/X; vorhandene Browserfenster unverändert; Rückkehr sowie Abbruch. Erst Kurts Abnahme erlaubt die unveränderte Veröffentlichung.
+- Public 1.2.4, Kandidat 1.2.5 und alle vorhandenen Archive bleiben unangetastet.
