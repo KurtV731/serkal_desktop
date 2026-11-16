@@ -5928,3 +5928,13 @@ Diese Entscheidung präzisiert und ersetzt den strengeren Freigabestatus des unm
 - Für die Veröffentlichung von 1.2.6 soll auf Downloadseite beziehungsweise in den Release-Hinweisen kurz stehen: Bei der Google-Anmeldung kann das neue Browserfenster den SerKal-Hinweis verdecken; bei Bedarf das Google-Fenster kurz zur Seite schieben.
 - Für eine spätere **Desktop 1.2.7** vormerken: Fenster nach Möglichkeit so anordnen, dass Google-Anmeldung und SerKal-Hinweis gleichzeitig sichtbar bleiben. Keine zusätzliche Bestätigungsschaltfläche als bereits beschlossene Lösung festlegen; konkrete Umsetzung erst dann prüfen.
 - Vor der Freigabe von 1.2.6 bleiben nur die laufenden Funktionsprüfungen offen: Google-Erfolg/Rückkehr und korrekte reale Archivzahl statt `undefined`.
+
+
+### Vormerkung Desktop 1.2.7 – Google-Anmeldestatus sichtbar machen
+
+Zusätzlich zur späteren Verbesserung der Fensteranordnung wünscht Kurt für Desktop 1.2.7 einen dauerhaft sichtbaren Google-Status nach dem Vorbild der Handyfassung:
+
+- In einer geeigneten Ecke der Desktop-Oberfläche soll ohne Öffnen des Menüs erkennbar sein, ob SerKal mit Google verbunden ist.
+- Bei bestehender Verbindung nach Möglichkeit die tatsächlich verwendete Google-Konto-Adresse anzeigen; bei fehlender Verbindung einen eindeutigen neutralen Status.
+- Die Anzeige muss den wirklichen Verbindungs-/Kontostand wiedergeben und darf nicht allein aus einer alten lokalen Einstellung ableiten, dass die Anmeldung noch gültig sei.
+- Genaue Ecke, Platzbedarf und Darstellung werden bei 1.2.7 zusammen mit den bereits vorgemerkten Änderungen festgelegt. Keine Änderung am geprüften Kandidaten 1.2.6.
