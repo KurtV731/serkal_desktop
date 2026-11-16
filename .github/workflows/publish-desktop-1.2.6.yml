@@ -1,0 +1,72 @@
+name: Publish approved SerKal Desktop 1.2.6
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/publish-desktop-1.2.6.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  wait-for-approved-public-file:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Wait for exact approved file on serkal.de
+        shell: bash
+        run: |
+          set -euo pipefail
+          expected_hash="4cd5128dce6c01771ecb0e80271b4a56b7b1047faa80eb0f72eabcab30aaef16"
+          expected_size="140893184"
+          url="https://serkal.de/download/serkal-desktop.exe"
+          for attempt in $(seq 1 60); do
+            rm -f serkal-desktop.exe
+            if curl --fail --location --silent --show-error --output serkal-desktop.exe "$url?release=1.2.6&attempt=$attempt"; then
+              actual_hash="$(sha256sum serkal-desktop.exe | awk '{print $1}')"
+              actual_size="$(stat -c %s serkal-desktop.exe)"
+              if [[ "$actual_hash" == "$expected_hash" && "$actual_size" == "$expected_size" ]]; then
+                echo "Exact approved public file found."
+                exit 0
+              fi
+              echo "Attempt $attempt: public file is still different ($actual_size bytes, $actual_hash)."
+            else
+              echo "Attempt $attempt: public file not yet reachable."
+            fi
+            sleep 30
+          done
+          echo "Approved file did not appear on serkal.de within 30 minutes." >&2
+          exit 1
+
+      - name: Create GitHub release from the identical public file
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > release-notes.md <<'EOF'
+          SerKal Desktop 1.2.6
+
+          - Stabilizes large Google Calendar transfers with paced requests, bounded retries and clearer progress.
+          - Opens Google sign-in in a separate, normally sized browser window.
+          - Reports the actual loaded archive count after sign-in instead of “undefined”.
+          - Keeps the shared archive format at release level 38 and remains compatible with SerKal Android 1.2.5.
+
+          Known minor issue: the separate Google browser window may cover the smaller SerKal message. If needed, briefly move the Google window aside.
+
+          Approved Windows file:
+          SHA-256: 4cd5128dce6c01771ecb0e80271b4a56b7b1047faa80eb0f72eabcab30aaef16
+          Size: 140893184 bytes
+          Source commit: 07903512a7ac2de4521182ec8b9a89e4cb030a86
+          EOF
+          if gh release view v1.2.6 --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload v1.2.6 serkal-desktop.exe --repo "$GITHUB_REPOSITORY" --clobber
+          else
+            gh release create v1.2.6 "serkal-desktop.exe#serkal-desktop.exe" \
+              --repo "$GITHUB_REPOSITORY" \
+              --target 07903512a7ac2de4521182ec8b9a89e4cb030a86 \
+              --title "SerKal Desktop 1.2.6" \
+              --notes-file release-notes.md
+          fi
