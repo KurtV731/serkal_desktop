@@ -34,7 +34,7 @@ public class DisplayDeviceTest {
    save(inst,context,"display-initial.png");
    scenario.onActivity(a->WindowCompat.getInsetsController(a.getWindow(),a.getWindow().getDecorView()).show(WindowInsetsCompat.Type.systemBars()));
    Thread.sleep(500);inst.waitForIdleSync();
-   scenario.onActivity(a->{View root=a.findViewById(android.R.id.content).findViewWithTag("insetRoot");WindowInsetsCompat i=ViewCompat.getRootWindowInsets(root);Insets bars=i.getInsets(WindowInsetsCompat.Type.systemBars());assertTrue(bars.top>0);assertTrue(root.getPaddingTop()>=bars.top);assertTrue(root.getPaddingBottom()>=bars.bottom);});
+   scenario.onActivity(a->{View root=a.findViewById(android.R.id.content).findViewWithTag("insetRoot");WindowInsetsCompat i=ViewCompat.getRootWindowInsets(root);Insets bars=i.getInsetsIgnoringVisibility(WindowInsetsCompat.Type.systemBars());assertTrue(bars.top>0);assertTrue(root.getPaddingTop()>=bars.top);assertTrue(root.getPaddingBottom()>=bars.bottom);});
    save(inst,context,"display-system-bars.png");
    // Force a size change through the OS; this preserves the same app session.
    shell(inst,"wm size 1200x1800");inst.waitForIdleSync();Thread.sleep(800);

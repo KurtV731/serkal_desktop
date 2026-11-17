@@ -959,7 +959,7 @@ public class MainActivity extends Activity {
     private void adaptPanels_(){
         if(insetRoot==null||adaptiveColumns==null)return;
         int usableWidth=insetRoot.getWidth()-insetRoot.getPaddingLeft()-insetRoot.getPaddingRight();
-        int usableHeight=insetRoot.getHeight()-insetRoot.getPaddingTop()-insetRoot.getPaddingBottom();
+        int usableHeight=insetRoot.getHeight();
         // Keep the established three-column landscape layout on ordinary phones.
         boolean compact=usableWidth<dp(700)||(usableWidth<dp(840)&&usableWidth<usableHeight);
         adaptiveTabs.setVisibility(compact?View.VISIBLE:View.GONE);
@@ -1232,7 +1232,7 @@ public class MainActivity extends Activity {
         Button quitButton=footerButton(english?"Exit SerKal":"SerKal beenden");quitButton.setTag("exitSerKal");quitButton.setOnClickListener(v->exitSerKal());footer.addView(quitButton);
         root.addView(scrollBar_(footer),new LinearLayout.LayoutParams(-1,dp(36)));
         ViewCompat.setOnApplyWindowInsetsListener(root,(view,insets)->{
-            Insets safe=insets.getInsets(WindowInsetsCompat.Type.systemBars()|WindowInsetsCompat.Type.displayCutout()|WindowInsetsCompat.Type.ime());
+            Insets safe=Insets.max(insets.getInsetsIgnoringVisibility(WindowInsetsCompat.Type.systemBars()|WindowInsetsCompat.Type.displayCutout()),insets.getInsets(WindowInsetsCompat.Type.ime()));
             view.setPadding(dp(4)+safe.left,dp(3)+safe.top,dp(4)+safe.right,dp(4)+safe.bottom);
             adaptPanels_();return insets;
         });

@@ -27,7 +27,7 @@ public class EdgeToEdgeLayoutTest {
  @Test @Config(qualifiers="sw400dp-w900dp-h400dp") public void phoneStillPrefersLandscapeAndInsetsAreIdempotent(){
   ActivityController<MainActivity> c=Robolectric.buildActivity(MainActivity.class).create();MainActivity a=c.get();try{
    assertEquals(android.content.pm.ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE,a.getRequestedOrientation());View r=root(a);layout(r,760,400);assertEquals(View.GONE,r.findViewWithTag("adaptiveTabs").getVisibility());layout(r,900,400);int baseLeft=r.getPaddingLeft(),baseBottom=r.getPaddingBottom();
-   WindowInsetsCompat safe=new WindowInsetsCompat.Builder().setInsets(WindowInsetsCompat.Type.systemBars(),Insets.of(14,24,10,28)).setInsets(WindowInsetsCompat.Type.displayCutout(),Insets.of(36,0,0,0)).setInsets(WindowInsetsCompat.Type.ime(),Insets.of(0,0,0,180)).build();
+   WindowInsetsCompat safe=new WindowInsetsCompat.Builder().setInsets(WindowInsetsCompat.Type.systemBars(),Insets.of(14,24,10,28)).setInsetsIgnoringVisibility(WindowInsetsCompat.Type.systemBars(),Insets.of(14,24,10,28)).setInsets(WindowInsetsCompat.Type.displayCutout(),Insets.of(36,0,0,0)).setInsetsIgnoringVisibility(WindowInsetsCompat.Type.displayCutout(),Insets.of(36,0,0,0)).setInsets(WindowInsetsCompat.Type.ime(),Insets.of(0,0,0,180)).build();
    ViewCompat.dispatchApplyWindowInsets(r,safe);assertEquals(baseLeft+36,r.getPaddingLeft());assertEquals(baseBottom+180,r.getPaddingBottom());
    ViewCompat.dispatchApplyWindowInsets(r,safe);assertEquals(baseLeft+36,r.getPaddingLeft());assertEquals(baseBottom+180,r.getPaddingBottom());
    ViewCompat.dispatchApplyWindowInsets(r,new WindowInsetsCompat.Builder().build());assertEquals(baseLeft,r.getPaddingLeft());assertEquals(baseBottom,r.getPaddingBottom());
