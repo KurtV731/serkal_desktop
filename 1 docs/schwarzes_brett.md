@@ -6061,3 +6061,34 @@ Status: **CE-ARTEFAKT EXAKT BESTÄTIGT / CODE-50-SIGNIERER VORBEREITET UND GEPR�
 ## CE / Kurt – 17.11.2026: Code50 vorläufig für Upload gesperrt – Edge-to-Edge-Ersatz beauftragt
 
 **Ab sofort keinen Upload der bisherigen 1.2.6/Code50-AAB** (unsignierter Eingabehash `14ddfe923a76a9cc608954d7e9ea9b27187de67ea4965ba09a924bfa68ad5f56`) oder daraus signierter Dateien ausführen. Bisherige AAB und Signierpaket vorerst behalten. Kurt beauftragt ausdrücklich einen geprüften Ersatz mit weiterhin **Version 1.2.6 / versionCode 50**: veraltete Systemleisten-Farbaufrufe ersetzen, Edge-to-Edge/Insets auf Android15 und adaptive Tablet-/Großdisplaydarstellung auf Android16 prüfen; Querformat bleibt bevorzugt. Vorheriger Signierer und dessen Hashfreigabe gelten nicht für den Ersatz. CE meldet neuen Quellstand/Hash und Tests hier zurück. Kein neuer Versionscode ohne Kurts weiteren Auftrag.
+
+
+## CE – 17.11.2026: geprüfter Edge-to-Edge-Ersatz 1.2.6 / Code50 fertig
+
+Status: **ERSATZBAU UND DARSTELLUNGSPRÜFUNGEN BESTANDEN / NEUER EINGABEHASH FÜR INSTALLER / PRIVATE SIGNATUR UND PLAY-UPLOAD NICHT AUSGEFÜHRT**.
+
+Dieser Eintrag ersetzt ausschließlich die frühere Code50-Artefaktfreigabe. Alte AAB mit SHA256 `14ddfe923a76a9cc608954d7e9ea9b27187de67ea4965ba09a924bfa68ad5f56` und daraus erzeugte Dateien **nicht hochladen**. Alte Datei und bisheriges Signierpaket bleiben vorerst erhalten; CE hat nichts gelöscht.
+
+### Neuer verbindlicher Ersatz
+
+- Branch `ce-play-edge50`, Anwendungsstand `d3009c859efd19c60e613e86e6c0356455793f99`, abschließender Test-/Bauquellstand **`2043721004a6bbba4faf1454a366c1c9e9d90608`**.
+- [Vollständiger Nachweis](https://github.com/KurtV731/serkal_desktop/blob/f3850a199e6d758beac141f8be18e374a241e626/1%20docs/android/code50-edge-to-edge-ersatz.md).
+- **Datei `SerKal-Android-1.2.6-code50-edge-unsigned.aab`, 2496084 Bytes, SHA256 `4edd860ea8d1c9bee3133d0809f552ace9a71aa4994e9aec5f8361a6759d2d20`.**
+- [Datei für Kurt](https://chatgpt.com/library?file_id=libfile_a6933fc0c61c819189ebdd2250b605a4&account_id=personal).
+- [Regression und AAB-Bau](https://github.com/KurtV731/serkal_desktop/actions/runs/44100663424): **96 Tests bestanden, null Fehler, null übersprungen**. CI-Artefakt14336696122. Zusätzlich rekonstruierbar unter play-build-output/ in Sicherungscommit `022b24f52f46a0bbefd6b57312643b702d88a73c`.
+- ZIP141 Einträge vollständig geprüft; CI-Hash bestätigt; echtes binäres Manifest ausgelesen: **Version1.2.6, Code50, Paket de.serkal.android.preview.v005**, resizeableActivity=true, screenOrientation=unspecified. Weiterhin unsigniert. Archivstand38 unverändert.
+
+### Jetzt umgesetzt und geprüft
+
+1. Direkte veraltete Systemleisten-Farbaufrufe und alte System-UI-Flags in MainActivity entfernt; WindowCompat.enableEdgeToEdge / InsetsController und stabile Systemleisten-/Aussparungs-/Tastatur-Insetbehandlung eingesetzt.
+2. Größere Displays und Mehrfenster dürfen sich drehen und skalieren. Normale Telefone bevorzugen weiterhin Querformat. Bei knapper Breite Reiter für Suche/Eintrag/Archiv; breite Darstellung weiterhin drei Spalten. Größenwechsel ohne Verlust der Sitzung/Suche.
+3. AGP8.10.1 / Gradle8.11.1 / AndroidXCore1.17.0; Release-AAB bleibt unsigniert, Debugsignatur nur für Gerätetests.
+4. [Native Gerätetests](https://github.com/KurtV731/serkal_desktop/actions/runs/44100663551): **Android15/Pixel7 und Android16/PixelTablet erfolgreich**, je ein Instrumentationstest. Systemleisten, Größenwechsel, erhaltene Eingabe, Panelgrenzen und tatsächlich geöffnete Tastatur geprüft. CE hat stabile Bildschirmaufnahmen von breiter/kompakter Darstellung und Fußleiste oberhalb der Tastatur angesehen. Zusätzliche Robolectric-Prüfungen decken Hoch-/Querformat und schmales Fenster ab.
+5. Bisherige Google-/TMDB-Erklärungen, Schlüsselprüfung/-ablage und Kalenderstabilisierung aus Code50 bleiben enthalten. Keine pauschale Behauptung, bekannte andere Android-Restpunkte seien gelöst. Emulatortests verwenden kein echtes Google-Konto und ersetzen die reale Funktionsabnahme nicht.
+
+### Verbindliche Übergabe an Installer
+
+- Den alten Code50-Signierstarter und das alte Signierpaket **nicht unverändert benutzen**: Beide sind auf den überholten Hash/Quellstand festgelegt.
+- Neues Paket ausschließlich mit obiger Ersatz-AAB, neuem Eingabehash und Quellstand2043721004a6bbba4faf1454a366c1c9e9d90608 vorbereiten. Kein erneuter Build nötig.
+- Unverändert Alias `serkal-preview` und bekanntes Uploadzertifikat verwenden. Nach privater Signierung Signatur, Zertifikat, unveränderte Nutzdaten und neuen signierten SHA256 nachweisen; Play-App-Signierfingerabdruck für OAuth bleibt getrennt.
+- Vor einem Play-Upload ausschließlich die so geprüfte Ersatzdatei verwenden. **CE hat keine AAB hochgeladen.** Bestehender Play-Test, Paket und Teilnahme-Link bleiben bestehen; kein Löschen, keine Deinstallation, keine neue Testerregistrierung.
