@@ -6092,3 +6092,16 @@ Dieser Eintrag ersetzt ausschließlich die frühere Code50-Artefaktfreigabe. Alt
 - Neues Paket ausschließlich mit obiger Ersatz-AAB, neuem Eingabehash und Quellstand2043721004a6bbba4faf1454a366c1c9e9d90608 vorbereiten. Kein erneuter Build nötig.
 - Unverändert Alias `serkal-preview` und bekanntes Uploadzertifikat verwenden. Nach privater Signierung Signatur, Zertifikat, unveränderte Nutzdaten und neuen signierten SHA256 nachweisen; Play-App-Signierfingerabdruck für OAuth bleibt getrennt.
 - Vor einem Play-Upload ausschließlich die so geprüfte Ersatzdatei verwenden. **CE hat keine AAB hochgeladen.** Bestehender Play-Test, Paket und Teilnahme-Link bleiben bestehen; kein Löschen, keine Deinstallation, keine neue Testerregistrierung.
+
+
+## Installer – 17.11.2026: neues Edge-Signierpaket für Android 1.2.6 / Code50 bereit
+
+Status: **NEUES CE-ERSATZARTEFAKT EXAKT BESTÄTIGT / SIGNIERPAKET MIT KORRIGIERTER PRÜFROUTINE BEREIT / PRIVATE SIGNIERUNG UND PLAY-UPLOAD OFFEN**.
+
+- Verbindliche Eingabe: `SerKal-Android-1.2.6-code50-edge-unsigned.aab`, **2496084 Bytes**, SHA-256 `4edd860ea8d1c9bee3133d0809f552ace9a71aa4994e9aec5f8361a6759d2d20`.
+- Zugehöriger CE-Test-/Bauquellstand: `2043721004a6bbba4faf1454a366c1c9e9d90608`. Dateigröße, SHA-256 und vollständige AAB-ZIP-Struktur wurden vom Installer erneut geprüft.
+- Neuer Signierer: `serkal-code50-edge-aab-signieren-und-pruefen.cmd`. Er ist ausschließlich auf die Edge-Ersatz-AAB, den neuen Hash, die neue Größe und den neuen Quellstand festgesetzt. Die zuvor korrigierte PowerShell-Nutzdatenprüfung ist enthalten.
+- Neues Paket: [`SerKal-Android-1.2.6-code50-edge-SIGNIERPAKET.zip`](https://chatgpt.com/library?file_id=libfile_69d9807ec278819191f9c3bc9542d9b1&account_id=personal), **2453672 Bytes**, SHA-256 `47c01ad007841a69a5652825750edbff63bdd011ee9446a02576c28209c26e97`.
+- Paketinhalt durch ZIP-Prüfung bestätigt: exakt die neue unsignierte Edge-AAB und der neue Edge-Signierer.
+- Der frühere Code50-Bau mit Eingabehash `14ddfe923a76a9cc608954d7e9ea9b27187de67ea4965ba09a924bfa68ad5f56`, seine signierte Ableitung und das frühere Signierpaket bleiben **für den Upload gesperrt**.
+- Nächster Schritt auf Kurts Windows-PC: neues Paket entpacken und die Edge-CMD starten. Danach signierte AAB, Uploadzertifikat, unveränderte Nutzdaten und neuen signierten SHA-256 gegenprüfen. Erst anschließend darf der bestehende interne Play-Test aktualisiert werden.
