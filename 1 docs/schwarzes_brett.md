@@ -6042,3 +6042,17 @@ Kurt beauftragt die funktionale Angleichung der Programme und legt dafür ausdr�
 3. Anschließend als neuen Release des **bestehenden internen Google-Play-Tests** hochladen. Kein neues Paket, keine neue Testerregistrierung, kein neuer Teilnahme-Link, keine Deinstallation. Vorherigen funktionierenden Test nicht vorzeitig entfernen.
 4. Erst tatsächlicher Play-Upload/Verfügbarkeit erlaubt die Meldung „Testfassung 1.2.6 verfügbar“. CE hat weder private Signatur noch Play-Upload ausgeführt.
 5. Nach dem Update auf Pixel und betroffenem Samsung praktisch prüfen: vorhandener Schlüssel/Archiv erhalten, Google-Rechteerklärung und Rückweg, TMDB-Erklärung/Hilfe/Prüfung/Korrektur, größere Kalenderübertragung und Countdown/Erholung. Unklare Fehler mit dem vorhandenen Log untersuchen.
+
+
+### Installer – 17.11.2026: Android 1.2.6 / Code50 Eingabe geprüft, lokales Signierpaket bereit
+
+Status: **CE-ARTEFAKT EXAKT BESTÄTIGT / CODE-50-SIGNIERER VORBEREITET UND GEPRÜFT VERPACKT / PRIVATE KENNWORTEINGABE UND PLAY-UPLOAD NOCH OFFEN**.
+
+- Übergebene Datei: `SerKal-Android-1.2.6-code50-unsigned.aab`.
+- Installer-Gegenprüfung bestätigt exakt **2.191.807 Byte** und SHA-256 **`14ddfe923a76a9cc608954d7e9ea9b27187de67ea4965ba09a924bfa68ad5f56`**; damit bytegleich mit CE- und CI-Nachweis.
+- Neuer Signierer `serkal-code50-aab-signieren-und-pruefen.cmd` ist ausdrücklich auf Version 1.2.6, versionCode 50, Quellcommit `b29d4c4350019bbb9dc95b21290f8c699a4f97d8` und obigen Eingabehash festgesetzt. Der alte Code49-Starter wird nicht wiederverwendet.
+- Er verwendet unverändert Alias `serkal-preview`, erwartet das bekannte Uploadzertifikat SHA-1 `0D:63:F5:08:DC:1F:E1:4E:97:6C:22:1A:0C:27:98:D3:A1:51:59:86` und hält den getrennten Play-App-Signierfingerabdruck für OAuth fest.
+- Nach der verdeckten lokalen Kennworteingabe prüft er `jar verified`, Zertifikat, alle ursprünglichen ZIP/AAB-Nutzdaten bytegenau und ausschließlich zusätzliche `META-INF`-Signaturdateien. Danach erzeugt er signierte AAB, neuen SHA-256 und Freigabenachweis.
+- Bereitgestelltes Paket: `SerKal-Android-1.2.6-code50-SIGNIERPAKET.zip`, 2.157.145 Byte, SHA-256 `974d31850477a93298d08a0c821f414a31f62560b4dc4d60991c927851050002`.
+- Das Kennwort des privaten Uploadschlüssels wird absichtlich weder übertragen noch gespeichert; deshalb muss die eine Signierung auf Kurts Windows-PC erfolgen. Noch keine signierte Code50-AAB und keine Play-Verfügbarkeit behaupten.
+- Danach signierte Datei samt Freigabenachweis gegenprüfen und als neuen Release im bestehenden internen Play-Test hochladen. Kein neues Paket, keine neue Testerliste und kein neuer Teilnahme-Link.
