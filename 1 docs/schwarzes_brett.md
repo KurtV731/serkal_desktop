@@ -6009,3 +6009,36 @@ Noch nicht als live behaupten: Kurt muss den neuen Website-Stand veröffentliche
 - https://serkal.de/werkstatt-en.html
 
 Künftige Übergaben nach einer Desktop-Veröffentlichung sollen weiterhin die zwei Blöcke **„Jetzt behoben/veröffentlicht“** und **„Noch offen/nächste Version“** enthalten.
+
+
+## CE SerKal – 17.11.2026: Android-Play-Test 1.2.6 / Code50 an Desktop angeglichen
+
+Status: **QUELLSTAND UND REGRESSION GEPRÜFT / UNSIGNIERTE AAB FERTIG UND GEGENGEPRÜFT / PRIVATE SIGNATUR, PLAY-UPLOAD UND GERÄTEABNAHME OFFEN**.
+
+Kurt beauftragt die funktionale Angleichung der Programme und legt dafür ausdrücklich **nur die Android-Testfassung aus Google Play** als Referenz fest. Einrichtung/Prüfung für Google und TMDB sowie die inzwischen erweiterten Kalenderkorrekturen aus Desktop 1.2.6 sind in der neuen Android-Testfassung angeglichen. Produktversion 1.2.6, Android versionCode **50**; gemeinsamer Archivstand **38 unverändert**.
+
+### Exakter Stand und Bau
+
+- Branch `ce-play-alignment-1.2.6`; geprüfter Anwendungs-/Testcommit **`b29d4c4350019bbb9dc95b21290f8c699a4f97d8`**.
+- Basis Android 1.2.5/Code49 `d8f22dc08cb2b68b66d498882639405d204386c8`; Desktop-Vergleich 1.2.6 `07903512a7ac2de4521182ec8b9a89e4cb030a86`.
+- [Funktionsvergleich und Übergabe](https://github.com/KurtV731/serkal_desktop/blob/0365d45be2d9b83a2bd58d92bbf2b3e6e1ac7591/1%20docs/android/play-alignment-1.2.6.md).
+- Erfolgreiche komplette Regression und AAB-Bau: https://github.com/KurtV731/serkal_desktop/actions/runs/44048553706 (Job 133920260715). 94 deklarierte JUnit-Testmethoden einschließlich neuer Robolectric-/Fake-Clock-Prüfungen; beide Gradle-Schritte erfolgreich.
+- **Datei `SerKal-Android-1.2.6-code50-unsigned.aab`, 2.191.807 Byte, SHA256 `14ddfe923a76a9cc608954d7e9ea9b27187de67ea4965ba09a924bfa68ad5f56`.**
+- CI-Artefakt `SerKal-Android-1.2.6-code50-unsigned-aab`; zusätzlich unter `play-build-output/` auf demselben Branch gesichert. CE hat die Teile rekonstruiert, SHA mit CI verglichen und ZIP-Struktur ohne Fehler geprüft (126 Einträge). Datei steht Kurt zusätzlich im Chat zur Verfügung.
+- Paket bleibt **`de.serkal.android.preview.v005`**, compile/target SDK 36. Bestehender Play-Testlink und OAuth-Konfiguration bleiben erhalten.
+
+### Angeglichen
+
+1. Bestehende Google-Erklärung DE/EN, Datenschutz, Weiter/Später, Protokoll und Zeitbegrenzungen aus Code49 erhalten. Vor Fortsetzung alle benötigten App-Daten-/Kalenderrechte prüfen. Bei fehlenden Rechten verständliche Erklärung mit **Menü > Google-Konto** als Rückweg.
+2. **Ausführliche TMDB-Einrichtung DE/EN**: Zweck des persönlichen API-Keys/Lesezugriffstokens, Abgrenzung zum Google-Passwort, direkte Schlüsselanforderung auf TMDB, gleiche SerKal-TMDB-Hilfeseiten wie Desktop.
+3. **Prüfung im offenen Dialog:** leere Eingabe sichtbar markieren, ungültige/nicht prüfbare Eingabe korrigieren lassen, Hilfe öffnen ohne Verlust der Eingabe. Funktionierenden Schlüssel erst nach erfolgreicher Prüfung ersetzen. Gültigen Schlüssel für das bekannte Konto vor optionaler Google-Bereitstellung im vorhandenen verschlüsselten Cache speichern. Kein Wechsel des Cache-Alias oder Pakets; normales Play-Update statt Neuinstallation.
+4. **Kalender wie Desktop:** mindestens 250 ms zwischen Anfragen; zwei Sekunden Pause nach 20 erfolgreichen Schreibaktionen, Lesen zählt nicht. Bei passenden 403/429 bis zu sieben Wiederholungen mit wachsender Pause bis 32 s plus Zufallsanteil, längeres Retry-After beachten. Eigenes Fünf-Minuten-Fenster für Kalender nach Archivschreiben; sichtbarer Countdown mit bisherigem Fortschritt. Vorhandene Staffel-Scopes und dauerhaft offene Restarbeit erhalten.
+5. Android behält seinen nativen Google-Kontodialog; Windows-spezifische Browser-/Win32-Steuerung wird nicht übertragen. Diese Angleichung behauptet keine identischen Oberflächen oder Lösung aller bekannten Android-Restpunkte. Launcher-Dummysymbol, Wegwischen/Abschlussbedienung und die noch ungeklärte Samsung-Anmeldeschleife sind damit nicht pauschal behoben. Noch nicht benannte Leistenaktionen bleiben separat.
+
+### Nächster Auftrag an Installer: vorhandenen internen Play-Test aktualisieren
+
+1. Genau die bereits gebaute AAB verwenden; Eingabehash/Version/Code prüfen. Den bestehenden privaten Signierweg auf **Code50 und obigen Hash** anpassen. **Den alten Code49-Signierstarter nicht unverändert verwenden.**
+2. Mit unverändertem privaten Uploadschlüssel/Alias `serkal-preview` signieren; Ergebnis `SerKal-Android-1.2.6-code50.aab`. Gültige Signatur, erwartetes Zertifikat, unveränderte Nutzdaten und neuen SHA256 der signierten AAB nachweisen und hier protokollieren. Für OAuth weiterhin Play-App-Signierzertifikat maßgeblich, nicht mit Uploadzertifikat verwechseln.
+3. Anschließend als neuen Release des **bestehenden internen Google-Play-Tests** hochladen. Kein neues Paket, keine neue Testerregistrierung, kein neuer Teilnahme-Link, keine Deinstallation. Vorherigen funktionierenden Test nicht vorzeitig entfernen.
+4. Erst tatsächlicher Play-Upload/Verfügbarkeit erlaubt die Meldung „Testfassung 1.2.6 verfügbar“. CE hat weder private Signatur noch Play-Upload ausgeführt.
+5. Nach dem Update auf Pixel und betroffenem Samsung praktisch prüfen: vorhandener Schlüssel/Archiv erhalten, Google-Rechteerklärung und Rückweg, TMDB-Erklärung/Hilfe/Prüfung/Korrektur, größere Kalenderübertragung und Countdown/Erholung. Unklare Fehler mit dem vorhandenen Log untersuchen.
