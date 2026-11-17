@@ -12,6 +12,7 @@ android {
         applicationId 'de.serkal.android.preview.v005'
         minSdk 24
         targetSdk 36
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         versionCode releaseInfo.androidVersionCode as int
         versionName previewVersion
         buildConfigField 'int', 'SERKAL_RELEASE', releaseInfo.number.toString()
@@ -20,10 +21,14 @@ android {
     buildFeatures { buildConfig true }
     testOptions { unitTests.includeAndroidResources = true }
     // CI produces an unsigned APK. CE signs it with the privately retained key.
-    buildTypes { debug { signingConfig null } }
+    buildTypes { debug { if (!project.hasProperty("serkalDeviceTests")) signingConfig null } }
 }
 
 dependencies {
+    implementation 'androidx.core:core:1.17.0'
+    androidTestImplementation 'androidx.test:runner:1.7.0'
+    androidTestImplementation 'androidx.test:core:1.7.0'
+    androidTestImplementation 'androidx.test.ext:junit:1.3.0'
     implementation 'com.google.android.gms:play-services-auth:22.0.0'
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.robolectric:robolectric:4.14.1'

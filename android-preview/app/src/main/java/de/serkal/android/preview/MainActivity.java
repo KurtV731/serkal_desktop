@@ -1,6 +1,11 @@
 package de.serkal.android.preview;
 
 import android.app.Activity;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
+import androidx.core.view.ViewCompat;
+import androidx.core.graphics.Insets;
 import com.google.android.gms.auth.api.identity.Identity;
 import com.google.android.gms.auth.api.identity.AuthorizationRequest;
 import com.google.android.gms.auth.api.identity.AuthorizationResult;
@@ -561,6 +566,7 @@ public class MainActivity extends Activity {
     }
 
     private void showArchiveEntry(JSONObject e) {
+        showPanel_(1);
 
                 requestGeneration++; if(pendingSearch!=null) handler.removeCallbacks(pendingSearch);
                 selectedArchiveEntry=e; selectedTmdbId=e.optInt("tmdbId"); updateTmdbReference(); selectedName.setText(archiveTitle(e));
@@ -871,6 +877,7 @@ public class MainActivity extends Activity {
     }
 
     private void selectSeries(JSONObject entry, String key, boolean language) {
+        showPanel_(1);
         final int generation = ++requestGeneration;
         final int id = entry.optInt("id");
         clearPoster(); selectedDetail=null; selectedArchiveEntry=null; selectedTmdbId=0;updateTmdbReference();
@@ -899,6 +906,7 @@ public class MainActivity extends Activity {
         try {
             english=getPreferences(0).getBoolean("english",false);
             dark=getPreferences(0).getBoolean("dark",true); setPalette();
+            preferLandscape_();
             configureFullscreen_();
             buildScreen();
             boolean interrupted=getPreferences(0).getBoolean("googleAttemptPending",false);
@@ -919,20 +927,51 @@ public class MainActivity extends Activity {
         if (hasFocus) hideSystemBars_();
     }
 
+    private void preferLandscape_() {
+        boolean flexible=getResources().getConfiguration().smallestScreenWidthDp>=600
+            || (android.os.Build.VERSION.SDK_INT>=24 && isInMultiWindowMode());
+        int preferred=flexible?android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+            :android.content.pm.ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE;
+        if(getRequestedOrientation()!=preferred)setRequestedOrientation(preferred);
+    }
+    @Override public void onConfigurationChanged(android.content.res.Configuration configuration){
+        super.onConfigurationChanged(configuration);preferLandscape_();
+        if(insetRoot!=null)ViewCompat.requestApplyInsets(insetRoot);
+    }
     private void configureFullscreen_() {
-        Window window = getWindow();
+        Window window=getWindow();
         window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
-        window.setStatusBarColor(BG);
-        window.setNavigationBarColor(BG);
+        window.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(BG));
+        WindowCompat.enableEdgeToEdge(window);
+        WindowInsetsControllerCompat bars=WindowCompat.getInsetsController(window,window.getDecorView());
+        bars.setAppearanceLightStatusBars(!dark);bars.setAppearanceLightNavigationBars(!dark);
         hideSystemBars_();
     }
-
     private void hideSystemBars_() {
-        getWindow().getDecorView().setSystemUiVisibility(
-            View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY |
-            View.SYSTEM_UI_FLAG_FULLSCREEN |
-            View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-        );
+        WindowInsetsControllerCompat bars=WindowCompat.getInsetsController(getWindow(),getWindow().getDecorView());
+        bars.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+        bars.hide(WindowInsetsCompat.Type.systemBars());
+    }
+    private LinearLayout insetRoot,adaptiveColumns,adaptiveTabs;
+    private final java.util.List<View> adaptivePanels=new java.util.ArrayList<>();
+    private int activePanel;
+    private void showPanel_(int panel){activePanel=panel;adaptPanels_();}
+    private void adaptPanels_(){
+        if(insetRoot==null||adaptiveColumns==null)return;
+        boolean compact=insetRoot.getWidth()-insetRoot.getPaddingLeft()-insetRoot.getPaddingRight()<dp(840);
+        adaptiveTabs.setVisibility(compact?View.VISIBLE:View.GONE);
+        float[] weights={29,42,29};
+        for(int i=0;i<adaptivePanels.size();i++){
+            View panel=adaptivePanels.get(i);LinearLayout.LayoutParams lp=(LinearLayout.LayoutParams)panel.getLayoutParams();
+            int width=compact?-1:0;float weight=compact?0:weights[i];
+            if(lp.width!=width||lp.weight!=weight){lp.width=width;lp.weight=weight;panel.setLayoutParams(lp);}
+            panel.setVisibility(!compact||i==activePanel?View.VISIBLE:View.GONE);
+            if(i<adaptiveTabs.getChildCount())adaptiveTabs.getChildAt(i).setSelected(i==activePanel);
+        }
+    }
+    private android.widget.HorizontalScrollView scrollBar_(View content){
+        android.widget.HorizontalScrollView scroll=new android.widget.HorizontalScrollView(this);scroll.setFillViewport(true);scroll.setHorizontalScrollBarEnabled(false);
+        content.setMinimumWidth(dp(540));scroll.addView(content,new android.widget.FrameLayout.LayoutParams(-1,-2));return scroll;
     }
 
     private void showStartupError_(Throwable error) {
@@ -1024,6 +1063,7 @@ public class MainActivity extends Activity {
         if (pendingSearch != null) handler.removeCallbacks(pendingSearch);
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
+        root.setTag("insetRoot");insetRoot=root;adaptivePanels.clear();
         root.setBackgroundColor(BG);
         root.setPadding(dp(4), dp(3), dp(4), dp(4));
 
@@ -1054,13 +1094,17 @@ public class MainActivity extends Activity {
         styleTopButton_(theme);
         theme.setOnClickListener(v -> { dark=!dark;getPreferences(0).edit().putBoolean("dark",dark).apply();setPalette();configureFullscreen_();buildScreen(); });
 
-        root.addView(top);
+        root.addView(scrollBar_(top),new LinearLayout.LayoutParams(-1,-2));
+        adaptiveTabs=new LinearLayout(this);adaptiveTabs.setOrientation(LinearLayout.HORIZONTAL);adaptiveTabs.setTag("adaptiveTabs");
+        String[] tabs=english?new String[]{"Search","Entry","Archive"}:new String[]{"Suche","Eintrag","Archiv"};
+        for(int i=0;i<tabs.length;i++){final int index=i;Button tab=button(tabs[i]);tab.setTag("panelTab"+i);tab.setOnClickListener(v->showPanel_(index));adaptiveTabs.addView(tab);}
+        root.addView(adaptiveTabs,new LinearLayout.LayoutParams(-1,-2));
 
         zoomSurface = new ZoomPanLayout(this);
         zoomSurface.setBackgroundColor(BG);
         zoomSurface.setOnScaleChangedListener(value -> resetZoom.setText(Math.round(value * 100) + " %"));
         LinearLayout columns = new LinearLayout(this);
-        columns.setOrientation(LinearLayout.HORIZONTAL);
+        columns.setOrientation(LinearLayout.HORIZONTAL);adaptiveColumns=columns;columns.setTag("adaptiveColumns");
         zoomSurface.addView(columns, new ZoomPanLayout.LayoutParams(-1, -1));
         root.addView(zoomSurface, new LinearLayout.LayoutParams(-1, 0, 1));
 
@@ -1117,7 +1161,7 @@ public class MainActivity extends Activity {
         Button search=button(english?"Search":"Suchen");search.setOnClickListener(v->searchNow());leftButtons.addView(search);
         Button add=button(english?"Add to archive":"Ins Archiv");add.setTag("addToArchive");add.setOnClickListener(v->askForSeason());leftButtons.addView(add);
         left.addView(leftButtons,2);
-        columns.addView(left);
+        left.setTag("panelSearch");adaptivePanels.add(left);columns.addView(left);
 
         LinearLayout middle = panel(43);
         middle.addView(heading(english ? "ENTRY" : "EINTRAG"));
@@ -1147,7 +1191,7 @@ public class MainActivity extends Activity {
         edit.setOnClickListener(v->{archiveDialogOpen=true;dialogBuilder().setTitle(english?"Selected series":"Ausgewählte Serie")
             .setItems(english?new String[]{"Edit notes / offset / provider","Toggle watched","Delete complete series"}:new String[]{"Notiz / Offset / Anbieter ändern","Gesehen umschalten","Ganze Serie löschen"},(d,which)->handler.post(()->{if(which==0)editArchiveNotes();else if(which==1 && selectedArchiveEntry!=null)toggleArchiveSeen(selectedArchiveEntry);else if(which==2)deleteArchiveSeries();}))
             .setNegativeButton(english?"Close":"Schließen",null).setOnDismissListener(d->archiveDialogOpen=false).show();});editBar.addView(edit);middle.addView(editBar);
-        columns.addView(middle);
+        middle.setTag("panelEntry");adaptivePanels.add(middle);columns.addView(middle);
 
         LinearLayout right = panel(28);
         LinearLayout archiveBar=new LinearLayout(this);archiveBar.setOrientation(LinearLayout.HORIZONTAL);archiveBar.setGravity(Gravity.CENTER_VERTICAL);
@@ -1168,7 +1212,7 @@ public class MainActivity extends Activity {
         closeProgress=new android.widget.ProgressBar(this,null,android.R.attr.progressBarStyleHorizontal);closeProgress.setVisibility(View.GONE);right.addView(closeProgress,new LinearLayout.LayoutParams(-1,dp(6)));
         copySyncStatus.setOnClickListener(v->{archiveDialogOpen=true;dialogBuilder().setTitle(english?"Synchronization":"Synchronisation").setMessage(copySyncStatus.getText()).setPositiveButton(english?"Close":"Schließen",null).setOnDismissListener(d->archiveDialogOpen=false).show();});
         renderArchive();
-        columns.addView(right);
+        right.setTag("panelArchive");adaptivePanels.add(right);columns.addView(right);
 
         LinearLayout footer=new LinearLayout(this);footer.setOrientation(LinearLayout.HORIZONTAL);footer.setGravity(Gravity.CENTER_VERTICAL);footer.setTag("globalFooter");
         for(boolean en:new boolean[]{false,true}){
@@ -1183,8 +1227,14 @@ public class MainActivity extends Activity {
         Button help=footerButton(english?"Help":"Hilfe");help.setTag("help");help.setOnClickListener(v->showHelp());footer.addView(help);
         footer.addView(new View(this),new LinearLayout.LayoutParams(0,1,1));
         Button quitButton=footerButton(english?"Exit SerKal":"SerKal beenden");quitButton.setTag("exitSerKal");quitButton.setOnClickListener(v->exitSerKal());footer.addView(quitButton);
-        root.addView(footer,new LinearLayout.LayoutParams(-1,dp(36)));
-        setContentView(root);
+        root.addView(scrollBar_(footer),new LinearLayout.LayoutParams(-1,dp(36)));
+        ViewCompat.setOnApplyWindowInsetsListener(root,(view,insets)->{
+            Insets safe=insets.getInsets(WindowInsetsCompat.Type.systemBars()|WindowInsetsCompat.Type.displayCutout()|WindowInsetsCompat.Type.ime());
+            view.setPadding(dp(4)+safe.left,dp(3)+safe.top,dp(4)+safe.right,dp(4)+safe.bottom);
+            adaptPanels_();return insets;
+        });
+        root.addOnLayoutChangeListener((v,l,t,r,b,ol,ot,or,ob)->{if(r-l!=or-ol||b-t!=ob-ot)adaptPanels_();});
+        setContentView(root);ViewCompat.requestApplyInsets(root);root.post(this::adaptPanels_);
         if (!previousName.toString().isEmpty()) selectedName.setText(previousName);
         selectedInfo.setText(previousInfo);
         if (!previousStatus.toString().isEmpty()) statusText.setText(previousStatus);

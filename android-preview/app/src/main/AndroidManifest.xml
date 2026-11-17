@@ -3,12 +3,12 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <application
         android:allowBackup="false"
-        android:resizeableActivity="false"
+        android:resizeableActivity="true"
         android:label="@string/app_name"
         android:theme="@style/AppTheme">
         <activity
             android:name="de.serkal.android.preview.MainActivity"
-            android:screenOrientation="sensorLandscape"
+            android:screenOrientation="unspecified"
             android:windowSoftInputMode="adjustResize"
             android:configChanges="orientation|screenSize|keyboardHidden"
             android:exported="true">
