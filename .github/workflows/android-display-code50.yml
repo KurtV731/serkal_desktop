@@ -4,6 +4,9 @@ on:
   push:
     branches: [ce-play-edge50]
     paths: ['android-preview/**', '.github/workflows/android-display-code50.yml']
+concurrency:
+  group: code50-display-${{ github.ref }}
+  cancel-in-progress: true
 permissions:
   contents: read
 jobs:
@@ -44,7 +47,7 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -memory 2048
           script: |
             adb shell settings put secure show_ime_with_hard_keyboard 1
-            cd android-preview && gradle -PserkalDeviceTests connectedDebugAndroidTest
+            bash -c 'cd android-preview; gradle -PserkalDeviceTests connectedDebugAndroidTest; result=$?; cd ..; mkdir -p display-evidence; adb pull /sdcard/Android/data/de.serkal.android.preview.v005/files/ display-evidence/ || true; adb logcat -d > display-evidence/logcat.txt || true; exit $result' 
       - name: Collect display evidence
         if: always()
         run: |

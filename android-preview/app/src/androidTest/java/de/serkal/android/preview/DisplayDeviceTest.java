@@ -30,13 +30,17 @@ public class DisplayDeviceTest {
     EditText input=findEdit(root.findViewWithTag("panelSearch"));input.setText("Retained display test");
    });
    save(inst,context,"display-initial.png");
+   scenario.onActivity(a->WindowCompat.getInsetsController(a.getWindow(),a.getWindow().getDecorView()).show(WindowInsetsCompat.Type.systemBars()));
+   Thread.sleep(500);inst.waitForIdleSync();
+   scenario.onActivity(a->{View root=a.findViewById(android.R.id.content).findViewWithTag("insetRoot");WindowInsetsCompat i=ViewCompat.getRootWindowInsets(root);Insets bars=i.getInsets(WindowInsetsCompat.Type.systemBars());assertTrue(bars.top>0);assertTrue(root.getPaddingTop()>=bars.top);assertTrue(root.getPaddingBottom()>=bars.bottom);});
+   save(inst,context,"display-system-bars.png");
    // Force a size change through the OS; this preserves the same app session.
    shell(inst,"wm size 1200x1800");inst.waitForIdleSync();Thread.sleep(800);
    scenario.onActivity(a->{View root=a.findViewById(android.R.id.content).findViewWithTag("insetRoot");assertNotNull(root);assertEquals("Retained display test",findEdit(root.findViewWithTag("panelSearch")).getText().toString());assertNotNull(root.findViewWithTag("exitSerKal"));});
    save(inst,context,"display-resized.png");
    scenario.onActivity(a->{View root=a.findViewById(android.R.id.content).findViewWithTag("insetRoot");if(root.findViewWithTag("adaptiveTabs").getVisibility()==View.VISIBLE)root.findViewWithTag("panelTab0").performClick();EditText input=findEdit(root.findViewWithTag("panelSearch"));input.requestFocus();((android.view.inputmethod.InputMethodManager)a.getSystemService(Context.INPUT_METHOD_SERVICE)).showSoftInput(input,android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT);});
    Thread.sleep(1000);inst.waitForIdleSync();
-   scenario.onActivity(a->{View root=a.findViewById(android.R.id.content).findViewWithTag("insetRoot");WindowInsetsCompat i=ViewCompat.getRootWindowInsets(root);assertNotNull(i);assertTrue(root.getPaddingBottom()>=i.getInsets(WindowInsetsCompat.Type.ime()).bottom);});
+   scenario.onActivity(a->{View root=a.findViewById(android.R.id.content).findViewWithTag("insetRoot");WindowInsetsCompat i=ViewCompat.getRootWindowInsets(root);assertNotNull(i);assertTrue("Keyboard must actually be visible",i.getInsets(WindowInsetsCompat.Type.ime()).bottom>0);assertTrue(root.getPaddingBottom()>=i.getInsets(WindowInsetsCompat.Type.ime()).bottom);});
    save(inst,context,"display-ime.png");
   }finally{shell(inst,"wm size reset");}
  }
