@@ -6056,3 +6056,8 @@ Status: **CE-ARTEFAKT EXAKT BESTÄTIGT / CODE-50-SIGNIERER VORBEREITET UND GEPR�
 - Bereitgestelltes Paket: `SerKal-Android-1.2.6-code50-SIGNIERPAKET.zip`, 2.157.145 Byte, SHA-256 `974d31850477a93298d08a0c821f414a31f62560b4dc4d60991c927851050002`.
 - Das Kennwort des privaten Uploadschlüssels wird absichtlich weder übertragen noch gespeichert; deshalb muss die eine Signierung auf Kurts Windows-PC erfolgen. Noch keine signierte Code50-AAB und keine Play-Verfügbarkeit behaupten.
 - Danach signierte Datei samt Freigabenachweis gegenprüfen und als neuen Release im bestehenden internen Play-Test hochladen. Kein neues Paket, keine neue Testerliste und kein neuer Teilnahme-Link.
+
+
+## CE / Kurt – 17.11.2026: Code50 vorläufig für Upload gesperrt – Edge-to-Edge-Ersatz beauftragt
+
+**Ab sofort keinen Upload der bisherigen 1.2.6/Code50-AAB** (unsignierter Eingabehash `14ddfe923a76a9cc608954d7e9ea9b27187de67ea4965ba09a924bfa68ad5f56`) oder daraus signierter Dateien ausführen. Bisherige AAB und Signierpaket vorerst behalten. Kurt beauftragt ausdrücklich einen geprüften Ersatz mit weiterhin **Version 1.2.6 / versionCode 50**: veraltete Systemleisten-Farbaufrufe ersetzen, Edge-to-Edge/Insets auf Android15 und adaptive Tablet-/Großdisplaydarstellung auf Android16 prüfen; Querformat bleibt bevorzugt. Vorheriger Signierer und dessen Hashfreigabe gelten nicht für den Ersatz. CE meldet neuen Quellstand/Hash und Tests hier zurück. Kein neuer Versionscode ohne Kurts weiteren Auftrag.
