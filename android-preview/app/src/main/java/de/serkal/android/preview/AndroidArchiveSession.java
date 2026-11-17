@@ -73,10 +73,13 @@ final class AndroidArchiveSession {
     }
     synchronized boolean hasChanges(){try{return loaded&&(forceSave||!baseline.equals(digest(record)));}catch(Exception failure){return dirty;}}
     synchronized boolean requiresFinish(){return hasChanges()||calendarPending;}
-    synchronized void report(String value,int done,int count){if(!value.equals(phase)){phase=value;phaseStart=System.nanoTime();}current=done;total=count;changed();}
+    long waitUntil;
+    synchronized void reportWait(String step,long millis){phase=step;waitUntil=System.nanoTime()+millis*1000000L;changed();}
+    synchronized void report(String value,int done,int count){waitUntil=0;if(!value.equals(phase)){phase=value;phaseStart=System.nanoTime();}current=done;total=count;changed();}
     synchronized String progress(boolean english){
         if(!busy)return "";long seconds=Math.max(0,(System.nanoTime()-phaseStart)/1000000000L);
         String label=phase.equals("calendar-wait")?(english?"Google Calendar request limit · waiting before retry":"Google-Kalender begrenzt Anfragen · Wiederholung nach Pause"):phase.startsWith("calendar")?(english?"Updating Calendar":"Kalender aktualisieren"):phase.equals("archive-upload")?(english?"Saving archive to Google":"Archiv bei Google speichern"):phase.equals("archive-connect")?(english?"Connecting to Google":"Google-Verbindung herstellen"):(english?"Loading archive":"Archiv laden");
+        if(phase.equals("calendar-wait")||phase.equals("calendar-pause"))label=(phase.equals("calendar-pause")?(english?"Brief Calendar pause":"Kurze Kalenderpause"):(english?"Google request limit":"Google-Anfragebegrenzung"))+(english?" · continuing in ":" · weiter in ")+Math.max(0,(waitUntil-System.nanoTime()+999999999L)/1000000000L)+" s";
         return label+(total>0?" · "+current+"/"+total:"")+" · "+seconds+" s";
     }
     synchronized int progressCurrent(){return current;}synchronized int progressTotal(){return total;}
@@ -86,7 +89,7 @@ final class AndroidArchiveSession {
     private void runPhase(String step,PhaseTask task)throws Exception{report(step,0,0);long start=System.nanoTime();boolean ok=false;try{task.run();ok=true;}finally{time(step,start,ok);}}
     synchronized void authorizationTime(long start,boolean ok){time("authorization",start,ok);}
     private void detail(String event,JSONObject data){try(FileOutputStream out=new FileOutputStream(logFile,true)){out.write((new JSONObject().put("time",now()).put("event",event).put("details",data)+"\n").getBytes(StandardCharsets.UTF_8));}catch(Exception ignored){}}
-    private SessionArchiveClient client(){SessionArchiveClient client=factory.create(token);client.trace=(step,start,ok,failure)->{time(step,start,ok);if(failure!=null)log("GOOGLE_REQUEST_FAILED",failure);};client.progress=(step,done,count)->report(step,done,count);client.calendarPlan=data->detail(data.has("method")?"CALENDAR_OPERATION":"CALENDAR_PLAN",data);return client;}
+    private SessionArchiveClient client(){SessionArchiveClient client=factory.create(token);client.trace=(step,start,ok,failure)->{time(step,start,ok);if(failure!=null)log("GOOGLE_REQUEST_FAILED",failure);};client.progress=new SessionArchiveClient.Progress(){public void update(String step,int done,int count){report(step,done,count);}public void waiting(String step,long millis){reportWait(step,millis);}};client.calendarPlan=data->detail(data.has("method")?"CALENDAR_OPERATION":"CALENDAR_PLAN",data);return client;}
 
     synchronized boolean busy(){return busy;}
     synchronized String status(){return error.isEmpty()?status:error;}
@@ -125,7 +128,7 @@ final class AndroidArchiveSession {
             final CalendarScope.Projection projected=new CalendarScope.Projection(outgoing);
             client.calendarScopes=scopes;client.remainingScopes=remaining->{synchronized(this){markCalendarPending(!remaining.isEmpty(),remaining);calendarProjection=projected;}detail("CALENDAR_REMAINING",new JSONObject().put("scopes",remaining.size()));};
             if(write||!before.equals(outgoing.getJSONObject("calendar").toString())){runPhase("archive-upload",()->client.saveSession(outgoing));}
-            if(calendarChanged&&calendarFailure==null)try{runPhase("calendar-read",()->client.updateCalendar(outgoing));calendarBaseline=calendarKey(outgoing);calendarProjection=projected;}catch(Exception failure){calendarFailure=failure;log("CALENDAR_SAVE_FAILED",failure);}
+            if(calendarChanged&&calendarFailure==null)try{client.deadline=System.currentTimeMillis()+300000;runPhase("calendar-read",()->client.updateCalendar(outgoing));calendarBaseline=calendarKey(outgoing);calendarProjection=projected;}catch(Exception failure){calendarFailure=failure;log("CALENDAR_SAVE_FAILED",failure);}
             synchronized(this){record=outgoing;dirty=false;forceSave=false;baseline=digest(record);markCalendarPending(calendarFailure!=null);saveConfirmed();error=calendarFailure==null?"":GoogleHttpFailure.code(calendarFailure);message=calendarFailure==null?"":"Archive saved to Google. Only the Calendar update is incomplete. It will be retried the next time you exit normally.\n"+calendarFailure.getMessage();status=calendarFailure==null?"saved":"calendar-warning";log("SESSION_FINISHED",null);}
         }catch(Exception failure){synchronized(this){error=GoogleHttpFailure.code(failure);message=String.valueOf(failure.getMessage());status="error";log("SESSION_SAVE_FAILED",failure);}}
         finally{synchronized(this){busy=false;}changed();if(complete!=null)complete.run();}});

@@ -207,8 +207,10 @@ public class MainActivity extends Activity {
         if(generation!=googleGeneration || !googleBusy || isFinishing())return;
         googleStage("permissions_returned",60000);
         googleTrace(result.getGrantedScopes().contains("https://www.googleapis.com/auth/calendar.app.created")?"CALENDAR_PERMISSION_GRANTED":"CALENDAR_PERMISSION_NOT_GRANTED");
-        if (!result.getGrantedScopes().contains("https://www.googleapis.com/auth/drive.appdata")) {
-            googleFailure(new Exception("GOOGLE_PERMISSION_MISSING\nGoogle did not grant the required Drive app-data permission.")); return;
+        if (!result.getGrantedScopes().contains("https://www.googleapis.com/auth/drive.appdata")
+            || !result.getGrantedScopes().contains("https://www.googleapis.com/auth/calendar.app.created")
+            || !result.getGrantedScopes().contains("https://www.googleapis.com/auth/calendar.calendarlist.readonly")) {
+            googleFailure(new Exception("GOOGLE_PERMISSION_MISSING\nGoogle did not grant all required app-data and calendar permissions.")); return;
         }
         String accessToken = result.getAccessToken();
         if (accessToken == null || accessToken.isEmpty()) { googleFailure(new Exception("GOOGLE_TOKEN_MISSING")); return; }
@@ -307,6 +309,9 @@ public class MainActivity extends Activity {
         if(code.contains("GOOGLE_AUTHORIZATION_TIMEOUT"))message=english
             ? "Google connection timed out. Open Menu > Google account to retry. Details are in Log."
             : "Zeitüberschreitung bei der Google-Verbindung. Erneut versuchen über Menü > Google-Konto. Details stehen im Log.";
+        else if(code.contains("GOOGLE_PERMISSION_MISSING"))message=english
+            ? "Required Google permissions are missing. Open Menu > Google account and grant SerKal access to its app data and calendars."
+            : "Erforderliche Google-Berechtigungen fehlen. Öffne Menü > Google-Konto und erlaube SerKal den Zugriff auf seine App-Daten und Kalender.";
         else if (code.contains("SHARED_KEY_CONFLICT")) message = english ? "Different shared keys found. Nothing overwritten."
             : "Unterschiedliche gemeinsame Schlüssel gefunden. Nichts überschrieben.";
         else if (code.contains("GOOGLE_HTTP_403")) message = english ? "Google denied access. Check Drive API and app-data permission."
@@ -756,33 +761,60 @@ public class MainActivity extends Activity {
         super.onDestroy();
     }
 
+    protected TmdbClient tmdbClient(String key) { return new TmdbClient(key); }
+    private void openTmdbPage(boolean help) {
+        String url=help?(english?"https://serkal.de/tmdb-help.html":"https://serkal.de/tmdb-hilfe.html")
+            :"https://www.themoviedb.org/settings/api?language="+(english?"en-US":"de-DE");
+        try{startActivity(new android.content.Intent(android.content.Intent.ACTION_VIEW,android.net.Uri.parse(url)));}
+        catch(Exception error){statusText.setText((english?"Open in your browser: ":"Im Browser öffnen: ")+url);}
+    }
     private void askForKey() {
+        android.widget.LinearLayout content=new android.widget.LinearLayout(this);content.setOrientation(android.widget.LinearLayout.VERTICAL);content.setPadding(24,12,24,12);
+        TextView explanation=text(english
+            ? "SerKal uses TMDB to find series, seasons and episode dates. Enter your personal TMDB API key or API read access token. This is not your Google password.\n\nOpen TMDB to obtain your key; Help explains the steps. A valid saved key should be retained when you update the app. Google sharing lets your own SerKal installations use the same key."
+            : "SerKal verwendet TMDB für Serien, Staffeln und Folgentermine. Gib deinen persönlichen TMDB-API-Key oder API-Lesezugriffstoken ein. Gemeint ist nicht dein Google-Passwort.\n\nÜber TMDB kannst du den Schlüssel anfordern; die Hilfe erklärt die Schritte. Ein gültig gespeicherter Schlüssel soll bei einem App-Update erhalten bleiben. Über Google können deine eigenen SerKal-Installationen denselben Schlüssel verwenden.",14,TEXT);
+        content.addView(explanation);
         EditText input = new EditText(new android.view.ContextThemeWrapper(this, dark ? android.R.style.Theme_Material : android.R.style.Theme_Material_Light));
-        input.setTextColor(TEXT);
-        input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        input.setTextColor(TEXT);input.setHint(english?"TMDB API key or read access token":"TMDB-API-Key oder Lesezugriffstoken");
+        input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);content.addView(input);
+        android.widget.Button create=new android.widget.Button(this);create.setText(english?"Open TMDB key settings":"TMDB-Schlüssel anfordern");create.setOnClickListener(v->openTmdbPage(false));content.addView(create);
+        ScrollView scroll=new ScrollView(this);scroll.addView(content);
         archiveDialogOpen=true;
-        dialogBuilder()
-            .setTitle(english ? "TMDB API key / read access token" : "TMDB API-Key / Lesezugriffstoken")
-            .setView(input)
-            .setPositiveButton(english ? "Check" : "Prüfen", (dialog, which) -> {
-                String candidate = input.getText().toString().trim();
-                if (candidate.isEmpty()) return;
-                final int generation = ++requestGeneration;
-                statusText.setText(english ? "Checking key…" : "Schlüssel wird geprüft…");
-                network.execute(() -> {
-                    try {
-                        new TmdbClient(candidate).validate();
-                        handler.post(() -> {
-                            if (generation != requestGeneration) return;
-                            credential = candidate;
-                            if (googleUser != null) confirmPublish(candidate);
-                            statusText.setText(english ? "Key accepted. Enter a series." : "Schlüssel gültig. Serie eingeben.");
-                            searchNow();
-                        });
-                    } catch (Exception error) { showNetworkError(generation, error); }
-                });
-            })
-            .setNegativeButton(english ? "Cancel" : "Abbrechen", null).setOnDismissListener(_closedDialog -> archiveDialogOpen=false).show();
+        AlertDialog keyDialog=dialogBuilder().setTitle(english?"Set up TMDB":"TMDB einrichten").setView(scroll)
+            .setPositiveButton(english?"Check":"Prüfen",null)
+            .setNeutralButton(english?"Open Help":"Hilfe öffnen",null)
+            .setNegativeButton(english?"Cancel":"Abbrechen",null)
+            .setOnDismissListener(d->archiveDialogOpen=false).create();
+        keyDialog.show();keyDialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(v->openTmdbPage(true));
+        keyDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v->{
+            final String candidate=input.getText().toString().trim();
+            if(candidate.isEmpty()){input.setError(english?"Please enter a TMDB key or token.":"Bitte einen TMDB-Schlüssel oder Token eingeben.");return;}
+            final int generation=++requestGeneration;final String keyOwner=googleUser==null?"":googleUser.owner;
+            keyDialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
+            statusText.setText(english?"Checking key…":"Schlüssel wird geprüft…");
+            network.execute(()->{
+                try{
+                    tmdbClient(candidate).validate();
+                    handler.post(()->{
+                        if(generation!=requestGeneration||isFinishing()||!keyDialog.isShowing())return;
+                        try{if(!keyOwner.isEmpty())KeyCache.save(this,keyOwner,candidate);}
+                        catch(Exception saveError){keyDialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true);input.setError(english?"Key could not be saved. Please retry.":"Schlüssel konnte nicht gespeichert werden. Bitte erneut versuchen.");return;}
+                        credential=candidate;keyDialog.dismiss();
+                        statusText.setText(english?"Key accepted. Enter a series.":"Schlüssel gültig. Serie eingeben.");
+                        if(googleUser!=null)confirmPublish(candidate);
+                        if(queryField.getText().length()>=2)searchNow();
+                    });
+                }catch(Exception error){
+                    handler.post(()->{
+                        if(generation!=requestGeneration||isFinishing()||!keyDialog.isShowing())return;
+                        keyDialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true);
+                        input.setError("KEY".equals(error.getMessage())?(english?"Key rejected. Please check it.":"Schlüssel abgelehnt. Bitte prüfen.")
+                            :(english?"Could not verify or save the key. Please retry.":"Schlüssel konnte nicht geprüft oder gespeichert werden. Bitte erneut versuchen."));
+                    });
+                    showNetworkError(generation,error);
+                }
+            });
+        });
     }
 
     private void showNetworkError(int generation, Exception error) {

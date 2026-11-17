@@ -4,21 +4,21 @@ import java.util.*;
 class SessionArchiveClient extends ArchiveCopyClient {
     static final String NAME="serkal-session-v1.json";
     interface Trace{void done(String step,long start,boolean ok,Exception failure);}
-    interface Progress{void update(String step,int current,int total);}
+    interface Progress{void update(String step,int current,int total);default void waiting(String step,long millis){update(step,0,0);}}
     interface Remaining{void update(Set<String> scopes)throws Exception;}
     Set<String> calendarScopes;Remaining remainingScopes;java.util.function.Consumer<JSONObject> calendarPlan;
     Trace trace;Progress progress;long deadline;
     @Override protected int timeoutMillis()throws Exception{checkDeadline();return (int)Math.max(1,Math.min(15000,deadline==0?15000:deadline-System.currentTimeMillis()));}
-    @Override protected void checkDeadline()throws Exception{if(deadline>0&&System.currentTimeMillis()>=deadline)throw new java.net.SocketTimeoutException("SESSION_CLOSE_TIMEOUT: Google completion exceeded 45 seconds");}
+    @Override protected void checkDeadline()throws Exception{if(deadline>0&&System.currentTimeMillis()>=deadline)throw new java.net.SocketTimeoutException("SESSION_CLOSE_TIMEOUT: Google completion time limit exceeded");}
     @Override JSONObject request(String url,String method,String body,String type)throws Exception{
-        return url.contains("/calendar/v3/")?calendarRequests.run(()->requestOnce(url,method,body,type)):requestOnce(url,method,body,type);
+        return url.contains("/calendar/v3/")?calendarRequests.run(()->requestOnce(url,method,body,type),!method.equals("GET")):requestOnce(url,method,body,type);
     }
     protected JSONObject requestOnce(String url,String method,String body,String type)throws Exception{
         long start=System.nanoTime();boolean ok=false;Exception failed=null;
         try{JSONObject result=super.request(url,method,body,type);ok=true;return result;}catch(Exception error){failed=error;throw error;}
         finally{if(trace!=null)trace.done(url.contains("calendar/v3")?"calendar-http":url.contains("userinfo")?"identity-http":"archive-http",start,ok,failed);}
     }
-    private final CalendarRequestPolicy calendarRequests=new CalendarRequestPolicy(()->deadline,(attempt,millis)->{if(progress!=null)progress.update("calendar-wait",0,0);});
+    private final CalendarRequestPolicy calendarRequests=new CalendarRequestPolicy(()->deadline,(attempt,millis)->{if(progress!=null)progress.waiting(attempt==0?"calendar-pause":"calendar-wait",millis);});
     boolean imported;
     SessionArchiveClient(String token){super(token);}
     private JSONObject latest() throws Exception {

@@ -12,6 +12,7 @@ final class CalendarRequestPolicy {
     private final Wait progress;
     private long lastStart=-1;
     private Exception blocked;
+    private int successfulWrites;
     CalendarRequestPolicy(LongSupplier deadline,Wait progress){this(System::currentTimeMillis,deadline,Thread::sleep,progress);}
     CalendarRequestPolicy(LongSupplier now,LongSupplier deadline,Sleeper sleep,Wait progress){this.now=now;this.deadline=deadline;this.sleep=sleep;this.progress=progress;}
     static boolean limited(Exception error){
@@ -26,17 +27,24 @@ final class CalendarRequestPolicy {
         long end=deadline.getAsLong();if(end>0&&now.getAsLong()+ms>=end)throw new java.net.SocketTimeoutException("SESSION_CLOSE_TIMEOUT");
         if(ms>0)sleep.sleep(ms);
     }
-    synchronized JSONObject run(Request request)throws Exception{
+    private void pause(long millis,int attempt)throws Exception{
+        waitFor(0);long remaining=millis;
+        if(deadline.getAsLong()>0&&now.getAsLong()+millis>=deadline.getAsLong())throw new java.net.SocketTimeoutException("SESSION_CLOSE_TIMEOUT");
+        while(remaining>0){if(progress!=null)progress.waiting(attempt,remaining);long step=progress==null?remaining:Math.min(1000,remaining);waitFor(step);remaining-=step;}
+    }
+    synchronized JSONObject run(Request request)throws Exception{return run(request,false);}
+    synchronized JSONObject run(Request request,boolean write)throws Exception{
         if(blocked!=null)throw blocked;
         waitFor(lastStart<0?0:Math.max(0,250-(now.getAsLong()-lastStart)));
         for(int attempt=0;;attempt++){
-            lastStart=now.getAsLong();
-            try{return request.run();}catch(Exception error){
+            if(write&&successfulWrites>=20){pause(2000,0);successfulWrites=0;}
+            waitFor(0);lastStart=now.getAsLong();
+            try{JSONObject result=request.run();if(write)successfulWrites++;return result;}catch(Exception error){
                 if(!limited(error))throw error;
-                long delay=Math.max(((GoogleHttpFailure)error).retryAfterMillis,(1000L<<attempt)+(long)(Math.random()*1000));
+                long delay=Math.max(((GoogleHttpFailure)error).retryAfterMillis,Math.min(32000L,(1000L<<attempt))+(long)(Math.random()*1000));
                 long end=deadline.getAsLong();
-                if(attempt>=3||(end>0&&now.getAsLong()+delay>=end)){blocked=error;throw error;}
-                if(progress!=null)progress.waiting(attempt+1,delay);waitFor(delay);
+                if(attempt>=7||(end>0&&now.getAsLong()+delay>=end)){blocked=error;throw error;}
+                pause(delay,attempt+1);
             }
         }
     }

@@ -24,4 +24,20 @@ public class CalendarRequestPolicyTest {
         try{p.run(()->{calls[0]++;throw new GoogleHttpFailure(403,"{\"error\":{\"errors\":[{\"reason\":\"forbidden\"}]}}","https://www.googleapis.com/calendar/v3/calendars/id","GET","");});fail();}catch(GoogleHttpFailure expected){}
         assertEquals(1,calls[0]);assertTrue(CalendarRequestPolicy.limited(new GoogleHttpFailure(429,"{}","url","PUT","")));
     }
+    @Test public void twoHundredWritesPauseNineTimesAndReadsDoNotCount()throws Exception{
+        long[] clock={0};int[] pauses={0},calls={0};
+        CalendarRequestPolicy p=new CalendarRequestPolicy(()->clock[0],()->300000,ms->clock[0]+=ms,(attempt,ms)->{if(attempt==0&&ms==2000)pauses[0]++;});
+        for(int n=0;n<30;n++)p.run(JSONObject::new);
+        assertEquals(0,pauses[0]);
+        for(int n=0;n<200;n++)p.run(()->{calls[0]++;return new JSONObject();},true);
+        assertEquals(200,calls[0]);assertEquals(9,pauses[0]);assertTrue(clock[0]>45000);assertTrue(clock[0]<300000);
+    }
+    @Test public void recoversAfterMinuteWindowAndCapsExhaustion()throws Exception{
+        long[] clock={0};int[] calls={0};CalendarRequestPolicy p=new CalendarRequestPolicy(()->clock[0],()->300000,ms->clock[0]+=ms,null);
+        p.run(()->{if(++calls[0]<=6)throw quota();return new JSONObject();},true);
+        assertEquals(7,calls[0]);assertTrue(clock[0]>=63000);
+        calls[0]=0;CalendarRequestPolicy exhausted=new CalendarRequestPolicy(()->clock[0],()->0,ms->clock[0]+=ms,null);
+        try{exhausted.run(()->{calls[0]++;throw quota();});fail();}catch(GoogleHttpFailure expected){}assertEquals(8,calls[0]);
+        try{exhausted.run(()->{calls[0]++;return new JSONObject();});fail();}catch(GoogleHttpFailure expected){}assertEquals(8,calls[0]);
+    }
 }
