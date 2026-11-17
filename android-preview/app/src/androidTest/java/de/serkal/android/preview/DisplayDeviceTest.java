@@ -40,9 +40,12 @@ public class DisplayDeviceTest {
    shell(inst,"wm size 1200x1800");inst.waitForIdleSync();Thread.sleep(800);
    scenario.onActivity(a->{View root=a.findViewById(android.R.id.content).findViewWithTag("insetRoot");assertNotNull(root);assertEquals("Retained display test",findEdit(root.findViewWithTag("panelSearch")).getText().toString());assertNotNull(root.findViewWithTag("exitSerKal"));});
    save(inst,context,"display-resized.png");
+   scenario.onActivity(a->{for(View window:android.view.inspector.WindowInspector.getGlobalWindowViews()){Button later=findLater(window);if(later!=null)later.performClick();}});
+   inst.waitForIdleSync();Thread.sleep(300);
    scenario.onActivity(a->{View root=a.findViewById(android.R.id.content).findViewWithTag("insetRoot");if(root.findViewWithTag("adaptiveTabs").getVisibility()==View.VISIBLE)root.findViewWithTag("panelTab0").performClick();EditText input=findEdit(root.findViewWithTag("panelSearch"));input.requestFocus();WindowCompat.getInsetsController(a.getWindow(),input).show(WindowInsetsCompat.Type.ime());});
    java.util.concurrent.atomic.AtomicInteger imeHeight=new java.util.concurrent.atomic.AtomicInteger();
    for(int attempt=0;attempt<50&&imeHeight.get()==0;attempt++){Thread.sleep(100);inst.waitForIdleSync();scenario.onActivity(a->{WindowInsetsCompat insets=ViewCompat.getRootWindowInsets(a.findViewById(android.R.id.content).findViewWithTag("insetRoot"));if(insets!=null)imeHeight.set(insets.getInsets(WindowInsetsCompat.Type.ime()).bottom);});}
+   save(inst,context,"display-ime.png");
    scenario.onActivity(a->{View root=a.findViewById(android.R.id.content).findViewWithTag("insetRoot");WindowInsetsCompat i=ViewCompat.getRootWindowInsets(root);assertNotNull(i);assertTrue("Keyboard must actually be visible",i.getInsets(WindowInsetsCompat.Type.ime()).bottom>0);assertTrue(root.getPaddingBottom()>=i.getInsets(WindowInsetsCompat.Type.ime()).bottom);});
    save(inst,context,"display-ime.png");
   }finally{shell(inst,"wm size reset");}

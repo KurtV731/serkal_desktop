@@ -958,7 +958,10 @@ public class MainActivity extends Activity {
     private void showPanel_(int panel){activePanel=panel;adaptPanels_();}
     private void adaptPanels_(){
         if(insetRoot==null||adaptiveColumns==null)return;
-        boolean compact=insetRoot.getWidth()-insetRoot.getPaddingLeft()-insetRoot.getPaddingRight()<dp(840);
+        int usableWidth=insetRoot.getWidth()-insetRoot.getPaddingLeft()-insetRoot.getPaddingRight();
+        int usableHeight=insetRoot.getHeight()-insetRoot.getPaddingTop()-insetRoot.getPaddingBottom();
+        // Keep the established three-column landscape layout on ordinary phones.
+        boolean compact=usableWidth<dp(700)||(usableWidth<dp(840)&&usableWidth<usableHeight);
         adaptiveTabs.setVisibility(compact?View.VISIBLE:View.GONE);
         float[] weights={29,42,29};
         for(int i=0;i<adaptivePanels.size();i++){
