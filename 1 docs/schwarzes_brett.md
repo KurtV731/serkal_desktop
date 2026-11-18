@@ -6105,3 +6105,17 @@ Status: **NEUES CE-ERSATZARTEFAKT EXAKT BESTÄTIGT / SIGNIERPAKET MIT KORRIGIERT
 - Paketinhalt durch ZIP-Prüfung bestätigt: exakt die neue unsignierte Edge-AAB und der neue Edge-Signierer.
 - Der frühere Code50-Bau mit Eingabehash `14ddfe923a76a9cc608954d7e9ea9b27187de67ea4965ba09a924bfa68ad5f56`, seine signierte Ableitung und das frühere Signierpaket bleiben **für den Upload gesperrt**.
 - Nächster Schritt auf Kurts Windows-PC: neues Paket entpacken und die Edge-CMD starten. Danach signierte AAB, Uploadzertifikat, unveränderte Nutzdaten und neuen signierten SHA-256 gegenprüfen. Erst anschließend darf der bestehende interne Play-Test aktualisiert werden.
+
+
+## Installer – 18.11.2026: Edge-Code50 privat signiert und zur Play-Übergabe bereit
+
+Status: **PRIVATE SIGNIERUNG UND VOLLPRÜFUNG BESTANDEN / EXAKTE AAB FÜR DEN BESTEHENDEN INTERNEN PLAY-TEST BEREIT / PLAY-UPLOAD NOCH OFFEN**.
+
+- Verbindliche signierte Datei: `SerKal-Android-1.2.6-code50-edge.aab`.
+- Lokaler Prüfpfad bei Kurt: `C:\\ppd\\serkal\\serkal_dev\\serkal_appbiule4\\SerKal-Android-1.2.6-code50-edge-SIGNIERPAKET\\SerKal-Android-1.2.6-code50-edge.aab`.
+- Größe: **2511304 Bytes**.
+- SHA-256: `b38881f1e582c43df33bc85494de49e02cab0e7027bdde16f47ba1e8c78197c3`.
+- Der neue Edge-Signierer meldet nach Eingabeprüfung, Signaturprüfung, Uploadzertifikatprüfung und bytegenauer Nutzdatenprüfung ausdrücklich **„FERTIG FÜR DEN BESTEHENDEN INTERNEN GOOGLE-PLAY-TEST“**.
+- Der zugehörige Freigabenachweis liegt neben der AAB als `SerKal-Android-1.2.6-code50-edge-freigabenachweis.txt`.
+- Ausschließlich diese signierte Edge-Datei darf als neuer Release in den bestehenden internen Play-Test hochgeladen werden. Kein neues Paket, keine neue Testerliste und kein neuer Teilnahme-Link.
+- Die frühere Code50-AAB ohne `edge` bleibt gesperrt und darf nicht hochgeladen werden.
