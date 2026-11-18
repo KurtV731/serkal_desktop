@@ -81,7 +81,7 @@ Diese Tabelle gibt den **belegten Übergabestand**, keine neu durchgeführte Liv
 |---|---|---|
 | SerKal Windows öffentlich | Desktop 1.2.6, am 16.11. veröffentlicht und Live-Hash bestätigt; Quellstand 07903512a7ac2de4521182ec8b9a89e4cb030a86. | Bekannte Restpunkte für spätere Pflege, siehe Abschnitt 4. |
 | SerKal Android Website | Öffentliche APK 1.2.4 / Code47; getrennt vom Play-Test. | Keine Aktualisierung allein wegen des neuen Play-Baus behaupten. |
-| SerKal Android Play-Kandidat | 1.2.6 / Code50 Edge; Bau-/Testquelle 2043721004a6bbba4faf1454a366c1c9e9d90608; am 18.11. privat signiert und voll geprüft. | Upload/Verfügbarkeit im bestehenden internen Test noch nicht auf diesem Brett bestätigt. |
+| SerKal Android Play-Test | 1.2.6 / Code50 Edge; Bau-/Testquelle 2043721004a6bbba4faf1454a366c1c9e9d90608; am 18.11. privat signiert, geprüft und im bestehenden **Geschlossenen Test – Alpha** zur Überprüfung eingereicht. | Google-Prüfung/Verfügbarkeit und praktische Neuinstallation durch Tester noch bestätigen. Produktionszugang bleibt mangels 12 Testern gesperrt. |
 | Gemeinsame SerKal-Daten | Archivstand 38 unverändert. | Produktversionsgleichheit nicht mit Datenformatwechsel verwechseln. |
 | HASA öffentlich stabil | 1.2 separat von Entwicklungskanal. | Keine Alpha als neue stabile Public ausgeben. |
 | HASA Entwicklung | 1.3.0 Alpha12, am 14.11. im Kanal dev-1.3-alpha1 veröffentlicht; Prüfquelle 43ca676594c21edc83497aded670cfadb5825eff, Kanalcommit 40281d7eb4d2a301d0bd8fa3632bd14ab3126192. | Reale Rückmeldungen, Server-/Handbuchstand getrennt führen. |
@@ -90,29 +90,42 @@ Diese Tabelle gibt den **belegten Übergabestand**, keine neu durchgeführte Liv
 
 Desktop-Public: serkal-desktop.exe, **140893184 Bytes**,
 SHA256 **4cd5128dce6c01771ecb0e80271b4a56b7b1047faa80eb0f72eabcab30aaef16**.
-Bestehender Android-Testlink: https://play.google.com/apps/internaltest/4699376963974012674
+Play-Seite für bereits aufgenommene Tester: https://play.google.com/store/apps/details?id=de.serkal.android.preview.v005
+Der maßgebliche Kanal für die derzeitige Testergruppe ist **Geschlossener Test – Alpha**, nicht der interne Test. Bestehende Teilnahmegruppe und Opt-in-Einstellungen unverändert weiterverwenden.
 
 ## 4. Aktive Übergaben und offene Arbeit
 
-### P1 – Installer / Kurt: Android-Edge-Code50 in bestehenden Play-Test übernehmen
+### P1 – Installer / Kurt: Android-Code50 im geschlossenen Alpha-Test abschließen
 
-Signierte freigegebene Eingabe: **SerKal-Android-1.2.6-code50-edge.aab**,
-**2511304 Bytes**, SHA256
+Am 18.11.2026 wurde die geprüfte **SerKal-Android-1.2.6-code50-edge.aab**
+im bestehenden Kanal **Geschlossener Test – Alpha** als Version **50 (1.2.6)**
+hochgeladen und zur Google-Überprüfung eingereicht. Version 49 (1.2.5) wurde nicht
+einbezogen; Roll-out 100 %, Versionshinweise DE/EN. Die angezeigte Warnung zur
+fehlenden R8/ProGuard-Offenlegungsdatei war nicht blockierend. Der endgültige
+Google-Status „verfügbar/aktiv“ und die reale Installation sind noch zu bestätigen.
+
+Verbindliches Artefakt: **2511304 Bytes**, SHA256
 **b38881f1e582c43df33bc85494de49e02cab0e7027bdde16f47ba1e8c78197c3**.
-Freigabenachweis liegt bei Kurt daneben als
-SerKal-Android-1.2.6-code50-edge-freigabenachweis.txt.
-
-Nur diese geprüfte signierte Edge-Datei verwenden. Die ältere Code50-Datei ohne edge,
-ihre signierten Ableitungen und das alte Nicht-Edge-Signierpaket bleiben uploadgesperrt.
-Vorhandene Dateien vorerst behalten. Keine neue Paketkennung, Testerliste oder Teilnahme-URL.
-Paket bleibt de.serkal.android.preview.v005; Uploadschlüssel/Alias serkal-preview unverändert.
+Paket bleibt de.serkal.android.preview.v005; Uploadschlüssel/Alias serkal-preview
+unverändert. Die ältere Code50-Datei ohne `edge` und ihre Ableitungen bleiben
+uploadgesperrt. Keine neue Paketkennung, Testerliste, Teilnahme-URL oder Testspur anlegen.
 Uploadzertifikat und Google-Play-App-Signierzertifikat für OAuth nicht verwechseln.
 
-CE-Ersatzbau: alte Farbaufrufe durch Edge-to-Edge/Insets ersetzt; Querformat auf Telefonen
-bevorzugt, Tablets/Mehrfenster anpassbar; Google-/TMDB-Einrichtung und Kalenderstabilisierung
-erhalten. 96 Regressionstests und Android15-/16-Emulatorprüfungen bestanden.
-Dies beweist keine reale Google-/Kalenderabnahme und keine Lösung aller alten Androidfehler.
-Nach Upload Verfügbarkeit und praktische Update-/Funktionsprüfung dokumentieren.
+**Nächste Schritte für den Nachfolger:**
+
+1. In Play Console den Status des geschlossenen Alpha-Releases prüfen.
+2. Sobald Google Version 50 anbietet, Tester informieren beziehungsweise Verfügbarkeit
+   bestätigen. Für Kurts praktische Abnahme alte App deinstallieren und Version 50 neu
+   aus dem bestehenden Test installieren; damit wird auch der vollständige Ersteinstieg geprüft.
+3. Installation, Google-/TMDB-Einrichtung, Archivzahl und Kalenderzugriff praktisch prüfen;
+   Ergebnis knapp im Brett aktualisieren.
+4. Öffentliches Google-Play-Produktionsrelease nicht behaupten: Kurt hat derzeit neun
+   Tester. Für Produktionszugang verlangt Google mindestens zwölf ununterbrochen
+   beigetretene Tester über 14 Tage; anschließend ist der Produktionszugang separat zu beantragen.
+
+CE-Ersatzbau: Edge-to-Edge/Insets statt alter Farbaufrufe; Querformat auf Telefonen
+bevorzugt, Tablets/Mehrfenster anpassbar; 96 Regressionstests und Android-15-/16-
+Emulatorprüfungen bestanden. Das ersetzt die noch ausstehende reale Abnahme nicht.
 [Exakte CE-Unterlagen](https://github.com/KurtV731/serkal_desktop/blob/f3850a199e6d758beac141f8be18e374a241e626/1%20docs/android/code50-edge-to-edge-ersatz.md).
 
 ### P2 – Website: ausstehende Übernahmen abschließen
