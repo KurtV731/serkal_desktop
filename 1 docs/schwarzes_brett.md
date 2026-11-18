@@ -158,6 +158,11 @@ Keine neue Version allein durch diese Liste beauftragt; zuerst aktuellen Code/Ab
 
 ### P4 – CE HASA / Website: fachliche und betriebliche Restpunkte
 
+**Entwicklungsnachfolge vorbereitet am 18.11.2026:** Kurt übergibt zum Wochenende.
+[HASA-Kurzübergabe mit Codepins, Arbeitsregeln, Testwegen und Wunschliste](https://github.com/KurtV731/hasa/blob/main/03%20Dokumentation/entwicklungsuebergabe-2026-11.md).
+Nachfolger liest dieses Brett und diese Facheinführung, danach nur auftragsbezogene Quellen.
+Keine neue Programmversion oder vollständige Neuprüfung allein wegen des Chatwechsels.
+
 - Persönliche Ereignis-/Ressourcenlisten: eigene Planeten nicht allein aus Berichtsbesitz
   ableiten. Übergreifende Besitzer-/Rundenfilterkorrektur vom 07.11. nicht als verteilt belegt.
 - Adressbuch-Automatik ist ab Alpha8 enthalten; eventuell ausstehende Servereinrichtung,
@@ -166,8 +171,11 @@ Keine neue Version allein durch diese Liste beauftragt; zuerst aktuellen Code/Ab
 - Serveransichten/Ereignislisten: fehlende produktive Übernahmen gezielt abgleichen;
   ein erfolgreiches Userscript-Update beweist keinen PHP-/Datenbankupload.
 - Atommüll: Alpha12 korrigiert Zuordnung und Gelesen-Löschschutz. Reaktorstufe2 mit
-  200 ts Bauplatz pro Ladung ist nur Arbeitshypothese aus zwei Messungen; andere
-  Stufen/Forschungseinflüsse und automatische Messkurve nicht bestätigt.
+  200 ts Bauplatz pro Ladung ist Arbeitshypothese aus zwei Messungen. Neu am 18.11.:
+  Stufe3 500 ts pro Ladung, einmal gemessen (4.678 gegenüber 4.178 ts).
+  Kurt möchte beide Werte als vorläufig feste Regeln; Wiki-Tabelle gewünscht.
+  Forschungseinflüsse, weitere Stufen, automatische Messkurve und endgültige praktische
+  Alpha12-Abnahme sind nicht bestätigt.
 - Handels-/Modulkonzept ist gesichert, kein fertiges Handelsmodul.
   Detailauftrag: HASA, 03 Dokumentation/handelsmodul-konzept-2026-10-29.md.
 - Zusammenhängendes Handbuch statt verstreuter Versionsnachträge; Quellen im HASA-Repo.
