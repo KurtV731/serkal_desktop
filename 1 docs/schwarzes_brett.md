@@ -1,6 +1,6 @@
 # Gemeinsames Schwarzes Brett – SerKal, HASA und Websites
 
-Stand: 18.11.2026 · gekürzter Arbeitsstand auf Kurts Auftrag.
+Stand: 19.11.2026 · gekürzter Arbeitsstand auf Kurts Auftrag.
 
 ## 1. Start hier
 
@@ -26,6 +26,11 @@ keine früheren offenen Meldungen ungeprüft reaktivieren.
 | Website | SerKal-Seiten/Downloads in KurtV731/serkal-pages; HASA-Webgestaltung in KurtV731/hasa. |
 | CE HASA | Userscript, API/Serverlogik, Datenbank-/Rechteverhalten und fachliche Anleitung in KurtV731/hasa. |
 | Anleitung / Hosting | Handbuchredaktion beziehungsweise Server-/Domainbetrieb; Abstimmung weiterhin hier. |
+
+**CE-SerKal-Nachfolge für Samstag, 21.11.2026:**
+[Kurzübergabe mit Quellpins, Bau-/Testwegen und offenen Punkten](ce-uebergabe-2026-11.md).
+Neuer CE ausschließlich für SerKal; HASA und Installer3 haben eigene Nachfolger.
+Das Archiv und die Oktober-Übergabe sind keine Pflichtlektüre.
 
 ## 2. Dauerhafte Entscheidungen von Kurt
 
@@ -82,7 +87,7 @@ Diese Tabelle gibt den **belegten Übergabestand**, keine neu durchgeführte Liv
 | SerKal Windows öffentlich | Desktop 1.2.6, am 16.11. veröffentlicht und Live-Hash bestätigt; Quellstand 07903512a7ac2de4521182ec8b9a89e4cb030a86. | Bekannte Restpunkte für spätere Pflege, siehe Abschnitt 4. |
 | SerKal Android Website | Öffentliche APK 1.2.4 / Code47; getrennt vom Play-Test. | Keine Aktualisierung allein wegen des neuen Play-Baus behaupten. |
 | SerKal Android Play-Test | 1.2.6 / Code50 Edge; Bau-/Testquelle 2043721004a6bbba4faf1454a366c1c9e9d90608; am 18.11. privat signiert, geprüft und im bestehenden **Geschlossenen Test – Alpha** zur Überprüfung eingereicht. | Google-Prüfung/Verfügbarkeit und praktische Neuinstallation durch Tester noch bestätigen. Produktionszugang bleibt mangels 12 Testern gesperrt. |
-| SerKal Android nächster Kandidat | 1.2.7 / Code51 Tastaturkorrektur, CE-Bau geprüft. | Installer3: signieren und bestehenden geschlossenen Test aktualisieren, siehe P1a. |
+| SerKal Android nächster Kandidat | 1.2.7 / Code51 Tastaturkorrektur; am19.11. signiert und im geschlossenen Alpha-Test eingereicht, Status „Wird überprüft“. | Verfügbarkeit und Claudias reale Abnahme bestätigen; kein erneuter Bau/Signiervorgang nötig, siehe P1a. |
 | Gemeinsame SerKal-Daten | Archivstand 38 unverändert. | Produktversionsgleichheit nicht mit Datenformatwechsel verwechseln. |
 | HASA öffentlich stabil | 1.2 separat von Entwicklungskanal. | Keine Alpha als neue stabile Public ausgeben. |
 | HASA Entwicklung | 1.3.0 Alpha12, am 14.11. im Kanal dev-1.3-alpha1 veröffentlicht; Prüfquelle 43ca676594c21edc83497aded670cfadb5825eff, Kanalcommit 40281d7eb4d2a301d0bd8fa3632bd14ab3126192. | Reale Rückmeldungen, Server-/Handbuchstand getrennt führen. |
@@ -129,32 +134,22 @@ bevorzugt, Tablets/Mehrfenster anpassbar; 96 Regressionstests und Android-15-/16
 Emulatorprüfungen bestanden. Das ersetzt die noch ausstehende reale Abnahme nicht.
 [Exakte CE-Unterlagen](https://github.com/KurtV731/serkal_desktop/blob/f3850a199e6d758beac141f8be18e374a241e626/1%20docs/android/code50-edge-to-edge-ersatz.md).
 
-### P1a – SerKal Installer3: geprüfte Android 1.2.7 / Code51 signieren
+### P1a – Installer3 / Tester: Android1.2.7 / Code51 verfügbar machen und abnehmen
 
-**19.11.2026 – Code51 im geschlossenen Alpha-Test eingereicht / wird überprüft.**
-Kurts Windows-Prüfnachweis: `SerKal-Android-1.2.7-code51.aab`, 2511495 Bytes, SHA-256 `919e700ea8286ea5f2372160368904fc247074e254d78a23e4704e1d9aa11c4b`. Alias `serkal-preview`, Uploadzertifikat SHA-256 `7e24902dd88ed80fb84e0ffc3b188a1e0c88e30cb2a84247a03cf4ba416667eb`. Signatur und Zertifikat auf allen 141 unveränderten Nutzdateien geprüft.
-[Signierpaket für Kurt](https://chatgpt.com/library?file_id=libfile_183a0c8fe48481918b131e9b1d330edb&account_id=personal): CE-Eingabe nach Größe/SHA-256 geprüft; Signiervorgang mit Testschlüssel geprüft, einschließlich Zertifikat und unveränderter 141 Nutzdateien. Play Console: Einreichung 5 am 19.11.2026 um 21:18 Uhr, Version 51 (1.2.7), vollständiger Roll-out im bestehenden geschlossenen Alpha-Test, Versionshinweise DE/EN gespeichert. Status „Wird überprüft“. Nächster Schritt: Verfügbarkeit bestätigen, dann Tester informieren.
-Kurt beauftragt die Neufassung nach Claudias Tastaturmeldung in1.2.6.
-[Quellstand, Datei, Tests und DE/EN-Versionshinweise](https://github.com/KurtV731/serkal_desktop/blob/c324f8ba0fccef0915a619ea5247b283a13a0afd/1%20docs/android/keyboard-1.2.7-installer-uebergabe.md).
+**19.11.2026: signiert, vollständig geprüft und im geschlossenen Alpha-Test eingereicht.**
+Einreichung5 um21:18Uhr, vollständiger Roll-out, letzter belegter Status „Wird überprüft“.
+Signierte SerKal-Android-1.2.7-code51.aab: **2511495 Bytes**, SHA256
+**919e700ea8286ea5f2372160368904fc247074e254d78a23e4704e1d9aa11c4b**.
+Alle141 unveränderten Nutzdateien, Signatur und Uploadzertifikat durch Installer3 geprüft.
+[CE-Quellstand, Tests, unsignierte Datei und Versionshinweise](https://github.com/KurtV731/serkal_desktop/blob/c324f8ba0fccef0915a619ea5247b283a13a0afd/1%20docs/android/keyboard-1.2.7-installer-uebergabe.md).
 
-- Fertige **SerKal-Android-1.2.7-code51-unsigned.aab**, **2496284 Bytes**,
-  SHA256 **1eda94714c08c93265c78783bd010b6f290e57db93368bcc783d666d8ad138fa**.
-- [Datei](https://chatgpt.com/library?file_id=libfile_bab92dc04b0c81919f89a04c56a5610b&account_id=personal);
-  Quell-/Teststand **47f4e2240b089f8cc700f6706af388f2baed6a28**,
-  Branch ce-android-keyboard-1.2.7. Nur Android, **kein Windows-Bau aus diesem Zweig**.
-- 98 Regressionstests und beide nativen Android15-/16-Prüfungen bestanden; echte
-  Tastatur über Schließen/Lupe/Suchen ausgeblendet und Eingabe/Bedienung erhalten.
-  Aufnahmen angesehen; Claudias Gerät noch nicht praktisch abgenommen.
-- Installer3: Code51-Signierpaket mit exakt diesem Eingabehash/Quellstand vorbereiten;
-  Alias serkal-preview/Uploadzertifikat unverändert. Nach privater Signierung Signatur,
-  Zertifikat, unveränderte Nutzdaten und neuen signierten Hash nachweisen.
-  **Nicht erneut bauen; Code50-Signierer nicht unverändert verwenden.**
-- Danach bestehenden geschlossenen Alpha-Test übernehmen, Verfügbarkeit gesondert
-  bestätigen. CE hat nichts signiert/hochgeladen; Desktop-Public1.2.6 unverändert.
-  Paket/Testerliste/Teilnahmeweg und Archivstand38 bleiben erhalten.
-- Philipps Google-Anmeldehänger bleibt offen. Keine neue Geräteausnahme oder
-  behauptete Anmeldereparatur. Kurts Neuinstallationstest bleibt maßgeblich;
-  bestehende Google-OAuth-Freigaben werden durch Deinstallation nicht automatisch widerrufen.
+98 Regressionstests und native Android15-/16-Tastaturprüfungen bestanden.
+Nächster Schritt: Verfügbarkeit bestätigen, danach echte Testerabnahme, insbesondere Claudia.
+Philipps Google-Hänger bleibt offen. Keine Behauptung eines bereits behobenen Anmeldefehlers.
+Kein erneuter Bau/Signieren der eingereichten Datei, keine neue Testspur oder Paketkennung.
+Kurts Erstnutzerprüfung per Neuinstallation bleibt gewünscht; dabei gehen lokale Daten verloren,
+bereits erteilte Google-OAuth-Rechte werden dagegen nicht automatisch widerrufen.
+Neue Änderungen brauchen neue eindeutige Kennungen. Desktop-Public1.2.6 bleibt unverändert.
 
 ### P2 – Website: ausstehende Übernahmen abschließen
 
@@ -180,6 +175,8 @@ Keine neue Version allein durch diese Liste beauftragt; zuerst aktuellen Code/Ab
 | Kalender öffnen | Browserkonto-/„Kalender hinzufügen“-Umweg nicht als zuverlässig behoben melden. Funktionierende API-Schreibzuordnung nicht dafür ändern. |
 | Android-Einstieg | Samsung-Kontoauswahl/Spinner und unvollständige Abbruchlogs anhand konkreter Logs prüfen; Code50-Darstellungstest beweist diesen Fix nicht. |
 | Android-Tastatur, Claudia 19.11. | 1.2.7/Code51 fertig und an Installer3 übergeben: sichtbares Tastaturschließen, Lupe/Suchen schließen gezielt, Vorschlagsuche behält Tastatur. 98 Regressionstests plus native Android15-/16-Tests bestanden. Claudias konkrete Geräteabnahme bleibt offen; kein Google-Anmeldefix behauptet. Details und nächster Schritt siehe P1a. |
+| Android-Vollbild, Kurt 19.11. | Volle Bildschirmfläche im Normalzustand, keine dauerhafte Reserve für ausgeblendete Leisten. Steuerelemente/Tastatur dürfen vorübergehend überlagern oder Ansicht verkleinern; danach volle Fläche. Dauerhaft sichtbare Leisten ausdrücklich abgelehnt. Noch nicht umgesetzt; Code51 nutzt getInsetsIgnoringVisibility. Details in CE-Kurzübergabe Abschnitt7A. |
+| Play-Edge-to-Edge-Warnung | Screenshot zu Code50 trotz ersetzter direkter Farbaufrufe. Konkrete benannte APIs/Klassen im Play-Detailbefund und ggf. Bibliotheken prüfen; kein belegter Fix durch Code51. |
 | Android-Bedienung | Launcher-Dummysymbol, Wegwischen/Abschlussverhalten, später gewünschte direkte Leistenaktionen. Nicht pauschal durch Angleichung erledigt. |
 | Sprache / Übersicht | Vollständige englische Tooltips/UI, feste Desktop-Statuszeile, Wartungsergebnis-/Menüangleichung: Abschlussbelege vor erneutem Auftrag prüfen. |
 | Deutsche Veröffentlichungstermine | Zweite verlässliche Quelle; manuell geschützte deutsche Start-/Folgenangaben. Vorhandene Datenfelder zuerst prüfen; kein Storestart-Blocker. |
@@ -221,6 +218,7 @@ oder abgeschlossene Konformität aus alten Meldungen ableiten.
 Quellen und Details nur bei diesem Thema gezielt im Archiv-Eintrag
 „CE SerKal – 05.11.2026: Google-Play-Richtlinien dauerhaft bei Entscheidungen berücksichtigen“
 nachschlagen; dortige Fristen sind damaliger Prüfstand, keine neue Rechts-/Richtlinienprüfung.
+Code51-DEX am19.11. aus fertiger AAB gemessen: 6836316Bytes, derzeit unter der10MB-Schwelle für die25%-Optimierungsquoten. Speicher-/Restoreprüfung bleibt offen.
 Bestandene allgemeine Abnahmen nicht ohne neuen Befund vollständig wiederholen.
 
 ## 5. So bleibt dieses Brett kurz
