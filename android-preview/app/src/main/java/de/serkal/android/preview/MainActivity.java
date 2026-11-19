@@ -833,6 +833,19 @@ public class MainActivity extends Activity {
         });
     }
 
+    private void closeSearchKeyboard_() {
+        View focused=getCurrentFocus();
+        if(focused!=null)focused.clearFocus();
+        if(insetRoot!=null){insetRoot.setFocusableInTouchMode(true);insetRoot.requestFocus();}
+        WindowCompat.getInsetsController(getWindow(),getWindow().getDecorView()).hide(WindowInsetsCompat.Type.ime());
+        android.view.inputmethod.InputMethodManager keyboard=(android.view.inputmethod.InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);
+        if(keyboard!=null&&queryField!=null)keyboard.hideSoftInputFromWindow(queryField.getWindowToken(),0);
+    }
+    private void searchExplicitly_() {
+        closeSearchKeyboard_();
+        searchNow();
+    }
+
     private void searchNow() {
         if (pendingSearch != null) handler.removeCallbacks(pendingSearch);
         final String query = queryField.getText().toString().trim();
@@ -955,6 +968,7 @@ public class MainActivity extends Activity {
     private LinearLayout insetRoot,adaptiveColumns,adaptiveTabs;
     private final java.util.List<View> adaptivePanels=new java.util.ArrayList<>();
     private int activePanel;
+    private Button keyboardCloseButton;
     private void showPanel_(int panel){activePanel=panel;adaptPanels_();}
     private void adaptPanels_(){
         if(insetRoot==null||adaptiveColumns==null)return;
@@ -1072,6 +1086,10 @@ public class MainActivity extends Activity {
 
         LinearLayout top = new LinearLayout(this);
         top.setGravity(Gravity.CENTER_VERTICAL);
+        keyboardCloseButton=footerButton(english?"Close keyboard":"Tastatur schließen");
+        keyboardCloseButton.setTag("closeKeyboard");keyboardCloseButton.setVisibility(View.GONE);
+        keyboardCloseButton.setOnClickListener(v->closeSearchKeyboard_());
+        top.addView(keyboardCloseButton,new LinearLayout.LayoutParams(-2,dp(40)));
         TextView title = text("SerKal", 13, TEXT);
         title.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
         top.addView(title, new LinearLayout.LayoutParams(0, dp(31), 1));
@@ -1122,6 +1140,14 @@ public class MainActivity extends Activity {
         queryField.setImeOptions(android.view.inputmethod.EditorInfo.IME_FLAG_NO_EXTRACT_UI
             | android.view.inputmethod.EditorInfo.IME_FLAG_NO_FULLSCREEN
             | android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH);
+        queryField.setOnEditorActionListener((view,action,event)->{
+            boolean enter=event!=null&&event.getKeyCode()==android.view.KeyEvent.KEYCODE_ENTER;
+            if(action==android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH||action==android.view.inputmethod.EditorInfo.IME_ACTION_DONE||enter){
+                if(!enter||event.getAction()==android.view.KeyEvent.ACTION_DOWN)searchExplicitly_();
+                return true;
+            }
+            return false;
+        });
         queryField.setTextSize(14);
         queryField.setPadding(dp(5),dp(2),dp(4),dp(2));
         queryField.setTextColor(TEXT);
@@ -1161,7 +1187,7 @@ public class MainActivity extends Activity {
         LinearLayout leftButtons = new LinearLayout(this);leftButtons.setOrientation(LinearLayout.HORIZONTAL);
         leftButtons.setTag("searchActions");
         Button reset=button("Reset");reset.setTag("resetSearch");reset.setOnClickListener(v->resetSearch());leftButtons.addView(reset);
-        Button search=button(english?"Search":"Suchen");search.setOnClickListener(v->searchNow());leftButtons.addView(search);
+        Button search=button(english?"Search":"Suchen");search.setTag("submitSearch");search.setOnClickListener(v->searchExplicitly_());leftButtons.addView(search);
         Button add=button(english?"Add to archive":"Ins Archiv");add.setTag("addToArchive");add.setOnClickListener(v->askForSeason());leftButtons.addView(add);
         left.addView(leftButtons,2);
         left.setTag("panelSearch");adaptivePanels.add(left);columns.addView(left);
@@ -1232,6 +1258,7 @@ public class MainActivity extends Activity {
         Button quitButton=footerButton(english?"Exit SerKal":"SerKal beenden");quitButton.setTag("exitSerKal");quitButton.setOnClickListener(v->exitSerKal());footer.addView(quitButton);
         root.addView(scrollBar_(footer),new LinearLayout.LayoutParams(-1,dp(36)));
         ViewCompat.setOnApplyWindowInsetsListener(root,(view,insets)->{
+            keyboardCloseButton.setVisibility(insets.getInsets(WindowInsetsCompat.Type.ime()).bottom>0?View.VISIBLE:View.GONE);
             Insets safe=Insets.max(insets.getInsetsIgnoringVisibility(WindowInsetsCompat.Type.systemBars()|WindowInsetsCompat.Type.displayCutout()),insets.getInsets(WindowInsetsCompat.Type.ime()));
             view.setPadding(dp(4)+safe.left,dp(3)+safe.top,dp(4)+safe.right,dp(4)+safe.bottom);
             adaptPanels_();return insets;

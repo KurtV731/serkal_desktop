@@ -47,7 +47,22 @@ public class DisplayDeviceTest {
    for(int attempt=0;attempt<50&&imeHeight.get()==0;attempt++){Thread.sleep(100);inst.waitForIdleSync();scenario.onActivity(a->{WindowInsetsCompat insets=ViewCompat.getRootWindowInsets(a.findViewById(android.R.id.content).findViewWithTag("insetRoot"));if(insets!=null)imeHeight.set(insets.getInsets(WindowInsetsCompat.Type.ime()).bottom);});}
    save(inst,context,"display-ime.png");
    scenario.onActivity(a->{View root=a.findViewById(android.R.id.content).findViewWithTag("insetRoot");WindowInsetsCompat i=ViewCompat.getRootWindowInsets(root);assertNotNull(i);assertTrue("Keyboard must actually be visible",i.getInsets(WindowInsetsCompat.Type.ime()).bottom>0);assertTrue(root.getPaddingBottom()>=i.getInsets(WindowInsetsCompat.Type.ime()).bottom);});
+   // Reopen the real IME for each route; no Google/TMDB credentials are needed.
+   for(int route=0;route<3;route++){
+    final int action=route;
+    scenario.onActivity(a->{View r=a.findViewById(android.R.id.content).findViewWithTag("insetRoot");EditText e=findEdit(r.findViewWithTag("panelSearch"));e.setText("T");e.requestFocus();WindowCompat.getInsetsController(a.getWindow(),e).show(WindowInsetsCompat.Type.ime());});
+    waitIme(inst,scenario,true);
+    scenario.onActivity(a->{View r=a.findViewById(android.R.id.content).findViewWithTag("insetRoot");View close=r.findViewWithTag("closeKeyboard");Rect rect=new Rect();assertEquals(View.VISIBLE,close.getVisibility());assertTrue("Close keyboard button reachable",close.getGlobalVisibleRect(rect));assertTrue(rect.width()>0&&rect.height()>0);if(action==0)close.performClick();else if(action==1)findEdit(r.findViewWithTag("panelSearch")).onEditorAction(android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH);else r.findViewWithTag("submitSearch").performClick();});
+    waitIme(inst,scenario,false);
+    scenario.onActivity(a->{View r=a.findViewById(android.R.id.content).findViewWithTag("insetRoot");assertFalse(findEdit(r.findViewWithTag("panelSearch")).hasFocus());assertEquals("T",findEdit(r.findViewWithTag("panelSearch")).getText().toString());assertEquals(View.GONE,r.findViewWithTag("closeKeyboard").getVisibility());Rect rect=new Rect();assertTrue(r.findViewWithTag("submitSearch").getGlobalVisibleRect(rect));assertTrue(rect.height()>0);});
+    save(inst,context,"keyboard-closed-"+action+".png");
+   }
   }finally{shell(inst,"wm size reset");}
+ }
+ static void waitIme(Instrumentation inst,ActivityScenario<MainActivity> scenario,boolean expected)throws Exception{
+  java.util.concurrent.atomic.AtomicBoolean shown=new java.util.concurrent.atomic.AtomicBoolean(!expected);
+  for(int i=0;i<60;i++){Thread.sleep(100);inst.waitForIdleSync();scenario.onActivity(a->{WindowInsetsCompat insets=ViewCompat.getRootWindowInsets(a.findViewById(android.R.id.content));shown.set(insets!=null&&insets.getInsets(WindowInsetsCompat.Type.ime()).bottom>0);});if(shown.get()==expected)return;}
+  fail("Keyboard visibility did not become "+expected);
  }
  static Button findLater(View v){if(v instanceof Button&&(((Button)v).getText().toString().equalsIgnoreCase("Später")||((Button)v).getText().toString().equalsIgnoreCase("Later")))return (Button)v;if(v instanceof ViewGroup)for(int n=0;n<((ViewGroup)v).getChildCount();n++){Button b=findLater(((ViewGroup)v).getChildAt(n));if(b!=null)return b;}return null;}
  static EditText findEdit(View v){if(v instanceof EditText)return (EditText)v;if(v instanceof ViewGroup)for(int n=0;n<((ViewGroup)v).getChildCount();n++){EditText e=findEdit(((ViewGroup)v).getChildAt(n));if(e!=null)return e;}return null;}
