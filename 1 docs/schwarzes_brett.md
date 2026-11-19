@@ -131,7 +131,8 @@ Emulatorprüfungen bestanden. Das ersetzt die noch ausstehende reale Abnahme nic
 
 ### P1a – SerKal Installer3: geprüfte Android 1.2.7 / Code51 signieren
 
-**19.11.2026 – CE fertig / Signierung und Play-Übernahme offen.**
+**19.11.2026 – Code51-Signierpaket bereit / private Signierung und Play-Übernahme offen.**
+[Signierpaket für Kurt](https://chatgpt.com/library?file_id=libfile_183a0c8fe48481918b131e9b1d330edb&account_id=personal): CE-Eingabe nach Größe/SHA-256 geprüft; Signiervorgang mit Testschlüssel geprüft, einschließlich Zertifikat und unveränderter 141 Nutzdateien. Nächster Schritt: private Signierung mit Kurts Uploadschlüssel, danach Prüfnachweis und bestehender geschlossener Alpha-Test.
 Kurt beauftragt die Neufassung nach Claudias Tastaturmeldung in1.2.6.
 [Quellstand, Datei, Tests und DE/EN-Versionshinweise](https://github.com/KurtV731/serkal_desktop/blob/c324f8ba0fccef0915a619ea5247b283a13a0afd/1%20docs/android/keyboard-1.2.7-installer-uebergabe.md).
 
