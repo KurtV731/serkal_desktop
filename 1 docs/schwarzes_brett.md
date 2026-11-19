@@ -131,9 +131,9 @@ Emulatorprüfungen bestanden. Das ersetzt die noch ausstehende reale Abnahme nic
 
 ### P1a – SerKal Installer3: geprüfte Android 1.2.7 / Code51 signieren
 
-**19.11.2026 – Code51 privat signiert und lokal geprüft / Play-Übernahme offen.**
+**19.11.2026 – Code51 im geschlossenen Alpha-Test eingereicht / wird überprüft.**
 Kurts Windows-Prüfnachweis: `SerKal-Android-1.2.7-code51.aab`, 2511495 Bytes, SHA-256 `919e700ea8286ea5f2372160368904fc247074e254d78a23e4704e1d9aa11c4b`. Alias `serkal-preview`, Uploadzertifikat SHA-256 `7e24902dd88ed80fb84e0ffc3b188a1e0c88e30cb2a84247a03cf4ba416667eb`. Signatur und Zertifikat auf allen 141 unveränderten Nutzdateien geprüft.
-[Signierpaket für Kurt](https://chatgpt.com/library?file_id=libfile_183a0c8fe48481918b131e9b1d330edb&account_id=personal): CE-Eingabe nach Größe/SHA-256 geprüft; Signiervorgang mit Testschlüssel geprüft, einschließlich Zertifikat und unveränderter 141 Nutzdateien. Nächster Schritt: signierte Datei im bestehenden geschlossenen Alpha-Test einreichen und Verfügbarkeit gesondert bestätigen.
+[Signierpaket für Kurt](https://chatgpt.com/library?file_id=libfile_183a0c8fe48481918b131e9b1d330edb&account_id=personal): CE-Eingabe nach Größe/SHA-256 geprüft; Signiervorgang mit Testschlüssel geprüft, einschließlich Zertifikat und unveränderter 141 Nutzdateien. Play Console: Einreichung 5 am 19.11.2026 um 21:18 Uhr, Version 51 (1.2.7), vollständiger Roll-out im bestehenden geschlossenen Alpha-Test, Versionshinweise DE/EN gespeichert. Status „Wird überprüft“. Nächster Schritt: Verfügbarkeit bestätigen, dann Tester informieren.
 Kurt beauftragt die Neufassung nach Claudias Tastaturmeldung in1.2.6.
 [Quellstand, Datei, Tests und DE/EN-Versionshinweise](https://github.com/KurtV731/serkal_desktop/blob/c324f8ba0fccef0915a619ea5247b283a13a0afd/1%20docs/android/keyboard-1.2.7-installer-uebergabe.md).
 
