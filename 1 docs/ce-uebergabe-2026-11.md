@@ -194,6 +194,8 @@ Wenn Hänger/Abbruch weiter ohne verwertbaren Eintrag bleibt, diese konkrete Dia
 schließen, einschließlich Lifecycle/SDK-Rückgabe. Tokens/Passwörter nicht loggen.
 Deinstallation entfernt lokale Daten, widerruft aber nicht automatisch Google-OAuth-Rechte.
 
+**Codeanalyse20.11. auf Kurts Auftrag:** [vollständiges Start-/Speicherschema](android/erster-start-speicher-und-anmeldung-2026-11-20.md). Keine manuelle Handyordner-Freigabe erforderlich; eigene Logs, Preferences und Archivdateien liegen appintern. Geprüfter Authblock und Speicherklassen in1.2.6/1.2.7 identisch. Cloud-TMDB-Validierung/Keystore liegen vor CONNECTED; Logschreibfehler werden verschluckt. Keine Ursache auf Thorstens Gerät behaupten; konkrete Stufen im Bericht nutzen.
+
 ### D – Claudia: Ersteinrichtung klappt, Tastaturproblem gemeldet
 
 Claudia bestätigt1.2.6; zweimal bleibt Tastatur trotz Lupentipp offen.
