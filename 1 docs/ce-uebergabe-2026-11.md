@@ -202,7 +202,31 @@ sichtbarer Schließenknopf; normale Vorschlagsuche unverändert.
 Claudias reale1.2.7-Abnahme, Gerät/Androidversion/Tastatur stehen noch aus.
 Nicht erneut1.2.6 testen lassen oder Emulatorerfolg als ihren Erfolg ausgeben.
 
-### E – Weitere Pflege, nicht alles gleichzeitig anfangen
+### E – Plattformplanung von Kurt, 20.11.2026
+
+Weitere angefragte Tester haben wegen iPhone-Nutzung und fehlendem Android-Gerät
+abgesagt. Deshalb wünscht Kurt für die weitere Plattformausweitung diese Reihenfolge:
+
+1. **Linux, zunächst Ubuntu.** Vorhandene Desktop-Fachlogik möglichst weiterverwenden.
+   Die frühere Aussage „relativ einfach“ ist eine vorläufige Einschätzung, keine
+   bereits geprüfte Portierung: insbesondere Windows-spezifische Fenster-/Browserhelfer,
+   OAuth-Rückweg, Installation und Schlüsselablage gezielt auf Ubuntu prüfen.
+2. **Danach iPhone/iOS.** Als eigenständigen Portierungsauftrag planen; kein fertiger
+   Bauweg oder Veröffentlichungstermin zugesagt. Google-/TMDB-/Archiv-/Kalenderfunktionen
+   sollen funktional zu den bestehenden Fassungen passen.
+
+Dies ist die gewünschte Reihenfolge der zusätzlichen Plattformen, kein Auftrag,
+den laufenden Android-Test abzubrechen oder sofort beide Portierungen gleichzeitig
+zu beginnen. Der Nachfolger soll diese Planung aktiv mitnehmen.
+
+**Neue Testerantwort vom20.11.:** Thorsten meldet erfolgreiche Installation von1.2.6,
+aber identisches Google-Anmeldeverhalten wie unter1.2.4. Kein behobener Loginfall.
+Kurt hat ihn bereits angeschrieben; Antwort/Log kann dauern, SerKal hat für den Tester
+nicht höchste Priorität. Nicht ständig neue Versuche verlangen. Seine Nachricht ist
+mit Thorsten unterschrieben; nicht ungeprüft mit der bisherigen Bezeichnung Philipp
+gleichsetzen. Logtext oder letzte Meldung genügt, Signal-Screenshot ist nicht nötig.
+
+### F – Weitere Pflege, nicht alles gleichzeitig anfangen
 
 - Desktop: Googlefenster kann nativen Hinweis verdecken (für1.2.6 akzeptiert);
   bessere Anordnung und tatsächlicher dauerhafter Kontostatus vorgemerkt.
