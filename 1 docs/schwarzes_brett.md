@@ -194,7 +194,8 @@ Keine neue Version allein durch diese Liste beauftragt; zuerst aktuellen Code/Ab
 | Android-Bedienung | Launcher-Dummysymbol, Wegwischen/Abschlussverhalten, später gewünschte direkte Leistenaktionen. Nicht pauschal durch Angleichung erledigt. |
 | Sprache / Übersicht | Vollständige englische Tooltips/UI, feste Desktop-Statuszeile, Wartungsergebnis-/Menüangleichung: Abschlussbelege vor erneutem Auftrag prüfen. |
 | Deutsche Veröffentlichungstermine | Zweite verlässliche Quelle; manuell geschützte deutsche Start-/Folgenangaben. Vorhandene Datenfelder zuerst prüfen; kein Storestart-Blocker. |
-| Spätere Ideen | System-/Dateikartierung, Single-PC-Modus, Linux sowie [Ideenliste](ideenliste.md); keine automatische Erweiterung des laufenden Auftrags. |
+| Weitere Plattformen, Kurt 20.11. | Reihenfolge: **zuerst Linux/Ubuntu, danach iPhone/iOS**. Anlass: angefragte Tester haben nur iPhones. Planung an CE-Nachfolger übergeben; keine fertige Portierung zugesagt, laufender Android-Test bleibt bestehen. Details in CE-Kurzübergabe Abschnitt7E. |
+| Spätere Ideen | System-/Dateikartierung, Single-PC-Modus sowie [Ideenliste](ideenliste.md); keine automatische Erweiterung des laufenden Auftrags. |
 
 ### P4 – CE HASA / Website: fachliche und betriebliche Restpunkte
 
