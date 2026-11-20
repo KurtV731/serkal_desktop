@@ -167,6 +167,18 @@ Kurt macht zunächst Pause; aktuell keine weiteren Klicks von ihm nötig.
 
 ### P2 – Website: ausstehende Übernahmen abschließen
 
+**20.11.2026 – SERAWEB-Rechtstexte-Check vollständig in den Website-Quellen umgesetzt.**
+Quellcommit serkal-pages: `8ca7735f577801700e4dd9acf165d11e23bb4c61`.
+Alle HTML-Seiten besitzen nun zusätzlich zur unveränderten Siebener-Navigation direkte
+Fußzeilenlinks zu Impressum und Datenschutz. Impressum: § 5 DDG, einheitlicher Kontakt
+support@serkal.de, eine Telefonnummer und § 18 Abs. 2 MStV. Datenschutz DE/EN:
+Widerspruch nach Art. 21, Google Limited Use, konkrete Drittlandgrundlagen, LfDI RLP,
+Art.-28-Hosting, keine Cookies/Browserablage, eindeutige Google-Rechtsgrundlage sowie
+lokale Desktop-Protokolle. Überschriftenstruktur auf About/Legal korrigiert.
+`.htaccess`: www→serkal.de, HSTS, nosniff und Referrer-Policy vorbereitet.
+**Noch offen:** Serverupload und anschließende Liveprüfung aller Links, Weiterleitungen
+und Header; kein öffentlicher Abschluss behauptet, bevor dieser Nachweis vorliegt.
+
 - SerKal: Live-Übernahme/Prüfung von neu-in-1.2.html, whats-new-1.2.html,
   werkstatt.html und werkstatt-en.html bestätigen; Quelle am 16.11. fertig.
 - Datenschutz: Nachtrag zu lokalen Desktop-Protokollen und Aufbewahrung bis Löschung
