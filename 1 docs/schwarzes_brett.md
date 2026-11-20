@@ -174,7 +174,8 @@ Fußzeilenlinks zu Impressum und Datenschutz. Impressum: § 5 DDG, einheitlicher
 support@serkal.de, eine Telefonnummer und § 18 Abs. 2 MStV. Datenschutz DE/EN:
 Widerspruch nach Art. 21, Google Limited Use, konkrete Drittlandgrundlagen, LfDI RLP,
 Art.-28-Hosting, keine Cookies/Browserablage, eindeutige Google-Rechtsgrundlage sowie
-lokale Desktop-Protokolle. Überschriftenstruktur auf About/Legal korrigiert.
+lokale Desktop-Protokolle. Überschriftenstruktur auf About/Legal korrigiert. Die gemeinsamen Textfarben wurden
+gegen ihre Hintergründe geprüft; niedrigster gemessener Kontrast 5,38:1 und damit mindestens WCAG-AA für Normalschrift.
 `.htaccess`: www→serkal.de, HSTS, nosniff und Referrer-Policy vorbereitet.
 **Noch offen:** Serverupload und anschließende Liveprüfung aller Links, Weiterleitungen
 und Header; kein öffentlicher Abschluss behauptet, bevor dieser Nachweis vorliegt.
