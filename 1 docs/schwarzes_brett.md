@@ -32,6 +32,11 @@ keine früheren offenen Meldungen ungeprüft reaktivieren.
 Neuer CE ausschließlich für SerKal; HASA und Installer3 haben eigene Nachfolger.
 Das Archiv und die Oktober-Übergabe sind keine Pflichtlektüre.
 
+**Website-Nachfolge vorbereitet am 20.11.2026:**  
+[Kurzübergabe mit Pfaden, festen Gestaltungsregeln, Ein-Klick-Veröffentlichung und offenen Live-Nachweisen](https://github.com/KurtV731/serkal-pages/blob/main/docs/website-uebergabe-2026-11-20.md).
+Der bisherige Website-Chatty geht auf Kurts Wunsch in den Rentnerclub. Der Nachfolger liest
+dieses Brett und die Kurzübergabe; frühere Website-Übergaben sind keine Pflichtlektüre.
+
 ## 2. Dauerhafte Entscheidungen von Kurt
 
 - Bestehende SerKal-2.5-Fachlogik portieren, nicht durch neue Produktregeln ersetzen.
