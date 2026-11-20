@@ -1,6 +1,6 @@
 # Gemeinsames Schwarzes Brett – SerKal, HASA und Websites
 
-Stand: 19.11.2026 · gekürzter Arbeitsstand auf Kurts Auftrag.
+Stand: 20.11.2026 · gekürzter Arbeitsstand auf Kurts Auftrag.
 
 ## 1. Start hier
 
@@ -87,7 +87,7 @@ Diese Tabelle gibt den **belegten Übergabestand**, keine neu durchgeführte Liv
 | SerKal Windows öffentlich | Desktop 1.2.6, am 16.11. veröffentlicht und Live-Hash bestätigt; Quellstand 07903512a7ac2de4521182ec8b9a89e4cb030a86. | Bekannte Restpunkte für spätere Pflege, siehe Abschnitt 4. |
 | SerKal Android Website | Öffentliche APK 1.2.4 / Code47; getrennt vom Play-Test. | Keine Aktualisierung allein wegen des neuen Play-Baus behaupten. |
 | SerKal Android Play-Test | 1.2.6 / Code50 Edge; Bau-/Testquelle 2043721004a6bbba4faf1454a366c1c9e9d90608; am 18.11. privat signiert, geprüft und im bestehenden **Geschlossenen Test – Alpha** zur Überprüfung eingereicht. | Google-Prüfung/Verfügbarkeit und praktische Neuinstallation durch Tester noch bestätigen. Produktionszugang bleibt mangels 12 Testern gesperrt. |
-| SerKal Android nächster Kandidat | 1.2.7 / Code51 Tastaturkorrektur; am19.11. signiert und im geschlossenen Alpha-Test eingereicht, Status „Wird überprüft“. | Verfügbarkeit und Claudias reale Abnahme bestätigen; kein erneuter Bau/Signiervorgang nötig, siehe P1a. |
+| SerKal Android nächster Kandidat | 1.2.7 / Code51 Tastaturkorrektur; am19.11. signiert/eingereicht. Play-Support-KI meldet am20.11. „Fully rolled out“ im geschlossenen Alpha-Test und NO_CHANGES. | Verfügbarkeit und Claudias reale Abnahme bestätigen; kein erneuter Bau/Signiervorgang nötig, siehe P1a. |
 | Gemeinsame SerKal-Daten | Archivstand 38 unverändert. | Produktversionsgleichheit nicht mit Datenformatwechsel verwechseln. |
 | HASA öffentlich stabil | 1.2 separat von Entwicklungskanal. | Keine Alpha als neue stabile Public ausgeben. |
 | HASA Entwicklung | 1.3.0 Alpha12, am 14.11. im Kanal dev-1.3-alpha1 veröffentlicht; Prüfquelle 43ca676594c21edc83497aded670cfadb5825eff, Kanalcommit 40281d7eb4d2a301d0bd8fa3632bd14ab3126192. | Reale Rückmeldungen, Server-/Handbuchstand getrennt führen. |
@@ -137,7 +137,7 @@ Emulatorprüfungen bestanden. Das ersetzt die noch ausstehende reale Abnahme nic
 ### P1a – Installer3 / Tester: Android1.2.7 / Code51 verfügbar machen und abnehmen
 
 **19.11.2026: signiert, vollständig geprüft und im geschlossenen Alpha-Test eingereicht.**
-Einreichung5 um21:18Uhr, vollständiger Roll-out, letzter belegter Status „Wird überprüft“.
+Einreichung5 um21:18Uhr. Neuer Hinweis am20.11.: Play-Support-KI meldet mit Kontozugriff „Fully rolled out“ im geschlossenen Alpha-Test und NO_CHANGES, keine Ablehnung. Release-Detailansicht und reale Geräteabnahme noch nicht unabhängig bestätigt.
 Signierte SerKal-Android-1.2.7-code51.aab: **2511495 Bytes**, SHA256
 **919e700ea8286ea5f2372160368904fc247074e254d78a23e4704e1d9aa11c4b**.
 Alle141 unveränderten Nutzdateien, Signatur und Uploadzertifikat durch Installer3 geprüft.
@@ -150,6 +150,20 @@ Kein erneuter Bau/Signieren der eingereichten Datei, keine neue Testspur oder Pa
 Kurts Erstnutzerprüfung per Neuinstallation bleibt gewünscht; dabei gehen lokale Daten verloren,
 bereits erteilte Google-OAuth-Rechte werden dagegen nicht automatisch widerrufen.
 Neue Änderungen brauchen neue eindeutige Kennungen. Desktop-Public1.2.6 bleibt unverändert.
+
+### P1b – Kurt / CE: Google-Prüferzugang, Support-Ticket gesendet am20.11.
+
+Google-Kontosicherheit hat einen Login mit richtigem Passwort beim dedizierten
+Prüfkonto blockiert. Kurts Arbeitsannahme: autorisierter Play-Prüfer ausgesperrt;
+nicht ständig erneut grundsätzlich diskutieren. Technische Zuordnung durch Support offen.
+**Ticket erfolgreich abgesendet** unter Google Play-Richtlinien / SerKal /
+Sonstiges Richtlinienproblem. Bitte um verlässlichen Prüferzugang, Abstimmung mit dem
+Reviewteam und Klärung der Auswirkung auf die Prüfung. Noch keine Ticketnummer erfasst.
+Antwort laut Bestätigung per E-Mail innerhalb von **zwei Arbeitstagen**, ggf. länger.
+Nächster Schritt: Antwort im bestehenden Vorgang auswerten; keine doppelte Anfrage,
+keine Kontosicherheitsänderung/neue App allein wegen KI-Ratschlägen. Keine automatische
+Überwachung eingerichtet. [Details für den CE-Nachfolger](ce-uebergabe-2026-11.md).
+Kurt macht zunächst Pause; aktuell keine weiteren Klicks von ihm nötig.
 
 ### P2 – Website: ausstehende Übernahmen abschließen
 
