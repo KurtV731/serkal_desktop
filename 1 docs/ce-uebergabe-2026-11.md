@@ -1,6 +1,6 @@
 # CE SerKal – kompakte Übergabe November 2026
 
-Stand: 19.11.2026 · Nachfolge von Kurt für Samstag, **21.11.2026**, vorbereitet.
+Stand: 20.11.2026 · Nachfolge von Kurt für Samstag, **21.11.2026**, vorbereitet.
 Gilt ausschließlich für **SerKal Desktop und Android**. HASA hat einen eigenen CE;
 Installer3 und Website haben eigene Zuständigkeiten. Kein gemeinsamer Neubeginn.
 
@@ -234,10 +234,55 @@ Details: https://support.google.com/googleplay/android-developer/answer/17492799
   https://developer.android.com/develop/ui/views/layout/immersive
   Das rechtfertigt keine permanenten leeren Insets. Quellen bei Umsetzung aktualisieren.
 
+### Aktueller Nachtrag 20.11.: Google-Prüfkonto und Support-Ticket
+
+Kurt hat ein ausschließlich für die Play-Prüfer vorgesehenes Google-Konto angelegt
+und dessen Zugangsdaten unter App-Zugriff hinterlegt. Eine Google-Sicherheitswarnung
+meldete einen verhinderten Anmeldeversuch mit richtigem Passwort, unbekanntem Gerät
+und Browser „Sonstiger“. **Arbeitsannahme von Kurt: Googles Kontoschutz hat den
+autorisierten App-Prüfer ausgesperrt.** Diese nachvollziehbare Arbeitsannahme respektieren
+und nicht in jedem Gespräch erneut mit ihm grundsätzlich diskutieren; eine technische
+Zuordnung durch den Support steht noch aus.
+
+**Support-Ticket am20.11.2026 durch Kurt erfolgreich abgesendet**, Bestätigung im
+Screenshot „Ticket gesendet“. Weg in seiner Konsole: Konto verwalten → Hilfe →
+Supportteam kontaktieren → Google Play-Richtlinien → Google Play-Richtlinien →
+App/SerKal → Sonstiges Richtlinienproblem. Nach der KI-Empfehlung:
+„Nein, Support-Ticket erstellen“ und Wunsch nach einer Supportantwort.
+Kein Hilfe-Fragezeichen in seiner damaligen Kopfzeile vorhanden; keine erfundenen
+Menüpositionen ansagen. Nächste Klicks anhand seines tatsächlichen Bildschirms erklären.
+
+Inhalt des englischen Tickets: SerKal1.2.7/Code51, geschlossener Alpha-Test,
+dedizierter Prüferzugang durch Google-Kontosicherheit blockiert; Bitte um Abstimmung
+mit dem Reviewteam, einen verlässlichen Zugangsweg und Bestätigung, ob die laufende
+Prüfung betroffen war. Kein Passwort im Tickettext. Ticketnummer liegt hier nicht vor;
+Anhänge wurden im Text erwähnt, ihr tatsächlicher Upload ist nicht bestätigt.
+Keine zweite gleichlautende Anfrage erstellen.
+
+**Frist laut Versandbestätigung: Antwort per E-Mail innerhalb von zwei Arbeitstagen,
+in einzelnen Fällen länger.** Nicht mit zwei Kalendertagen gleichsetzen.
+Nächster Schritt bei Rückmeldung: vorhandenes Ticket gezielt lesen und den konkreten
+Supportvorschlag gemeinsam mit Kurt umsetzen. Keine automatische Postfachüberwachung
+oder Erinnerung wurde eingerichtet. Kurt hat sich zunächst für eine Pause verabschiedet.
+
+Die vorgeschaltete Play-Support-KI meldete mit Kontozugriff:
+Publishingstatus NO_CHANGES und Code51 **Fully rolled out** im geschlossenen Alpha-Test,
+keine Ablehnung. Das ist ein neuer Statushinweis gegenüber „Wird überprüft“ vom19.11.,
+aber noch kein unabhängig gelesener Release-Detailbeleg oder Claudias Geräteabnahme.
+Bei Bedarf gezielt in der Releaseansicht bestätigen, nicht weiter als sicher noch
+ungeprüft darstellen.
+
+Keine Telefonnummer/2FA entfernen, kein Passwort ändern und keinen Demo-Modus bauen
+allein aufgrund der bisherigen KI-Vorschläge. Entfernen einer Telefonnummer garantiert
+keine bestimmte Sicherheitsabfrage; ein simulierter Demo-Modus ist keine zugesicherte
+vollständige Play-Abnahme der echten Drive-/Kalenderfunktionen. Kontokonfiguration und
+App wurden in diesem Vorgang nicht durch CE verändert. Für einen echten Auftrag
+neuen Befund/Supportantwort verwenden, keine neue AAB allein aus diesem Ticket ableiten.
+
 ## 9. Erster Schritt am Samstag
 
 1. Aktuelles Brett auf neue Installer-/Testerantworten prüfen.
-2. Status von1.2.7 nicht erraten: zuletzt signiert/eingereicht, noch keine belegte Verfügbarkeit.
+2. Code51: Support-KI meldet am20.11. vollständig ausgerollt; Releaseansicht und reale Abnahme bei Bedarf bestätigen. Support-Ticket ist bereits gesendet, Antwort steht aus.
 3. Mit Kurt den dann aktuellen Einzelauftrag fortsetzen: dynamische Vollbildfläche oder
    konkrete neue Tester-/Play-Diagnose. Fehlende Informationen gezielt erheben.
 4. Nur betroffene Codepfade öffnen/testen; keine Versions-/Installer-/Archiv-Neuordnung
