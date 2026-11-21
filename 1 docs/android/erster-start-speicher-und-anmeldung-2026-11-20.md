@@ -1,9 +1,51 @@
 # SerKal Android – erster Start, Speicherorte und Google-Anmeldung
-Stand: 20.11.2026. Codeanalyse auf Kurts Auftrag, keine Änderung der App oder Nutzerdaten.
+Stand: Codeanalyse vom20.11.2026, Ergebnisnachtrag vom21.11.2026. Keine Änderung der App oder Nutzerdaten.
+
+## Nachtrag 21.11.2026: Thorstens Anmeldung funktioniert – Hilfshinweis
+
+**Ergebnis laut Thorstens Signal-Rückmeldung, von Kurt übermittelt:** SerKal auf
+seinem Tablet installiert und dort mit demselben Google-Konto verbunden. Das gelang;
+erst danach sah er SerKal im Google-Konto unter „Verknüpfte Apps“. Anschließend
+startete er SerKal auf dem bislang betroffenen Smartphone: kein erneuter Google-Dialog,
+seine Google-Adresse wurde unmittelbar angezeigt. **Sein konkreter Anmeldefall ist
+damit praktisch gelöst, ohne von uns nachgewiesene neue Codekorrektur.**
+
+### Hinweis für Nutzer (zur Übernahme in Programmhilfe/FAQ)
+
+Wenn die Google-Anmeldung auf einem Android-Gerät dauerhaft hängen bleibt und du
+ein zweites Android-Gerät besitzt, kannst du SerKal dort mit **demselben Google-Konto**
+verbinden und die benötigten Zugriffe bestätigen. Versuche anschließend den Start
+beziehungsweise die Verbindung auf dem ursprünglich betroffenen Gerät erneut.
+Bei einem Tester funktionierte danach auch die Anmeldung auf dem ersten Gerät.
+Das ist eine mögliche Ausweichlösung, keine garantierte Reparatur. Ein zweites Gerät
+ist keine Voraussetzung für SerKal; wenn keines vorhanden ist, bleibt der normale
+Support-/Diagnoseweg bestehen.
+
+### English help text
+
+If Google sign-in keeps getting stuck on one Android device and you have another
+Android device available, try connecting SerKal on that device using **the same Google
+account** and grant the requested permissions. Then try starting or connecting SerKal
+again on the original device. This resolved the issue for one tester. It is a possible
+workaround, not a guaranteed fix; owning a second device is not a requirement for SerKal.
+
+### Einordnung für CE und Nachfolger
+
+- Thorsten vermutet zu restriktive Google-Dienste-/Geräteeinstellungen am Smartphone.
+  Das ist seine Vermutung; die konkrete blockierende Einstellung ist nicht ermittelt.
+- Nicht behaupten, dass nach einer Freigabe automatisch jedes Gerät funktioniert.
+- Die Codeanalyse vom20.11. bleibt als Beschreibung der damaligen Quellen gültig;
+  ihre damalige Aussage „Fall noch offen / auf Log warten“ ist durch diesen Nachtrag überholt.
+- Kurt wünscht diesen Weg in den Hinweisen zum Programm. Text hier dokumentiert;
+  die Übernahme in ausgelieferte App-Hilfe beziehungsweise Website-FAQ ist ein Auftrag
+  an den jeweiligen Nachfolger und noch **nicht als veröffentlicht** bestätigt.
+- Diesen gelösten Fall nicht automatisch mit der früheren Bezeichnung Philipp oder
+  mit dem separaten Google-Play-Prüfkonto-Support-Ticket gleichsetzen.
 
 ## Geprüfte Fassungen und Reichweite
 
-Thorsten meldet das Problem nach Installation von Android1.2.6 weiterhin.
+Am20.11. meldete Thorsten das Problem nach Installation von Android1.2.6 weiterhin;
+am21.11. meldete er Erfolg über das zweite Gerät (siehe Nachtrag oben).
 Geprüfte1.2.6-Quelle: 2043721004a6bbba4faf1454a366c1c9e9d90608 (Code50 Edge).
 Vergleich1.2.7: 47f4e2240b089f8cc700f6706af388f2baed6a28 (Code51).
 MainActivity-Anmeldeblock sowie KeyCache, SharedKeyClient, AndroidArchiveSession,
@@ -195,8 +237,8 @@ Zwei tatsächlich erkennbare Kopplungen/Grenzen:
 
 MainActivity Menü > Log zeigt Auth-/Googlefehlerlog auch ohne archiveCopy an;
 mit Archivsession zusätzlich deren Sessionlog. Text ist auswählbar. Im geprüften
-Dialog existiert kein eigener Exportknopf. Thorsten muss zunächst seine bereits
-erhaltene Anfrage beantworten; nicht mit neuen Neuinstallationen bedrängen.
+Dialog existiert kein eigener Exportknopf. Für Thorstens inzwischen gelösten Fall
+ist keine erneute Loganforderung oder Neuinstallation allein aufgrund dieses Berichts nötig.
 Der frische Bericht ist mit Thorsten unterschrieben; frühere Philipp-Bezeichnung
 nicht ohne Klärung als dieselbe Person/Gerät ausgeben.
 
