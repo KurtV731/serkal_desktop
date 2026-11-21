@@ -1787,7 +1787,8 @@
     .maintenanceControls small { display: block; }
     .maintenanceReport ul { padding: 0; list-style: none; }
     .maintenanceReport li { padding: 9px 0; border-top: 1px solid currentColor; }
-    .archiveContinuation { white-space: nowrap; font-size: .85em; }
+    .archiveCaptions { min-width: 0; flex: 1; }
+    .archiveContinuation { display: block; font-size: .85em; }
 </style>
 
 
@@ -3906,6 +3907,11 @@ const I18N = {
     MAINT_DATE_ADDED: "Folgentermin ergänzt",
     MAINT_NO_RUN: "Starte die Wartung, um den ersten Bericht zu sehen.",
     MAINT_SERIES_ENDED: "Beendet",
+    ARCHIVE_SEASON_PLANNED: "Staffel geplant",
+    ARCHIVE_SEASON_RUNNING: "Staffel läuft",
+    ARCHIVE_SEASON_AIRED: "Staffel ausgestrahlt",
+    ARCHIVE_SEASON_UNDATED: "Staffeltermin offen",
+    ARCHIVE_SEASON_WATCHED: "Gesehen",
     MAINT_SERIES_PLANNED: "Folgestaffel geplant",
     MAINT_SERIES_UNKNOWN: "Fortsetzung unklar",
     MAINT_EXTRA_1: "Neue Staffeln sind Vorschläge; sie wurden nicht automatisch eingetragen.",
@@ -4135,6 +4141,11 @@ const I18N = {
     MAINT_DATE_ADDED: "Episode date added",
     MAINT_NO_RUN: "Run maintenance to see the first report.",
     MAINT_SERIES_ENDED: "Ended",
+    ARCHIVE_SEASON_PLANNED: "Season scheduled",
+    ARCHIVE_SEASON_RUNNING: "Season airing",
+    ARCHIVE_SEASON_AIRED: "Season aired",
+    ARCHIVE_SEASON_UNDATED: "Season date pending",
+    ARCHIVE_SEASON_WATCHED: "Watched",
     MAINT_SERIES_PLANNED: "Next season planned",
     MAINT_SERIES_UNKNOWN: "Continuation unclear",
     MAINT_EXTRA_1: "New seasons are suggestions; nothing was added automatically.",
@@ -6989,6 +7000,23 @@ function toggleWatched_(it) {
   return {seen:seen};
 }
 
+function archiveSeriesKey_(entry) {
+  if (entry.tmdbId) return 'tmdb:' + entry.tmdbId;
+  return entry.fileName ? 'file:' + entry.fileName : '';
+}
+
+function archiveSeasonNumber_(entry) {
+  return Number(entry.staffelNummer || String(entry.seasonLabel || entry.staffelLabel || '').replace(/\D/g,''));
+}
+
+function archiveContinuationKey_(entry, status, seriesWithFutureSeasons) {
+  if (status === 1) return archiveSeasonNumber_(entry) > 1 ? 'MAINT_SERIES_PLANNED' : 'ARCHIVE_SEASON_PLANNED';
+  if (seriesWithFutureSeasons.has(archiveSeriesKey_(entry))) return 'MAINT_SERIES_PLANNED';
+  if (entry.continuationStatus === 'ended') return 'MAINT_SERIES_ENDED';
+  if (entry.continuationStatus === 'planned') return 'MAINT_SERIES_PLANNED';
+  return 'MAINT_SERIES_UNKNOWN';
+}
+
 function renderArchivList() {
   archivList.innerHTML = '';
 
@@ -7042,6 +7070,10 @@ function renderArchivList() {
     uiResetDetails_();
     return;
   }
+
+  const seriesWithFutureSeasons = new Set(arr.filter(entry =>
+    statusValueFromAny_(entry) === 1 && archiveSeasonNumber_(entry) > 1)
+    .map(archiveSeriesKey_).filter(Boolean));
 
   sorted.forEach((it, idx) => {
     const div = document.createElement('div');
@@ -7110,13 +7142,17 @@ function renderArchivList() {
       meta.appendChild(symSpan);
     }
 
-    const continuation = document.createElement('span');
-    continuation.className = 'archiveContinuation';
-    const continuationKey = it.continuationStatus === 'ended' ? 'MAINT_SERIES_ENDED' :
-      it.continuationStatus === 'planned' ? 'MAINT_SERIES_PLANNED' : 'MAINT_SERIES_UNKNOWN';
-    continuation.textContent = t(continuationKey);
-    row.appendChild(titleEl);
-    meta.prepend(continuation);
+    const continuationKey = archiveContinuationKey_(it,st,seriesWithFutureSeasons);
+    const seasonKey = {0:'ARCHIVE_SEASON_UNDATED',2:'ARCHIVE_SEASON_RUNNING',3:'ARCHIVE_SEASON_AIRED'}[st];
+    const captions = document.createElement('div');
+    captions.className = 'archiveCaptions';
+    captions.append(titleEl);
+    const season = document.createElement('small');
+    season.className = 'archiveContinuation';
+    season.textContent = (seasonKey ? t(seasonKey) + ' · ' : st === 4 ? t('ARCHIVE_SEASON_WATCHED') + ' · ' : '') +
+      t(continuationKey);
+    captions.append(season);
+    row.appendChild(captions);
     row.appendChild(meta);
     div.appendChild(row);
 
