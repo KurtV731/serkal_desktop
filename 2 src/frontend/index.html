@@ -1789,6 +1789,7 @@
     .maintenanceReport li { padding: 9px 0; border-top: 1px solid currentColor; }
     .archiveCaptions { min-width: 0; flex: 1; }
     .archiveContinuation { display: block; font-size: .85em; }
+    .archivePressStatus { margin-top: 3px; }
 </style>
 
 
@@ -3893,6 +3894,19 @@ const I18N = {
     TT_SORT_ALPHA: 'Sortierung: Alphabetisch (A–Z) – klicken für Datum',
     TT_SORT_DATE: 'Sortierung: Startdatum (neu→alt) – klicken für A–Z',
     MAINT_EXTRA_0: "Ergebnis der Wartung",
+    MAINT_INTENSIVE: "Intensiv Analyse",
+    PRESS_LOADING: "Serienjunkies wird geprüft: {done} von {total} Listen",
+    PRESS_RESULT: "{matched} Serien gefunden. {saved} Archiveinträge aktualisiert.",
+    PRESS_FAILED: "{failed} von {checked} Listen konnten nicht gelesen werden. Die bisherigen Vermerke bleiben erhalten.",
+    PRESS_SAVE_FIRST: "Bitte zuerst die offenen Archivänderungen speichern.",
+    PRESS_EDIT: "Fortsetzungsvermerk bearbeiten",
+    MAINT_PRESS_APPLY: "Übernehmen",
+    PRESS_SOURCE: "Meldung bei Serienjunkies öffnen",
+    PRESS_AUTO: "Automatisch (Serienjunkies)",
+    PRESS_MANUAL: "Manuell",
+    PRESS_RENEWED: "V · Verlängert",
+    PRESS_CANCELED: "A · Abgesetzt / nicht verlängert",
+    PRESS_NO_HIT: "Keine Meldung gespeichert",
     MAINT_LATEST: "Aktuelle Wartung",
     MAINT_PREVIOUS: "Vorherige Wartung",
     MAINT_NO_TIME: "Laufzeitpunkt nicht gespeichert",
@@ -4128,6 +4142,19 @@ const I18N = {
     TT_SORT_ALPHA: 'Sorting: Alphabetical (A–Z) – click for Date',
     TT_SORT_DATE: 'Sorting: Start date (new→old) – click for A–Z',
     MAINT_EXTRA_0: "Maintenance results",
+    MAINT_INTENSIVE: "Intensive analysis",
+    PRESS_LOADING: "Checking Serienjunkies: {done} of {total} lists",
+    PRESS_RESULT: "Found {matched} series. Updated {saved} archive entries.",
+    PRESS_FAILED: "Could not read {failed} of {checked} lists. Existing reports were kept.",
+    PRESS_SAVE_FIRST: "Please save pending archive changes first.",
+    PRESS_EDIT: "Edit renewal or cancellation",
+    MAINT_PRESS_APPLY: "Apply",
+    PRESS_SOURCE: "Open report on Serienjunkies",
+    PRESS_AUTO: "Automatic (Serienjunkies)",
+    PRESS_MANUAL: "Manual",
+    PRESS_RENEWED: "V · Renewed",
+    PRESS_CANCELED: "A · Canceled / not renewed",
+    PRESS_NO_HIT: "No report saved",
     MAINT_LATEST: "Latest maintenance",
     MAINT_PREVIOUS: "Previous maintenance",
     MAINT_NO_TIME: "Run time unavailable",
@@ -5396,6 +5423,7 @@ const I18N_MAP = [
   { sel: '#btnAppMenuClose', text:'APP_MENU_CLOSE' },
   { sel: '#btnMaintenanceLast', text:'MAINT_EXTRA_0' },
   { sel: '#btnMaintenanceOutlook', text:'MAINT_OUTLOOK' },
+  { sel: '#btnIntensiveAnalysis', text:'MAINT_INTENSIVE' },
   { sel: '#btnArchiveSync', text: 'BTN_ARCHIVE_SYNC' },
   { sel: '#btnArchiveReload', text: 'BTN_ARCHIVE_RELOAD', attr: { title: 'TT_ARCHIVE_RELOAD', 'aria-label': 'TT_ARCHIVE_RELOAD' } },
   { sel: '#btnSortToggle',                     attr: { title: 'TT_SORT_SWITCH' } },
@@ -7020,6 +7048,100 @@ function archiveContinuationKey_(entry, status, seriesWithFutureSeasons) {
   return 'MAINT_SERIES_UNKNOWN';
 }
 
+function pressStatusLabel_(code) {
+  return t(code === 'A' ? 'PRESS_CANCELED' : 'PRESS_RENEWED');
+}
+
+function showPressEditor_(entry, related) {
+  const dialog = document.createElement('dialog');
+  dialog.className = 'maintenanceReport';
+  const heading = document.createElement('h2');
+  heading.textContent = buildTitle_(entry);
+  const source = document.createElement('p');
+  source.textContent = entry.pressStatus
+    ? pressStatusLabel_(entry.pressStatus.code) + ' · Serienjunkies · ' + entry.pressStatus.date
+    : t('PRESS_NO_HIT');
+  const label = document.createElement('label');
+  label.textContent = t('PRESS_EDIT') + ' ';
+  const select = document.createElement('select');
+  for (const [value,caption] of [['',t('PRESS_AUTO')],['V',pressStatusLabel_('V')],['A',pressStatusLabel_('A')]]) {
+    select.add(new Option(caption,value));
+  }
+  select.value = entry.pressOverride || '';
+  label.append(select);
+  const actions = document.createElement('div');
+  actions.className = 'maintenanceControls';
+  const apply = document.createElement('button');
+  apply.textContent = t('MAINT_PRESS_APPLY');
+  apply.addEventListener('click',()=>{
+    if ((entry.pressOverride || '') !== select.value) {
+      for (const item of related) {
+        item.pressOverride = select.value;
+        setDirtyForEntry_(item,{pressOverride:select.value});
+      }
+      renderArchivList();
+    }
+    dialog.close();
+  });
+  const close = document.createElement('button');
+  close.textContent = t('MAINT_EXTRA_11');
+  close.onclick = ()=>dialog.close();
+  actions.append(apply,close);
+  if (entry.pressStatus?.url) {
+    const open = document.createElement('button');
+    open.textContent = t('PRESS_SOURCE');
+    open.onclick = ()=>window.serkal.maintenance.pressSource(entry.pressStatus.url);
+    actions.append(open);
+  }
+  dialog.append(heading,source,label,actions);
+  dialog.addEventListener('close',()=>dialog.remove(),{once:true});
+  document.body.append(dialog);
+  dialog.showModal();
+}
+
+async function runIntensiveAnalysis_() {
+  if (state.busy) return;
+  if (state.isDirty) {
+    uiStatus(t('PRESS_SAVE_FIRST'),{kind:'info'});
+    return;
+  }
+  uiSetBusy_(true);
+  const dialog = document.createElement('dialog');
+  dialog.className = 'maintenanceReport';
+  const heading = document.createElement('h2');
+  heading.textContent = t('MAINT_INTENSIVE');
+  const message = document.createElement('p');
+  message.setAttribute('aria-live','polite');
+  message.textContent = t('PRESS_LOADING',{done:0,total:(new Date().getFullYear()-2007)*2});
+  const close = document.createElement('button');
+  close.textContent = t('MAINT_EXTRA_11');
+  close.disabled = true;
+  close.onclick = ()=>dialog.close();
+  dialog.addEventListener('cancel',event=>{ if (close.disabled) event.preventDefault(); });
+  dialog.addEventListener('close',()=>dialog.remove(),{once:true});
+  dialog.append(heading,message,close);
+  document.body.append(dialog);
+  dialog.showModal();
+  const stop = window.serkal.maintenance.onIntensiveProgress(progress=>{
+    message.textContent = t('PRESS_LOADING',progress);
+  });
+  let refresh = false;
+  try {
+    const result = await window.serkal.maintenance.intensive();
+    message.textContent = result.ok ? t('PRESS_RESULT',{matched:result.matched,saved:result.savedCount}) :
+      result.failed ? t('PRESS_FAILED',result) : result.message || t('MAINT_FAILED');
+    refresh = result.ok && result.savedCount > 0;
+  } catch (_) {
+    message.textContent = t('MAINT_FAILED');
+  } finally {
+    stop();
+    uiSetBusy_(false);
+    close.disabled = false;
+    close.focus();
+  }
+  if (refresh) loadArchiv();
+}
+
 function renderArchivList() {
   archivList.innerHTML = '';
 
@@ -7155,6 +7277,20 @@ function renderArchivList() {
     season.textContent = (seasonKey && (st !== 1 || ['MAINT_SERIES_CANCELED','MAINT_SERIES_ENDED'].includes(continuationKey)) ? t(seasonKey) + ' · ' : st === 4 ? t('ARCHIVE_SEASON_WATCHED') + ' · ' : '') +
       t(continuationKey);
     captions.append(season);
+    const press = document.createElement('button');
+    press.type = 'button';
+    press.className = 'btnSmall archivePressStatus';
+    const pressCode = it.pressOverride || it.pressStatus?.code;
+    press.textContent = pressCode ? pressStatusLabel_(pressCode) + ' · ' +
+      (it.pressOverride ? t('PRESS_MANUAL') : 'Serienjunkies') : t('PRESS_EDIT');
+    press.title = t('PRESS_EDIT');
+    press.addEventListener('keydown',event=>event.stopPropagation());
+    press.addEventListener('click',event=>{
+      event.stopPropagation();
+      const key = archiveSeriesKey_(it);
+      if (!state.busy) showPressEditor_(it,key ? arr.filter(entry=>archiveSeriesKey_(entry) === key) : [it]);
+    });
+    captions.append(press);
     row.appendChild(captions);
     row.appendChild(meta);
     div.appendChild(row);
@@ -9353,6 +9489,12 @@ if(btnWartung && window.serkal && window.serkal.maintenance){
   outlook.textContent=t('MAINT_OUTLOOK');
   outlook.onclick=async()=>showMaintenanceReport_(await window.serkal.maintenance.last(),'outlook');
   last.insertAdjacentElement('afterend',outlook);
+  const intensive=document.createElement('button');
+  intensive.id='btnIntensiveAnalysis';
+  intensive.className='btnSmall';
+  intensive.textContent=t('MAINT_INTENSIVE');
+  intensive.onclick=runIntensiveAnalysis_;
+  outlook.insertAdjacentElement('afterend',intensive);
 }
 
 if (btnCalendarDock) btnCalendarDock.addEventListener('click', function(){ try { uiLogAction_(t('LOG_CALENDAR_OPENED'), {}); } catch (_eAction) {} openCalendarFromDock_(); });

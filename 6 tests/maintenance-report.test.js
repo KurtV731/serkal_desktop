@@ -41,3 +41,20 @@ assert.equal(outlook(tracked,{ok:true,tv:{status:'Returning Series',seasons:[{se
 assert.equal(outlook(tracked,{ok:true,tv:{status:'Ended'}},'2026-11-21').status,'ended');
 assert.equal(outlook(tracked,{ok:true,tv:{status:'Canceled'}},'2026-11-21').status,'canceled');
 console.log('Maintenance outlook: known episodes, added dates, real extra episodes, confirmed sequel and unknown dates: OK');
+
+const press = require('../2 src/common/serienjunkies-status');
+function pressFixture(heading,day,title,series) {
+    return `<h1>${heading}</h1><table><tr><td><strong><a href="/${series}/">${title}</a></strong>
+        <p>Am Freitag, ${day} wurde bekannt. <a href="/news/status-123.html">Meldung</a></p></td></tr></table>`;
+}
+const renewed = press.parse(pressFixture('Verlängerte Serien','5. Mai 2011','A &amp; B','a-und-b'),'V',2011);
+const canceled = press.parse(pressFixture('Abgesetzte Serien','12. Juni 2018','A &amp; B','a-und-b'),'A',2018);
+const seriesEntry = [{title:'Übersetzung',titleEN:'A & B',year:2009,tmdbId:21},{title:'Übersetzung',year:2009,tmdbId:21}];
+assert.deepEqual(press.match(seriesEntry,[...canceled,...renewed]).map(hit=>hit.code),['A','A']);
+assert.equal(press.match([{...seriesEntry[0],year:2020}],[...renewed,...canceled])[0],null);
+assert.deepEqual(press.match([{title:'A & B',tmdbId:21},{title:'A & B',tmdbId:22}],canceled),[null,null]);
+assert.equal(press.match(seriesEntry,[...canceled,{...renewed[0],date:'2021-03-21'}])[0].code,'V');
+assert.equal(press.match(seriesEntry,[...canceled,{...renewed[0],date:canceled[0].date}])[0],null);
+assert.equal(press.match(seriesEntry,[...canceled,{...renewed[0],series:'/remake/'}])[0],null);
+assert.throws(()=>press.parse('<h1>Wartung</h1>','A',2018),/Unexpected list heading/);
+console.log('Serienjunkies: date and title parsing, series aliases, newest report, ambiguity and remakes passed');

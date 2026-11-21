@@ -81,6 +81,13 @@ contextBridge.exposeInMainWorld("serkal", {
     },
     maintenance:{
         last:()=>ipcRenderer.invoke("serkal:maintenance:last"),
+        intensive:()=>ipcRenderer.invoke("serkal:maintenance:intensive"),
+        pressSource:url=>ipcRenderer.invoke("serkal:maintenance:pressSource",url),
+        onIntensiveProgress:callback=>{
+            const listener = (_event,progress)=>callback(progress);
+            ipcRenderer.on("serkal:maintenance:intensiveProgress",listener);
+            return ()=>ipcRenderer.removeListener("serkal:maintenance:intensiveProgress",listener);
+        },
         status:()=>ipcRenderer.invoke("serkal:maintenance:status"),
         run:options=>ipcRenderer.invoke("serkal:maintenance:run",options||{})
     }

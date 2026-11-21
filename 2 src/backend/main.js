@@ -655,6 +655,8 @@ function archiveEntryFromLine_(fileName, stats, line) {
         announcements:require(path.join(__dirname,"../common/watch-providers")).parse(archiveDecode_(archiveField_(line,"announcements")))||[],
         announcementOnly,
         continuationStatus:archiveField_(line,"continuationStatus"),
+        pressStatus:require(path.join(__dirname,"../common/watch-providers")).parse(archiveDecode_(archiveField_(line,"pressStatus"))),
+        pressOverride:archiveField_(line,"pressOverride"),
         calendarLanguage:archiveField_(line,"calendarLanguage")||"de",
         watchProviders:require(path.join(__dirname,"../common/watch-providers")).parse(archiveDecode_(archiveField_(line,"watchProviders"))),
         providerText:require(path.join(__dirname,"../common/watch-providers")).text(require(path.join(__dirname,"../common/watch-providers")).parse(archiveDecode_(archiveField_(line,"watchProviders"))),noteText,activeLanguage_==="en"),
@@ -760,7 +762,7 @@ function archiveInsert_(payload) {
         if (oldNote) parts.push("note="+oldNote);
         parts.push("flags="+flags);
         if (manualFlags) parts.push("manualFlags="+manualFlags);
-        for (const field of ["watchProviders","titleDE","titleEN","announcements","continuationStatus","calendarLanguage","seen","buttonPressed"]) { const old=archiveField_(oldLine,field); if(old)parts.push(field+"="+old); }
+        for (const field of ["watchProviders","titleDE","titleEN","announcements","continuationStatus","pressStatus","pressOverride","calendarLanguage","seen","buttonPressed"]) { const old=archiveField_(oldLine,field); if(old)parts.push(field+"="+old); }
         if(provisional){
             const parsed=require(path.join(__dirname,"../common/watch-providers")).parse(archiveDecode_(archiveField_(oldLine,"announcements")));
             const list=Array.isArray(parsed)?parsed:[];
@@ -999,6 +1001,14 @@ async function archiveSaveChanges_(dirtyMap) {
                 const previousEntry = archiveEntryFromLine_(fileName, fs.statSync(fullPath), line);
                 if (Object.prototype.hasOwnProperty.call(patch, "seen")) {
                     line = archiveSetField_(line, "seen", Number(patch.seen) === 1 ? "1" : "0");
+                }
+                if (["A","V",""].includes(patch.pressOverride)) {
+                    line = archiveSetField_(line,"pressOverride",patch.pressOverride);
+                }
+                if (patch.pressStatus && ["A","V"].includes(patch.pressStatus.code) &&
+                    /^\d{4}-\d{2}-\d{2}$/.test(patch.pressStatus.date) &&
+                    serienjunkiesUrl_(patch.pressStatus.url)) {
+                    line = archiveSetField_(line,"pressStatus",archiveEncode_(JSON.stringify(patch.pressStatus)));
                 }
                 if (Object.prototype.hasOwnProperty.call(patch, "note")) {
                     const noteText = String(patch.note || "");
@@ -3767,6 +3777,40 @@ function archiveWriteHandler_(channel, handler) {
     });
 }
 
+function serienjunkiesUrl_(url) {
+    return typeof url === "string" && /^https:\/\/www\.serienjunkies\.de\/(?:news\/[a-z\d/_%-]+\.html|serien\/(?:abgesetzt|verlaengert)\/\d{4}\.html)$/i.test(url);
+}
+
+async function intensiveAnalysis_(sender) {
+    const loaded = archiveLoad_();
+    if (!loaded.ok) return loaded;
+    const provider = require(path.join(__dirname,"../common/serienjunkies-status"));
+    const scanned = await provider.scan(async url => {
+        const response = await fetch(url,{signal:AbortSignal.timeout(12000)});
+        if (!response.ok) throw new Error(String(response.status));
+        return response.text();
+    },new Date().getFullYear(),(done,total) => {
+        if (!sender.isDestroyed()) sender.send("serkal:maintenance:intensiveProgress",{done,total});
+    });
+    if (scanned.errors.length) return {ok:false,failed:scanned.errors.length,checked:scanned.checked};
+
+    const entries = loaded.daten.entries;
+    const matches = provider.match(entries,scanned.records);
+    const series = new Set();
+    const patches = [];
+    entries.forEach((entry,index) => {
+        const hit = matches[index];
+        if (!hit) return;
+        series.add(entry.tmdbId ? "tmdb:" + entry.tmdbId : "file:" + entry.fileName);
+        if (entry.pressStatus?.date > hit.date || JSON.stringify(entry.pressStatus) === JSON.stringify(hit)) return;
+        patches.push({fileName:entry.fileName,staffelLabel:entry.staffelLabel,pressStatus:hit});
+    });
+    const saved = await archiveSaveChanges_(patches);
+    if (saved.ok && saved.savedCount) scheduleSharedArchive_();
+    return {ok:saved.ok,message:saved.message,checked:scanned.checked,
+        matched:series.size,savedCount:saved.savedCount || 0};
+}
+
 function installIpc_() {
     ipcMain.handle("serkal:app:close", event => { const win=BrowserWindow.fromWebContents(event.sender); if(win && win===serkalMainWindow_)win.close(); });
     ipcMain.handle("serkal:settings:get", () => readSettings_());
@@ -3864,6 +3908,10 @@ function installIpc_() {
     });
     ipcMain.handle("serkal:maintenance:status", () => maintenanceGetStatus_());
     ipcMain.handle("serkal:maintenance:last", maintenanceLast_);
+    archiveWriteHandler_("serkal:maintenance:intensive", event => intensiveAnalysis_(event.sender));
+    ipcMain.handle("serkal:maintenance:pressSource", (_event,url) => {
+        if (serienjunkiesUrl_(url)) return shell.openExternal(url);
+    });
     archiveWriteHandler_("serkal:maintenance:run", async (_event,options) => { const result=await maintenanceRun_(options||{}); if(result && result.ok) scheduleSharedArchive_(); return result; });
     ipcMain.handle("serkal:calendar:createIcs", async (_event, payload) => {
         if(sessionTest_)return {ok:false,message:'Calendar export is disabled in the isolated archive test.'};
