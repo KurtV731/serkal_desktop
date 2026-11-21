@@ -1,6 +1,6 @@
 # CE SerKal – kompakte Übergabe November 2026
 
-Stand: 20.11.2026 · Nachfolge von Kurt für Samstag, **21.11.2026**, vorbereitet.
+Stand: 21.11.2026 · Nachfolge von Kurt für Samstag, **21.11.2026**, vorbereitet.
 Gilt ausschließlich für **SerKal Desktop und Android**. HASA hat einen eigenen CE;
 Installer3 und Website haben eigene Zuständigkeiten. Kein gemeinsamer Neubeginn.
 
@@ -221,12 +221,24 @@ Dies ist die gewünschte Reihenfolge der zusätzlichen Plattformen, kein Auftrag
 den laufenden Android-Test abzubrechen oder sofort beide Portierungen gleichzeitig
 zu beginnen. Der Nachfolger soll diese Planung aktiv mitnehmen.
 
-**Neue Testerantwort vom20.11.:** Thorsten meldet erfolgreiche Installation von1.2.6,
-aber identisches Google-Anmeldeverhalten wie unter1.2.4. Kein behobener Loginfall.
-Kurt hat ihn bereits angeschrieben; Antwort/Log kann dauern, SerKal hat für den Tester
-nicht höchste Priorität. Nicht ständig neue Versuche verlangen. Seine Nachricht ist
-mit Thorsten unterschrieben; nicht ungeprüft mit der bisherigen Bezeichnung Philipp
-gleichsetzen. Logtext oder letzte Meldung genügt, Signal-Screenshot ist nicht nötig.
+**Thorsten: am21.11.2026 praktisch gelöst.** Er verband SerKal erfolgreich auf seinem
+Tablet mit demselben Google-Konto. Danach erschien SerKal unter „Verknüpfte Apps“;
+anschließend zeigte auch das bislang blockierte Smartphone direkt seine Google-Adresse,
+ohne erneuten Google-Dialog. Keine neue Codekorrektur als Ursache behaupten.
+Er vermutet zu restriktive Google-Dienste-Einstellungen am Handy; konkrete Ursache
+unbestätigt. Keine weiteren Logs/Neuinstallationen für diesen gelösten Fall verlangen.
+Nicht ungeprüft mit der früheren Bezeichnung Philipp gleichsetzen.
+
+**Auftrag von Kurt für die Hinweise zum Programm:** Den zweiten Android-Anmeldeweg
+mit demselben Konto als mögliche Ausweichlösung in App-Hilfe/FAQ aufnehmen, inklusive
+DE/EN-Text im [Ergebnisnachtrag der Codekarte](android/erster-start-speicher-und-anmeldung-2026-11-20.md).
+Kein zweites Gerät zur Pflicht machen, keine Erfolgsgarantie für alle Geräte.
+Dokumentiert, noch keine ausgelieferte App-/Websitehilfe geändert.
+Das separate Play-Prüfkonto-Support-Ticket bleibt bestehen.
+
+Kurt verabschiedet den bisherigen CE am21.11. in den „CE-SerKal Rentner – Nov.2026“;
+der laufende Entwicklungsauftrag geht an den Nachfolger, der alte Chat bleibt für
+historische Rückfragen erhalten.
 
 ### F – Weitere Pflege, nicht alles gleichzeitig anfangen
 
