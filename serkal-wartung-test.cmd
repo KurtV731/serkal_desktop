@@ -35,16 +35,22 @@ if "%SERKAL_WARTUNG_DEPS%"=="%SERKAL_WARTUNG_INSTALLED%" goto launch
 
 :install
 call npm ci --no-audit --no-fund
-if errorlevel 1 goto failed
-if not exist "%SERKAL_WARTUNG_ELECTRON%" goto failed
+if errorlevel 1 goto npm_failed
+if not exist "%SERKAL_WARTUNG_ELECTRON%" (
+    echo Lade das Electron-Programm fuer den Wartungstest ...
+    node "node_modules\electron\install.js"
+    if errorlevel 1 goto electron_failed
+)
+if not exist "%SERKAL_WARTUNG_ELECTRON%" goto electron_failed
 >"node_modules\.serkal-wartung-lock" echo %SERKAL_WARTUNG_DEPS%
 
 :launch
 set "SERKAL_WARTUNG_TARGET=%SERKAL_WARTUNG_DIR%"
 call :oauth
 if errorlevel 1 goto oauth_missing
-start "" /wait "%SERKAL_WARTUNG_ELECTRON%" "%CD%"
-if errorlevel 1 goto failed
+echo Starte SerKal-Wartungstest ...
+start "" /wait "%SERKAL_WARTUNG_DIR%\%SERKAL_WARTUNG_ELECTRON%" "%SERKAL_WARTUNG_DIR%"
+if errorlevel 1 goto launch_failed
 popd
 exit /b 0
 
@@ -68,6 +74,18 @@ exit /b 1
 echo Fuer diesen Start werden Git und Node.js mit npm benoetigt.
 pause
 exit /b 1
+
+:npm_failed
+echo npm konnte die Pakete fuer den Wartungstest nicht installieren.
+goto failed
+
+:electron_failed
+echo Electron konnte nicht heruntergeladen werden oder electron.exe fehlt.
+goto failed
+
+:launch_failed
+echo Electron wurde gefunden, aber der SerKal-Prozess meldet einen Startfehler.
+goto failed
 
 :failed
 echo Der Wartungstest konnte nicht starten. Bitte dieses Fenster fuer die Fehlermeldung offen lassen.
