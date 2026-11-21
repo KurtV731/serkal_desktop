@@ -40,13 +40,27 @@ if not exist "%SERKAL_WARTUNG_ELECTRON%" goto failed
 >"node_modules\.serkal-wartung-lock" echo %SERKAL_WARTUNG_DEPS%
 
 :launch
+set "SERKAL_WARTUNG_TARGET=%SERKAL_WARTUNG_DIR%"
+call :oauth
+if errorlevel 1 goto oauth_missing
 start "" /wait "%SERKAL_WARTUNG_ELECTRON%" "%CD%"
 if errorlevel 1 goto failed
 popd
 exit /b 0
 
 :running
-echo Der SerKal-Wartungstest laeuft noch. Bitte SerKal normal beenden und diesen Starter erneut anklicken.
+set "SERKAL_WARTUNG_TARGET=%SERKAL_WARTUNG_DIR%"
+if exist "%SERKAL_WARTUNG_DIR%\%SERKAL_WARTUNG_ELECTRON%" call :oauth
+set "SERKAL_WARTUNG_TARGET=%SERKAL_WARTUNG_ALT%"
+if exist "%SERKAL_WARTUNG_ALT%\%SERKAL_WARTUNG_ELECTRON%" call :oauth
+if not defined SERKAL_WARTUNG_OAUTH_READY goto oauth_missing
+echo Google-Konfiguration ist bereit. Bitte zur offenen SerKal-Sitzung wechseln und Beenden mit Speichern erneut versuchen.
+pause
+exit /b 0
+
+:oauth_missing
+echo Die Google-Konfiguration der installierten SerKal-Version wurde nicht gefunden.
+echo Falls SerKal noch offen ist, bitte geoeffnet lassen.
 pause
 exit /b 1
 
@@ -59,3 +73,9 @@ exit /b 1
 echo Der Wartungstest konnte nicht starten. Bitte dieses Fenster fuer die Fehlermeldung offen lassen.
 pause
 exit /b 1
+
+:oauth
+powershell.exe -NoProfile -NonInteractive -Command "$ErrorActionPreference='Stop'; $name='google_oauth_client.json'; $target=Join-Path (Join-Path $env:SERKAL_WARTUNG_TARGET 'node_modules\electron\dist\resources') $name; if(Test-Path -LiteralPath $target -PathType Leaf){exit 0}; $sources=@($env:SERKAL_GOOGLE_OAUTH_FILE,(Join-Path $env:LOCALAPPDATA ('serkal_private\'+$name)),('C:\serkal_dev\serkal_private\'+$name)); $roots=@($env:LOCALAPPDATA,$env:ProgramFiles,${env:ProgramFiles(x86)}) | Where-Object { $_ }; foreach($root in $roots){$folders=Get-ChildItem -LiteralPath $root -Directory -Filter '*SerKal*' -ErrorAction SilentlyContinue | Where-Object { $_.Name -notlike 'SerKal-Wartungstest*' }; foreach($folder in $folders){$sources+=Join-Path $folder.FullName ('resources\'+$name); $sources+=Get-ChildItem -LiteralPath $folder.FullName -Directory -Filter 'app-*' -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending | ForEach-Object { Join-Path $_.FullName ('resources\'+$name) } }}; $ws=New-Object -ComObject WScript.Shell; foreach($place in @('Desktop','CommonDesktopDirectory','StartMenu','CommonStartMenu')){$directory=[Environment]::GetFolderPath($place); if($directory){$links=Get-ChildItem -LiteralPath $directory -Filter '*SerKal*.lnk' -File -Recurse -ErrorAction SilentlyContinue; foreach($link in $links){$exe=$ws.CreateShortcut($link.FullName).TargetPath; if($exe){$sources+=Join-Path (Split-Path -Parent $exe) ('resources\'+$name)}}}}; foreach($source in $sources){if($source -and (Test-Path -LiteralPath $source -PathType Leaf)){try{$json=Get-Content -LiteralPath $source -Raw | ConvertFrom-Json; $config=$json.installed; if(-not $config){$config=$json.web}; if(-not $config){$config=$json}; if($config.client_id){$null=New-Item -ItemType Directory -Force -Path (Split-Path -Parent $target); Copy-Item -LiteralPath $source -Destination $target; exit 0}}catch{}}}; exit 1"
+if errorlevel 1 exit /b 1
+set "SERKAL_WARTUNG_OAUTH_READY=1"
+exit /b 0
