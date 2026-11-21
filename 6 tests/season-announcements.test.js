@@ -31,4 +31,4 @@ const s1={seasonLabel:'S01',announcements:placeholder.announcements};
 assert.equal(ui.archiveAnnouncementForSeason_(s1),undefined);
 assert.equal(ui.archiveDateCaption_(s1,'22.08.2023'),'22.08.2023');
 assert.equal(ui.archiveAnnouncementForSeason_(placeholder).date,'2027-01-19');
-assert.equal(ui.archiveDateCaption_(placeholder,'19.01.2027'),'19.01.2027 (?)');
+assert.equal(ui.archiveDateCaption_(placeholder,'19.01.2027'),'19.01.2027');

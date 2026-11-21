@@ -654,6 +654,7 @@ function archiveEntryFromLine_(fileName, stats, line) {
         descEN:archiveDecode_(archiveField_(line,"descEN") || archiveField_(line,"ov_en")),
         announcements:require(path.join(__dirname,"../common/watch-providers")).parse(archiveDecode_(archiveField_(line,"announcements")))||[],
         announcementOnly,
+        continuationStatus:archiveField_(line,"continuationStatus"),
         calendarLanguage:archiveField_(line,"calendarLanguage")||"de",
         watchProviders:require(path.join(__dirname,"../common/watch-providers")).parse(archiveDecode_(archiveField_(line,"watchProviders"))),
         providerText:require(path.join(__dirname,"../common/watch-providers")).text(require(path.join(__dirname,"../common/watch-providers")).parse(archiveDecode_(archiveField_(line,"watchProviders"))),noteText,activeLanguage_==="en"),
@@ -759,7 +760,7 @@ function archiveInsert_(payload) {
         if (oldNote) parts.push("note="+oldNote);
         parts.push("flags="+flags);
         if (manualFlags) parts.push("manualFlags="+manualFlags);
-        for (const field of ["watchProviders","titleDE","titleEN","announcements","calendarLanguage","seen","buttonPressed"]) { const old=archiveField_(oldLine,field); if(old)parts.push(field+"="+old); }
+        for (const field of ["watchProviders","titleDE","titleEN","announcements","continuationStatus","calendarLanguage","seen","buttonPressed"]) { const old=archiveField_(oldLine,field); if(old)parts.push(field+"="+old); }
         if(provisional){
             const parsed=require(path.join(__dirname,"../common/watch-providers")).parse(archiveDecode_(archiveField_(oldLine,"announcements")));
             const list=Array.isArray(parsed)?parsed:[];
@@ -3323,7 +3324,7 @@ async function maintenanceSyncCalendar_(operation) {
 }
 
 async function maintenanceApplyOperations_(operations) {
-    const result = { changedFiles:new Set(), created:0, updated:0, removed:0, protected:0, skipped:0, errors:[] };
+    const result = { changedFiles:new Set(), appliedKeys:new Set(), created:0, updated:0, removed:0, protected:0, skipped:0, errors:[] };
     for (const operation of Array.isArray(operations) ? operations : []) {
         const snapshot = maintenanceArchiveSnapshot_(operation);
         try {
@@ -3340,6 +3341,7 @@ async function maintenanceApplyOperations_(operations) {
                 continue;
             }
             result.changedFiles.add(operation.fileName);
+            result.appliedKeys.add(operation.key);
             result.created += Number(calendar && calendar.created || 0);
             result.updated += Number(calendar && calendar.updated || 0);
             result.removed += Number(calendar && calendar.removed || 0);
@@ -3493,6 +3495,7 @@ function maintenanceWriteProviders_(groups,snapshot) {
     const corrections=[];
     for(const group of groups){
         const record=snapshot.get(String(group.tmdbId));if(!record || !record.ok)continue;
+        const continuation = require(path.join(__dirname,"../common/maintenance-report")).outlook(group,record).status;
         const announcementUpdate=require(path.join(__dirname,"../common/season-announcements")).update(group,record,undefined,activeLanguage_);
         for(const [number,value] of Object.entries(record.seasons||{})){
             const n=Number(number);
@@ -3510,6 +3513,7 @@ function maintenanceWriteProviders_(groups,snapshot) {
             const text=writes.has(file)?writes.get(file):fs.readFileSync(file,"utf8");
             const lines=text.split(/\r?\n/).map(line=>{
                 if(Number(archiveField_(line,"tmdb"))!==group.tmdbId)return line;
+                line=archiveSetField_(line,"continuationStatus",continuation);
                 line=archiveSetField_(line,"announcements",archiveEncode_(JSON.stringify(announcementUpdate.announcements)));
                 if(archiveField_(line,"announcementOnly")==="1"){
                     const own=announcementUpdate.announcements.find(a=>Number(a.season)===Number((line.match(/^S(\d+)/i)||[])[1]||0) && a.date);
@@ -3532,6 +3536,24 @@ function maintenanceWriteProviders_(groups,snapshot) {
     return corrections;
 }
 
+function maintenanceLast_() {
+    try {
+        return JSON.parse(fs.readFileSync(path.join(app.getPath("userData"),"maintenance-last.json"),"utf8"));
+    } catch (_) {
+        return null;
+    }
+}
+
+function maintenanceSaveReport_(result, previous) {
+    const file = path.join(app.getPath("userData"),"maintenance-last.json");
+    if (previous) {
+        const { previous: older, ...last } = previous;
+        result.previous = last;
+    }
+    fs.writeFileSync(file + ".tmp",JSON.stringify(result),"utf8");
+    fs.renameSync(file + ".tmp",file);
+}
+
 async function maintenanceRun_(options={}) {
     const country=String(options.country||readSettings_().watchCountry||"DE").toUpperCase();
     if(!/^[A-Z]{2}$/.test(country))return {ok:false,message:bt_("PROVIDER_COUNTRY_INVALID")};
@@ -3541,6 +3563,7 @@ async function maintenanceRun_(options={}) {
     }
 
     maintenanceRunning_ = true;
+    const previous = maintenanceLast_();
     const counters = {
         requests:0,
         cacheHits:0,
@@ -3575,7 +3598,9 @@ async function maintenanceRun_(options={}) {
 
         maintenanceSetStatus_("auswertung", bt_("MAINT_COMPARE"), null, groups.length, groups.length);
         const findings = maintenanceAnalyse_(groups, snapshot);
-        const report=require(path.join(__dirname,"../common/maintenance-report")).build(groups,snapshot);
+        const reportModel = require(path.join(__dirname,"../common/maintenance-report"));
+        const candidates = reportModel.build(groups,snapshot);
+        const report = [];
         const decisionCounts = findings.reduce((counts, finding) => {
             const action = String(finding && finding.action || "observe");
             if (action === "apply") counts.ready++;
@@ -3610,10 +3635,12 @@ async function maintenanceRun_(options={}) {
             const operations = maintenanceBuildOperations_(groups, snapshot, findings);
             maintenanceSetStatus_("uebernahme", bt_("MAINT_APPLY"), null, 0, operations.length);
             applied = await maintenanceApplyOperations_(operations);
-            for(const op of operations)if(op.isNew && !applied.errors.some(e=>e.fileName===op.fileName && e.seasonNumber===op.payload.staffelNummer)){
-                const row=report.find(r=>r.tmdbId===op.payload.tmdbId && r.season===op.payload.staffelNummer && r.kind==='missing-season');
-                if(row)row.kind='added-season';
-                else report.push({kind:'added-season',tmdbId:op.payload.tmdbId,title:op.payload.titel,season:op.payload.staffelNummer,date:op.payload.termindaten[0]});
+            report.push(...candidates.filter(item => item.kind !== "missing-season" &&
+                applied.appliedKeys.has(maintenanceOperationKey_(item.tmdbId,item.season))));
+            for (const op of operations) {
+                if (!op.isNew || !applied.appliedKeys.has(op.key)) continue;
+                report.push({kind:"added-season",tmdbId:op.payload.tmdbId,title:op.payload.titel,
+                    season:op.payload.staffelNummer,date:op.payload.termindaten[0]});
             }
             applied.changedFileCount=new Set([...Array.from(applied.changedFiles||[]),...titleCorrections.map(item=>item.fileName).filter(Boolean)]).size;
         } else {
@@ -3624,8 +3651,12 @@ async function maintenanceRun_(options={}) {
 
         const allErrors = counters.errors.concat(applied.errors || []);
         const ok = allErrors.length === 0;
+        const refreshed = archiveLoad_();
+        const outlookGroups = refreshed.ok ? maintenanceGroups_(refreshed.daten.entries).groups : groups;
+        const outlook = reportModel.markNew(outlookGroups.flatMap(group =>
+            reportModel.outlook(group,snapshot.get(String(group.tmdbId))).rows),previous?.outlook);
         const result = {
-            ok,
+            ok, finishedAt:new Date().toISOString(), outlook,
             readOnly:false,
             phase:"applied",
             message:ok ? bt_("MAINT_SUCCESS_SUMMARY", { count:Number(applied.changedFileCount || 0) }) :
@@ -3655,7 +3686,7 @@ async function maintenanceRun_(options={}) {
             errors:allErrors
         };
 
-        fs.writeFileSync(path.join(app.getPath("userData"),"maintenance-last.json"),JSON.stringify(result),"utf8");
+        maintenanceSaveReport_(result,previous);
         maintenanceSetStatus_(ok ? "ende" : "fehler", result.message, null, groups.length, groups.length);
         logWrite_(ok ? "INFO" : "ERROR", "WARTUNG", bt_("MAINT_COMPLETED"), result);
         return result;
@@ -3832,7 +3863,7 @@ function installIpc_() {
         return result;
     });
     ipcMain.handle("serkal:maintenance:status", () => maintenanceGetStatus_());
-    ipcMain.handle("serkal:maintenance:last", () => {try{return JSON.parse(fs.readFileSync(path.join(app.getPath("userData"),"maintenance-last.json"),"utf8"));}catch(_){return null;}});
+    ipcMain.handle("serkal:maintenance:last", maintenanceLast_);
     archiveWriteHandler_("serkal:maintenance:run", async (_event,options) => { const result=await maintenanceRun_(options||{}); if(result && result.ok) scheduleSharedArchive_(); return result; });
     ipcMain.handle("serkal:calendar:createIcs", async (_event, payload) => {
         if(sessionTest_)return {ok:false,message:'Calendar export is disabled in the isolated archive test.'};

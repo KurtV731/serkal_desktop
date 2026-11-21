@@ -13,3 +13,31 @@ const limited=build(later,new Map([['2',{ok:true,tv:{name:'Later start'},seasons
 assert.deepEqual(limited.filter(r=>r.kind==='missing-season').map(r=>r.season).sort((a,b)=>a-b),[8,10]);
 assert.equal(limited.length,2); // Unchanged future episodes and S01–S06 are silent.
 console.log('Maintenance report: old missing seasons, gaps, future episodes, date changes, no auto insertion: OK');
+
+const {outlook,markNew}=require('../2 src/common/maintenance-report');
+const archived={title:'Show',seasonLabel:'S01',episoden:13,start:'2026-01-01',
+    datesOriginal:['2026-01-01'],activeDates:['2026-01-01']};
+const tracked={tmdbId:1,entries:[archived]};
+const current={ok:true,tv:{name:'Show',status:'Returning Series',seasons:[
+    {season_number:1},{season_number:2,air_date:'2027-07-08',episode_count:1}
+]},seasons:{1:{data:{episodes:[
+    {episode_number:7,air_date:'2026-11-29'},{episode_number:14,air_date:'2026-12-06'}
+]}},2:{data:{episodes:[{episode_number:1,air_date:'2027-07-08'}]}}}};
+const changes=build([tracked],new Map([['1',current]]),'2026-11-21');
+assert.equal(changes.find(row=>row.episode===7).kind,'dated-episode');
+assert.equal(changes.find(row=>row.episode===14).kind,'new-episode');
+assert.equal(changes.some(row=>row.season===2),false);
+const upcoming=outlook(tracked,current,'2026-11-21');
+assert.equal(upcoming.status,'planned');
+assert.deepEqual(upcoming.rows.filter(row=>row.season===2).map(({kind,date})=>[kind,date]),[['season','2027-07-08']]);
+const withoutDate={...current,tv:{...current.tv,seasons:[{season_number:1},{season_number:2}]} ,seasons:{}};
+const indeterminate=outlook(tracked,withoutDate,'2026-11-21');
+assert.equal(indeterminate.status,'planned');
+assert.equal(indeterminate.rows.find(row=>row.season===2).date,'');
+const annotated=markNew(upcoming.rows,indeterminate.rows);
+assert.equal(annotated.find(row=>row.season===2).newlyAnnounced,true);
+assert.equal(markNew(upcoming.rows,upcoming.rows).some(row=>row.newlyAnnounced),false);
+assert.equal(outlook(tracked,{ok:true,tv:{status:'Returning Series',seasons:[{season_number:1}]}},'2026-11-21').status,'unknown');
+assert.equal(outlook(tracked,{ok:true,tv:{status:'Ended'}},'2026-11-21').status,'ended');
+assert.equal(outlook(tracked,{ok:true,tv:{status:'Canceled'}},'2026-11-21').status,'ended');
+console.log('Maintenance outlook: known episodes, added dates, real extra episodes, confirmed sequel and unknown dates: OK');

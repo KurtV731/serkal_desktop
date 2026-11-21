@@ -18,7 +18,7 @@ function announcementPlan(entries,events,revision,scope=null){
   if(scope&&!scope.has(k))continue;
   const en=a.language==='en',next=new Date(cardDate+'T00:00:00Z');next.setUTCDate(next.getUTCDate()+1);
   const history=(a.history||[]).map(h=>en?'Recorded on '+h.capturedAt+': '+(h.from?'from '+h.from+' → ':'announced for ')+(h.to||'date unknown'):'Erfasst am '+h.capturedAt+': '+(h.from?'von '+h.from+' → ':'angekündigt für ')+(h.to||'Termin unbekannt'));
-  const event={id:'serkal'+sha('sha1','announcement:'+k),summary:(en?'Announced season start: ':'Angekündigter Staffelstart: ')+a.title+' S'+String(a.season).padStart(2,'0'),description:[en?'Provisional start date. This card remains until you delete it.':'Vorläufiges Startdatum. Diese Karte bleibt bis zur manuellen Löschung bestehen.',...(a.episodeCount>0?[(en?'Expected episodes: ':'Erwartete Folgen: ')+a.episodeCount]:[]),...history].join('\n'),start:{date:cardDate},end:{date:next.toISOString().slice(0,10)},transparency:'transparent',extendedProperties:{private:{serkal:'announcement',announcementKey:k}}};
+  const event={id:'serkal'+sha('sha1','announcement:'+k),summary:(en?'Announced season start: ':'Angekündigter Staffelstart: ')+a.title+' S'+String(a.season).padStart(2,'0'),description:[en?'Provisional start date. This card remains until you delete it.':'Vorläufiges Startdatum. Diese Karte bleibt bis zur manuellen Löschung bestehen.',...(a.episodeCount>1?[(en?'Expected episodes: ':'Erwartete Folgen: ')+a.episodeCount]:[]),...history].join('\n'),start:{date:cardDate},end:{date:next.toISOString().slice(0,10)},transparency:'transparent',extendedProperties:{private:{serkal:'announcement',announcementKey:k}}};
   desired.set(k,event);
  }
  const operations=[];

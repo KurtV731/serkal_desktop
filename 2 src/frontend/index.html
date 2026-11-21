@@ -1780,7 +1780,15 @@
     .appMenuDanger { margin-top:8px; padding-top:12px; border-top:1px solid var(--dialog-border); }
     .appMenuDanger button { color:#b73240; }
     body[data-theme="dark"] .appMenuDanger button { color:#ff9ca7; }
-  </style>
+      .maintenanceReport { width: min(760px, 90vw); max-height: 82vh; overflow: auto; }
+    .maintenanceControls { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+    .maintenanceControls button { padding: 8px 14px; text-align: left; }
+    .maintenanceControls button[aria-pressed="true"] { outline: 2px solid currentColor; outline-offset: -2px; font-weight: 700; }
+    .maintenanceControls small { display: block; }
+    .maintenanceReport ul { padding: 0; list-style: none; }
+    .maintenanceReport li { padding: 9px 0; border-top: 1px solid currentColor; }
+    .archiveContinuation { white-space: nowrap; font-size: .85em; }
+</style>
 
 
 </head>
@@ -3884,6 +3892,22 @@ const I18N = {
     TT_SORT_ALPHA: 'Sortierung: Alphabetisch (A–Z) – klicken für Datum',
     TT_SORT_DATE: 'Sortierung: Startdatum (neu→alt) – klicken für A–Z',
     MAINT_EXTRA_0: "Ergebnis der Wartung",
+    MAINT_LATEST: "Aktuelle Wartung",
+    MAINT_PREVIOUS: "Vorherige Wartung",
+    MAINT_NO_TIME: "Laufzeitpunkt nicht gespeichert",
+    MAINT_CHANGED: "Bei dieser Wartung geändert",
+    MAINT_NO_CHANGES: "Keine Änderungen übernommen.",
+    MAINT_OUTLOOK: "Wann geht’s weiter?",
+    MAINT_NO_OUTLOOK: "Keine kommenden Termine oder angekündigten Staffeln in diesem Bericht.",
+    MAINT_OPEN_DATE: "Angekündigt · Termin offen",
+    MAINT_FUTURE_SEASON: "Angekündigter Staffelstart",
+    MAINT_FUTURE_EPISODE: "Kommende Folge",
+    MAINT_NEW_NOTICE: "Neu seit dem vorigen Lauf",
+    MAINT_DATE_ADDED: "Folgentermin ergänzt",
+    MAINT_NO_RUN: "Starte die Wartung, um den ersten Bericht zu sehen.",
+    MAINT_SERIES_ENDED: "Beendet",
+    MAINT_SERIES_PLANNED: "Folgestaffel geplant",
+    MAINT_SERIES_UNKNOWN: "Fortsetzung unklar",
     MAINT_EXTRA_1: "Neue Staffeln sind Vorschläge; sie wurden nicht automatisch eingetragen.",
     MAINT_EXTRA_2: "Fehlende Staffel",
     MAINT_EXTRA_3: "Anstehende Episode",
@@ -4097,6 +4121,22 @@ const I18N = {
     TT_SORT_ALPHA: 'Sorting: Alphabetical (A–Z) – click for Date',
     TT_SORT_DATE: 'Sorting: Start date (new→old) – click for A–Z',
     MAINT_EXTRA_0: "Maintenance results",
+    MAINT_LATEST: "Latest maintenance",
+    MAINT_PREVIOUS: "Previous maintenance",
+    MAINT_NO_TIME: "Run time unavailable",
+    MAINT_CHANGED: "Changes applied in this run",
+    MAINT_NO_CHANGES: "No changes applied.",
+    MAINT_OUTLOOK: "What’s next?",
+    MAINT_NO_OUTLOOK: "No upcoming dates or announced seasons in this report.",
+    MAINT_OPEN_DATE: "Announced · date pending",
+    MAINT_FUTURE_SEASON: "Announced season premiere",
+    MAINT_FUTURE_EPISODE: "Upcoming episode",
+    MAINT_NEW_NOTICE: "New since the previous run",
+    MAINT_DATE_ADDED: "Episode date added",
+    MAINT_NO_RUN: "Run maintenance to see the first report.",
+    MAINT_SERIES_ENDED: "Ended",
+    MAINT_SERIES_PLANNED: "Next season planned",
+    MAINT_SERIES_UNKNOWN: "Continuation unclear",
     MAINT_EXTRA_1: "New seasons are suggestions; nothing was added automatically.",
     MAINT_EXTRA_2: "Missing season",
     MAINT_EXTRA_3: "Upcoming episode",
@@ -5342,6 +5382,7 @@ const I18N_MAP = [
   { sel: '#appMenuTitle', text:'APP_MENU_TITLE' },
   { sel: '#btnAppMenuClose', text:'APP_MENU_CLOSE' },
   { sel: '#btnMaintenanceLast', text:'MAINT_EXTRA_0' },
+  { sel: '#btnMaintenanceOutlook', text:'MAINT_OUTLOOK' },
   { sel: '#btnArchiveSync', text: 'BTN_ARCHIVE_SYNC' },
   { sel: '#btnArchiveReload', text: 'BTN_ARCHIVE_RELOAD', attr: { title: 'TT_ARCHIVE_RELOAD', 'aria-label': 'TT_ARCHIVE_RELOAD' } },
   { sel: '#btnSortToggle',                     attr: { title: 'TT_SORT_SWITCH' } },
@@ -5745,16 +5786,114 @@ function stopMaintenanceStatusPolling_() {
  * @status aktiv
  * @loeschung nein
  */
-function showMaintenanceReport_(res){
-  const en=LANG==='en',dialog=document.createElement('dialog');dialog.style.cssText='width:80vw;max-height:80vh;overflow:auto';
-  const title=document.createElement('h2');title.textContent=t('MAINT_EXTRA_0');dialog.append(title);
-  const lines=[res.message||'',t('MAINT_EXTRA_1')];
-  for(const item of res.report||[])lines.push([(item.previousTitle?item.previousTitle+' → ':'')+item.title,'S'+String(item.season).padStart(2,'0')+(item.episode?'E'+String(item.episode).padStart(2,'0'):''),(item.previousDate?item.previousDate+' → ':'')+(item.date||'—'),({ 'title-correction':t('MAINT_TITLE_CORRECTED'),'announced-season':t('MAINT_ANNOUNCED'),'announcement-changed':t('MAINT_ANNOUNCEMENT_CHANGED'),'added-season':t('MAINT_SEASON_ADDED'),'missing-season':t('MAINT_EXTRA_2'),'upcoming-episode':t('MAINT_EXTRA_3'),'new-episode':t('MAINT_EXTRA_4'),'changed-episode':t('MAINT_EXTRA_5')})[item.kind]||item.kind].join(' · '));
-  if(!(res.report||[]).length)lines.push(t('MAINT_EXTRA_6'));
-  if((res.providers||[]).length)lines.push(t('MAINT_PROVIDER_SUMMARY'));
-  const pre=document.createElement('pre');pre.style.whiteSpace='pre-wrap';pre.textContent=lines.join('\n\n');dialog.append(pre);
-  const print=document.createElement('button');print.textContent=t('MAINT_EXTRA_10');print.onclick=()=>{const frame=document.createElement('iframe');frame.style.display='none';document.body.append(frame);const doc=frame.contentDocument;const text=doc.createElement('pre');text.style.whiteSpace='pre-wrap';text.textContent=pre.textContent;doc.body.append(text);frame.contentWindow.focus();frame.contentWindow.print();setTimeout(()=>frame.remove(),1000);};dialog.append(print);
-  const close=document.createElement('button');close.textContent=t('MAINT_EXTRA_11');close.onclick=()=>dialog.close();dialog.append(close);dialog.onclose=()=>dialog.remove();document.body.append(dialog);dialog.showModal();
+function showMaintenanceReport_(result, initialView = 'changes') {
+  const dialog = document.createElement('dialog');
+  dialog.className = 'maintenanceReport';
+  const heading = document.createElement('h2');
+  heading.textContent = t('MAINT_EXTRA_0');
+  const runs = document.createElement('div');
+  const views = document.createElement('div');
+  const body = document.createElement('section');
+  const actions = document.createElement('div');
+  runs.className = views.className = actions.className = 'maintenanceControls';
+  body.setAttribute('aria-live','polite');
+  dialog.append(heading,runs,views,body,actions);
+  let selected = result;
+  let view = initialView;
+  const locale = LANG === 'en' ? 'en-GB' : 'de-DE';
+  const runTime = run => run?.finishedAt
+    ? new Intl.DateTimeFormat(locale,{dateStyle:'medium',timeStyle:'short'}).format(new Date(run.finishedAt))
+    : t('MAINT_NO_TIME');
+  const date = value => value ? formatDateShort_(value + 'T00:00:00') : '';
+  const itemLabel = item => [
+    item.previousTitle ? item.previousTitle + ' → ' + item.title : item.title,
+    item.season ? 'S' + String(item.season).padStart(2,'0') +
+      (item.episode ? 'E' + String(item.episode).padStart(2,'0') : '') : ''
+  ].filter(Boolean).join(' · ');
+  const changeKeys = {
+    'title-correction':'MAINT_TITLE_CORRECTED', 'added-season':'MAINT_SEASON_ADDED',
+    'new-episode':'MAINT_EXTRA_4', 'changed-episode':'MAINT_EXTRA_5', 'dated-episode':'MAINT_DATE_ADDED',
+    'announced-season':'MAINT_ANNOUNCED', 'announcement-changed':'MAINT_ANNOUNCEMENT_CHANGED',
+    'missing-season':'MAINT_EXTRA_2', 'upcoming-episode':'MAINT_EXTRA_3'
+  };
+
+  function button(container,key,action,subtitle) {
+    const control = document.createElement('button');
+    control.type = 'button';
+    control.textContent = t(key);
+    if (subtitle) {
+      const caption = document.createElement('small');
+      caption.textContent = subtitle;
+      control.append(caption);
+    }
+    control.addEventListener('click',action);
+    container.append(control);
+    return control;
+  }
+
+  const latest = button(runs,'MAINT_LATEST',()=>{ selected = result; render(); },result ? runTime(result) : '');
+  const previous = result?.previous
+    ? button(runs,'MAINT_PREVIOUS',()=>{ selected = result.previous; render(); },runTime(result.previous))
+    : null;
+  const changes = button(views,'MAINT_CHANGED',()=>{ view = 'changes'; render(); });
+  const outlook = button(views,'MAINT_OUTLOOK',()=>{ view = 'outlook'; render(); });
+
+  function paragraph(value) {
+    const p = document.createElement('p');
+    p.textContent = value;
+    body.append(p);
+  }
+
+  function render() {
+    latest.setAttribute('aria-pressed',String(selected === result));
+    previous?.setAttribute('aria-pressed',String(selected === result.previous));
+    changes.setAttribute('aria-pressed',String(view === 'changes'));
+    outlook.setAttribute('aria-pressed',String(view === 'outlook'));
+    body.replaceChildren();
+    const title = document.createElement('h3');
+    title.textContent = t(view === 'changes' ? 'MAINT_CHANGED' : 'MAINT_OUTLOOK');
+    body.append(title);
+    if (!selected) { paragraph(t('MAINT_NO_RUN')); return; }
+    if (view === 'changes' || !selected.ok) paragraph(selected.message || '');
+    const items = view === 'changes' ? selected.report : selected.outlook;
+    if (!items?.length) {
+      paragraph(t(view === 'changes' ? 'MAINT_NO_CHANGES' : 'MAINT_NO_OUTLOOK'));
+      return;
+    }
+    const list = document.createElement('ul');
+    for (const item of items) {
+      const row = document.createElement('li');
+      const name = document.createElement('strong');
+      const details = document.createElement('div');
+      name.textContent = itemLabel(item);
+      const dates = [date(item.previousDate),date(item.date)].filter(Boolean).join(' → ');
+      const label = view === 'changes' ? (changeKeys[item.kind] ? t(changeKeys[item.kind]) : '') :
+        t(item.kind === 'episode' ? 'MAINT_FUTURE_EPISODE' : item.date ? 'MAINT_FUTURE_SEASON' : 'MAINT_OPEN_DATE');
+      details.textContent = [label,dates,item.newlyAnnounced ? t('MAINT_NEW_NOTICE') : ''].filter(Boolean).join(' · ');
+      row.append(name,details);
+      list.append(row);
+    }
+    body.append(list);
+  }
+
+  button(actions,'MAINT_EXTRA_10',()=>{
+    const frame = document.createElement('iframe');
+    frame.style.display = 'none';
+    document.body.append(frame);
+    const doc = frame.contentDocument;
+    const title = doc.createElement('h2');
+    title.textContent = heading.textContent + (selected ? ' · ' + runTime(selected) : '');
+    const report = doc.importNode(body,true);
+    doc.body.append(title,report);
+    frame.contentWindow.focus();
+    frame.contentWindow.print();
+    setTimeout(()=>frame.remove(),1000);
+  });
+  button(actions,'MAINT_EXTRA_11',()=>dialog.close());
+  dialog.addEventListener('close',()=>dialog.remove(),{once:true});
+  render();
+  document.body.append(dialog);
+  dialog.showModal();
 }
 
 function runMaintenance_(country) {
@@ -6552,7 +6691,7 @@ function archiveAnnouncementForSeason_(it){
   return (it.announcements||[]).find(a=>Number(a.season)===Number(String(it.seasonLabel||it.staffelLabel||'').replace(/\D/g,'')) && a.date);
 }
 function archiveDateCaption_(it,ds){
-  return ds + (it.deRule?' • DE':'')+(it.announcementOnly?' (?)':'');
+  return ds + (it.deRule?' • DE':'');
 }
 
 function getStartEnd_(it){
@@ -6933,7 +7072,7 @@ function renderArchivList() {
     // Announcements belong to their own season, never to every row of the series.
     const ownAnnouncement=archiveAnnouncementForSeason_(it);
     dateSpan.textContent = archiveDateCaption_(it,ds);
-    dateSpan.title=ownAnnouncement ? formatDateShort_(ownAnnouncement.date)+' (?)' : '';
+    dateSpan.title=ownAnnouncement ? t('MAINT_FUTURE_SEASON') + ' · ' + formatDateShort_(ownAnnouncement.date) : '';
     meta.appendChild(dateSpan);
 
     if (st === 2 || st === 3 || st === 4) {
@@ -6971,7 +7110,13 @@ function renderArchivList() {
       meta.appendChild(symSpan);
     }
 
+    const continuation = document.createElement('span');
+    continuation.className = 'archiveContinuation';
+    const continuationKey = it.continuationStatus === 'ended' ? 'MAINT_SERIES_ENDED' :
+      it.continuationStatus === 'planned' ? 'MAINT_SERIES_PLANNED' : 'MAINT_SERIES_UNKNOWN';
+    continuation.textContent = t(continuationKey);
     row.appendChild(titleEl);
+    meta.prepend(continuation);
     row.appendChild(meta);
     div.appendChild(row);
 
@@ -9161,7 +9306,14 @@ if (langToggleTrack) langToggleTrack.addEventListener('click', function(){ toggl
 if (btnWartung) btnWartung.addEventListener('click', function(){ runMaintenance_(); });
 if(btnWartung && window.serkal && window.serkal.maintenance){
   const last=document.createElement('button');last.id='btnMaintenanceLast';last.className='btnSmall';last.textContent=t('MAINT_EXTRA_0');last.title=t('MAINT_EXTRA_0');last.setAttribute('aria-label',t('MAINT_EXTRA_0'));
-  last.onclick=async()=>{const result=await window.serkal.maintenance.last();if(result)showMaintenanceReport_(result);};btnWartung.insertAdjacentElement('afterend',last);
+  last.onclick=async()=>showMaintenanceReport_(await window.serkal.maintenance.last());
+  btnWartung.insertAdjacentElement('afterend',last);
+  const outlook=document.createElement('button');
+  outlook.id='btnMaintenanceOutlook';
+  outlook.className='btnSmall';
+  outlook.textContent=t('MAINT_OUTLOOK');
+  outlook.onclick=async()=>showMaintenanceReport_(await window.serkal.maintenance.last(),'outlook');
+  last.insertAdjacentElement('afterend',outlook);
 }
 
 if (btnCalendarDock) btnCalendarDock.addEventListener('click', function(){ try { uiLogAction_(t('LOG_CALENDAR_OPENED'), {}); } catch (_eAction) {} openCalendarFromDock_(); });
