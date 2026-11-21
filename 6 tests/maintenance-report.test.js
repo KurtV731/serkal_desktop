@@ -39,5 +39,5 @@ assert.equal(annotated.find(row=>row.season===2).newlyAnnounced,true);
 assert.equal(markNew(upcoming.rows,upcoming.rows).some(row=>row.newlyAnnounced),false);
 assert.equal(outlook(tracked,{ok:true,tv:{status:'Returning Series',seasons:[{season_number:1}]}},'2026-11-21').status,'unknown');
 assert.equal(outlook(tracked,{ok:true,tv:{status:'Ended'}},'2026-11-21').status,'ended');
-assert.equal(outlook(tracked,{ok:true,tv:{status:'Canceled'}},'2026-11-21').status,'ended');
+assert.equal(outlook(tracked,{ok:true,tv:{status:'Canceled'}},'2026-11-21').status,'canceled');
 console.log('Maintenance outlook: known episodes, added dates, real extra episodes, confirmed sequel and unknown dates: OK');

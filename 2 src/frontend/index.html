@@ -3906,7 +3906,8 @@ const I18N = {
     MAINT_NEW_NOTICE: "Neu seit dem vorigen Lauf",
     MAINT_DATE_ADDED: "Folgentermin ergänzt",
     MAINT_NO_RUN: "Starte die Wartung, um den ersten Bericht zu sehen.",
-    MAINT_SERIES_ENDED: "Beendet",
+    MAINT_SERIES_ENDED: "Serie abgeschlossen",
+    MAINT_SERIES_CANCELED: "Serie abgesetzt",
     ARCHIVE_SEASON_PLANNED: "Staffel geplant",
     ARCHIVE_SEASON_RUNNING: "Staffel läuft",
     ARCHIVE_SEASON_AIRED: "Staffel ausgestrahlt",
@@ -4140,7 +4141,8 @@ const I18N = {
     MAINT_NEW_NOTICE: "New since the previous run",
     MAINT_DATE_ADDED: "Episode date added",
     MAINT_NO_RUN: "Run maintenance to see the first report.",
-    MAINT_SERIES_ENDED: "Ended",
+    MAINT_SERIES_ENDED: "Series ended",
+    MAINT_SERIES_CANCELED: "Series canceled",
     ARCHIVE_SEASON_PLANNED: "Season scheduled",
     ARCHIVE_SEASON_RUNNING: "Season airing",
     ARCHIVE_SEASON_AIRED: "Season aired",
@@ -7010,9 +7012,10 @@ function archiveSeasonNumber_(entry) {
 }
 
 function archiveContinuationKey_(entry, status, seriesWithFutureSeasons) {
+  if (entry.continuationStatus === 'canceled') return 'MAINT_SERIES_CANCELED';
+  if (entry.continuationStatus === 'ended') return 'MAINT_SERIES_ENDED';
   if (status === 1) return archiveSeasonNumber_(entry) > 1 ? 'MAINT_SERIES_PLANNED' : 'ARCHIVE_SEASON_PLANNED';
   if (seriesWithFutureSeasons.has(archiveSeriesKey_(entry))) return 'MAINT_SERIES_PLANNED';
-  if (entry.continuationStatus === 'ended') return 'MAINT_SERIES_ENDED';
   if (entry.continuationStatus === 'planned') return 'MAINT_SERIES_PLANNED';
   return 'MAINT_SERIES_UNKNOWN';
 }
@@ -7143,13 +7146,13 @@ function renderArchivList() {
     }
 
     const continuationKey = archiveContinuationKey_(it,st,seriesWithFutureSeasons);
-    const seasonKey = {0:'ARCHIVE_SEASON_UNDATED',2:'ARCHIVE_SEASON_RUNNING',3:'ARCHIVE_SEASON_AIRED'}[st];
+    const seasonKey = {0:'ARCHIVE_SEASON_UNDATED',1:'ARCHIVE_SEASON_PLANNED',2:'ARCHIVE_SEASON_RUNNING',3:'ARCHIVE_SEASON_AIRED'}[st];
     const captions = document.createElement('div');
     captions.className = 'archiveCaptions';
     captions.append(titleEl);
     const season = document.createElement('small');
     season.className = 'archiveContinuation';
-    season.textContent = (seasonKey ? t(seasonKey) + ' · ' : st === 4 ? t('ARCHIVE_SEASON_WATCHED') + ' · ' : '') +
+    season.textContent = (seasonKey && (st !== 1 || ['MAINT_SERIES_CANCELED','MAINT_SERIES_ENDED'].includes(continuationKey)) ? t(seasonKey) + ' · ' : st === 4 ? t('ARCHIVE_SEASON_WATCHED') + ' · ' : '') +
       t(continuationKey);
     captions.append(season);
     row.appendChild(captions);

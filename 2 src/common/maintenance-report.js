@@ -96,7 +96,8 @@ function outlook(group, record, today = new Date().toISOString().slice(0, 10)) {
         (tv.seasons || []).some(item => Number(item.season_number) > latestRegular &&
             (!archived.has(Number(item.season_number)) || archived.get(Number(item.season_number)).announcementOnly) &&
             (!validDate(item.air_date) || item.air_date >= today));
-    const status = ['Ended', 'Canceled'].includes(tv.status) ? 'ended' : planned ? 'planned' : 'unknown';
+    const status = tv.status === 'Canceled' ? 'canceled' :
+        tv.status === 'Ended' ? 'ended' : planned ? 'planned' : 'unknown';
     return { status, rows:[...rows.values()] };
 }
 

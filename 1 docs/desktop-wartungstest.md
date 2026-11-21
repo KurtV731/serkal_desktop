@@ -1,4 +1,4 @@
-# Desktop-Wartungstest 1.2.7-wartung.2
+# Desktop-Wartungstest 1.2.7-wartung.3
 
 Entwicklungsstand für Kurts praktische Abnahme. Basis ist die freigegebene Desktop-Version 1.2.6. Archivstand 38.
 
