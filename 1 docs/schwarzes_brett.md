@@ -1,6 +1,6 @@
 # Gemeinsames Schwarzes Brett – SerKal, HASA und Websites
 
-Stand: 20.11.2026 · gekürzter Arbeitsstand auf Kurts Auftrag.
+Stand: 21.11.2026 · gekürzter Arbeitsstand auf Kurts Auftrag.
 
 ## 1. Start hier
 
@@ -205,7 +205,7 @@ Keine neue Version allein durch diese Liste beauftragt; zuerst aktuellen Code/Ab
 | Desktop-Googlefenster | Eigenes normales Fenster ist in 1.2.6 gelungen; es kann den kleinen SerKal-Hinweis verdecken. Bessere Anordnung für 1.2.7 vorgemerkt, kein rückwirkender Freigabestopper. |
 | Desktop-Googleanzeige | Dauerhaft sichtbarer tatsächlicher Verbindungsstatus, möglichst mit verwendetem Konto. |
 | Kalender öffnen | Browserkonto-/„Kalender hinzufügen“-Umweg nicht als zuverlässig behoben melden. Funktionierende API-Schreibzuordnung nicht dafür ändern. |
-| Android-Einstieg | Thorsten bestätigt am20.11. identischen Login-Hänger in1.2.6 wie1.2.4. [Codekarte zu Start, Dateien, Rechten und Logstufen](android/erster-start-speicher-und-anmeldung-2026-11-20.md): keine manuelle Handyordner-Freigabe nötig; Login-/Speicherpfad identisch in1.2.6/1.2.7; Ursache offen. Antwort des Testers abwarten. |
+| Android-Einstieg, Thorsten 21.11. | **Praktisch gelöst:** zuerst SerKal auf Tablet mit demselben Google-Konto erfolgreich verbunden; danach Anmeldung am Smartphone direkt erfolgreich. Konkrete Ursache (vermutete Geräteeinschränkung) unbestätigt. **CE/Website: diesen optionalen Umweg in Programmhilfe/FAQ übernehmen**, kein zweites Gerät als Pflicht, keine Erfolgsgarantie. [Ergebnis und DE/EN-Hilfetext](android/erster-start-speicher-und-anmeldung-2026-11-20.md). Noch keine veröffentlichte Hilfeänderung behaupten. |
 | Android-Tastatur, Claudia 19.11. | 1.2.7/Code51 fertig und an Installer3 übergeben: sichtbares Tastaturschließen, Lupe/Suchen schließen gezielt, Vorschlagsuche behält Tastatur. 98 Regressionstests plus native Android15-/16-Tests bestanden. Claudias konkrete Geräteabnahme bleibt offen; kein Google-Anmeldefix behauptet. Details und nächster Schritt siehe P1a. |
 | Android-Vollbild, Kurt 19.11. | Volle Bildschirmfläche im Normalzustand, keine dauerhafte Reserve für ausgeblendete Leisten. Steuerelemente/Tastatur dürfen vorübergehend überlagern oder Ansicht verkleinern; danach volle Fläche. Dauerhaft sichtbare Leisten ausdrücklich abgelehnt. Noch nicht umgesetzt; Code51 nutzt getInsetsIgnoringVisibility. Details in CE-Kurzübergabe Abschnitt7A. |
 | Play-Edge-to-Edge-Warnung | Screenshot zu Code50 trotz ersetzter direkter Farbaufrufe. Konkrete benannte APIs/Klassen im Play-Detailbefund und ggf. Bibliotheken prüfen; kein belegter Fix durch Code51. |
