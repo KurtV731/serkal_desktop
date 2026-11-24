@@ -1789,7 +1789,19 @@
     .maintenanceReport li { padding: 9px 0; border-top: 1px solid currentColor; }
     .archiveCaptions { min-width: 0; flex: 1; }
     .archiveContinuation { display: block; font-size: .85em; }
-    .archivePressStatus { margin-top: 3px; min-width: 2.5rem; min-height: 2.5rem; font-size: 1.24rem; }
+    button.archivePressStatus {
+      display: inline-grid; place-items: center; flex: 0 0 18px;
+      width: 18px; height: 18px; min-width: 0; min-height: 0;
+      margin: 0; padding: 0; border-radius: 4px; font-size: 12px; line-height: 1;
+    }
+    .archivePressStatus:focus-visible { outline: 2px solid currentColor; outline-offset: 1px; }
+    .archivePressStatus[data-confirmed="false"][data-continuation="O"] { border-color: transparent; }
+    .archivePressStatus[data-confirmed="false"][data-continuation="V"] { color: #356f55; }
+    .archivePressStatus[data-confirmed="false"][data-continuation="A"] { color: #a24449; }
+    .archivePressStatus[data-confirmed="false"][data-continuation="E"] { color: #5c5c8c; }
+    body[data-theme="dark"] .archivePressStatus[data-confirmed="false"][data-continuation="V"] { color: #8dc5a5; }
+    body[data-theme="dark"] .archivePressStatus[data-confirmed="false"][data-continuation="A"] { color: #f1a2a8; }
+    body[data-theme="dark"] .archivePressStatus[data-confirmed="false"][data-continuation="E"] { color: #bdbce9; }
     .archivePressStatus[data-confirmed="false"] { background: transparent; color: inherit; border: 1px solid currentColor; font-weight: normal; }
     .archivePressStatus[data-confirmed="true"] { background: #2858a9; color: #fff; border: 1px solid #2858a9; font-weight: bold; }
 </style>
@@ -7099,8 +7111,9 @@ function archiveContinuation_(entries) {
   const reportedSeasons = extra(pressSeasons);
   const seasons = extra([...tmdbSeasons,...reportedSeasons]);
   const tmdbStatus = ordered.find(entry=>entry.continuationStatus)?.continuationStatus;
-  const automatic = seasons.length ? 'V' : tmdbStatus === 'canceled' || press?.code === 'A' && press.explicit ? 'A' :
-    press?.code === 'E' ? 'E' : 'O';
+  const automatic = tmdbStatus === 'canceled' || (press?.code === 'A' && press.explicit) ? 'A' :
+    press?.code === 'E' ? 'E' :
+    seasons.length || press?.code === 'V' || tmdbStatus === 'planned' ? 'V' : 'O';
   return { code:override || automatic, automatic, confirmed:Boolean(override), seasons, press, tmdbStatus,
     tmdbSeasons, reportedSeasons };
 }
@@ -7108,7 +7121,9 @@ function archiveContinuation_(entries) {
 function continuationButton_(entry, related, info, onApply) {
   const button = document.createElement('button');
   button.type = 'button';
-  button.className = 'btnSmall archivePressStatus';
+  button.type = 'button';
+  button.className = 'archivePressStatus';
+  button.dataset.continuation = info.code;
   button.dataset.confirmed = String(info.confirmed);
   button.textContent = continuationSymbols[info.code];
   button.title = [pressStatusLabel_(info.code),t(info.confirmed ? 'PRESS_MANUAL' : 'PRESS_DETECTED'),
@@ -7355,16 +7370,14 @@ function renderArchivList() {
       meta.appendChild(symSpan);
     }
 
-    const captions = document.createElement('div');
-    captions.className = 'archiveCaptions';
-    captions.append(titleEl);
+
     const { entries, info, last, lastPublished } = continuation.get(archiveSeriesKey_(it) || it);
     const number = archiveSeasonNumber_(it);
     const anchor = info.seasons.length ? last : lastPublished || last;
-    if (number === anchor && (st !== 1 || info.seasons.length || info.confirmed)) {
-      captions.append(continuationButton_(it,entries,info));
+    if (number === anchor) {
+      meta.insertBefore(continuationButton_(it,entries,info),dateSpan);
     }
-    row.appendChild(captions);
+    row.appendChild(titleEl);
     row.appendChild(meta);
     div.appendChild(row);
 
