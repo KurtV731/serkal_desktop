@@ -40,7 +40,9 @@ function parse(html, code, year) {
         const final = code === 'A' && /\b(?:planmäßig|wie angekündigt)\s+(?:beendet|abgeschlossen)\b/i.test(description);
         const explicit = code === 'A' && !final && /\b(?:abgesetzt|eingestellt)\b/i.test(description) &&
             !/\b(?:nicht\s+(?:abgesetzt|eingestellt)|letzte\s+Staffel|finale\s+Staffel)\b/i.test(description);
-        const seasons = planned ? [...new Set(planned[1].match(/\d+/g).map(Number).filter(n=>n > 0))] : [];
+        const numbered = code === 'V' ? description.match(/\b(?:eine|die)\s+(\d{1,2})\.\s*Staffel\s+(?:bestellt|bestätigt)\b/i) : null;
+        const seasonNumbers = planned?.[1] || numbered?.[1] || '';
+        const seasons = [...new Set((seasonNumbers.match(/\d+/g) || []).map(Number).filter(n=>n > 0))];
         records.push({ code:final ? 'E' : code,date,title:text(main[2]),series:main[1].toLowerCase(),
             ...(explicit ? {explicit} : {}),...(seasons.length ? {seasons} : {}),
             url:ROOT + (news || '/serien/' + LISTS[code] + '/' + year + '.html') });
