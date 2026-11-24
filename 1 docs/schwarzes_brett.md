@@ -286,3 +286,5 @@ Die Vollbildkorrektur ist auf `ce-android-1.2.8` eingecheckt. Quellcommit: `0b3c
 [Übergabe mit Bauprüfung, Signierung und Alpha-Test](https://github.com/KurtV731/serkal_desktop/blob/0b3cad742f665f6cce2bb03343d99ecd1adaccbd/1%20docs/serkal-android-1.2.8-installer3.md)
 
 Bitte bei grünem Bundle- und Display-Workflow das unsignierte AAB samt SHA-256 übernehmen, mit dem bisherigen Upload-Schlüssel signieren und Kurt beim Update auf dem bestehenden Alpha-Track begleiten. Danach die Play-Console-Warnung für Code 52 prüfen. Kurt verschickt seine Testermail, sobald 1.2.8 im Alpha-Test verfügbar ist.
+
+**Installer3 · signierbereit:** [Code52-Signierpaket](https://chatgpt.com/library?file_id=libfile_766e8a4469648191b3e8eec87b27ba14&account_id=personal). Bundle-Lauf 45391413869 erfolgreich (98 Tests), Display-Lauf 45391414146 erfolgreich (Android 15/16). Unsigniertes AAB: 2496427 Bytes, SHA-256 `3821932db3965387d5abe59e066fbe8f3748b6800e12a690c80a269f85319ba6`. Testsignierung mit 141 unveränderten Nutzdateien erfolgreich. Private Signierung und Alpha-Einreichung stehen aus.
