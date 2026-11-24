@@ -1,4 +1,4 @@
-# Desktop-Wartungstest 1.2.7-wartung.4
+# Desktop-Wartungstest 1.2.7-wartung.5
 
 Entwicklungsstand für Kurts praktische Abnahme. Basis ist die freigegebene Desktop-Version 1.2.6. Archivstand 38.
 
@@ -13,4 +13,6 @@ Für den Testbau gilt der normale Speicherablauf von SerKal. Die private OAuth-D
 
 Unter **Menü → Intensiv Analyse** prüft SerKal die beiden Serienjunkies-Jahreslisten ab 2008 einmal je Jahr. Datum, Vermerk und Quellenlink des jüngsten eindeutig zuordenbaren Treffers werden im Archiv hinterlegt. Ein fehlender Treffer ändert keine bestehenden Vermerke. Falls Listen fehlen, zeigt SerKal den unvollständigen Durchlauf an und lässt die bisherigen Vermerke stehen.
 
-Der Vermerk lässt sich über seine Schaltfläche in der Archivliste bearbeiten und wie andere Archivänderungen speichern. Manuelle Werte gelten für die vorhandenen Staffeln der Serie. Über **Automatisch (Serienjunkies)** lässt sich wieder die gespeicherte Quellenmeldung anzeigen. Der Quellenlink öffnet die Meldung oder die entsprechende Jahresliste.
+Der Vermerk lässt sich über seine Schaltfläche in der Archivliste bearbeiten und wie andere Archivänderungen speichern. Manuelle Werte gelten für die vorhandenen Staffeln der Serie. Über **Automatisch (TMDB und Serienjunkies)** lässt sich wieder die gespeicherte Quellenmeldung anzeigen. Der Quellenlink öffnet die Meldung oder die entsprechende Jahresliste.
+
+Im Archiv und im Ausblick sind ↻ (verlängert), ✕ (abgesetzt), ⚑ (beendet) und ? (offen) anklickbar. Ein automatisch ermittelter Status erscheint zurückhaltend, ein bestätigter Status kräftig. Nach einer Bestätigung als abgesetzt oder beendet verschwindet die Serie aus dem Ausblick. Gelbe Archiveinträge zeigen einen zusätzlichen Planungshinweis nur bei konkret belegten weiteren Staffeln außerhalb des Archivs.

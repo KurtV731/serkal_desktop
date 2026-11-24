@@ -1789,7 +1789,9 @@
     .maintenanceReport li { padding: 9px 0; border-top: 1px solid currentColor; }
     .archiveCaptions { min-width: 0; flex: 1; }
     .archiveContinuation { display: block; font-size: .85em; }
-    .archivePressStatus { margin-top: 3px; }
+    .archivePressStatus { margin-top: 3px; min-width: 2.5rem; min-height: 2.5rem; font-size: 1.24rem; }
+    .archivePressStatus[data-confirmed="false"] { background: transparent; color: inherit; border: 1px solid currentColor; font-weight: normal; }
+    .archivePressStatus[data-confirmed="true"] { background: #2858a9; color: #fff; border: 1px solid #2858a9; font-weight: bold; }
 </style>
 
 
@@ -3902,10 +3904,13 @@ const I18N = {
     PRESS_EDIT: "Fortsetzungsvermerk bearbeiten",
     MAINT_PRESS_APPLY: "Übernehmen",
     PRESS_SOURCE: "Meldung bei Serienjunkies öffnen",
-    PRESS_AUTO: "Automatisch (Serienjunkies)",
-    PRESS_MANUAL: "Manuell",
-    PRESS_RENEWED: "V · Verlängert",
-    PRESS_CANCELED: "A · Abgesetzt / nicht verlängert",
+    PRESS_AUTO: "Automatisch (TMDB und Serienjunkies)",
+    PRESS_MANUAL: "Von dir bestätigt",
+    PRESS_DETECTED: "Automatisch ermittelt",
+    PRESS_SEASONS: "Weitere bestätigte Staffeln: {seasons}",
+    PRESS_CONFIRM: "Bestätigen",
+    PRESS_RENEWED: "Serie verlängert",
+    PRESS_CANCELED: "Serie abgesetzt",
     PRESS_NO_HIT: "Keine Meldung gespeichert",
     MAINT_LATEST: "Aktuelle Wartung",
     MAINT_PREVIOUS: "Vorherige Wartung",
@@ -4150,10 +4155,13 @@ const I18N = {
     PRESS_EDIT: "Edit renewal or cancellation",
     MAINT_PRESS_APPLY: "Apply",
     PRESS_SOURCE: "Open report on Serienjunkies",
-    PRESS_AUTO: "Automatic (Serienjunkies)",
-    PRESS_MANUAL: "Manual",
-    PRESS_RENEWED: "V · Renewed",
-    PRESS_CANCELED: "A · Canceled / not renewed",
+    PRESS_AUTO: "Automatic (TMDB and Serienjunkies)",
+    PRESS_MANUAL: "Confirmed by you",
+    PRESS_DETECTED: "Detected automatically",
+    PRESS_SEASONS: "Additional confirmed seasons: {seasons}",
+    PRESS_CONFIRM: "Confirm",
+    PRESS_RENEWED: "Series renewed",
+    PRESS_CANCELED: "Series canceled",
     PRESS_NO_HIT: "No report saved",
     MAINT_LATEST: "Latest maintenance",
     MAINT_PREVIOUS: "Previous maintenance",
@@ -5896,7 +5904,35 @@ function showMaintenanceReport_(result, initialView = 'changes') {
     body.append(title);
     if (!selected) { paragraph(t('MAINT_NO_RUN')); return; }
     if (view === 'changes' || !selected.ok) paragraph(selected.message || '');
-    const items = view === 'changes' ? selected.report : selected.outlook;
+    const series = new Map();
+    if (view === 'outlook') {
+      for (const entry of state.archivEntries || []) {
+        if (!entry.tmdbId) continue;
+        const key = String(entry.tmdbId);
+        if (!series.has(key)) series.set(key,[]);
+        series.get(key).push(entry);
+      }
+    }
+    const statuses = new Map([...series].map(([key,entries])=>[key,archiveContinuation_(entries)]));
+    let items = view === 'changes' ? selected.report : (selected.outlook || []).filter(item=>{
+      const info = statuses.get(String(item.tmdbId));
+      return !(info?.confirmed && ['A','E'].includes(info.code));
+    });
+    if (view === 'outlook' && selected === result) {
+      const present = new Set(items.map(item=>String(item.tmdbId) + ':' + item.season));
+      for (const [key,entries] of series) {
+        const info = statuses.get(key);
+        if (info.code !== 'V') continue;
+        for (const season of info.seasons) {
+          if (present.has(key + ':' + season)) continue;
+          const announcement = entries.flatMap(entry=>entry.announcements || [])
+            .find(item=>Number(item.season) === season && item.date >= new Date().toISOString().slice(0,10));
+          items.push({kind:'season',tmdbId:key,title:entries[0].title || entries[0].titel,season,date:announcement?.date || ''});
+        }
+      }
+      items.sort((a,b)=>(a.date || '9999').localeCompare(b.date || '9999') ||
+        String(a.title).localeCompare(String(b.title)) || a.season-b.season || (a.episode || 0)-(b.episode || 0));
+    }
     if (!items?.length) {
       paragraph(t(view === 'changes' ? 'MAINT_NO_CHANGES' : 'MAINT_NO_OUTLOOK'));
       return;
@@ -5912,6 +5948,9 @@ function showMaintenanceReport_(result, initialView = 'changes') {
         t(item.kind === 'episode' ? 'MAINT_FUTURE_EPISODE' : item.date ? 'MAINT_FUTURE_SEASON' : 'MAINT_OPEN_DATE');
       details.textContent = [label,dates,item.newlyAnnounced ? t('MAINT_NEW_NOTICE') : ''].filter(Boolean).join(' · ');
       row.append(name,details);
+      const key = String(item.tmdbId);
+      const related = series.get(key);
+      if (related) row.append(continuationButton_(related[0],related,statuses.get(key),render));
       list.append(row);
     }
     body.append(list);
@@ -7039,42 +7078,82 @@ function archiveSeasonNumber_(entry) {
   return Number(entry.staffelNummer || String(entry.seasonLabel || entry.staffelLabel || '').replace(/\D/g,''));
 }
 
-function archiveContinuationKey_(entry, status, seriesWithFutureSeasons) {
-  if (entry.continuationStatus === 'canceled') return 'MAINT_SERIES_CANCELED';
-  if (entry.continuationStatus === 'ended') return 'MAINT_SERIES_ENDED';
-  if (status === 1) return archiveSeasonNumber_(entry) > 1 ? 'MAINT_SERIES_PLANNED' : 'ARCHIVE_SEASON_PLANNED';
-  if (seriesWithFutureSeasons.has(archiveSeriesKey_(entry))) return 'MAINT_SERIES_PLANNED';
-  if (entry.continuationStatus === 'planned') return 'MAINT_SERIES_PLANNED';
-  return 'MAINT_SERIES_UNKNOWN';
-}
+const continuationSymbols = { V:'↻', A:'✕', E:'⚑', O:'?' };
 
 function pressStatusLabel_(code) {
-  return t(code === 'A' ? 'PRESS_CANCELED' : 'PRESS_RENEWED');
+  return t({ V:'PRESS_RENEWED', A:'PRESS_CANCELED', E:'MAINT_SERIES_ENDED', O:'MAINT_SERIES_UNKNOWN' }[code]);
 }
 
-function showPressEditor_(entry, related) {
+function archiveContinuation_(entries) {
+  const ordered = entries.slice().sort((a,b)=>archiveSeasonNumber_(b)-archiveSeasonNumber_(a));
+  const last = archiveSeasonNumber_(ordered[0]) || 0;
+  const override = ordered.find(entry=>Object.hasOwn(continuationSymbols,entry.pressOverride))?.pressOverride;
+  const press = ordered.map(entry=>entry.pressStatus).filter(Boolean)
+    .sort((a,b)=>String(b.date).localeCompare(String(a.date)))[0];
+  const today = new Date().toISOString().slice(0,10);
+  const tmdb = ordered.flatMap(entry=>(entry.announcements || [])
+    .filter(item=>!item.date || item.date >= today).map(item=>Number(item.season)));
+  const pressSeasons = press?.code === 'V' && Array.isArray(press.seasons) ? press.seasons.map(Number) : [];
+  const extra = numbers=>[...new Set(numbers.filter(n=>Number.isInteger(n) && n > last))].sort((a,b)=>a-b);
+  const tmdbSeasons = extra(tmdb);
+  const reportedSeasons = extra(pressSeasons);
+  const seasons = extra([...tmdbSeasons,...reportedSeasons]);
+  const tmdbStatus = ordered.find(entry=>entry.continuationStatus)?.continuationStatus;
+  const automatic = seasons.length ? 'V' : tmdbStatus === 'canceled' || press?.code === 'A' && press.explicit ? 'A' :
+    press?.code === 'E' ? 'E' : 'O';
+  return { code:override || automatic, automatic, confirmed:Boolean(override), seasons, press, tmdbStatus,
+    tmdbSeasons, reportedSeasons };
+}
+
+function continuationButton_(entry, related, info, onApply) {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'btnSmall archivePressStatus';
+  button.dataset.confirmed = String(info.confirmed);
+  button.textContent = continuationSymbols[info.code];
+  button.title = [pressStatusLabel_(info.code),t(info.confirmed ? 'PRESS_MANUAL' : 'PRESS_DETECTED'),
+    info.seasons.length ? t('PRESS_SEASONS',{seasons:info.seasons.join(', ')}) : ''].filter(Boolean).join(' · ');
+  button.setAttribute('aria-label',button.title);
+  button.addEventListener('keydown',event=>event.stopPropagation());
+  button.addEventListener('click',event=>{
+    event.stopPropagation();
+    if (!state.busy) showPressEditor_(entry,related,onApply);
+  });
+  return button;
+}
+
+function showPressEditor_(entry, related, onApply) {
+  const info = archiveContinuation_(related);
   const dialog = document.createElement('dialog');
   dialog.className = 'maintenanceReport';
   const heading = document.createElement('h2');
   heading.textContent = buildTitle_(entry);
   const source = document.createElement('p');
-  source.textContent = entry.pressStatus
-    ? pressStatusLabel_(entry.pressStatus.code) + ' · Serienjunkies · ' + entry.pressStatus.date
-    : t('PRESS_NO_HIT');
+  const sources = [];
+  if (info.tmdbStatus || info.tmdbSeasons.length) {
+    const key = { canceled:'MAINT_SERIES_CANCELED', ended:'MAINT_SERIES_ENDED' }[info.tmdbStatus];
+    sources.push(['TMDB',key ? t(key) : '',info.tmdbSeasons.length ?
+      t('PRESS_SEASONS',{seasons:info.tmdbSeasons.join(', ')}) : ''].filter(Boolean).join(' · '));
+  }
+  if (info.press) {
+    sources.push(['Serienjunkies',pressStatusLabel_(info.press.code),info.press.date,info.reportedSeasons.length ?
+      t('PRESS_SEASONS',{seasons:info.reportedSeasons.join(', ')}) : ''].filter(Boolean).join(' · '));
+  }
+  source.textContent = sources.join(' / ') || t('PRESS_NO_HIT');
   const label = document.createElement('label');
   label.textContent = t('PRESS_EDIT') + ' ';
   const select = document.createElement('select');
-  for (const [value,caption] of [['',t('PRESS_AUTO')],['V',pressStatusLabel_('V')],['A',pressStatusLabel_('A')]]) {
+  for (const [value,caption] of [['',t('PRESS_AUTO')],...Object.entries(continuationSymbols).map(([code,symbol])=>[code,symbol + ' ' + pressStatusLabel_(code)])]) {
     select.add(new Option(caption,value));
   }
-  select.value = entry.pressOverride || '';
+  select.value = info.code;
   label.append(select);
   const actions = document.createElement('div');
   actions.className = 'maintenanceControls';
   const apply = document.createElement('button');
-  apply.textContent = t('MAINT_PRESS_APPLY');
+  apply.textContent = t('PRESS_CONFIRM');
   apply.addEventListener('click',()=>{
-    if ((entry.pressOverride || '') !== select.value) {
+    if (related.some(item=>(item.pressOverride || '') !== select.value)) {
       for (const item of related) {
         item.pressOverride = select.value;
         setDirtyForEntry_(item,{pressOverride:select.value});
@@ -7082,15 +7161,16 @@ function showPressEditor_(entry, related) {
       renderArchivList();
     }
     dialog.close();
+    onApply?.();
   });
   const close = document.createElement('button');
   close.textContent = t('MAINT_EXTRA_11');
   close.onclick = ()=>dialog.close();
   actions.append(apply,close);
-  if (entry.pressStatus?.url) {
+  if (info.press?.url) {
     const open = document.createElement('button');
     open.textContent = t('PRESS_SOURCE');
-    open.onclick = ()=>window.serkal.maintenance.pressSource(entry.pressStatus.url);
+    open.onclick = ()=>window.serkal.maintenance.pressSource(info.press.url);
     actions.append(open);
   }
   dialog.append(heading,source,label,actions);
@@ -7196,9 +7276,17 @@ function renderArchivList() {
     return;
   }
 
-  const seriesWithFutureSeasons = new Set(arr.filter(entry =>
-    statusValueFromAny_(entry) === 1 && archiveSeasonNumber_(entry) > 1)
-    .map(archiveSeriesKey_).filter(Boolean));
+  const series = new Map();
+  for (const entry of arr) {
+    const key = archiveSeriesKey_(entry) || entry;
+    if (!series.has(key)) series.set(key,[]);
+    series.get(key).push(entry);
+  }
+  const continuation = new Map([...series].map(([key,entries])=>[key,{
+    entries,info:archiveContinuation_(entries),
+    last:Math.max(...entries.map(archiveSeasonNumber_)),
+    lastPublished:Math.max(0,...entries.filter(entry=>statusValueFromAny_(entry)!==1).map(archiveSeasonNumber_))
+  }]));
 
   sorted.forEach((it, idx) => {
     const div = document.createElement('div');
@@ -7267,30 +7355,15 @@ function renderArchivList() {
       meta.appendChild(symSpan);
     }
 
-    const continuationKey = archiveContinuationKey_(it,st,seriesWithFutureSeasons);
-    const seasonKey = {0:'ARCHIVE_SEASON_UNDATED',1:'ARCHIVE_SEASON_PLANNED',2:'ARCHIVE_SEASON_RUNNING',3:'ARCHIVE_SEASON_AIRED'}[st];
     const captions = document.createElement('div');
     captions.className = 'archiveCaptions';
     captions.append(titleEl);
-    const season = document.createElement('small');
-    season.className = 'archiveContinuation';
-    season.textContent = (seasonKey && (st !== 1 || ['MAINT_SERIES_CANCELED','MAINT_SERIES_ENDED'].includes(continuationKey)) ? t(seasonKey) + ' · ' : st === 4 ? t('ARCHIVE_SEASON_WATCHED') + ' · ' : '') +
-      t(continuationKey);
-    captions.append(season);
-    const press = document.createElement('button');
-    press.type = 'button';
-    press.className = 'btnSmall archivePressStatus';
-    const pressCode = it.pressOverride || it.pressStatus?.code;
-    press.textContent = pressCode ? pressStatusLabel_(pressCode) + ' · ' +
-      (it.pressOverride ? t('PRESS_MANUAL') : 'Serienjunkies') : t('PRESS_EDIT');
-    press.title = t('PRESS_EDIT');
-    press.addEventListener('keydown',event=>event.stopPropagation());
-    press.addEventListener('click',event=>{
-      event.stopPropagation();
-      const key = archiveSeriesKey_(it);
-      if (!state.busy) showPressEditor_(it,key ? arr.filter(entry=>archiveSeriesKey_(entry) === key) : [it]);
-    });
-    captions.append(press);
+    const { entries, info, last, lastPublished } = continuation.get(archiveSeriesKey_(it) || it);
+    const number = archiveSeasonNumber_(it);
+    const anchor = info.seasons.length ? last : lastPublished || last;
+    if (number === anchor && (st !== 1 || info.seasons.length || info.confirmed)) {
+      captions.append(continuationButton_(it,entries,info));
+    }
     row.appendChild(captions);
     row.appendChild(meta);
     div.appendChild(row);

@@ -1002,10 +1002,10 @@ async function archiveSaveChanges_(dirtyMap) {
                 if (Object.prototype.hasOwnProperty.call(patch, "seen")) {
                     line = archiveSetField_(line, "seen", Number(patch.seen) === 1 ? "1" : "0");
                 }
-                if (["A","V",""].includes(patch.pressOverride)) {
+                if (["A","V","E","O",""].includes(patch.pressOverride)) {
                     line = archiveSetField_(line,"pressOverride",patch.pressOverride);
                 }
-                if (patch.pressStatus && ["A","V"].includes(patch.pressStatus.code) &&
+                if (patch.pressStatus && ["A","V","E"].includes(patch.pressStatus.code) &&
                     /^\d{4}-\d{2}-\d{2}$/.test(patch.pressStatus.date) &&
                     serienjunkiesUrl_(patch.pressStatus.url)) {
                     line = archiveSetField_(line,"pressStatus",archiveEncode_(JSON.stringify(patch.pressStatus)));

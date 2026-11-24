@@ -35,7 +35,14 @@ function parse(html, code, year) {
         const date = [year,String(month).padStart(2,'0'),dateParts[1].padStart(2,'0')].join('-');
         if (!validDate(date)) continue;
         const news = main[3].match(/href="(\/news\/[a-z\d/_%-]+\.html)"/i)?.[1];
-        records.push({ code,date,title:text(main[2]),series:main[1].toLowerCase(),
+        const description = text(main[3]);
+        const planned = code === 'V' ? description.match(/\b(?:um|für)\s+(?:die\s+)?Staffeln?\s+((?:\d{1,2})(?:(?:\s*,\s*|\s+und\s+)\d{1,2})*)\s+(?:verlängert|bestellt|bestätigt)\b/i) : null;
+        const final = code === 'A' && /\b(?:planmäßig|wie angekündigt)\s+(?:beendet|abgeschlossen)\b/i.test(description);
+        const explicit = code === 'A' && !final && /\b(?:abgesetzt|eingestellt)\b/i.test(description) &&
+            !/\b(?:nicht\s+(?:abgesetzt|eingestellt)|letzte\s+Staffel|finale\s+Staffel)\b/i.test(description);
+        const seasons = planned ? [...new Set(planned[1].match(/\d+/g).map(Number).filter(n=>n > 0))] : [];
+        records.push({ code:final ? 'E' : code,date,title:text(main[2]),series:main[1].toLowerCase(),
+            ...(explicit ? {explicit} : {}),...(seasons.length ? {seasons} : {}),
             url:ROOT + (news || '/serien/' + LISTS[code] + '/' + year + '.html') });
     }
     if (!records.length && !/\bvon 0 Serien\b|\b(?:über|von) 0 Serien\b/.test(text(html))) {
@@ -72,7 +79,8 @@ function match(entries, records) {
         hits.sort((a,b) => b.date.localeCompare(a.date));
         const latest = hits[0];
         if (hits.some(hit => hit.date === latest.date && hit.code !== latest.code)) return null;
-        return { code:latest.code,date:latest.date,url:latest.url };
+        return { code:latest.code,date:latest.date,url:latest.url,
+            ...(latest.explicit ? {explicit:true} : {}),...(latest.seasons?.length ? {seasons:latest.seasons} : {}) };
     });
 }
 
