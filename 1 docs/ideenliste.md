@@ -41,3 +41,9 @@ Kurt wirbt aktuell weitere freiwillige Tester für den späteren Google-Play-Sto
 - Erfassen, welche Felder SerKal in Desktop und Android tatsächlich speichert. Dazu gehören Serien- und Staffelangaben, deutsche und ursprüngliche Titel, Datumsangaben, Quellen, Wartungsergebnisse, Status-Flags, Sondervermerke und manuelle Bestätigungen.
 - Je Feld dokumentieren, wo es gespeichert wird, woher es kommt, wann es geändert wird und welche Ansichten oder Funktionen es verwenden. Alte und neue Datensätze berücksichtigen.
 - Ergebnis ist eine verständliche Übersicht anhand des Codes und anonymisierter Beispieldaten. Die Bestandsaufnahme erfolgt lesend.
+
+## PLUS-05 – Lokalen SerKal-Datenordner wechseln
+
+- Prüfauftrag von Kurt, 24.11.2026. Bei der Bestandsaufnahme der Daten mit untersuchen.
+- Für SerKal Desktop klären, welche Daten Kurt mit „Datenbank“ meint und welche lokalen Pfade für Archiv, Anwendungseinstellungen und weitere Daten tatsächlich verwendet werden. Auswirkungen auf die Google-Kopie und den Zugriff von anderen Geräten prüfen.
+- Ermitteln, ob der Speicherort bereits über die Oberfläche oder Konfiguration geändert werden kann. Einen nachvollziehbaren Ablauf für Sicherung, Umzug, Prüfung und Rückkehr zum bisherigen Ordner dokumentieren. Falls nötig, eine Ordnerauswahl oder einen geführten Umzug als spätere Erweiterung prüfen.
