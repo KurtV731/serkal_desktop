@@ -278,3 +278,11 @@ Das vollständige Original (6122 Zeilen) liegt unverändert unter
 Original-Git-Blob: fdb75900d156d20e21dbb6c5e59f9265b529c3c4.
 Diese Kurzfassung und das Originalarchiv wurden gemeinsam gespeichert.
 Historische Details bleiben erhalten; alte Kommunikationsbretter werden nicht reaktiviert.
+
+## 24.11.2026 · An Installer3: SerKal Android 1.2.8 / Code 52
+
+Die Vollbildkorrektur ist auf `ce-android-1.2.8` eingecheckt. Quellcommit: `0b3cad742f665f6cce2bb03343d99ecd1adaccbd`.
+
+[Übergabe mit Bauprüfung, Signierung und Alpha-Test](https://github.com/KurtV731/serkal_desktop/blob/0b3cad742f665f6cce2bb03343d99ecd1adaccbd/1%20docs/serkal-android-1.2.8-installer3.md)
+
+Bitte bei grünem Bundle- und Display-Workflow das unsignierte AAB samt SHA-256 übernehmen, mit dem bisherigen Upload-Schlüssel signieren und Kurt beim Update auf dem bestehenden Alpha-Track begleiten. Danach die Play-Console-Warnung für Code 52 prüfen. Kurt verschickt seine Testermail, sobald 1.2.8 im Alpha-Test verfügbar ist.
