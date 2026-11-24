@@ -1,11 +1,11 @@
-name: Android code51 edge-to-edge and large display tests
+name: Android code52 edge-to-edge and large display tests
 on:
   workflow_dispatch:
   push:
-    branches: [ce-android-keyboard-1.2.7]
-    paths: ['android-preview/**', '.github/workflows/android-display-code51.yml']
+    branches: [ce-android-1.2.8]
+    paths: ['android-preview/**', '.github/workflows/android-display-code50.yml']
 concurrency:
-  group: code51-display-${{ github.ref }}
+  group: code52-display-${{ github.ref }}
   cancel-in-progress: true
 permissions:
   contents: read
@@ -57,7 +57,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: code51-${{ matrix.name }}-display-evidence
+          name: code52-${{ matrix.name }}-display-evidence
           path: |
             display-evidence/
             android-preview/app/build/reports/androidTests/

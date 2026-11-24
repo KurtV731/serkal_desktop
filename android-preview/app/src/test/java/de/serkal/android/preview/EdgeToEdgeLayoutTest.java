@@ -30,7 +30,18 @@ public class EdgeToEdgeLayoutTest {
    WindowInsetsCompat safe=new WindowInsetsCompat.Builder().setInsets(WindowInsetsCompat.Type.systemBars(),Insets.of(14,24,10,28)).setInsetsIgnoringVisibility(WindowInsetsCompat.Type.systemBars(),Insets.of(14,24,10,28)).setInsets(WindowInsetsCompat.Type.displayCutout(),Insets.of(36,0,0,0)).setInsetsIgnoringVisibility(WindowInsetsCompat.Type.displayCutout(),Insets.of(36,0,0,0)).setInsets(WindowInsetsCompat.Type.ime(),Insets.of(0,0,0,180)).build();
    ViewCompat.dispatchApplyWindowInsets(r,safe);assertEquals(baseLeft+36,r.getPaddingLeft());assertEquals(baseBottom+180,r.getPaddingBottom());
    ViewCompat.dispatchApplyWindowInsets(r,safe);assertEquals(baseLeft+36,r.getPaddingLeft());assertEquals(baseBottom+180,r.getPaddingBottom());
-   ViewCompat.dispatchApplyWindowInsets(r,new WindowInsetsCompat.Builder().build());assertEquals(baseLeft,r.getPaddingLeft());assertEquals(baseBottom,r.getPaddingBottom());
+   WindowInsetsCompat shown = new WindowInsetsCompat.Builder()
+       .setInsets(WindowInsetsCompat.Type.navigationBars(),Insets.of(0,0,0,28))
+       .setInsetsIgnoringVisibility(WindowInsetsCompat.Type.navigationBars(),Insets.of(0,0,0,28))
+       .setVisible(WindowInsetsCompat.Type.navigationBars(),true).build();
+   ViewCompat.dispatchApplyWindowInsets(r,shown);
+   assertEquals(baseBottom+28,r.getPaddingBottom());
+   WindowInsetsCompat hidden = new WindowInsetsCompat.Builder(shown)
+       .setInsets(WindowInsetsCompat.Type.navigationBars(),Insets.NONE)
+       .setVisible(WindowInsetsCompat.Type.navigationBars(),false).build();
+   ViewCompat.dispatchApplyWindowInsets(r,hidden);
+   assertEquals(baseLeft,r.getPaddingLeft());
+   assertEquals(baseBottom,r.getPaddingBottom());
   }finally{c.destroy();}
  }
 }

@@ -34,8 +34,22 @@ public class DisplayDeviceTest {
    save(inst,context,"display-initial.png");
    scenario.onActivity(a->WindowCompat.getInsetsController(a.getWindow(),a.getWindow().getDecorView()).show(WindowInsetsCompat.Type.systemBars()));
    Thread.sleep(500);inst.waitForIdleSync();
-   scenario.onActivity(a->{View root=a.findViewById(android.R.id.content).findViewWithTag("insetRoot");WindowInsetsCompat i=ViewCompat.getRootWindowInsets(root);Insets bars=i.getInsetsIgnoringVisibility(WindowInsetsCompat.Type.systemBars());assertTrue(bars.top>0);assertTrue(root.getPaddingTop()>=bars.top);assertTrue(root.getPaddingBottom()>=bars.bottom);});
+   scenario.onActivity(a->{View root=a.findViewById(android.R.id.content).findViewWithTag("insetRoot");WindowInsetsCompat i=ViewCompat.getRootWindowInsets(root);Insets bars=i.getInsets(WindowInsetsCompat.Type.systemBars());assertTrue(i.isVisible(WindowInsetsCompat.Type.statusBars()));assertTrue(bars.top>0);assertTrue(root.getPaddingTop()>=bars.top);assertTrue(root.getPaddingBottom()>=bars.bottom);});
    save(inst,context,"display-system-bars.png");
+   scenario.onActivity(a->WindowCompat.getInsetsController(a.getWindow(),a.getWindow().getDecorView()).hide(WindowInsetsCompat.Type.systemBars()));
+   Thread.sleep(500);inst.waitForIdleSync();
+   scenario.onActivity(a->{
+    View root=a.findViewById(android.R.id.content).findViewWithTag("insetRoot");
+    WindowInsetsCompat i=ViewCompat.getRootWindowInsets(root);
+    assertFalse(i.isVisible(WindowInsetsCompat.Type.statusBars()));
+    assertFalse(i.isVisible(WindowInsetsCompat.Type.navigationBars()));
+    Insets remaining=Insets.max(i.getInsets(WindowInsetsCompat.Type.systemBars()|WindowInsetsCompat.Type.ime()),
+        i.getInsetsIgnoringVisibility(WindowInsetsCompat.Type.displayCutout()));
+    float density=root.getResources().getDisplayMetrics().density;
+    assertEquals(Math.round(3*density)+remaining.top,root.getPaddingTop());
+    assertEquals(Math.round(4*density)+remaining.bottom,root.getPaddingBottom());
+   });
+   save(inst,context,"display-bars-hidden-again.png");
    // Force a size change through the OS; this preserves the same app session.
    shell(inst,"wm size 1200x1800");inst.waitForIdleSync();Thread.sleep(2200);inst.waitForIdleSync();
    scenario.onActivity(a->{View root=a.findViewById(android.R.id.content).findViewWithTag("insetRoot");assertNotNull(root);assertEquals("Retained display test",findEdit(root.findViewWithTag("panelSearch")).getText().toString());assertNotNull(root.findViewWithTag("exitSerKal"));View panel=root.findViewWithTag("panelSearch");assertTrue(panel.getWidth()>0);assertTrue(panel.getHeight()>0);assertTrue(panel.getWidth()<=root.getWidth());});

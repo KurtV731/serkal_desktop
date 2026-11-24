@@ -955,7 +955,11 @@ public class MainActivity extends Activity {
         Window window=getWindow();
         window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
         window.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(BG));
-        WindowCompat.enableEdgeToEdge(window);
+        // Android 15+ already enforces edge-to-edge for our target SDK.
+        // On older versions opt into layout under the bars without changing their colors.
+        if (android.os.Build.VERSION.SDK_INT < 35) {
+            WindowCompat.setDecorFitsSystemWindows(window,false);
+        }
         WindowInsetsControllerCompat bars=WindowCompat.getInsetsController(window,window.getDecorView());
         bars.setAppearanceLightStatusBars(!dark);bars.setAppearanceLightNavigationBars(!dark);
         hideSystemBars_();
@@ -1259,7 +1263,9 @@ public class MainActivity extends Activity {
         root.addView(scrollBar_(footer),new LinearLayout.LayoutParams(-1,dp(36)));
         ViewCompat.setOnApplyWindowInsetsListener(root,(view,insets)->{
             keyboardCloseButton.setVisibility(insets.getInsets(WindowInsetsCompat.Type.ime()).bottom>0?View.VISIBLE:View.GONE);
-            Insets safe=Insets.max(insets.getInsetsIgnoringVisibility(WindowInsetsCompat.Type.systemBars()|WindowInsetsCompat.Type.displayCutout()),insets.getInsets(WindowInsetsCompat.Type.ime()));
+            Insets visible = insets.getInsets(WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.ime());
+            Insets cutout = insets.getInsetsIgnoringVisibility(WindowInsetsCompat.Type.displayCutout());
+            Insets safe = Insets.max(visible,cutout);
             view.setPadding(dp(4)+safe.left,dp(3)+safe.top,dp(4)+safe.right,dp(4)+safe.bottom);
             adaptPanels_();return insets;
         });
