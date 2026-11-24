@@ -1071,6 +1071,18 @@ public class MainActivity extends Activity {
         return b;
     }
 
+    private void moveSearchField_(LinearLayout from, LinearLayout to, int index,
+                                  LinearLayout.LayoutParams params) {
+        // Keep the same editor, text watcher, composing text and selection.
+        boolean focused = queryField.hasFocus();
+        int start = queryField.getSelectionStart();
+        int end = queryField.getSelectionEnd();
+        from.removeView(queryField);
+        to.addView(queryField,index,params);
+        if (focused) queryField.requestFocus();
+        if (start >= 0 && end >= 0) queryField.setSelection(start,end);
+    }
+
     private void buildScreen() {
         String previousQuery = queryField == null ? "" : queryField.getText().toString();
         String previousYear = yearField == null ? "" : yearField.getText().toString();
@@ -1096,6 +1108,7 @@ public class MainActivity extends Activity {
         top.addView(keyboardCloseButton,new LinearLayout.LayoutParams(-2,dp(40)));
         TextView title = text("SerKal", 13, TEXT);
         title.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+        title.setTag("appTitle");
         top.addView(title, new LinearLayout.LayoutParams(0, dp(31), 1));
         TextView preview = text(BuildConfig.VERSION_NAME, 7.5f, MUTED);
         preview.setGravity(Gravity.CENTER_VERTICAL | Gravity.RIGHT);
@@ -1140,6 +1153,7 @@ public class MainActivity extends Activity {
         TextView titleLabel=text(english?"Title":"Titel",9,TEXT);titleLabel.setTypeface(Typeface.DEFAULT,Typeface.BOLD);searchFields.addView(titleLabel,new LinearLayout.LayoutParams(-2,dp(34)));
         queryField = new EditText(new android.view.ContextThemeWrapper(this, dark ? android.R.style.Theme_Material : android.R.style.Theme_Material_Light));
         queryField.setSingleLine(true);
+        queryField.setTag("seriesTitleInput");
         // Keep the real title field and suggestions visible in landscape.
         queryField.setImeOptions(android.view.inputmethod.EditorInfo.IME_FLAG_NO_EXTRACT_UI
             | android.view.inputmethod.EditorInfo.IME_FLAG_NO_FULLSCREEN
@@ -1158,7 +1172,8 @@ public class MainActivity extends Activity {
         queryField.setHintTextColor(MUTED);
         queryField.setHint(english ? "Series title" : "Serientitel");
         queryField.setText(previousQuery);
-        searchFields.addView(queryField,new LinearLayout.LayoutParams(0,dp(34),1));
+        LinearLayout.LayoutParams inlineQueryParams = new LinearLayout.LayoutParams(0,dp(34),1);
+        searchFields.addView(queryField,inlineQueryParams);
         yearField=new EditText(new android.view.ContextThemeWrapper(this,dark?android.R.style.Theme_Material:android.R.style.Theme_Material_Light));
         yearField.setSingleLine(true);yearField.setInputType(InputType.TYPE_CLASS_NUMBER);yearField.setTextSize(TypedValue.COMPLEX_UNIT_DIP,9);
         yearField.setTextColor(TEXT);yearField.setHintTextColor(MUTED);yearField.setHint(english?"Year":"Jahr");yearField.setGravity(Gravity.CENTER);
@@ -1262,7 +1277,16 @@ public class MainActivity extends Activity {
         Button quitButton=footerButton(english?"Exit SerKal":"SerKal beenden");quitButton.setTag("exitSerKal");quitButton.setOnClickListener(v->exitSerKal());footer.addView(quitButton);
         root.addView(scrollBar_(footer),new LinearLayout.LayoutParams(-1,dp(36)));
         ViewCompat.setOnApplyWindowInsetsListener(root,(view,insets)->{
-            keyboardCloseButton.setVisibility(insets.getInsets(WindowInsetsCompat.Type.ime()).bottom>0?View.VISIBLE:View.GONE);
+            boolean keyboardVisible = insets.isVisible(WindowInsetsCompat.Type.ime());
+            keyboardCloseButton.setVisibility(keyboardVisible ? View.VISIBLE : View.GONE);
+            boolean inHeader = queryField.getParent() == top;
+            if (keyboardVisible && !inHeader && queryField.hasFocus()) {
+                moveSearchField_(searchFields,top,top.indexOfChild(title),new LinearLayout.LayoutParams(0,dp(34),1));
+                title.setVisibility(View.GONE);
+            } else if (!keyboardVisible && inHeader) {
+                moveSearchField_(top,searchFields,1,inlineQueryParams);
+                title.setVisibility(View.VISIBLE);
+            }
             Insets visible = insets.getInsets(WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.ime());
             Insets cutout = insets.getInsetsIgnoringVisibility(WindowInsetsCompat.Type.displayCutout());
             Insets safe = Insets.max(visible,cutout);
