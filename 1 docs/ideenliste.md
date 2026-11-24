@@ -34,3 +34,10 @@ Kurt wirbt aktuell weitere freiwillige Tester für den späteren Google-Play-Sto
 - Nutzer bestimmt, welche neuen Staffeln automatisch aufgenommen und welche nur gemeldet werden: bereits verfolgte/gesehene Serien, noch ungesehene letzte Staffel, Lücken und weitere Entscheidungsfälle.
 - Aktuelle kostenlose Vorgabe: direkte Aufnahme neuer Folgestaffeln nach letzter gesehener Staffel, Ankündigungen für unvollständige Termine, kein automatisches Nachtragen vor dem eigenen Einstieg.
 - Schutzmarkierungen, Datenintegrität und verständliche Ergebnisse gelten unabhängig von einer späteren Bezahlfunktion weiter. Noch keine Konfigurationsoberfläche implementiert.
+
+## PLUS-04 – Bestandsaufnahme der SerKal-Daten
+
+- Folgeaufgabe von Kurt, 24.11.2026. Beginnt nach Abschluss und praktischer Abnahme von Future-View und Sondervermerken.
+- Erfassen, welche Felder SerKal in Desktop und Android tatsächlich speichert. Dazu gehören Serien- und Staffelangaben, deutsche und ursprüngliche Titel, Datumsangaben, Quellen, Wartungsergebnisse, Status-Flags, Sondervermerke und manuelle Bestätigungen.
+- Je Feld dokumentieren, wo es gespeichert wird, woher es kommt, wann es geändert wird und welche Ansichten oder Funktionen es verwenden. Alte und neue Datensätze berücksichtigen.
+- Ergebnis ist eine verständliche Übersicht anhand des Codes und anonymisierter Beispieldaten. Die Bestandsaufnahme erfolgt lesend.
