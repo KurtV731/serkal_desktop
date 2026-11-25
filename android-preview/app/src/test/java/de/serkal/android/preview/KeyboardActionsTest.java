@@ -15,7 +15,7 @@ import static org.junit.Assert.*;
 public class KeyboardActionsTest {
  int generation(MainActivity a)throws Exception{java.lang.reflect.Field f=MainActivity.class.getDeclaredField("requestGeneration");f.setAccessible(true);return f.getInt(a);}
  EditText input(View v){if(v instanceof EditText)return (EditText)v;if(v instanceof ViewGroup)for(int i=0;i<((ViewGroup)v).getChildCount();i++){EditText e=input(((ViewGroup)v).getChildAt(i));if(e!=null)return e;}return null;}
- void focus(MainActivity a,View r,EditText e){e.requestFocus();((InputMethodManager)a.getSystemService(Context.INPUT_METHOD_SERVICE)).showSoftInput(e,0);ViewCompat.dispatchApplyWindowInsets(r,new WindowInsetsCompat.Builder().setInsets(WindowInsetsCompat.Type.ime(),Insets.of(0,0,0,180)).build());}
+ void focus(MainActivity a,View r,EditText e){e.requestFocus();((InputMethodManager)a.getSystemService(Context.INPUT_METHOD_SERVICE)).showSoftInput(e,0);ViewCompat.dispatchApplyWindowInsets(r,new WindowInsetsCompat.Builder().setInsets(WindowInsetsCompat.Type.ime(),Insets.of(0,0,0,180)).setVisible(WindowInsetsCompat.Type.ime(),true).build());}
  @Test public void explicitActionsCloseKeyboardButCloseButtonDoesNotSearch()throws Exception{
   ActivityController<MainActivity> c=Robolectric.buildActivity(MainActivity.class).create();MainActivity a=c.get();try{
    View root=a.findViewById(android.R.id.content).findViewWithTag("insetRoot");EditText e=input(root.findViewWithTag("panelSearch"));e.setText("T");
