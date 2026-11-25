@@ -930,7 +930,8 @@ public class MainActivity extends Activity {
 
     private void closeSearchKeyboard_() {
         View focused=getCurrentFocus();
-        if(focused!=null)focused.clearFocus();
+        if(queryField!=null)queryField.clearFocus();
+        if(focused!=null&&focused!=queryField)focused.clearFocus();
         if(insetRoot!=null){insetRoot.setFocusableInTouchMode(true);insetRoot.requestFocus();}
         WindowCompat.getInsetsController(getWindow(),getWindow().getDecorView()).hide(WindowInsetsCompat.Type.ime());
         android.view.inputmethod.InputMethodManager keyboard=(android.view.inputmethod.InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);
@@ -1070,19 +1071,20 @@ public class MainActivity extends Activity {
     private int activePanel;
     private Button keyboardCloseButton;
     private void showPanel_(int panel){activePanel=panel;adaptPanels_();}
+    private boolean titleTypingMode;
     private void adaptPanels_(){
         if(insetRoot==null||adaptiveColumns==null)return;
         int usableWidth=insetRoot.getWidth()-insetRoot.getPaddingLeft()-insetRoot.getPaddingRight();
         int usableHeight=insetRoot.getHeight();
         // Keep the established three-column landscape layout on ordinary phones.
-        boolean compact=usableWidth<dp(700)||(usableWidth<dp(840)&&usableWidth<usableHeight);
-        adaptiveTabs.setVisibility(compact?View.VISIBLE:View.GONE);
+        boolean compact=titleTypingMode||usableWidth<dp(700)||(usableWidth<dp(840)&&usableWidth<usableHeight);
+        adaptiveTabs.setVisibility(compact&&!titleTypingMode?View.VISIBLE:View.GONE);
         float[] weights={29,42,29};
         for(int i=0;i<adaptivePanels.size();i++){
             View panel=adaptivePanels.get(i);LinearLayout.LayoutParams lp=(LinearLayout.LayoutParams)panel.getLayoutParams();
             int width=compact?-1:0;float weight=compact?0:weights[i];
             if(lp.width!=width||lp.weight!=weight){lp.width=width;lp.weight=weight;panel.setLayoutParams(lp);}
-            panel.setVisibility(!compact||i==activePanel?View.VISIBLE:View.GONE);
+            panel.setVisibility(!compact||i==(titleTypingMode?0:activePanel)?View.VISIBLE:View.GONE);
             if(i<adaptiveTabs.getChildCount())adaptiveTabs.getChildAt(i).setSelected(i==activePanel);
         }
     }
@@ -1167,19 +1169,8 @@ public class MainActivity extends Activity {
         return b;
     }
 
-    private void moveSearchField_(LinearLayout from, LinearLayout to, int index,
-                                  LinearLayout.LayoutParams params) {
-        // Keep the same editor, text watcher, composing text and selection.
-        boolean focused = queryField.hasFocus();
-        int start = queryField.getSelectionStart();
-        int end = queryField.getSelectionEnd();
-        from.removeView(queryField);
-        to.addView(queryField,index,params);
-        if (focused) queryField.requestFocus();
-        if (start >= 0 && end >= 0) queryField.setSelection(start,end);
-    }
-
-    private void buildScreen() {
+        private void buildScreen() {
+        titleTypingMode=false;
         String previousQuery = queryField == null ? "" : queryField.getText().toString();
         String previousYear = yearField == null ? "" : yearField.getText().toString();
         String previousSeason = seasonField == null ? "" : seasonField.getText().toString();
@@ -1201,14 +1192,14 @@ public class MainActivity extends Activity {
         keyboardCloseButton=footerButton(english?"Close keyboard":"Tastatur schließen");
         keyboardCloseButton.setTag("closeKeyboard");keyboardCloseButton.setVisibility(View.GONE);
         keyboardCloseButton.setOnClickListener(v->closeSearchKeyboard_());
-        top.addView(keyboardCloseButton,new LinearLayout.LayoutParams(-2,dp(40)));
+        // The keyboard controls stay attached to the search row throughout the session.
         TextView title = text("SerKal", 13, TEXT);
         title.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
         title.setTag("appTitle");
         top.addView(title, new LinearLayout.LayoutParams(0, dp(31), 1));
         Button headerSearch=footerButton(english?"Search":"Suchen");
         headerSearch.setTag("headerSearch");headerSearch.setVisibility(View.GONE);
-        headerSearch.setOnClickListener(v->searchExplicitly_());top.addView(headerSearch,new LinearLayout.LayoutParams(-2,dp(34)));
+        headerSearch.setOnClickListener(v->searchExplicitly_());
         TextView preview = text(BuildConfig.VERSION_NAME, 7.5f, MUTED);
         preview.setGravity(Gravity.CENTER_VERTICAL | Gravity.RIGHT);
         top.addView(preview, new LinearLayout.LayoutParams(-2, dp(31)));
@@ -1231,7 +1222,8 @@ public class MainActivity extends Activity {
         styleTopButton_(theme);
         theme.setOnClickListener(v -> { dark=!dark;getPreferences(0).edit().putBoolean("dark",dark).apply();setPalette();configureFullscreen_();buildScreen(); });
 
-        root.addView(scrollBar_(top),new LinearLayout.LayoutParams(-1,-2));
+        View topBar=scrollBar_(top);
+        root.addView(topBar,new LinearLayout.LayoutParams(-1,-2));
         adaptiveTabs=new LinearLayout(this);adaptiveTabs.setOrientation(LinearLayout.HORIZONTAL);adaptiveTabs.setTag("adaptiveTabs");
         String[] tabs=english?new String[]{"Search","Entry","Archive"}:new String[]{"Suche","Eintrag","Archiv"};
         for(int i=0;i<tabs.length;i++){final int index=i;Button tab=button(tabs[i]);tab.setTag("panelTab"+i);tab.setOnClickListener(v->showPanel_(index));adaptiveTabs.addView(tab);}
@@ -1247,7 +1239,8 @@ public class MainActivity extends Activity {
 
         // Verbindliche Reihenfolge wie am Desktop: Suche – Anzeige/Bearbeitung – Archiv.
         LinearLayout left = panel(29);
-        left.addView(heading(english ? "SEARCH & ENTRY" : "SUCHE & EINTRAG"));
+        View searchHeading=heading(english ? "SEARCH & ENTRY" : "SUCHE & EINTRAG");
+        left.addView(searchHeading);
         LinearLayout searchFields=new LinearLayout(this);searchFields.setOrientation(LinearLayout.HORIZONTAL);searchFields.setGravity(Gravity.CENTER_VERTICAL);
         TextView titleLabel=text(english?"Title":"Titel",9,TEXT);titleLabel.setTypeface(Typeface.DEFAULT,Typeface.BOLD);searchFields.addView(titleLabel,new LinearLayout.LayoutParams(-2,dp(34)));
         queryField = new EditText(new android.view.ContextThemeWrapper(this, dark ? android.R.style.Theme_Material : android.R.style.Theme_Material_Light));
@@ -1282,6 +1275,8 @@ public class MainActivity extends Activity {
         seasonField.setSingleLine(true);seasonField.setInputType(InputType.TYPE_CLASS_NUMBER);seasonField.setTextSize(TypedValue.COMPLEX_UNIT_DIP,9);
         seasonField.setTextColor(TEXT);seasonField.setHintTextColor(MUTED);seasonField.setHint("S");seasonField.setGravity(Gravity.CENTER);
         seasonField.setPadding(dp(2),0,dp(2),0);seasonField.setText(previousSeason);searchFields.addView(seasonField,new LinearLayout.LayoutParams(dp(32),dp(34)));
+        searchFields.addView(keyboardCloseButton,0,new LinearLayout.LayoutParams(-2,dp(34)));
+        searchFields.addView(headerSearch,new LinearLayout.LayoutParams(-2,dp(34)));
         left.addView(searchFields);
         suggestions = new LinearLayout(this);
         suggestions.setOrientation(LinearLayout.VERTICAL);
@@ -1375,25 +1370,28 @@ public class MainActivity extends Activity {
         Button help=footerButton(english?"Help":"Hilfe");help.setTag("help");help.setOnClickListener(v->showHelp());footer.addView(help);
         footer.addView(new View(this),new LinearLayout.LayoutParams(0,1,1));
         Button quitButton=footerButton(english?"Exit SerKal":"SerKal beenden");quitButton.setTag("exitSerKal");quitButton.setOnClickListener(v->exitSerKal());footer.addView(quitButton);
-        root.addView(scrollBar_(footer),new LinearLayout.LayoutParams(-1,dp(36)));
+        View footerBar=scrollBar_(footer);
+        root.addView(footerBar,new LinearLayout.LayoutParams(-1,dp(36)));
         ViewCompat.setOnApplyWindowInsetsListener(root,(view,insets)->{
             boolean keyboardVisible = insets.isVisible(WindowInsetsCompat.Type.ime());
+            boolean typingTitle = keyboardVisible && queryField.hasFocus();
+            titleTypingMode=typingTitle;
             keyboardCloseButton.setVisibility(keyboardVisible ? View.VISIBLE : View.GONE);
-            boolean inHeader = queryField.getParent() == top;
-            if (keyboardVisible && !inHeader && queryField.hasFocus()) {
-                moveSearchField_(searchFields,top,top.indexOfChild(title),new LinearLayout.LayoutParams(0,dp(34),1));
-                title.setVisibility(View.GONE);headerSearch.setVisibility(View.VISIBLE);
-                preview.setVisibility(View.GONE);zoomOut.setVisibility(View.GONE);resetZoom.setVisibility(View.GONE);zoomIn.setVisibility(View.GONE);
-            } else if (!keyboardVisible && inHeader) {
-                moveSearchField_(top,searchFields,1,inlineQueryParams);
-                title.setVisibility(View.VISIBLE);headerSearch.setVisibility(View.GONE);
-                preview.setVisibility(View.VISIBLE);zoomOut.setVisibility(View.VISIBLE);resetZoom.setVisibility(View.VISIBLE);zoomIn.setVisibility(View.VISIBLE);
-            }
+            headerSearch.setVisibility(typingTitle ? View.VISIBLE : View.GONE);
+            // Keep the original editor attached: reparenting interrupts Android's input connection.
+            topBar.setVisibility(typingTitle ? View.GONE : View.VISIBLE);
+            footerBar.setVisibility(typingTitle ? View.GONE : View.VISIBLE);
+            title.setVisibility(typingTitle ? View.GONE : View.VISIBLE);
+            searchHeading.setVisibility(typingTitle ? View.GONE : View.VISIBLE);
+            titleLabel.setVisibility(typingTitle ? View.GONE : View.VISIBLE);
+            yearField.setVisibility(typingTitle ? View.GONE : View.VISIBLE);
+            seasonField.setVisibility(typingTitle ? View.GONE : View.VISIBLE);
             Insets visible = insets.getInsets(WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.ime());
             Insets cutout = insets.getInsetsIgnoringVisibility(WindowInsetsCompat.Type.displayCutout());
             Insets safe = Insets.max(visible,cutout);
             view.setPadding(dp(4)+safe.left,dp(3)+safe.top,dp(4)+safe.right,dp(4)+safe.bottom);
-            adaptPanels_();return insets;
+            adaptPanels_();
+            return insets;
         });
         root.addOnLayoutChangeListener((v,l,t,r,b,ol,ot,or,ob)->{if(r-l!=or-ol||b-t!=ob-ot)adaptPanels_();});
         setContentView(root);ViewCompat.requestApplyInsets(root);root.post(this::adaptPanels_);
