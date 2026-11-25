@@ -871,8 +871,8 @@ public class MainActivity extends Activity {
         keySetupOpen=true;
         android.widget.LinearLayout content=new android.widget.LinearLayout(this);content.setOrientation(android.widget.LinearLayout.VERTICAL);content.setPadding(24,12,24,12);
         TextView explanation=text(english
-            ? "SerKal needs your Google account and your personal TMDB API key. The API key lets SerKal search for series. Request it once from TMDB, then paste it here. Your other devices can use the same key through your Google account. The guide explains each step."
-            : "SerKal braucht dein Google-Konto und deinen persönlichen API-Key von TMDB. Der API-Key ermöglicht die Seriensuche. Beantrage ihn einmal bei TMDB und füge ihn hier ein. Auf deinen weiteren Geräten kann SerKal ihn über dasselbe Google-Konto übernehmen. Die Anleitung erklärt jeden Schritt.",14,TEXT);
+            ? "SerKal needs your Google account and your personal TMDB API key. The API key lets SerKal search for series. Request it once from TMDB, then paste it here. This is not your Google password. Your other devices can use the same key through your Google account. The guide explains each step."
+            : "SerKal braucht dein Google-Konto und deinen persönlichen API-Key von TMDB. Der API-Key ermöglicht die Seriensuche. Beantrage ihn einmal bei TMDB und füge ihn hier ein. Das ist nicht dein Google-Passwort. Auf deinen weiteren Geräten kann SerKal ihn über dasselbe Google-Konto übernehmen. Die Anleitung erklärt jeden Schritt.",14,TEXT);
         content.addView(explanation);
         EditText input = new EditText(new android.view.ContextThemeWrapper(this, dark ? android.R.style.Theme_Material : android.R.style.Theme_Material_Light));
         input.setTextColor(TEXT);input.setHint(english?"TMDB API key or read access token":"API-Key von TMDB oder Lesezugriffstoken");
@@ -888,7 +888,7 @@ public class MainActivity extends Activity {
         keyDialog.show();keyDialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(v->openTmdbPage(true));
         keyDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v->{
             final String candidate=input.getText().toString().trim();
-            if(candidate.isEmpty()){input.setError(english?"Please enter a API key or token.":"Bitte einen API-Key oder Token eingeben.");return;}
+            if(candidate.isEmpty()){input.setError(english?"Please enter an API key or token.":"Bitte einen API-Key oder Token eingeben.");return;}
             final int generation=++requestGeneration;final String keyOwner=googleUser==null?"":googleUser.owner;
             keyDialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
             statusText.setText(english?"Checking key…":"API-Key wird geprüft…");
@@ -1206,6 +1206,9 @@ public class MainActivity extends Activity {
         title.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
         title.setTag("appTitle");
         top.addView(title, new LinearLayout.LayoutParams(0, dp(31), 1));
+        Button headerSearch=footerButton(english?"Search":"Suchen");
+        headerSearch.setTag("headerSearch");headerSearch.setVisibility(View.GONE);
+        headerSearch.setOnClickListener(v->searchExplicitly_());top.addView(headerSearch,new LinearLayout.LayoutParams(-2,dp(34)));
         TextView preview = text(BuildConfig.VERSION_NAME, 7.5f, MUTED);
         preview.setGravity(Gravity.CENTER_VERTICAL | Gravity.RIGHT);
         top.addView(preview, new LinearLayout.LayoutParams(-2, dp(31)));
@@ -1379,11 +1382,11 @@ public class MainActivity extends Activity {
             boolean inHeader = queryField.getParent() == top;
             if (keyboardVisible && !inHeader && queryField.hasFocus()) {
                 moveSearchField_(searchFields,top,top.indexOfChild(title),new LinearLayout.LayoutParams(0,dp(34),1));
-                title.setVisibility(View.GONE);
+                title.setVisibility(View.GONE);headerSearch.setVisibility(View.VISIBLE);
                 preview.setVisibility(View.GONE);zoomOut.setVisibility(View.GONE);resetZoom.setVisibility(View.GONE);zoomIn.setVisibility(View.GONE);
             } else if (!keyboardVisible && inHeader) {
                 moveSearchField_(top,searchFields,1,inlineQueryParams);
-                title.setVisibility(View.VISIBLE);
+                title.setVisibility(View.VISIBLE);headerSearch.setVisibility(View.GONE);
                 preview.setVisibility(View.VISIBLE);zoomOut.setVisibility(View.VISIBLE);resetZoom.setVisibility(View.VISIBLE);zoomIn.setVisibility(View.VISIBLE);
             }
             Insets visible = insets.getInsets(WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.ime());
