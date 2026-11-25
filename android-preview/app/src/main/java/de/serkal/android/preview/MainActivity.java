@@ -52,6 +52,61 @@ public class MainActivity extends Activity {
     private volatile String googleStep = "idle";
     private Runnable googleTimeout;
     private boolean googleWelcomeOpen;
+    private boolean setupActive, driveChecked, calendarChecked, keyChecked, keySetupOpen, keyPrompted;
+    private String setupIssue = "";
+    private AlertDialog setupDialog;
+
+    private boolean setupReady() {
+        return googleUser != null && !googleAccessToken.isEmpty() && calendarChecked && keyChecked
+            && driveChecked;
+    }
+    private void openIntroduction() {
+        openPublicLink(english ? "https://serkal.de/tmdb-help.html" : "https://serkal.de/serkal-einfach-erklaert.html");
+    }
+    private void updateSetup() {
+        if (!setupActive || googleWelcomeOpen || keySetupOpen || archiveDialogOpen || isFinishing() || isDestroyed()) return;
+        if (setupReady()) {
+            if (setupDialog != null) setupDialog.dismiss();
+            setupActive = false;
+            return;
+        }
+        boolean connected = googleUser != null && !googleAccessToken.isEmpty();
+        boolean drive = connected && driveChecked;
+        boolean checking = googleBusy;
+        String message = (english ? "1. Google account\n" : "1. Google-Konto\n") + (connected ? "✓ " : "○ ") + (english ? "Google account" : "Google-Konto") +
+            (connected ? ": " + googleUser.email : "") +
+            "\n" + (drive ? "✓ " : "○ ") + "Google Drive" +
+            "\n" + (calendarChecked ? "✓ " : "○ ") + (english ? "Google Calendar" : "Google Kalender") +
+            "\n\n" + (english ? "2. TMDB\n" : "2. TMDB\n") + (keyChecked ? "✓ " : "○ ") + (english ? "TMDB API key" : "API-Key von TMDB") +
+            "\n\n" + (checking ? (english ? "Checking requirements…" : "Voraussetzungen werden geprüft…") :
+                !setupIssue.isEmpty() ? setupIssue :
+                connected && !keyChecked ? (english ? "Set up your API key to search for series." :
+                    "Richte deinen API-Key ein, damit du Serien suchen kannst.") :
+                (english ? "Connect Google and grant the required access." :
+                    "Verbinde Google und erlaube den erforderlichen Zugriff."));
+        if (setupDialog == null || !setupDialog.isShowing()) {
+            setupDialog = dialogBuilder().setTitle(english ? "Set up SerKal" : "SerKal einrichten")
+                .setMessage(message).setCancelable(false)
+                .setPositiveButton(english ? "Continue" : "Weiter",null)
+                .setNeutralButton(english ? "Help" : "Hilfe",null)
+                .setNegativeButton(english ? "Exit" : "Beenden",(d,w)->exitSerKal()).create();
+            setupDialog.show();
+            setupDialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(v->openIntroduction());
+        } else setupDialog.setMessage(message);
+        Button next = setupDialog.getButton(AlertDialog.BUTTON_POSITIVE);
+        boolean keyStep = connected && drive && calendarChecked && !keyChecked;
+        if (keyStep && !checking && !keyPrompted) {
+            keyPrompted=true; setupDialog.dismiss(); handler.post(this::askForKey); return;
+        }
+        next.setText(keyStep ? (english ? "Set up API key" : "API-Key einrichten") :
+            (english ? "Connect Google" : "Google verbinden"));
+        next.setEnabled(!checking);
+        next.setOnClickListener(v->{
+            setupDialog.dismiss();
+            if (keyStep) askForKey(); else connectGoogle(true);
+        });
+    }
+
 
     private void googleTrace(String event) {
         GoogleHttpFailure.event(this,event,googleGeneration,googleStep,
@@ -84,12 +139,13 @@ public class MainActivity extends Activity {
         googleWelcomeOpen=true;
         AlertDialog welcome=dialogBuilder().setTitle(english?"Welcome to SerKal":"Willkommen bei SerKal")
             .setMessage(english
-                ? "SerKal connects to your Google account to use your own archive and calendar.\n\nGoogle Drive: stores your SerKal archive and TMDB key in SerKal's hidden app-data area for use on your devices. This permission does not grant access to your other Drive documents.\n\nGoogle Calendar: reads your calendar list and creates and updates calendars and series events created by SerKal.\n\nYour account ID and email associate the archive with your account. You grant access directly to the app on this device. You can connect later through Menu > Google account."
-                : "SerKal verbindet sich mit deinem Google-Konto, um dein eigenes Archiv und deinen Kalender zu nutzen.\n\nGoogle Drive: speichert dein SerKal-Archiv und deinen TMDB-Schlüssel im verborgenen App-Datenbereich von SerKal für deine Geräte. Diese Berechtigung gibt keinen Zugriff auf deine anderen Drive-Dokumente.\n\nGoogle Kalender: liest deine Kalenderliste und erstellt und aktualisiert von SerKal angelegte Kalender und Serientermine.\n\nKontokennung und E-Mail ordnen das Archiv deinem Konto zu. Du erteilst den Zugriff direkt der App auf diesem Gerät. Später verbinden geht über Menü > Google-Konto.")
+                ? "SerKal connects to your Google account to use your own archive and calendar.\n\nGoogle Drive: stores your SerKal archive and API key in SerKal's hidden app-data area for use on your devices. This permission does not grant access to your other Drive documents.\n\nGoogle Calendar: reads your calendar list and creates and updates calendars and series events created by SerKal.\n\nYour account ID and email associate the archive with your account. You grant access directly to the app on this device. SerKal needs both your Google account and TMDB API key."
+                : "SerKal verbindet sich mit deinem Google-Konto, um dein eigenes Archiv und deinen Kalender zu nutzen.\n\nGoogle Drive: speichert dein SerKal-Archiv und deinen API-Key im verborgenen App-Datenbereich von SerKal für deine Geräte. Diese Berechtigung gibt keinen Zugriff auf deine anderen Drive-Dokumente.\n\nGoogle Kalender: liest deine Kalenderliste und erstellt und aktualisiert von SerKal angelegte Kalender und Serientermine.\n\nKontokennung und E-Mail ordnen das Archiv deinem Konto zu. Du erteilst den Zugriff direkt der App auf diesem Gerät. Ohne Google-Konto und API-Key von TMDB kann SerKal nicht vollständig arbeiten.")
             .setPositiveButton(english?"Continue to Google":"Weiter zu Google",(d,w)->{
-                getPreferences(0).edit().putBoolean("googleWelcomeAccepted",true).apply();connectGoogle(chooseAccount);
+                getPreferences(0).edit().putBoolean("googleWelcomeAccepted",true).apply();handler.post(()->connectGoogle(chooseAccount));
             })
-            .setNegativeButton(english?"Later":"Später",(d,w)->restoreLocalArchive())
+            .setCancelable(false)
+            .setNegativeButton(english?"Exit":"Beenden",(d,w)->exitSerKal())
             .setNeutralButton(english?"Privacy policy":"Datenschutz",null)
             .setOnDismissListener(d->googleWelcomeOpen=false).create();
         welcome.show();
@@ -121,6 +177,7 @@ public class MainActivity extends Activity {
         googleTrace("CANCELLED");stopGoogleTimeout();
         getPreferences(0).edit().putBoolean("googleAttemptPending",false).apply();
         googleGeneration++; googleBusy=false;
+        setupIssue = english ? "Google connection cancelled." : "Google-Verbindung abgebrochen."; handler.post(this::updateSetup);
         if(googleUser==null)restoreLocalArchive();else if(!googleAccessToken.isEmpty())loadArchive();
         statusText.setText(english?"Google connection cancelled. Your local archive is unchanged.":"Google-Verbindung abgebrochen. Dein lokales Archiv bleibt unverändert.");
     }
@@ -170,6 +227,8 @@ public class MainActivity extends Activity {
         if(!getPreferences(0).getBoolean("googleWelcomeAccepted",false)){showGoogleWelcome(chooseAccount);return;}
         // Keep the current account, local archive and selection until a new login succeeds.
         googleBusy = true;
+        setupActive = true; driveChecked = false; calendarChecked = false; keyChecked = false; keyPrompted = false; setupIssue = "";
+        updateSetup();
         final int generation = ++googleGeneration;
         pendingGoogleGeneration = generation;
         googleStarted=android.os.SystemClock.elapsedRealtime();
@@ -210,7 +269,7 @@ public class MainActivity extends Activity {
 
     private void useGoogleResult(AuthorizationResult result, int generation) {
         if(generation!=googleGeneration || !googleBusy || isFinishing())return;
-        googleStage("permissions_returned",60000);
+        googleStage("permissions_returned",180000);
         googleTrace(result.getGrantedScopes().contains("https://www.googleapis.com/auth/calendar.app.created")?"CALENDAR_PERMISSION_GRANTED":"CALENDAR_PERMISSION_NOT_GRANTED");
         if (!result.getGrantedScopes().contains("https://www.googleapis.com/auth/drive.appdata")
             || !result.getGrantedScopes().contains("https://www.googleapis.com/auth/calendar.app.created")
@@ -232,14 +291,43 @@ public class MainActivity extends Activity {
                 try{value=client.load(user);googleTrace("DRIVE_KEY_OK");}catch(Exception failure){value=user;keyProblem=failure;googleTrace("DRIVE_KEY_FAILED");}
                 if(generation!=googleGeneration || isFinishing())return;
                 final SharedKeyClient.Result loaded=value;final Exception keyFailure=keyProblem;
-                String cached = loaded.key.isEmpty() ? KeyCache.load(this, user.owner) : "";
-                if (!loaded.key.isEmpty()) {
-                    googleTrace("TMDB_VALIDATE_REQUEST");
-                    new TmdbClient(loaded.key).validate();
-                    googleTrace("TMDB_VALIDATE_OK");
-                    if(generation!=googleGeneration || isFinishing())return;
-                    KeyCache.save(this, user.owner, loaded.key);
+                String candidate = loaded.key.isEmpty() ? KeyCache.load(this,user.owner) : loaded.key;
+                String validKey = "";
+                boolean calendarOK = false;
+                boolean driveOK = false;
+                String issue = "";
+                try {
+                    new ArchiveCopyClient(accessToken).get("https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&pageSize=1&fields=files(id)");
+                    driveOK = true;
+                } catch (Exception failure) {
+                    GoogleHttpFailure.record(this,failure);
+                    issue = english ? "Google Drive could not be reached. See Log." : "Google Drive konnte nicht erreicht werden. Details stehen im Log.";
                 }
+                try {
+                    googleTrace("CALENDAR_CHECK");
+                    new ArchiveCopyClient(accessToken).get("https://www.googleapis.com/calendar/v3/users/me/calendarList?maxResults=1");
+                    calendarOK = true;
+                } catch (Exception failure) {
+                    GoogleHttpFailure.record(this,failure);
+                    issue = english ? "Google Calendar could not be reached. See Log." : "Google Kalender konnte nicht erreicht werden. Details stehen im Log.";
+                }
+                if (!candidate.isEmpty()) {
+                    try {
+                        googleTrace("TMDB_VALIDATE_REQUEST");
+                        tmdbClient(candidate).validate();
+                        if(generation!=googleGeneration || isFinishing())return;
+                        KeyCache.save(this,user.owner,candidate);
+                        validKey = candidate;
+                        googleTrace("TMDB_VALIDATE_OK");
+                    } catch(Exception failure) {
+                        googleTrace("TMDB_VALIDATE_FAILED");
+                        if(issue.isEmpty()) issue = english ? "API key could not be verified." : "API-Key konnte nicht geprüft werden.";
+                    }
+                }
+                final String checkedKey = validKey;
+                final boolean checkedCalendar = calendarOK;
+                final boolean checkedDrive = driveOK;
+                final String checkedIssue = issue;
                 handler.post(() -> {
                     if (generation != googleGeneration || isFinishing()) return;
                     googleTrace("CONNECTED");stopGoogleTimeout();
@@ -256,18 +344,17 @@ public class MainActivity extends Activity {
                     getPreferences(0).edit().putString("lastOwner",user.owner).putString("lastEmail",user.email).apply();
                     loadArchive();
                     if(keyFailure!=null){GoogleHttpFailure.record(this,keyFailure);if(archiveCopy!=null)archiveCopy.recordFailure(keyFailure);}
-                    if (!loaded.key.isEmpty()) {
-                        credential = loaded.key;
-                        statusText.setText(user.email + (english ? "\nTMDB key adopted automatically." : "\nTMDB-Schlüssel automatisch übernommen."));
-                        if (queryField.getText().length() >= 2) searchNow();
-                    } else if (!cached.isEmpty()) {
-                        if(keyFailure==null)confirmPublish(cached);
-                        else{credential=cached;statusText.setText(user.email+"\n"+keyFailure.getMessage());}
-                    } else {
-                        statusText.setText(user.email + (english
-                            ? "\nNo shared key yet. Enter or paste your TMDB key using API key."
-                            : "\nNoch kein gemeinsamer Schlüssel. Deinen TMDB-Schlüssel mit API-Key eingeben oder einfügen."));
-                    }
+                    credential = checkedKey;
+                    driveChecked = checkedDrive;
+                    calendarChecked = checkedCalendar;
+                    keyChecked = !checkedKey.isEmpty();
+                    setupIssue = checkedIssue;
+                    statusText.setText(user.email + (keyChecked ?
+                        (english ? "\nAPI key verified." : "\nAPI-Key geprüft.") :
+                        (english ? "\nSet up your API key." : "\nBitte API-Key einrichten.")));
+                    updateSetup();
+                    if (keyChecked && loaded.key.isEmpty() && keyFailure==null && setupReady()) confirmPublish(checkedKey);
+
                 });
             } catch (Exception error) {
                 handler.post(() -> { if (generation == googleGeneration) googleFailure(error); });
@@ -278,11 +365,11 @@ public class MainActivity extends Activity {
     private void confirmPublish(String key) {
         if (googleUser == null || googleAccessToken.isEmpty()) return;
         archiveDialogOpen=true;
-        dialogBuilder().setTitle(english ? "Share TMDB key" : "TMDB-Schlüssel bereitstellen")
+        dialogBuilder().setTitle(english ? "Share API key" : "API-Key bereitstellen")
             .setMessage(googleUser.email + (english ? "\nUse this key for your other SerKal installations?"
-                : "\nDiesen Schlüssel für deine weiteren SerKal-Installationen bereitstellen?"))
+                : "\nDiesen API-Key für deine weiteren SerKal-Installationen bereitstellen?"))
             .setPositiveButton(english ? "Share" : "Bereitstellen", (dialog, which) -> publishKey(key))
-            .setNegativeButton(english ? "Cancel" : "Abbrechen", null).setOnDismissListener(_closedDialog -> archiveDialogOpen=false).show();
+            .setNegativeButton(english ? "Cancel" : "Abbrechen", null).setOnDismissListener(_closedDialog -> {archiveDialogOpen=false;handler.post(this::updateSetup);}).show();
     }
 
     private void publishKey(String key) {
@@ -298,7 +385,7 @@ public class MainActivity extends Activity {
                 handler.post(() -> {
                     if (generation != googleGeneration || isFinishing()) return;
                     googleBusy = false; credential = result.key;
-                    statusText.setText(result.email + (english ? "\nKey ready for your other devices." : "\nSchlüssel für deine anderen Geräte bereit."));
+                    statusText.setText(result.email + (english ? "\nKey ready for your other devices." : "\nAPI-Key für deine anderen Geräte bereit."));
                 });
             } catch(Exception error) { handler.post(() -> { if(generation==googleGeneration) googleFailure(error); }); }
         });
@@ -317,16 +404,19 @@ public class MainActivity extends Activity {
         else if(code.contains("GOOGLE_PERMISSION_MISSING"))message=english
             ? "Required Google permissions are missing. Open Menu > Google account and grant SerKal access to its app data and calendars."
             : "Erforderliche Google-Berechtigungen fehlen. Öffne Menü > Google-Konto und erlaube SerKal den Zugriff auf seine App-Daten und Kalender.";
-        else if (code.contains("SHARED_KEY_CONFLICT")) message = english ? "Different shared keys found. Nothing overwritten."
-            : "Unterschiedliche gemeinsame Schlüssel gefunden. Nichts überschrieben.";
+        else if (code.contains("SHARED_KEY_CONFLICT")) message = english ? "Different API keys found. Nothing overwritten."
+            : "Unterschiedliche API-Keys gefunden. Nichts überschrieben.";
         else if (code.contains("GOOGLE_HTTP_403")) message = english ? "Google denied access. Check Drive API and app-data permission."
             : "Google verweigert Zugriff. Drive-API und App-Daten-Berechtigung prüfen.";
         else if (error instanceof ApiException) message = (english ? "Google setup error " : "Google-Einrichtungsfehler ")
             + ((ApiException)error).getStatusCode() + (english ? ". Check Android OAuth package and signing SHA-1." : ". Android-OAuth-Paket und Signatur-SHA-1 prüfen.");
-        else message = english ? "Google/key connection failed. Please retry." : "Google-/Schlüsselverbindung fehlgeschlagen. Bitte erneut versuchen.";
+        else message = english ? "Google connection failed. Please retry. See Log for details." : "Google-Verbindung fehlgeschlagen. Bitte erneut versuchen. Details stehen im Log.";
         if(googleUser==null)restoreLocalArchive();else if(!googleAccessToken.isEmpty())loadArchive();
         if(archiveCopy!=null)archiveCopy.recordFailure(error);
+        String stage = googleStep.equals("authorize") || googleStep.equals("account_and_permissions") ? (english?"Google sign-in and permissions":"Google-Anmeldung und Berechtigungen") : (english?"Checking Google services":"Prüfung der Google-Dienste");
+        message = stage + ": " + message;
         statusText.setText(message+"\n"+(english?"Full Google response is in Log.":"Die vollständige Google-Antwort steht im Log."));
+        setupActive = true; setupIssue = message; updateSetup();
     }
     private void restoreLocalArchive() {
         String owner=getPreferences(0).getString("lastOwner","");if(owner.isEmpty())return;
@@ -445,6 +535,7 @@ public class MainActivity extends Activity {
         if(archiveCopy==null || googleUser==null || !archiveCopy.owner.equals(googleUser.owner) || isFinishing())return;
         try {JSONObject local=archiveCopy.snapshot();if(local!=null){archiveSnapshot=local;archiveError="";renderArchive();}}catch(Exception error){archiveError=String.valueOf(error.getMessage());renderArchive();}
         String code=archiveCopy.status();String label;
+        updateSetup();
         if(code.equals("saved"))label=archiveCopy.calendarIncomplete()?(english?"Archive saved · Calendar update pending at exit":"Archiv gespeichert · Kalenderabgleich beim Beenden noch offen"):(english ? "No changes · exit without transfer" : "Keine Änderungen · Beenden ohne Übertragung");
         else if(code.equals("authority-pending"))label=english ? "This device is locally set as authoritative · Google confirmation is pending" : "Dieser Rechner ist lokal als maßgeblich festgelegt · Google-Bestätigung steht aus";
         else if(code.equals("authority-applied"))label=english ? "The authoritative Google archive was applied. Local differences were replaced." : "Der verbindliche Google-Archivstand wurde übernommen. Abweichende lokale Einträge wurden ersetzt.";
@@ -629,6 +720,7 @@ public class MainActivity extends Activity {
                 ? "Enter a series title; year and season are optional. Choose a result, then Add to archive. After saving, the fields are cleared for the next series.\n\nTap an archive entry to view it. Edit opens notes, watched status and deletion. Google and TMDB settings are in the archive menu."
                 : "Serientitel eingeben; Jahr und Staffel sind optional. Einen Treffer auswählen und mit Ins Archiv übernehmen. Nach dem Speichern sind die Felder für die nächste Serie wieder leer.\n\nEinen Archiveintrag zum Anzeigen antippen. Bearbeiten öffnet Notizen, Gesehen-Status und Löschen. Google- und TMDB-Einstellungen stehen im Archivmenü.")
             .setNeutralButton(english?"Privacy policy":"Datenschutz",(d,w)->openPrivacy())
+            .setNegativeButton(english?"Setup guide":"SerKal einfach erklärt",(d,w)->openIntroduction())
             .setPositiveButton(english?"Close":"Schließen",null).show();
     }
 
@@ -775,47 +867,50 @@ public class MainActivity extends Activity {
         catch(Exception error){statusText.setText((english?"Open in your browser: ":"Im Browser öffnen: ")+url);}
     }
     private void askForKey() {
+        if (keySetupOpen) return;
+        keySetupOpen=true;
         android.widget.LinearLayout content=new android.widget.LinearLayout(this);content.setOrientation(android.widget.LinearLayout.VERTICAL);content.setPadding(24,12,24,12);
         TextView explanation=text(english
-            ? "SerKal uses TMDB to find series, seasons and episode dates. Enter your personal TMDB API key or API read access token. This is not your Google password.\n\nOpen TMDB to obtain your key; Help explains the steps. A valid saved key should be retained when you update the app. Google sharing lets your own SerKal installations use the same key."
-            : "SerKal verwendet TMDB für Serien, Staffeln und Folgentermine. Gib deinen persönlichen TMDB-API-Key oder API-Lesezugriffstoken ein. Gemeint ist nicht dein Google-Passwort.\n\nÜber TMDB kannst du den Schlüssel anfordern; die Hilfe erklärt die Schritte. Ein gültig gespeicherter Schlüssel soll bei einem App-Update erhalten bleiben. Über Google können deine eigenen SerKal-Installationen denselben Schlüssel verwenden.",14,TEXT);
+            ? "SerKal needs your Google account and your personal TMDB API key. The API key lets SerKal search for series. Request it once from TMDB, then paste it here. Your other devices can use the same key through your Google account. The guide explains each step."
+            : "SerKal braucht dein Google-Konto und deinen persönlichen API-Key von TMDB. Der API-Key ermöglicht die Seriensuche. Beantrage ihn einmal bei TMDB und füge ihn hier ein. Auf deinen weiteren Geräten kann SerKal ihn über dasselbe Google-Konto übernehmen. Die Anleitung erklärt jeden Schritt.",14,TEXT);
         content.addView(explanation);
         EditText input = new EditText(new android.view.ContextThemeWrapper(this, dark ? android.R.style.Theme_Material : android.R.style.Theme_Material_Light));
-        input.setTextColor(TEXT);input.setHint(english?"TMDB API key or read access token":"TMDB-API-Key oder Lesezugriffstoken");
+        input.setTextColor(TEXT);input.setHint(english?"TMDB API key or read access token":"API-Key von TMDB oder Lesezugriffstoken");
         input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);content.addView(input);
-        android.widget.Button create=new android.widget.Button(this);create.setText(english?"Open TMDB key settings":"TMDB-Schlüssel anfordern");create.setOnClickListener(v->openTmdbPage(false));content.addView(create);
+        android.widget.Button create=new android.widget.Button(this);create.setText(english?"Open API key guide":"API-Key anfordern");create.setOnClickListener(v->openTmdbPage(true));content.addView(create);
         ScrollView scroll=new ScrollView(this);scroll.addView(content);
         archiveDialogOpen=true;
         AlertDialog keyDialog=dialogBuilder().setTitle(english?"Set up TMDB":"TMDB einrichten").setView(scroll)
             .setPositiveButton(english?"Check":"Prüfen",null)
             .setNeutralButton(english?"Open Help":"Hilfe öffnen",null)
             .setNegativeButton(english?"Cancel":"Abbrechen",null)
-            .setOnDismissListener(d->archiveDialogOpen=false).create();
+            .setOnDismissListener(d->{archiveDialogOpen=false;keySetupOpen=false;handler.post(this::updateSetup);}).create();
         keyDialog.show();keyDialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(v->openTmdbPage(true));
         keyDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v->{
             final String candidate=input.getText().toString().trim();
-            if(candidate.isEmpty()){input.setError(english?"Please enter a TMDB key or token.":"Bitte einen TMDB-Schlüssel oder Token eingeben.");return;}
+            if(candidate.isEmpty()){input.setError(english?"Please enter a API key or token.":"Bitte einen API-Key oder Token eingeben.");return;}
             final int generation=++requestGeneration;final String keyOwner=googleUser==null?"":googleUser.owner;
             keyDialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
-            statusText.setText(english?"Checking key…":"Schlüssel wird geprüft…");
+            statusText.setText(english?"Checking key…":"API-Key wird geprüft…");
             network.execute(()->{
                 try{
                     tmdbClient(candidate).validate();
                     handler.post(()->{
                         if(generation!=requestGeneration||isFinishing()||!keyDialog.isShowing())return;
                         try{if(!keyOwner.isEmpty())KeyCache.save(this,keyOwner,candidate);}
-                        catch(Exception saveError){keyDialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true);input.setError(english?"Key could not be saved. Please retry.":"Schlüssel konnte nicht gespeichert werden. Bitte erneut versuchen.");return;}
-                        credential=candidate;keyDialog.dismiss();
-                        statusText.setText(english?"Key accepted. Enter a series.":"Schlüssel gültig. Serie eingeben.");
-                        if(googleUser!=null)confirmPublish(candidate);
+                        catch(Exception saveError){keyDialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true);input.setError(english?"Key could not be saved. Please retry.":"API-Key konnte nicht gespeichert werden. Bitte erneut versuchen.");return;}
+                        credential=candidate;keyChecked=true;setupIssue="";keyDialog.dismiss();
+                        updateSetup();
+                        statusText.setText(english?"Key accepted. Enter a series.":"API-Key gültig. Serie eingeben.");
+                        if(googleUser!=null && !googleAccessToken.isEmpty()) confirmPublish(candidate);
                         if(queryField.getText().length()>=2)searchNow();
                     });
                 }catch(Exception error){
                     handler.post(()->{
                         if(generation!=requestGeneration||isFinishing()||!keyDialog.isShowing())return;
                         keyDialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true);
-                        input.setError("KEY".equals(error.getMessage())?(english?"Key rejected. Please check it.":"Schlüssel abgelehnt. Bitte prüfen.")
-                            :(english?"Could not verify or save the key. Please retry.":"Schlüssel konnte nicht geprüft oder gespeichert werden. Bitte erneut versuchen."));
+                        input.setError("KEY".equals(error.getMessage())?(english?"Key rejected. Please check it.":"API-Key abgelehnt. Bitte prüfen.")
+                            :(english?"Could not verify or save the key. Please retry.":"API-Key konnte nicht geprüft oder gespeichert werden. Bitte erneut versuchen."));
                     });
                     showNetworkError(generation,error);
                 }
@@ -828,7 +923,7 @@ public class MainActivity extends Activity {
         handler.post(() -> {
             if (generation != requestGeneration) return;
             statusText.setText("KEY".equals(code)
-                ? (english ? "TMDB key rejected. Check the key." : "TMDB-Schlüssel abgelehnt. Bitte prüfen.")
+                ? (english ? "API key rejected. Check the key." : "API-Key abgelehnt. Bitte prüfen.")
                 : (english ? "TMDB unavailable. Please retry." : "TMDB nicht erreichbar. Bitte erneut versuchen."));
         });
     }
@@ -858,6 +953,7 @@ public class MainActivity extends Activity {
         selectedInfo.setText("");
         if (query.length() < 2) return;
         if(!year.isEmpty() && !year.matches("\\d{4}")){statusText.setText(english?"Enter a four-digit year or leave it blank.":"Bitte ein vierstelliges Jahr eingeben oder das Feld leeren.");return;}
+        if (setupActive && !setupReady()) { updateSetup(); return; }
         if (credential.isEmpty()) { askForKey(); return; }
         final String key = credential;
         statusText.setText(english ? "Searching…" : "Suche läuft…");
@@ -1153,6 +1249,7 @@ public class MainActivity extends Activity {
         TextView titleLabel=text(english?"Title":"Titel",9,TEXT);titleLabel.setTypeface(Typeface.DEFAULT,Typeface.BOLD);searchFields.addView(titleLabel,new LinearLayout.LayoutParams(-2,dp(34)));
         queryField = new EditText(new android.view.ContextThemeWrapper(this, dark ? android.R.style.Theme_Material : android.R.style.Theme_Material_Light));
         queryField.setSingleLine(true);
+        queryField.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
         queryField.setTag("seriesTitleInput");
         // Keep the real title field and suggestions visible in landscape.
         queryField.setImeOptions(android.view.inputmethod.EditorInfo.IME_FLAG_NO_EXTRACT_UI
@@ -1188,7 +1285,7 @@ public class MainActivity extends Activity {
         ScrollView resultsScroll = new ScrollView(this);
         resultsScroll.addView(suggestions);
         left.addView(resultsScroll, new LinearLayout.LayoutParams(-1, 0, 1));
-        statusText = text(english ? "TMDB key required." : "TMDB-Schlüssel erforderlich.", 9, MUTED);
+        statusText = text(english ? "API key required." : "API-Key erforderlich.", 9, MUTED);
         left.addView(statusText);
         queryField.addTextChangedListener(new TextWatcher() {
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -1283,9 +1380,11 @@ public class MainActivity extends Activity {
             if (keyboardVisible && !inHeader && queryField.hasFocus()) {
                 moveSearchField_(searchFields,top,top.indexOfChild(title),new LinearLayout.LayoutParams(0,dp(34),1));
                 title.setVisibility(View.GONE);
+                preview.setVisibility(View.GONE);zoomOut.setVisibility(View.GONE);resetZoom.setVisibility(View.GONE);zoomIn.setVisibility(View.GONE);
             } else if (!keyboardVisible && inHeader) {
                 moveSearchField_(top,searchFields,1,inlineQueryParams);
                 title.setVisibility(View.VISIBLE);
+                preview.setVisibility(View.VISIBLE);zoomOut.setVisibility(View.VISIBLE);resetZoom.setVisibility(View.VISIBLE);zoomIn.setVisibility(View.VISIBLE);
             }
             Insets visible = insets.getInsets(WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.ime());
             Insets cutout = insets.getInsetsIgnoringVisibility(WindowInsetsCompat.Type.displayCutout());
