@@ -149,6 +149,7 @@ public class MainActivity extends Activity {
             .setNegativeButton(english?"Try demo":"Demo ausprobieren",(d,w)->handler.post(()->showReviewDemo(chooseAccount)))
             .setNeutralButton(english?"Privacy policy":"Datenschutz",null)
             .setOnDismissListener(d->googleWelcomeOpen=false).create();
+        welcome.setCanceledOnTouchOutside(false);
         welcome.show();
         welcome.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(v->openPrivacy());
     }
@@ -164,6 +165,9 @@ public class MainActivity extends Activity {
             ? "Try a series search, save a sample season and view its calendar dates. The demo uses fictional local data."
             : "Suche eine Serie, speichere eine Beispielstaffel und sieh dir ihre Kalendertermine an. Die Demo verwendet erfundene, lokale Daten.", 14, TEXT);
         content.addView(intro);
+        content.addView(text(english
+            ? "Sample titles: Harbor Lights, Moon Station, Forest Trails."
+            : "Beispieltitel: Hafenlichter, Mondstation, Waldpfade.", 14, TEXT));
 
         EditText query = new EditText(new android.view.ContextThemeWrapper(this,
             dark ? android.R.style.Theme_Material : android.R.style.Theme_Material_Light));
@@ -180,7 +184,14 @@ public class MainActivity extends Activity {
         TextView result = text("", 14, TEXT);
         TextView archive = text("", 14, TEXT);
         TextView dates = text("", 14, TEXT);
-        String sample = english ? "Harbor Lights (2026), season 1" : "Hafenlichter (2026), Staffel 1";
+        String[] samples = english
+            ? new String[]{"Harbor Lights (2026), season 1", "Moon Station (2027), season 2", "Forest Trails (2027), season 1"}
+            : new String[]{"Hafenlichter (2026), Staffel 1", "Mondstation (2027), Staffel 2", "Waldpfade (2027), Staffel 1"};
+        String[][] episodeDates = english
+            ? new String[][]{{"10 February", "17 February"}, {"8 March", "15 March"}, {"2 April", "9 April"}}
+            : new String[][]{{"10. Februar", "17. Februar"}, {"8. März", "15. März"}, {"2. April", "9. April"}};
+        java.util.Set<Integer> saved = new java.util.LinkedHashSet<>();
+        int[] selected = {-1};
 
         content.addView(search);
         content.addView(result);
@@ -189,20 +200,38 @@ public class MainActivity extends Activity {
         content.addView(calendar);
         content.addView(dates);
         content.addView(remove);
-        add.setEnabled(false);
-        calendar.setEnabled(false);
-        remove.setEnabled(false);
-        archive.setText(english ? "Sample archive is empty." : "Das Beispielarchiv ist leer.");
+        Runnable refreshArchive = () -> {
+            StringBuilder list = new StringBuilder(english ? "Sample archive" : "Beispielarchiv");
+            for (int index : saved) list.append('\n').append(samples[index]);
+            archive.setText(saved.isEmpty()
+                ? (english ? "Sample archive is empty." : "Das Beispielarchiv ist leer.")
+                : list.toString());
+            boolean selectedIsSaved = saved.contains(selected[0]);
+            add.setEnabled(selected[0] >= 0 && !selectedIsSaved);
+            calendar.setEnabled(selectedIsSaved);
+            remove.setEnabled(selectedIsSaved);
+        };
+        refreshArchive.run();
 
         Runnable runSearch = () -> {
             String input = query.getText().toString().trim().toLowerCase(java.util.Locale.ROOT);
-            boolean found = !input.isEmpty() && sample.toLowerCase(java.util.Locale.ROOT).contains(input);
-            result.setText(found ? sample : (english ? "No match. Try Harbor." : "Kein Treffer. Versuche Hafen."));
-            add.setEnabled(found && !remove.isEnabled());
+            selected[0] = -1;
+            if (!input.isEmpty()) {
+                for (int index = 0; index < samples.length; index++) {
+                    if (samples[index].toLowerCase(java.util.Locale.ROOT).contains(input)) {
+                        selected[0] = index;
+                        break;
+                    }
+                }
+            }
+            result.setText(selected[0] >= 0 ? samples[selected[0]]
+                : (english ? "No match. Try a sample title above." : "Kein Treffer. Versuche einen der Beispieltitel oben."));
+            dates.setText("");
+            refreshArchive.run();
             android.view.inputmethod.InputMethodManager keyboard =
                 (android.view.inputmethod.InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
             if (keyboard != null) keyboard.hideSoftInputFromWindow(query.getWindowToken(), 0);
-            query.clearFocus();
+            content.requestFocus();
         };
         search.setOnClickListener(view -> runSearch.run());
         query.setImeOptions(android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH);
@@ -212,20 +241,22 @@ public class MainActivity extends Activity {
             return true;
         });
         add.setOnClickListener(view -> {
-            archive.setText((english ? "Sample archive: " : "Beispielarchiv: ") + sample);
-            add.setEnabled(false);
-            calendar.setEnabled(true);
-            remove.setEnabled(true);
+            if (selected[0] >= 0) saved.add(selected[0]);
+            refreshArchive.run();
         });
-        calendar.setOnClickListener(view -> dates.setText(english
-            ? "Sample dates\nEpisode 1 · 10 February 2027\nEpisode 2 · 17 February 2027"
-            : "Beispieltermine\nFolge 1 · 10. Februar 2027\nFolge 2 · 17. Februar 2027"));
+        calendar.setOnClickListener(view -> {
+            int index = selected[0];
+            if (saved.contains(index)) {
+                String heading = english ? "Sample dates" : "Beispieltermine";
+                String episode = english ? "Episode" : "Folge";
+                dates.setText(heading + "\n" + episode + " 1 · " + episodeDates[index][0]
+                    + " 2027\n" + episode + " 2 · " + episodeDates[index][1] + " 2027");
+            }
+        });
         remove.setOnClickListener(view -> {
-            archive.setText(english ? "Sample archive is empty." : "Das Beispielarchiv ist leer.");
+            saved.remove(selected[0]);
             dates.setText("");
-            calendar.setEnabled(false);
-            remove.setEnabled(false);
-            add.setEnabled(sample.contentEquals(result.getText()));
+            refreshArchive.run();
         });
 
         ScrollView scroll = new ScrollView(this);
@@ -238,6 +269,7 @@ public class MainActivity extends Activity {
             .setOnDismissListener(dialog -> {
                 if (!isFinishing() && !isDestroyed()) showGoogleWelcome(chooseAccount);
             }).create();
+        demo.setCanceledOnTouchOutside(false);
         demo.show();
         if (demo.getWindow() != null) demo.getWindow().setSoftInputMode(
             WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
