@@ -341,7 +341,7 @@ Google Play Support (Fall 5-6232000041755) kann den blockierten Anmeldeversuch k
 
 ### 26.11.2026 · Android 1.2.10 / Code 56 · Play-Build
 
-Kurts Tablet-Abnahme von R3 ist erteilt. Der reguläre Folge-Build enthält dieselbe Prüferdemo und die Korrektur der doppelten Suchen-Schaltfläche. Paket-ID `de.serkal.android.preview.v005`, Archivformat 38. [Quellcommit 540da68](https://github.com/KurtV731/serkal_desktop/commit/540da68d306d2b8989cf31d0aa4aa581e3e4e3f6), Zweig `ce-android-1.2.10`. Installer3 erhält die Freigabe zur Signierung nach grünem Bundle-Lauf für genau diesen Commit. Kurts Freigabe gilt der Übergabe. Der Folge-Build wird für Play vorbereitet; die laufende Testrunde wird damit nicht automatisch umgestellt.
+Kurts Tablet-Abnahme von R3 ist erteilt. Der reguläre Folge-Build enthält dieselbe Prüferdemo und die Korrektur der doppelten Suchen-Schaltfläche. Paket-ID `de.serkal.android.preview.v005`, Archivformat 38. [Quellcommit 540da68](https://github.com/KurtV731/serkal_desktop/commit/540da68d306d2b8989cf31d0aa4aa581e3e4e3f6), Zweig `ce-android-1.2.10`. **CE-Freigabe an Installer3 zur Signierung:** CI-Regressionstests und Bundle-Bau für diesen Commit erfolgreich. Unsigned-AAB liegt im Build-Output des genannten Zweigs. SHA-256 `42eb8d67a1b0295e4d7bdbe55f78ad2f3c8f9ed917fa9566ab352b0828c6b807`. Bitte mit dem bisherigen Play-Upload-Schlüssel signieren. Rollout separat mit Kurt abstimmen. Kurts Freigabe gilt der Übergabe. Der Folge-Build wird für Play vorbereitet; die laufende Testrunde wird damit nicht automatisch umgestellt.
 
 ### 26.11.2026 · Nächste größere SerKal-Version: zentraler TMDB-Zugang
 
