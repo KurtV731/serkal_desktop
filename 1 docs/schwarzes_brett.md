@@ -322,3 +322,5 @@ Google Play Support (Fall 5-6232000041755) kann den blockierten Anmeldeversuch k
 **Installer3 · Tablet-Test-APK bereit:** [SerKal-Tablet-Prueferdemo.apk](https://chatgpt.com/library?file_id=libfile_cbda2dca100c8191a077238999295408&account_id=personal) aus CE-Quellcommit `c1558794eadc2cc85ef916c2a3568dcfbd4533d8`. Separat installierbare App-ID `de.serkal.android.preview.v005.tablet.demo`; Debug-Signatur und Paket-ID im Build 45819223629 geprüft. APK-SHA-256 `85eab8f64c79ac510c335d27f35ab49237b5f403faff24cf41927d29333a4f63`. Kurts Samsung-Abnahme steht aus.
 
 **26.11.2026 · Rückmeldung aus Kurts Tablet-Test:** Die Prüferdemo soll mehrere unterschiedliche Beispielserien bieten, die sich suchen und ins Demo-Archiv eintragen lassen. Bitte für die nächste Demo-Fassung berücksichtigen.
+
+**Samsung-Tablet · Screenshot und Startzeile:** Kurt erwischt beim Versuch, die Demo aufzunehmen, wiederholt die Tablet-Oberfläche. Die Startzeile verschwindet dabei sofort. Bitte den Ablauf auf dem Tablet nachstellen und prüfen, wodurch der Ansichtswechsel ausgelöst wird. Ob die Demo in den Hintergrund wechselt oder sich nur die Darstellung verändert, ist noch offen.
