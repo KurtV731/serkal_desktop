@@ -334,3 +334,5 @@ Google Play Support (Fall 5-6232000041755) kann den blockierten Anmeldeversuch k
 ### 26.11.2026 · Nächste größere SerKal-Version: zentraler TMDB-Zugang
 
 Kurts Entscheidung: Die laufende Testerrunde läuft mit der bestehenden TMDB-Einrichtung weiter. Für die nächste größere Version nach Abschluss der Testerrunde ist als Erweiterung ein zentraler SerKal-Dienst mit serverseitigem TMDB-Schlüssel vorgemerkt. Ziel ist die Seriensuche ohne persönlichen TMDB-Schlüssel. Zuerst wenige Such- und Terminabfragen erproben. Einen Zwischenspeicher für Daten oder Bilder erst nach Klärung der TMDB-Nutzungsbedingungen einplanen.
+
+**Dauerhafte Wahlmöglichkeit:** Der zentrale TMDB-Zugang soll die Einrichtung erleichtern. Der vorhandene direkte Zugang mit eigenem TMDB-API-Key bleibt in Desktop und Android auswählbar und funktioniert ohne SerKal-Server, solange TMDB den direkten Zugriff anbietet. Der Wechsel muss auch bei ausgefallenem SerKal-Server möglich sein und vorhandenes Archiv und Kalender erhalten. Für einen Wechsel zu anderer Software ist ein dokumentierter Datenexport als eigener Prüfpunkt vorgemerkt. Die laufende Testerrunde bleibt beim bisherigen Stand.
