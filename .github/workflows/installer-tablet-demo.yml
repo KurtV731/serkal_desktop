@@ -21,9 +21,10 @@ jobs:
       - name: Build separately installable debug APK
         working-directory: android-preview
         run: |
-          sed -i "/buildTypes { debug/c\    buildTypes { debug { applicationIdSuffix '.tablet.demo'; versionCode 54; versionNameSuffix '-tablet-demo' } }" app/build.gradle
+          sed -i "/buildTypes { debug/c\    buildTypes { debug { applicationIdSuffix '.tablet.demo'; versionNameSuffix '-tablet-demo' } }" app/build.gradle
           grep -F "applicationIdSuffix '.tablet.demo'" app/build.gradle
           sed -i "s/previewVersion + ' - SerKal Android'/'SerKal Tablet-Demo'/" app/build.gradle
+          sed -i 's/versionCode releaseInfo.androidVersionCode as int/versionCode 54/' app/build.gradle
           gradle assembleDebug
           mkdir -p demo-output
           cp app/build/outputs/apk/debug/app-debug.apk demo-output/SerKal-Tablet-Prueferdemo-R2.apk
