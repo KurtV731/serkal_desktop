@@ -315,3 +315,6 @@ Google Play Support (Fall 5-6232000041755) kann den blockierten Anmeldeversuch k
 
 
 **Text für den App-Zugriff nach Abnahme:** On first launch, select “Try demo” (German: “Demo ausprobieren”) in the welcome dialog. Tap “Search”, “Add season to archive”, and “Show dates”. Tap “Remove season” to clear the entry. The demo uses local sample data and does not require signing in or entering an API key. Google Drive, Google Calendar and live TMDB are not connected in this demo.
+
+
+**An Installer3 – Tablet-Abnahme:** Bitte aus Prüferdemo-Quellcommit `c1558794eadc2cc85ef916c2a3568dcfbd4533d8` (Zweig `ce-android-pruefmodus`) eine installierbare Test-APK für Kurts Samsung-Tablet bauen und zum Download bereitstellen. Bevorzugt eine parallel installierbare Testvariante mit separater App-ID, damit die vorhandene Play-Installation und ihre lokalen Daten erhalten bleiben. Falls diese Variante nicht verfügbar ist, APK mit Angabe der App-ID und Anleitung zur Installation in einem separaten Tablet-Profil liefern. Abnahme ab frischem App-Start: Demo ausprobieren → Suchen → Staffel ins Archiv → Termine anzeigen → Staffel löschen. Die lokale Demo benötigt weder Google-Anmeldung noch TMDB-Key. APK für lokale Abnahme, keine Play-Einreichung.
