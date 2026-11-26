@@ -144,14 +144,104 @@ public class MainActivity extends Activity {
             .setPositiveButton(english?"Continue to Google":"Weiter zu Google",(d,w)->{
                 getPreferences(0).edit().putBoolean("googleWelcomeAccepted",true).apply();handler.post(()->connectGoogle(chooseAccount));
             })
-            .setCancelable(false)
-            .setNegativeButton(english?"Exit":"Beenden",(d,w)->exitSerKal())
+            .setCancelable(true)
+            .setOnCancelListener(d->exitSerKal())
+            .setNegativeButton(english?"Try demo":"Demo ausprobieren",(d,w)->handler.post(()->showReviewDemo(chooseAccount)))
             .setNeutralButton(english?"Privacy policy":"Datenschutz",null)
             .setOnDismissListener(d->googleWelcomeOpen=false).create();
         welcome.show();
         welcome.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(v->openPrivacy());
     }
 
+
+    // The demo owns its sample data. No app sessions, credentials or network clients are used.
+    private void showReviewDemo(boolean chooseAccount) {
+        LinearLayout content = new LinearLayout(this);
+        content.setOrientation(LinearLayout.VERTICAL);
+        content.setPadding(dp(20), dp(8), dp(20), dp(8));
+
+        TextView intro = text(english
+            ? "Try a series search, save a sample season and view its calendar dates. The demo uses fictional local data."
+            : "Suche eine Serie, speichere eine Beispielstaffel und sieh dir ihre Kalendertermine an. Die Demo verwendet erfundene, lokale Daten.", 14, TEXT);
+        content.addView(intro);
+
+        EditText query = new EditText(new android.view.ContextThemeWrapper(this,
+            dark ? android.R.style.Theme_Material : android.R.style.Theme_Material_Light));
+        query.setSingleLine(true);
+        query.setTextColor(TEXT);
+        query.setText(english ? "Harbor" : "Hafen");
+        query.setHint(english ? "Series title" : "Serientitel");
+        content.addView(query);
+
+        Button search = verticalButton(english ? "Search" : "Suchen");
+        Button add = verticalButton(english ? "Add season to archive" : "Staffel ins Archiv");
+        Button calendar = verticalButton(english ? "Show dates" : "Termine anzeigen");
+        Button remove = verticalButton(english ? "Remove season" : "Staffel löschen");
+        TextView result = text("", 14, TEXT);
+        TextView archive = text("", 14, TEXT);
+        TextView dates = text("", 14, TEXT);
+        String sample = english ? "Harbor Lights (2026), season 1" : "Hafenlichter (2026), Staffel 1";
+
+        content.addView(search);
+        content.addView(result);
+        content.addView(add);
+        content.addView(archive);
+        content.addView(calendar);
+        content.addView(dates);
+        content.addView(remove);
+        add.setEnabled(false);
+        calendar.setEnabled(false);
+        remove.setEnabled(false);
+        archive.setText(english ? "Sample archive is empty." : "Das Beispielarchiv ist leer.");
+
+        Runnable runSearch = () -> {
+            String input = query.getText().toString().trim().toLowerCase(java.util.Locale.ROOT);
+            boolean found = !input.isEmpty() && sample.toLowerCase(java.util.Locale.ROOT).contains(input);
+            result.setText(found ? sample : (english ? "No match. Try Harbor." : "Kein Treffer. Versuche Hafen."));
+            add.setEnabled(found && !remove.isEnabled());
+            android.view.inputmethod.InputMethodManager keyboard =
+                (android.view.inputmethod.InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+            if (keyboard != null) keyboard.hideSoftInputFromWindow(query.getWindowToken(), 0);
+            query.clearFocus();
+        };
+        search.setOnClickListener(view -> runSearch.run());
+        query.setImeOptions(android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH);
+        query.setOnEditorActionListener((view, action, event) -> {
+            if (action != android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH) return false;
+            runSearch.run();
+            return true;
+        });
+        add.setOnClickListener(view -> {
+            archive.setText((english ? "Sample archive: " : "Beispielarchiv: ") + sample);
+            add.setEnabled(false);
+            calendar.setEnabled(true);
+            remove.setEnabled(true);
+        });
+        calendar.setOnClickListener(view -> dates.setText(english
+            ? "Sample dates\nEpisode 1 · 10 February 2027\nEpisode 2 · 17 February 2027"
+            : "Beispieltermine\nFolge 1 · 10. Februar 2027\nFolge 2 · 17. Februar 2027"));
+        remove.setOnClickListener(view -> {
+            archive.setText(english ? "Sample archive is empty." : "Das Beispielarchiv ist leer.");
+            dates.setText("");
+            calendar.setEnabled(false);
+            remove.setEnabled(false);
+            add.setEnabled(sample.contentEquals(result.getText()));
+        });
+
+        ScrollView scroll = new ScrollView(this);
+        scroll.addView(content);
+        content.setFocusableInTouchMode(true);
+        content.requestFocus();
+        AlertDialog demo = dialogBuilder().setTitle(english ? "SerKal demo" : "SerKal-Demo")
+            .setView(scroll)
+            .setPositiveButton(english ? "Back to setup" : "Zur Einrichtung", null)
+            .setOnDismissListener(dialog -> {
+                if (!isFinishing() && !isDestroyed()) showGoogleWelcome(chooseAccount);
+            }).create();
+        demo.show();
+        if (demo.getWindow() != null) demo.getWindow().setSoftInputMode(
+            WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+    }
 
     private AlertDialog.Builder dialogBuilder() {
         return new AlertDialog.Builder(new android.view.ContextThemeWrapper(this,
