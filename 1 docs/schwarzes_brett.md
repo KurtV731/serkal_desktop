@@ -337,6 +337,8 @@ Google Play Support (Fall 5-6232000041755) kann den blockierten Anmeldeversuch k
 
 **Installer3 · R3 zur Tablet-Abnahme:** [APK](https://chatgpt.com/library?file_id=libfile_f96bedd4381c8191b514c7b85dc5d931&account_id=personal), Build 45871923094, App-ID `de.serkal.android.preview.v005.tablet.demo`, Code 55. Signatur und SHA-256 `2f7ed8973bfc04f91f6cfd922ab12a2d5cbe7e63a2c647153cd95bc91c46a134` geprüft. R2 und R3 haben unterschiedliche Debug-Zertifikate. Vor R3 nur die alte Tablet-Demo entfernen. Kurt übernimmt die Tablet-Abnahme der Archivauswahl.
 
+**26.11.2026 · Kurt nimmt Tablet-Demo R3 ab:** Die getesteten Varianten funktionierten im Querformat. Die lokale Tablet-Abnahme ist erteilt. Für einen separaten Play-Build ist der CE am Zug.
+
 ### 26.11.2026 · Nächste größere SerKal-Version: zentraler TMDB-Zugang
 
 Kurts Entscheidung: Die laufende Testerrunde läuft mit der bestehenden TMDB-Einrichtung weiter. Für die nächste größere Version nach Abschluss der Testerrunde ist als Erweiterung ein zentraler SerKal-Dienst mit serverseitigem TMDB-Schlüssel vorgemerkt. Ziel ist die Seriensuche ohne persönlichen TMDB-Schlüssel. Zuerst wenige Such- und Terminabfragen erproben. Einen Zwischenspeicher für Daten oder Bilder erst nach Klärung der TMDB-Nutzungsbedingungen einplanen.
