@@ -52,6 +52,7 @@ public class MainActivity extends Activity {
     private volatile String googleStep = "idle";
     private Runnable googleTimeout;
     private boolean googleWelcomeOpen;
+    private boolean quietGoogleCheck;
     private boolean setupActive, driveChecked, calendarChecked, keyChecked, keySetupOpen, keyPrompted;
     private String setupIssue = "";
     private AlertDialog setupDialog;
@@ -73,6 +74,7 @@ public class MainActivity extends Activity {
         boolean connected = googleUser != null && !googleAccessToken.isEmpty();
         boolean drive = connected && driveChecked;
         boolean checking = googleBusy;
+        if (checking && quietGoogleCheck) return;
         String message = (english ? "1. Google account\n" : "1. Google-Konto\n") + (connected ? "✓ " : "○ ") + (english ? "Google account" : "Google-Konto") +
             (connected ? ": " + googleUser.email : "") +
             "\n" + (drive ? "✓ " : "○ ") + "Google Drive" +
@@ -372,7 +374,11 @@ public class MainActivity extends Activity {
 
     private void connectGoogle(boolean chooseAccount) {
         if (googleBusy) return;
-        if(!getPreferences(0).getBoolean("googleWelcomeAccepted",false)){showGoogleWelcome(chooseAccount);return;}
+        quietGoogleCheck = !chooseAccount && !getPreferences(0).getString("lastOwner", "").isEmpty();
+        if (!quietGoogleCheck && !getPreferences(0).getBoolean("googleWelcomeAccepted", false)) {
+            showGoogleWelcome(chooseAccount);
+            return;
+        }
         // Keep the current account, local archive and selection until a new login succeeds.
         googleBusy = true;
         setupActive = true; driveChecked = false; calendarChecked = false; keyChecked = false; keyPrompted = false; setupIssue = "";
@@ -382,7 +388,9 @@ public class MainActivity extends Activity {
         googleStarted=android.os.SystemClock.elapsedRealtime();
         getPreferences(0).edit().putBoolean("googleAttemptPending",true).apply();
         googleStage("authorize",45000);
-        statusText.setText(english ? "Connecting to Google…" : "Google wird verbunden…");
+        statusText.setText(quietGoogleCheck
+            ? (english ? "Checking Google and API key…" : "Google und API-Key werden geprüft…")
+            : (english ? "Connecting to Google…" : "Google wird verbunden…"));
         AuthorizationRequest.Builder builder = AuthorizationRequest.builder().setRequestedScopes(java.util.Arrays.asList(
             new Scope("https://www.googleapis.com/auth/drive.appdata"),
             new Scope("openid"), new Scope("https://www.googleapis.com/auth/userinfo.email"),
@@ -501,7 +509,9 @@ public class MainActivity extends Activity {
                         (english ? "\nAPI key verified." : "\nAPI-Key geprüft.") :
                         (english ? "\nSet up your API key." : "\nBitte API-Key einrichten.")));
                     updateSetup();
-                    if (keyChecked && loaded.key.isEmpty() && keyFailure==null && setupReady()) confirmPublish(checkedKey);
+                    if (!quietGoogleCheck && keyChecked && loaded.key.isEmpty() && keyFailure == null && setupReady()) {
+                        confirmPublish(checkedKey);
+                    }
 
                 });
             } catch (Exception error) {
