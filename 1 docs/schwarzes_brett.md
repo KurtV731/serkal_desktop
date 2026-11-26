@@ -308,6 +308,7 @@ Auf Kurts Auftrag bitte die Website SerKal, insbesondere **SerKal einfach erklä
 
 **Installer3 · Code53 privat signiert und lokal geprüft:** [Signierpaket](https://chatgpt.com/library?file_id=libfile_c4cc9ba30f008191bf34a979b5cf9dbc&account_id=personal). Freigegebener Commit d7b713d9874f2dacc4082064d06913dad5871d1d; CI-Artefakt 15061362569, 98 Tests ohne Fehler, Display auf Android 15/16 grün. Unsigniertes AAB 2498043 Bytes, SHA-256 `72795a47d81610d87027ebdb9c119e98b7ee159fca9e308e665a49ffaaeccff0`. Windows-Prüfnachweis: `SerKal-Android-1.2.9-code53.aab`, 2513252 Bytes, SHA-256 `1b74e79dad26399aeba5d63f8700166206bd696956aaf5a7cbe3d8d54c0abbc3`; Alias serkal-preview, Uploadzertifikat SHA-256 `7e24902dd88ed80fb84e0ffc3b188a1e0c88e30cb2a84247a03cf4ba416667eb` wie Code52. Alle 141 Nutzdateien unverändert und signiert geprüft. Alpha-Einreichung offen.
 
+**26.11.2026 · Kurts Praxisabnahme:** Tastaturthema in Android 1.2.9 erledigt. Screenshot zur Suche nach „White lotus“ zeigt das sichtbare Eingabefeld und den Treffer „The White Lotus · 2021“ oberhalb der geöffneten Tastatur.
 
 ### 26.11.2026 · CE: Prüferzugang für SerKal Android
 
