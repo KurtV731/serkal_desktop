@@ -137,7 +137,13 @@ public class MainActivity extends Activity {
     private void showGoogleWelcome(boolean chooseAccount) {
         if(googleWelcomeOpen)return;
         googleWelcomeOpen=true;
-        AlertDialog welcome=dialogBuilder().setTitle(english?"Welcome to SerKal":"Willkommen bei SerKal")
+        android.content.res.Configuration dialogConfig =
+            new android.content.res.Configuration(getResources().getConfiguration());
+        dialogConfig.fontScale = Math.min(dialogConfig.fontScale, 1.15f);
+        android.content.Context dialogContext = createConfigurationContext(dialogConfig);
+        AlertDialog welcome = new AlertDialog.Builder(new android.view.ContextThemeWrapper(dialogContext,
+            dark ? android.R.style.Theme_Material_Dialog_Alert : android.R.style.Theme_Material_Light_Dialog_Alert))
+            .setTitle(english?"Welcome to SerKal":"Willkommen bei SerKal")
             .setMessage(english
                 ? "SerKal connects to your Google account to use your own archive and calendar.\n\nGoogle Drive: stores your SerKal archive and API key in SerKal's hidden app-data area for use on your devices. This permission does not grant access to your other Drive documents.\n\nGoogle Calendar: reads your calendar list and creates and updates calendars and series events created by SerKal.\n\nYour account ID and email associate the archive with your account. You grant access directly to the app on this device. SerKal needs both your Google account and TMDB API key."
                 : "SerKal verbindet sich mit deinem Google-Konto, um dein eigenes Archiv und deinen Kalender zu nutzen.\n\nGoogle Drive: speichert dein SerKal-Archiv und deinen API-Key im verborgenen App-Datenbereich von SerKal für deine Geräte. Diese Berechtigung gibt keinen Zugriff auf deine anderen Drive-Dokumente.\n\nGoogle Kalender: liest deine Kalenderliste und erstellt und aktualisiert von SerKal angelegte Kalender und Serientermine.\n\nKontokennung und E-Mail ordnen das Archiv deinem Konto zu. Du erteilst den Zugriff direkt der App auf diesem Gerät. Ohne Google-Konto und API-Key von TMDB kann SerKal nicht vollständig arbeiten.")
@@ -1401,7 +1407,7 @@ public class MainActivity extends Activity {
             }
             return false;
         });
-        queryField.setTextSize(14);
+        queryField.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
         queryField.setPadding(dp(5),dp(2),dp(4),dp(2));
         queryField.setTextColor(TEXT);
         queryField.setHintTextColor(MUTED);
