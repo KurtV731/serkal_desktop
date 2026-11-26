@@ -1500,6 +1500,7 @@ public class MainActivity extends Activity {
             titleTypingMode=typingTitle;
             keyboardCloseButton.setVisibility(keyboardVisible ? View.VISIBLE : View.GONE);
             headerSearch.setVisibility(typingTitle ? View.VISIBLE : View.GONE);
+            search.setVisibility(typingTitle ? View.GONE : View.VISIBLE);
             // Keep the original editor attached: reparenting interrupts Android's input connection.
             topBar.setVisibility(typingTitle ? View.GONE : View.VISIBLE);
             footerBar.setVisibility(typingTitle ? View.GONE : View.VISIBLE);
