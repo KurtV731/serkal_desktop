@@ -183,6 +183,8 @@ public class MainActivity extends Activity {
         Button remove = verticalButton(english ? "Remove season" : "Staffel löschen");
         TextView result = text("", 14, TEXT);
         TextView archive = text("", 14, TEXT);
+        LinearLayout archiveChoices = new LinearLayout(this);
+        archiveChoices.setOrientation(LinearLayout.VERTICAL);
         TextView dates = text("", 14, TEXT);
         String[] samples = english
             ? new String[]{"Harbor Lights (2026), season 1", "Moon Station (2027), season 2", "Forest Trails (2027), season 1"}
@@ -197,20 +199,36 @@ public class MainActivity extends Activity {
         content.addView(result);
         content.addView(add);
         content.addView(archive);
+        content.addView(archiveChoices);
         content.addView(calendar);
         content.addView(dates);
         content.addView(remove);
         Runnable refreshArchive = () -> {
-            StringBuilder list = new StringBuilder(english ? "Sample archive" : "Beispielarchiv");
-            for (int index : saved) list.append('\n').append(samples[index]);
             archive.setText(saved.isEmpty()
                 ? (english ? "Sample archive is empty." : "Das Beispielarchiv ist leer.")
-                : list.toString());
+                : (english ? "Sample archive · select a season" : "Beispielarchiv · Staffel auswählen"));
+            for (int index = 0; index < samples.length; index++) {
+                Button row = (Button) archiveChoices.getChildAt(index);
+                boolean active = selected[0] == index;
+                row.setVisibility(saved.contains(index) ? View.VISIBLE : View.GONE);
+                row.setSelected(active);
+                row.setText((active ? "✓ " : "") + samples[index]);
+            }
             boolean selectedIsSaved = saved.contains(selected[0]);
             add.setEnabled(selected[0] >= 0 && !selectedIsSaved);
             calendar.setEnabled(selectedIsSaved);
             remove.setEnabled(selectedIsSaved);
         };
+        for (int index = 0; index < samples.length; index++) {
+            final int choice = index;
+            Button row = verticalButton(samples[index]);
+            archiveChoices.addView(row);
+            row.setOnClickListener(view -> {
+                selected[0] = choice;
+                dates.setText("");
+                refreshArchive.run();
+            });
+        }
         refreshArchive.run();
 
         Runnable runSearch = () -> {
@@ -255,6 +273,8 @@ public class MainActivity extends Activity {
         });
         remove.setOnClickListener(view -> {
             saved.remove(selected[0]);
+            selected[0] = -1;
+            result.setText("");
             dates.setText("");
             refreshArchive.run();
         });
