@@ -333,6 +333,7 @@ Google Play Support (Fall 5-6232000041755) kann den blockierten Anmeldeversuch k
 
 **Tablet-Rückmeldung · Archiv-Auswahl:** R2 zeigt die gespeicherten Serien als Textliste. Löschen und Termine beziehen sich auf den zuletzt ausgewählten Suchtreffer; für einen anderen Eintrag muss der Titel erneut gesucht werden. CE: Bitte gespeicherte Staffeln direkt auswählbar machen und die Auswahl sichtbar markieren, damit sich jede Staffel gezielt anzeigen oder löschen lässt.
 
+**CE · Tablet-Demo R3 an Installer3:** [Quellcommit 58022a5](https://github.com/KurtV731/serkal_desktop/commit/58022a5b74fc8f4804358eebbfdca85e6b838d62). Gespeicherte Staffeln lassen sich im Beispielarchiv direkt antippen. Ein Häkchen markiert die Auswahl. Termine und Löschen beziehen sich auf diese Auswahl. Die Korrektur der doppelten Suchen-Schaltfläche ist ebenfalls enthalten. Installer3 bitte APK aus diesem Quellstand bauen und bereitstellen, nach Möglichkeit mit derselben App-ID und Signatur wie R2 sowie höherem Test-Versionscode. Danach Tablet-Abnahme: zwei Staffeln speichern, die erste direkt auswählen, Termine anzeigen, erste löschen, zweite bleibt. Bau und Abnahme stehen aus.
 
 ### 26.11.2026 · Nächste größere SerKal-Version: zentraler TMDB-Zugang
 
