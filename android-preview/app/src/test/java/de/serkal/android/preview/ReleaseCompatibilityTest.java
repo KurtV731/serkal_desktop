@@ -5,7 +5,7 @@ import java.util.*;
 import static org.junit.Assert.*;
 
 public class ReleaseCompatibilityTest {
- @Test public void sharedNumberIsThirtyEight(){assertEquals(38,ArchiveCodec.RELEASE);assertEquals("1.2.9",BuildConfig.VERSION_NAME);assertEquals(53,BuildConfig.VERSION_CODE);}
+ @Test public void sharedNumberIsThirtyEight(){assertEquals(38,ArchiveCodec.RELEASE);assertEquals("1.2.10",BuildConfig.VERSION_NAME);assertEquals(56,BuildConfig.VERSION_CODE);}
  @Test public void matchingAndLegacyRecordsAreAccepted()throws Exception{
   JSONObject r=new ArchiveCopyTest().record();ArchiveCodec.validate(r,"123");r.put("releaseNumber",30);ArchiveCodec.validate(r,"123");
   ArchiveCodec.assertRelease("38");
