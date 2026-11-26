@@ -1,4 +1,4 @@
-sourceCommit=c1558794eadc2cc85ef916c2a3568dcfbd4533d8
+sourceCommit=92d2ab80885fea68278a87f053fca5a849327d56
 versionName=1.2.9
 versionCode=53
 applicationId=de.serkal.android.preview.v005
