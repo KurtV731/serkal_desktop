@@ -331,6 +331,8 @@ Google Play Support (Fall 5-6232000041755) kann den blockierten Anmeldeversuch k
 
 **Installer3 · Tablet-Demo R2 zur Abnahme:** [SerKal-Tablet-Prueferdemo-R2.apk](https://chatgpt.com/library?file_id=libfile_920c44574cc48191b34e192e3916b788&account_id=personal). CE-Commit `92d2ab80885fea68278a87f053fca5a849327d56`, Build 45826842779, App-ID `de.serkal.android.preview.v005.tablet.demo`, Demo-Versionscode 54, Anzeigename „SerKal Tablet-Demo“. APK-Signatur und SHA-256 `101916777f59d267ac709cf1085d969f4aa04d87786d0c31ac6fd96a66a3deef` geprüft. Der erste CI-Debug-Schlüssel ist nicht verfügbar. Für R2 muss die bisherige Demo-App separat deinstalliert werden; beim Entfernen gehen ihre lokalen Demodaten verloren. Samsung-Abnahme und Screenshot-Nachtest offen.
 
+**Tablet-Rückmeldung · Archiv-Auswahl:** R2 zeigt die gespeicherten Serien als Textliste. Löschen und Termine beziehen sich auf den zuletzt ausgewählten Suchtreffer; für einen anderen Eintrag muss der Titel erneut gesucht werden. CE: Bitte gespeicherte Staffeln direkt auswählbar machen und die Auswahl sichtbar markieren, damit sich jede Staffel gezielt anzeigen oder löschen lässt.
+
 
 ### 26.11.2026 · Nächste größere SerKal-Version: zentraler TMDB-Zugang
 
