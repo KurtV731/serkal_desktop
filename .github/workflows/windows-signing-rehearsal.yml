@@ -32,7 +32,8 @@ jobs:
           $cert = New-SelfSignedCertificate -Type CodeSigningCert -Subject 'CN=SerKal Rehearsal Only' -CertStoreLocation Cert:\CurrentUser\My
           $cer = Join-Path $env:RUNNER_TEMP rehearsal.cer
           Export-Certificate -Cert $cert -FilePath $cer | Out-Null
-          Import-Certificate -FilePath $cer -CertStoreLocation Cert:\CurrentUser\Root | Out-Null
+          certutil.exe -f -addstore Root $cer
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
           "REHEARSAL_CERT=$($cert.Thumbprint)" >> $env:GITHUB_ENV
           "SERKAL_GOOGLE_OAUTH_FILE=$env:SERKAL_GOOGLE_OAUTH_FILE" >> $env:GITHUB_ENV
           npm.cmd run package -- --platform=win32 --arch=x64
