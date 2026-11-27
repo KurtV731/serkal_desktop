@@ -874,9 +874,11 @@ public class MainActivity extends Activity {
 
     private void showHelp() {
         dialogBuilder().setTitle(english?"SerKal help":"SerKal-Hilfe")
-            .setMessage(english
+            .setMessage((english
                 ? "Enter a series title; year and season are optional. Choose a result, then Add to archive. After saving, the fields are cleared for the next series.\n\nTap an archive entry to view it. Edit opens notes, watched status and deletion. Google and TMDB settings are in the archive menu."
                 : "Serientitel eingeben; Jahr und Staffel sind optional. Einen Treffer auswählen und mit Ins Archiv übernehmen. Nach dem Speichern sind die Felder für die nächste Serie wieder leer.\n\nEinen Archiveintrag zum Anzeigen antippen. Bearbeiten öffnet Notizen, Gesehen-Status und Löschen. Google- und TMDB-Einstellungen stehen im Archivmenü.")
+                + "\n\n" + (english ? "Credits · Series data and images: The Movie Database (TMDB)." : "Quellen · Seriendaten und Bilder: The Movie Database (TMDB).")
+                + "\nThis product uses the TMDB API but is not endorsed or certified by TMDB.")
             .setNeutralButton(english?"Privacy policy":"Datenschutz",(d,w)->openPrivacy())
             .setNegativeButton(english?"Setup guide":"SerKal einfach erklärt",(d,w)->openIntroduction())
             .setPositiveButton(english?"Close":"Schließen",null).show();
