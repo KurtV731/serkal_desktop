@@ -10019,7 +10019,7 @@ try {
       fields.hidden = false;
       input.focus();
     });
-    explain('Einen gespeicherten Key wählen, einen anderen eingeben oder aus Google übernehmen.', 'Use a saved key, enter a different one, or retrieve it from Google.');
+    explain('Einen gespeicherten Key wählen oder einen anderen eingeben.', 'Choose a saved key or enter a different one.');
     const central = action(english ? 'Use central SerKal access' : 'Zentralen SerKal-Zugang verwenden', async () => {
       central.disabled = true;
       availability.textContent = english ? 'Checking local pilot…' : 'Lokaler Pilot wird geprüft…';
@@ -10053,6 +10053,7 @@ try {
     save.textContent = english ? 'Check and save' : 'Prüfen und speichern';
     const google = document.createElement('button');
     google.type = 'button';
+    google.hidden = true;
     google.textContent = english ? 'Use key from Google' : 'API-Key aus Google übernehmen';
     google.addEventListener('click', () => {
       dialog.close();
@@ -10119,6 +10120,7 @@ try {
     document.body.append(dialog);
     dialog.showModal();
     tmdb.status().then(info => {
+      google.hidden = !info.googleKeyAvailable;
       central.disabled = !info.pilotAvailable;
       if (info.pilotAvailable) availability.textContent = info.pilotActive
         ? (english ? 'Local pilot is active.' : 'Lokaler Pilot ist aktiv.')
