@@ -9966,10 +9966,99 @@ try {
     } catch(e) { alert(message(null)); }
     finally { button.disabled=false; }
   }
+  function showTmdbAccess(button){
+    const tmdb = window.serkal?.tmdb;
+    if (!tmdb) return;
+    const english = getLang_() === 'en';
+    const dialog = document.createElement('dialog');
+    dialog.style.cssText = 'max-width:min(90vw,32rem);padding:1rem;color:inherit;background:Canvas;border:1px solid GrayText;border-radius:.5rem';
+    dialog.setAttribute('aria-label', 'TMDB (Google)');
+    const heading = document.createElement('h2');
+    heading.textContent = 'TMDB (Google)';
+    dialog.append(heading);
+
+    function action(label, listener){
+      const item = document.createElement('button');
+      item.type = 'button';
+      item.className = 'btnSmall';
+      item.style.cssText = 'display:block;width:100%;margin:.4rem 0';
+      item.textContent = label;
+      item.addEventListener('click', listener);
+      dialog.append(item);
+      return item;
+    }
+
+    action(english ? 'Keep current access' : 'Vorhandenen Zugang beibehalten', () => dialog.close());
+    const personal = action(english ? 'Use personal API key' : 'Persönlichen API-Key verwenden', () => {
+      fields.hidden = false;
+      input.focus();
+    });
+    action(english ? 'Use central SerKal access' : 'Zentralen SerKal-Zugang verwenden', () => {}).disabled = true;
+    const availability = document.createElement('p');
+    availability.textContent = english ? 'Central SerKal access is not available yet.' : 'Der zentrale SerKal-Zugang ist noch nicht verfügbar.';
+    dialog.append(availability);
+
+    const fields = document.createElement('form');
+    fields.hidden = true;
+    const label = document.createElement('label');
+    label.textContent = english ? 'TMDB API key' : 'API-Key von TMDB';
+    const input = document.createElement('input');
+    input.type = 'password';
+    input.autocomplete = 'off';
+    input.required = true;
+    label.append(document.createElement('br'), input);
+    const save = document.createElement('button');
+    save.type = 'submit';
+    save.textContent = english ? 'Check and save' : 'Prüfen und speichern';
+    const google = document.createElement('button');
+    google.type = 'button';
+    google.textContent = english ? 'Use key from Google' : 'API-Key aus Google übernehmen';
+    google.addEventListener('click', () => {
+      dialog.close();
+      connect(button);
+    });
+    const status = document.createElement('p');
+    status.setAttribute('role', 'status');
+    fields.append(label, save, google, status);
+    dialog.append(fields);
+    fields.addEventListener('submit', async event => {
+      event.preventDefault();
+      const candidate = input.value.trim();
+      if (!candidate || save.disabled) return;
+      save.disabled = true;
+      input.readOnly = true;
+      google.disabled = true;
+      personal.disabled = true;
+      try {
+        const result = await tmdb.testKey(candidate, english ? 'en' : 'de');
+        if (!dialog.open) return;
+        if (!result?.ok) {
+          status.textContent = english ? 'The API key could not be verified.' : 'Der API-Key konnte nicht geprüft werden.';
+          return;
+        }
+        const saved = await tmdb.saveKey(candidate);
+        if (!saved?.ok) throw new Error('TMDB key not saved');
+        dialog.close();
+      } catch {
+        status.textContent = english ? 'The API key could not be saved.' : 'Der API-Key konnte nicht gespeichert werden.';
+      } finally {
+        save.disabled = false;
+        input.readOnly = false;
+        google.disabled = false;
+        personal.disabled = false;
+      }
+    });
+    dialog.addEventListener('close', () => { input.value = ''; dialog.remove(); button.focus(); });
+    document.body.append(dialog);
+    dialog.showModal();
+  }
   window.addEventListener('DOMContentLoaded',function(){
     ['btnSharedKeyDock','skSetupSharedKey'].forEach(function(id){
       var button=document.getElementById(id);
-      if(button)button.addEventListener('click',function(){connect(button)});
+      if(button)button.addEventListener('click',function(){
+        if(id==='btnSharedKeyDock') showTmdbAccess(button);
+        else connect(button);
+      });
     });
     if(window.serkal && window.serkal.tmdb.sharedKey)
       window.serkal.archive.syncStatus().then(function(info){if(!info.session)return window.serkal.tmdb.sharedKey(false);}).catch(function(){});
