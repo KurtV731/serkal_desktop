@@ -1984,7 +1984,7 @@
 
 <dialog id="appMenuDialog" aria-labelledby="appMenuTitle">
   <div class="appMenuHeading"><h2 id="appMenuTitle"></h2><button id="btnAppMenuClose" type="button" class="btnSmall"></button></div>
-  <div class="appMenuActions"><button id="btnSaveDock" class="btnSmall btnPrimary" type="button" title="">💾 Speichern</button><button class="btnSmall" id="btnArchiveSync" type="button"></button><button class="btnSmall" id="btnArchiveReload" type="button" title=""></button><button id="btnWartung" class="btnSmall" type="button" title=""></button><button id="btnLogDock" class="btnSmall" type="button" title="">📜 Log</button><button id="btnSharedKeyDock" class="btnSmall" type="button">API-Key</button><button id="btnGoogleConnectionDock" class="btnSmall" type="button" style="display:none">Google-Verbindung erneuern</button><button id="btnThemeDock" class="btnSmall" type="button" title="">🌙 Dark</button><div class="appMenuDanger"><button class="btnDanger btnSmall" id="btnDeleteFile" type="button" title=""></button></div></div>
+  <div class="appMenuActions"><button id="btnSaveDock" class="btnSmall btnPrimary" type="button" title="">💾 Speichern</button><button class="btnSmall" id="btnArchiveSync" type="button"></button><button class="btnSmall" id="btnArchiveReload" type="button" title=""></button><button id="btnWartung" class="btnSmall" type="button" title=""></button><button id="btnLogDock" class="btnSmall" type="button" title="">📜 Log</button><button id="btnSharedKeyDock" class="btnSmall" type="button">API-Key</button><button id="btnGoogleConnectionDock" class="btnSmall" type="button" style="display:none"></button><button id="btnThemeDock" class="btnSmall" type="button" title="">🌙 Dark</button><div class="appMenuDanger"><button class="btnDanger btnSmall" id="btnDeleteFile" type="button" title=""></button></div></div>
 </dialog>
     <div id="logPanel" class="logPanel" aria-label="">
       <div id="logPanelResizeHandle" class="logPanelResizeHandle" role="separator" aria-orientation="horizontal"
@@ -3816,6 +3816,31 @@ function setDetailsdesc_(it, originTag) {
 // --------- I18N (DE/EN) ----------
 const I18N = {
   de: {
+    PILOT_PERSONAL:"persönlich",
+    PILOT_NOT_CONFIGURED:"Nicht eingerichtet",
+    PILOT_ACTIVE:"aktiv",
+    PILOT_RECONNECT_GOOGLE:"Google-Verbindung erneuern",
+    PILOT_SIGNS_IN_TO_GOOGLE_AGAIN_AND_SYNCHRONIZES_THE_ARCHIVE_AND_PERSONAL_API_KEY:"Erneute Google-Anmeldung mit Abgleich von Archiv und persönlichem API-Key.",
+    PILOT_KEEP_CURRENT_ACCESS:"Vorhandenen Zugang beibehalten",
+    PILOT_USE_PERSONAL_API_KEY:"Persönlichen API-Key verwenden",
+    PILOT_USE_CENTRAL_SERKAL_ACCESS:"Zentralen SerKal-Zugang verwenden",
+    PILOT_SERKAL_DEVELOPER_KEY_THIS_SESSION:"SerKal-Entwicklerschlüssel (für diese Sitzung)",
+    PILOT_CHECK_AND_ACTIVATE:"Prüfen und aktivieren",
+    PILOT_BACK:"Zurück",
+    PILOT_CHECKING_SERKAL_ACCESS:"SerKal-Zugang wird geprüft…",
+    PILOT_COULD_NOT_VERIFY_SERKAL_ACCESS_WITH_TMDB:"Der SerKal-Zugang konnte bei TMDB nicht geprüft werden.",
+    PILOT_TMDB_API_KEY:"API-Key von TMDB",
+    PILOT_CHECK_AND_SAVE:"Prüfen und speichern",
+    PILOT_USE_SAVED_PERSONAL_KEY:"Gespeicherten persönlichen Key nutzen",
+    PILOT_NO_PERSONAL_KEY_IS_SAVED:"Es ist kein persönlicher Key gespeichert.",
+    PILOT_COULD_NOT_SWITCH_ACCESS:"Der Zugang konnte nicht umgestellt werden.",
+    PILOT_CHECKING_API_KEY:"API-Key wird geprüft…",
+    PILOT_THE_API_KEY_COULD_NOT_BE_VERIFIED:"Der API-Key konnte nicht geprüft werden.",
+    PILOT_THE_API_KEY_COULD_NOT_BE_SAVED:"Der API-Key konnte nicht gespeichert werden.",
+    PILOT_SERKAL_ACCESS_IS_ACTIVE:"SerKal-Zugang ist aktiv.",
+    PILOT_CLOSES_THIS_WINDOW_AND_KEEPS_THE_ACTIVE_ACCESS_METHOD:"Schließt dieses Fenster. Der aktive Zugang bleibt eingestellt.",
+    PILOT_CHOOSE_A_SAVED_KEY_OR_ENTER_A_DIFFERENT_ONE:"Einen gespeicherten Key wählen oder einen anderen eingeben.",
+    PILOT_LOCAL_TEST_USING_THE_SERKAL_DEVELOPER_KEY:"Lokaler Test mit dem SerKal-Entwicklerschlüssel.",
     SHAREDARCHIVE_READY:"Archivstand für Android bereit: {count} Einträge.",
     SHAREDARCHIVE_LOADED:"Archiv geladen: {count} Einträge.",
     SHAREDARCHIVE_COUNT_UNKNOWN:"Die Archivanzahl konnte nicht ermittelt werden.",
@@ -4067,6 +4092,31 @@ const I18N = {
 
 },
   en: {
+    PILOT_PERSONAL:"personal",
+    PILOT_NOT_CONFIGURED:"Not configured",
+    PILOT_ACTIVE:"active",
+    PILOT_RECONNECT_GOOGLE:"Reconnect Google",
+    PILOT_SIGNS_IN_TO_GOOGLE_AGAIN_AND_SYNCHRONIZES_THE_ARCHIVE_AND_PERSONAL_API_KEY:"Signs in to Google again and synchronizes the archive and personal API key.",
+    PILOT_KEEP_CURRENT_ACCESS:"Keep current access",
+    PILOT_USE_PERSONAL_API_KEY:"Use personal API key",
+    PILOT_USE_CENTRAL_SERKAL_ACCESS:"Use central SerKal access",
+    PILOT_SERKAL_DEVELOPER_KEY_THIS_SESSION:"SerKal developer key (this session)",
+    PILOT_CHECK_AND_ACTIVATE:"Check and activate",
+    PILOT_BACK:"Back",
+    PILOT_CHECKING_SERKAL_ACCESS:"Checking SerKal access…",
+    PILOT_COULD_NOT_VERIFY_SERKAL_ACCESS_WITH_TMDB:"Could not verify SerKal access with TMDB.",
+    PILOT_TMDB_API_KEY:"TMDB API key",
+    PILOT_CHECK_AND_SAVE:"Check and save",
+    PILOT_USE_SAVED_PERSONAL_KEY:"Use saved personal key",
+    PILOT_NO_PERSONAL_KEY_IS_SAVED:"No personal key is saved.",
+    PILOT_COULD_NOT_SWITCH_ACCESS:"Could not switch access.",
+    PILOT_CHECKING_API_KEY:"Checking API key…",
+    PILOT_THE_API_KEY_COULD_NOT_BE_VERIFIED:"The API key could not be verified.",
+    PILOT_THE_API_KEY_COULD_NOT_BE_SAVED:"The API key could not be saved.",
+    PILOT_SERKAL_ACCESS_IS_ACTIVE:"SerKal access is active.",
+    PILOT_CLOSES_THIS_WINDOW_AND_KEEPS_THE_ACTIVE_ACCESS_METHOD:"Closes this window and keeps the active access method.",
+    PILOT_CHOOSE_A_SAVED_KEY_OR_ENTER_A_DIFFERENT_ONE:"Choose a saved key or enter a different one.",
+    PILOT_LOCAL_TEST_USING_THE_SERKAL_DEVELOPER_KEY:"Local test using the SerKal developer key.",
     SHAREDARCHIVE_READY:"Archive snapshot ready for Android: {count} entries.",
     SHAREDARCHIVE_LOADED:"Archive loaded: {count} entries.",
     SHAREDARCHIVE_COUNT_UNKNOWN:"The archive count could not be determined.",
@@ -9957,17 +10007,15 @@ try {
       const info = await tmdb.status();
       const english = getLang_() === 'en';
       const label = info.pilotActive ? 'SerKal'
-        : info.configured ? (english ? 'personal' : 'persönlich')
-        : (english ? 'Not configured' : 'Nicht eingerichtet');
-      const active = english ? 'active' : 'aktiv';
+        : info.configured ? (t('PILOT_PERSONAL'))
+        : (t('PILOT_NOT_CONFIGURED'));
+      const active = t('PILOT_ACTIVE');
       button.textContent = info.configured ? `API-Key (${active}: ${label})` : `API-Key (${label})`;
       const googleConnection = document.getElementById('btnGoogleConnectionDock');
       if (googleConnection) {
         googleConnection.style.display = info.googleKeyAvailable ? '' : 'none';
-        googleConnection.textContent = english ? 'Reconnect Google' : 'Google-Verbindung erneuern';
-        googleConnection.title = english
-          ? 'Signs in to Google again and synchronizes the archive and personal API key.'
-          : 'Erneute Google-Anmeldung mit Abgleich von Archiv und persönlichem API-Key.';
+        googleConnection.textContent = t('PILOT_RECONNECT_GOOGLE');
+        googleConnection.title = t('PILOT_SIGNS_IN_TO_GOOGLE_AGAIN_AND_SYNCHRONIZES_THE_ARCHIVE_AND_PERSONAL_API_KEY');
       }
     } catch {
       button.textContent = 'API-Key';
@@ -10015,23 +10063,23 @@ try {
       return item;
     }
 
-    function explain(de, en){
+    function explain(message){
       const description = document.createElement('p');
       description.style.cssText = 'margin:.15rem 0 .65rem;font-size:.9rem';
-      description.textContent = english ? en : de;
+      description.textContent = message;
       accessChoices.append(description);
     }
-    action(english ? 'Keep current access' : 'Vorhandenen Zugang beibehalten', () => dialog.close());
-    explain('Schließt dieses Fenster. Der aktive Zugang bleibt eingestellt.', 'Closes this window and keeps the active access method.');
-    const personal = action(english ? 'Use personal API key' : 'Persönlichen API-Key verwenden', () => {
+    action(t('PILOT_KEEP_CURRENT_ACCESS'), () => dialog.close());
+    explain(t('PILOT_CLOSES_THIS_WINDOW_AND_KEEPS_THE_ACTIVE_ACCESS_METHOD'));
+    const personal = action(t('PILOT_USE_PERSONAL_API_KEY'), () => {
       accessChoices.hidden = true;
       fields.hidden = false;
       input.focus();
     });
-    explain('Einen gespeicherten Key wählen oder einen anderen eingeben.', 'Choose a saved key or enter a different one.');
+    explain(t('PILOT_CHOOSE_A_SAVED_KEY_OR_ENTER_A_DIFFERENT_ONE'));
     let checkingPilot = false;
     let pilotKeyRequired = true;
-    const central = action(english ? 'Use central SerKal access' : 'Zentralen SerKal-Zugang verwenden', () => {
+    const central = action(t('PILOT_USE_CENTRAL_SERKAL_ACCESS'), () => {
       if (!pilotKeyRequired) {
         void activatePilot();
         return;
@@ -10041,14 +10089,14 @@ try {
       pilotInput.focus();
     });
     central.disabled = true;
-    explain('Lokaler Test mit dem SerKal-Entwicklerschlüssel.', 'Local test using the SerKal developer key.');
+    explain(t('PILOT_LOCAL_TEST_USING_THE_SERKAL_DEVELOPER_KEY'));
     const availability = document.createElement('p');
     availability.setAttribute('role', 'status');
     accessChoices.append(availability);
     const pilotForm = document.createElement('form');
     pilotForm.hidden = true;
     const pilotLabel = document.createElement('label');
-    pilotLabel.textContent = english ? 'SerKal developer key (this session)' : 'SerKal-Entwicklerschlüssel (für diese Sitzung)';
+    pilotLabel.textContent = t('PILOT_SERKAL_DEVELOPER_KEY_THIS_SESSION');
     const pilotInput = document.createElement('input');
     pilotInput.type = 'password';
     pilotInput.autocomplete = 'off';
@@ -10056,10 +10104,10 @@ try {
     pilotLabel.append(document.createElement('br'), pilotInput);
     const pilotSubmit = document.createElement('button');
     pilotSubmit.type = 'submit';
-    pilotSubmit.textContent = english ? 'Check and activate' : 'Prüfen und aktivieren';
+    pilotSubmit.textContent = t('PILOT_CHECK_AND_ACTIVATE');
     const pilotBack = document.createElement('button');
     pilotBack.type = 'button';
-    pilotBack.textContent = english ? 'Back' : 'Zurück';
+    pilotBack.textContent = t('PILOT_BACK');
     const pilotStatus = document.createElement('p');
     pilotStatus.setAttribute('role', 'status');
     pilotBack.addEventListener('click', () => {
@@ -10085,12 +10133,12 @@ try {
       const controls = dialog.querySelectorAll('button');
       controls.forEach(item => { item.disabled = true; });
       pilotInput.readOnly = true;
-      feedback.textContent = english ? 'Checking SerKal access…' : 'SerKal-Zugang wird geprüft…';
+      feedback.textContent = t('PILOT_CHECKING_SERKAL_ACCESS');
       try {
         if (!(await tmdb.usePilot(key))?.ok) throw new Error('Pilot unavailable');
         dialog.close();
       } catch {
-        feedback.textContent = english ? 'Could not verify SerKal access with TMDB.' : 'Der SerKal-Zugang konnte bei TMDB nicht geprüft werden.';
+        feedback.textContent = t('PILOT_COULD_NOT_VERIFY_SERKAL_ACCESS_WITH_TMDB');
       } finally {
         checkingPilot = false;
         pilotInput.readOnly = false;
@@ -10101,7 +10149,7 @@ try {
     const fields = document.createElement('form');
     fields.hidden = true;
     const label = document.createElement('label');
-    label.textContent = english ? 'TMDB API key' : 'API-Key von TMDB';
+    label.textContent = t('PILOT_TMDB_API_KEY');
     const input = document.createElement('input');
     input.type = 'password';
     input.autocomplete = 'off';
@@ -10109,23 +10157,23 @@ try {
     label.append(document.createElement('br'), input);
     const save = document.createElement('button');
     save.type = 'submit';
-    save.textContent = english ? 'Check and save' : 'Prüfen und speichern';
+    save.textContent = t('PILOT_CHECK_AND_SAVE');
     const status = document.createElement('p');
     status.setAttribute('role', 'status');
     const stored = document.createElement('button');
     stored.type = 'button';
-    stored.textContent = english ? 'Use saved personal key' : 'Gespeicherten persönlichen Key nutzen';
+    stored.textContent = t('PILOT_USE_SAVED_PERSONAL_KEY');
     stored.addEventListener('click', async () => {
       try {
         if ((await tmdb.usePersonalKey()).ok) dialog.close();
-        else status.textContent = english ? 'No personal key is saved.' : 'Es ist kein persönlicher Key gespeichert.';
+        else status.textContent = t('PILOT_NO_PERSONAL_KEY_IS_SAVED');
       } catch {
-        status.textContent = english ? 'Could not switch access.' : 'Der Zugang konnte nicht umgestellt werden.';
+        status.textContent = t('PILOT_COULD_NOT_SWITCH_ACCESS');
       }
     });
     const back = document.createElement('button');
     back.type = 'button';
-    back.textContent = english ? 'Back' : 'Zurück';
+    back.textContent = t('PILOT_BACK');
     back.addEventListener('click', () => {
       input.value = '';
       status.textContent = '';
@@ -10143,20 +10191,20 @@ try {
       input.readOnly = true;
       back.disabled = true;
       stored.disabled = true;
-      status.textContent = english ? 'Checking API key…' : 'API-Key wird geprüft…';
+      status.textContent = t('PILOT_CHECKING_API_KEY');
       personal.disabled = true;
       try {
         const result = await tmdb.testKey(candidate, english ? 'en' : 'de');
         if (!dialog.open) return;
         if (!result?.ok) {
-          status.textContent = english ? 'The API key could not be verified.' : 'Der API-Key konnte nicht geprüft werden.';
+          status.textContent = t('PILOT_THE_API_KEY_COULD_NOT_BE_VERIFIED');
           return;
         }
         const saved = await tmdb.saveKey(candidate);
         if (!saved?.ok) throw new Error('TMDB key not saved');
         dialog.close();
       } catch {
-        status.textContent = english ? 'The API key could not be saved.' : 'Der API-Key konnte nicht gespeichert werden.';
+        status.textContent = t('PILOT_THE_API_KEY_COULD_NOT_BE_SAVED');
       } finally {
         save.disabled = false;
         input.readOnly = false;
@@ -10171,7 +10219,7 @@ try {
     tmdb.status().then(info => {
       central.disabled = !info.pilotAvailable;
       pilotKeyRequired = info.pilotKeyRequired === true;
-      if (info.pilotActive) availability.textContent = english ? 'SerKal access is active.' : 'SerKal-Zugang ist aktiv.';
+      if (info.pilotActive) availability.textContent = t('PILOT_SERKAL_ACCESS_IS_ACTIVE');
     }).catch(() => {});
   }
   window.addEventListener('DOMContentLoaded',function(){
@@ -10195,6 +10243,7 @@ try {
 </body>
 
 </html>
+
 
 
 
