@@ -9998,7 +9998,7 @@ try {
       availability.textContent = english ? 'Checking local pilot…' : 'Lokaler Pilot wird geprüft…';
       try {
         if (!(await tmdb.usePilot()).ok) throw new Error('Pilot unavailable');
-        availability.textContent = english ? 'Local pilot is active.' : 'Lokaler Pilot ist aktiv.';
+        dialog.close();
       } catch {
         availability.textContent = english ? 'Local pilot is unavailable.' : 'Der lokale Pilot ist nicht erreichbar oder TMDB hat den Key abgelehnt.';
       } finally {
