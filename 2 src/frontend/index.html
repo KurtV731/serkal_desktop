@@ -3816,6 +3816,12 @@ function setDetailsdesc_(it, originTag) {
 // --------- I18N (DE/EN) ----------
 const I18N = {
   de: {
+    ACCESS_PERSONAL:"Persönlichen API-Key verwenden",
+    ACCESS_UNAVAILABLE:"Der zentrale SerKal-Zugang ist noch nicht verfügbar.",
+    ACCESS_SAVE:"Prüfen und speichern",
+    ACCESS_GOOGLE:"API-Key aus Google übernehmen",
+    ACCESS_VERIFY_ERROR:"Der API-Key konnte nicht geprüft werden.",
+    ACCESS_SAVE_ERROR:"Der API-Key konnte nicht gespeichert werden.",
     SHAREDARCHIVE_READY:"Archivstand für Android bereit: {count} Einträge.",
     SHAREDARCHIVE_LOADED:"Archiv geladen: {count} Einträge.",
     SHAREDARCHIVE_COUNT_UNKNOWN:"Die Archivanzahl konnte nicht ermittelt werden.",
@@ -4067,6 +4073,12 @@ const I18N = {
 
 },
   en: {
+    ACCESS_PERSONAL:"Use personal API key",
+    ACCESS_UNAVAILABLE:"Central SerKal access is not available yet.",
+    ACCESS_SAVE:"Check and save",
+    ACCESS_GOOGLE:"Use key from Google",
+    ACCESS_VERIFY_ERROR:"The API key could not be verified.",
+    ACCESS_SAVE_ERROR:"The API key could not be saved.",
     SHAREDARCHIVE_READY:"Archive snapshot ready for Android: {count} entries.",
     SHAREDARCHIVE_LOADED:"Archive loaded: {count} entries.",
     SHAREDARCHIVE_COUNT_UNKNOWN:"The archive count could not be determined.",
@@ -9989,13 +10001,13 @@ try {
     }
 
     action(english ? 'Keep current access' : 'Vorhandenen Zugang beibehalten', () => dialog.close());
-    const personal = action(english ? 'Use personal API key' : 'Persönlichen API-Key verwenden', () => {
+    const personal = action(t('ACCESS_PERSONAL'), () => {
       fields.hidden = false;
       input.focus();
     });
     action(english ? 'Use central SerKal access' : 'Zentralen SerKal-Zugang verwenden', () => {}).disabled = true;
     const availability = document.createElement('p');
-    availability.textContent = english ? 'Central SerKal access is not available yet.' : 'Der zentrale SerKal-Zugang ist noch nicht verfügbar.';
+    availability.textContent = t('ACCESS_UNAVAILABLE');
     dialog.append(availability);
 
     const fields = document.createElement('form');
@@ -10009,10 +10021,10 @@ try {
     label.append(document.createElement('br'), input);
     const save = document.createElement('button');
     save.type = 'submit';
-    save.textContent = english ? 'Check and save' : 'Prüfen und speichern';
+    save.textContent = t('ACCESS_SAVE');
     const google = document.createElement('button');
     google.type = 'button';
-    google.textContent = english ? 'Use key from Google' : 'API-Key aus Google übernehmen';
+    google.textContent = t('ACCESS_GOOGLE');
     google.addEventListener('click', () => {
       dialog.close();
       connect(button);
@@ -10033,14 +10045,14 @@ try {
         const result = await tmdb.testKey(candidate, english ? 'en' : 'de');
         if (!dialog.open) return;
         if (!result?.ok) {
-          status.textContent = english ? 'The API key could not be verified.' : 'Der API-Key konnte nicht geprüft werden.';
+          status.textContent = t('ACCESS_VERIFY_ERROR');
           return;
         }
         const saved = await tmdb.saveKey(candidate);
         if (!saved?.ok) throw new Error('TMDB key not saved');
         dialog.close();
       } catch {
-        status.textContent = english ? 'The API key could not be saved.' : 'Der API-Key konnte nicht gespeichert werden.';
+        status.textContent = t('ACCESS_SAVE_ERROR');
       } finally {
         save.disabled = false;
         input.readOnly = false;
