@@ -942,11 +942,11 @@ public class MainActivity extends Activity {
     }
     private void showArchiveMenu(){
         archiveDialogOpen=true;dialogBuilder().setTitle(english?"Archive actions":"Archivaktionen")
-            .setItems(english?new String[]{"TMDB API key","Google account","Sync now","Reload archive","Maintenance","Last maintenance results","Log"}:new String[]{"TMDB API-Key","Google-Konto","Jetzt synchronisieren","Archiv neu laden","Wartung","Letztes Wartungsergebnis","Log"},(d,which)->handler.post(()->runArchiveMenuAction(which)))
+            .setItems(english?new String[]{"TMDB (Google)","Google account","Sync now","Reload archive","Maintenance","Last maintenance results","Log"}:new String[]{"TMDB (Google)","Google-Konto","Jetzt synchronisieren","Archiv neu laden","Wartung","Letztes Wartungsergebnis","Log"},(d,which)->handler.post(()->runArchiveMenuAction(which)))
             .setNegativeButton(english?"Close":"Schließen",null).setOnDismissListener(d->archiveDialogOpen=false).show();
     }
     private void runArchiveMenuAction(int which){
-        if(which==0){askForKey();return;}
+        if(which==0){showTmdbAccessMenu();return;}
         if(which==1){googleMenu();return;}
         if(which==2){if(archiveCopy!=null && !archiveCopy.busy())archiveCopy.schedule(0);return;}
         if(which==3){loadArchive();checkPendingRequest();return;}
@@ -1026,6 +1026,30 @@ public class MainActivity extends Activity {
         try{startActivity(new android.content.Intent(android.content.Intent.ACTION_VIEW,android.net.Uri.parse(url)));}
         catch(Exception error){statusText.setText((english?"Open in your browser: ":"Im Browser öffnen: ")+url);}
     }
+    private void showTmdbAccessMenu() {
+        LinearLayout choices = new LinearLayout(this);
+        choices.setOrientation(LinearLayout.VERTICAL);
+        choices.setPadding(dp(16), dp(8), dp(16), dp(8));
+        Button keep = verticalButton(english ? "Keep current access" : "Vorhandenen Zugang beibehalten");
+        Button personal = verticalButton(english ? "Use personal API key" : "Persönlichen API-Key verwenden");
+        Button global = verticalButton(english ? "Use central SerKal access" : "Zentralen SerKal-Zugang verwenden");
+        choices.addView(keep);
+        choices.addView(personal);
+        choices.addView(global);
+        choices.addView(text(english ? "Central SerKal access is not available yet."
+            : "Der zentrale SerKal-Zugang ist noch nicht verfügbar.", 12, TEXT));
+        global.setEnabled(false);
+        ScrollView scroll = new ScrollView(this);
+        scroll.addView(choices);
+        AlertDialog menu = dialogBuilder().setTitle("TMDB (Google)").setView(scroll).create();
+        keep.setOnClickListener(view -> menu.dismiss());
+        personal.setOnClickListener(view -> {
+            menu.dismiss();
+            askForKey();
+        });
+        menu.show();
+    }
+
     private void askForKey() {
         if (keySetupOpen) return;
         keySetupOpen=true;
