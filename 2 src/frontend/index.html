@@ -1984,7 +1984,7 @@
 
 <dialog id="appMenuDialog" aria-labelledby="appMenuTitle">
   <div class="appMenuHeading"><h2 id="appMenuTitle"></h2><button id="btnAppMenuClose" type="button" class="btnSmall"></button></div>
-  <div class="appMenuActions"><button id="btnSaveDock" class="btnSmall btnPrimary" type="button" title="">💾 Speichern</button><button class="btnSmall" id="btnArchiveSync" type="button"></button><button class="btnSmall" id="btnArchiveReload" type="button" title=""></button><button id="btnWartung" class="btnSmall" type="button" title=""></button><button id="btnLogDock" class="btnSmall" type="button" title="">📜 Log</button><button id="btnSharedKeyDock" class="btnSmall" type="button">TMDB · Google</button><button id="btnThemeDock" class="btnSmall" type="button" title="">🌙 Dark</button><div class="appMenuDanger"><button class="btnDanger btnSmall" id="btnDeleteFile" type="button" title=""></button></div></div>
+  <div class="appMenuActions"><button id="btnSaveDock" class="btnSmall btnPrimary" type="button" title="">💾 Speichern</button><button class="btnSmall" id="btnArchiveSync" type="button"></button><button class="btnSmall" id="btnArchiveReload" type="button" title=""></button><button id="btnWartung" class="btnSmall" type="button" title=""></button><button id="btnLogDock" class="btnSmall" type="button" title="">📜 Log</button><button id="btnSharedKeyDock" class="btnSmall" type="button">API-Key</button><button id="btnGoogleConnectionDock" class="btnSmall" type="button" style="display:none">Google-Verbindung erneuern</button><button id="btnThemeDock" class="btnSmall" type="button" title="">🌙 Dark</button><div class="appMenuDanger"><button class="btnDanger btnSmall" id="btnDeleteFile" type="button" title=""></button></div></div>
 </dialog>
     <div id="logPanel" class="logPanel" aria-label="">
       <div id="logPanelResizeHandle" class="logPanelResizeHandle" role="separator" aria-orientation="horizontal"
@@ -9957,11 +9957,20 @@ try {
       const info = await tmdb.status();
       const english = getLang_() === 'en';
       const label = info.pilotActive ? 'SerKal'
-        : info.configured ? (english ? 'Personal' : 'Persönlich')
+        : info.configured ? (english ? 'personal' : 'persönlich')
         : (english ? 'Not configured' : 'Nicht eingerichtet');
-      button.textContent = 'TMDB (Google) · ' + label;
+      const active = english ? 'active' : 'aktiv';
+      button.textContent = info.configured ? `API-Key (${active}: ${label})` : `API-Key (${label})`;
+      const googleConnection = document.getElementById('btnGoogleConnectionDock');
+      if (googleConnection) {
+        googleConnection.style.display = info.googleKeyAvailable ? '' : 'none';
+        googleConnection.textContent = english ? 'Reconnect Google' : 'Google-Verbindung erneuern';
+        googleConnection.title = english
+          ? 'Signs in to Google again and synchronizes the archive and personal API key.'
+          : 'Erneute Google-Anmeldung mit Abgleich von Archiv und persönlichem API-Key.';
+      }
     } catch {
-      button.textContent = 'TMDB (Google)';
+      button.textContent = 'API-Key';
     }
   }
 
@@ -9988,9 +9997,9 @@ try {
     const english = getLang_() === 'en';
     const dialog = document.createElement('dialog');
     dialog.style.cssText = 'max-width:min(90vw,32rem);padding:1rem;color:inherit;background:Canvas;border:1px solid GrayText;border-radius:.5rem';
-    dialog.setAttribute('aria-label', 'TMDB (Google)');
+    dialog.setAttribute('aria-label', 'API-Key');
     const heading = document.createElement('h2');
-    heading.textContent = 'TMDB (Google)';
+    heading.textContent = 'API-Key';
     dialog.append(heading);
     const accessChoices = document.createElement('div');
     dialog.append(accessChoices);
@@ -10051,14 +10060,6 @@ try {
     const save = document.createElement('button');
     save.type = 'submit';
     save.textContent = english ? 'Check and save' : 'Prüfen und speichern';
-    const google = document.createElement('button');
-    google.type = 'button';
-    google.hidden = true;
-    google.textContent = english ? 'Use key from Google' : 'API-Key aus Google übernehmen';
-    google.addEventListener('click', () => {
-      dialog.close();
-      connect(button);
-    });
     const status = document.createElement('p');
     status.setAttribute('role', 'status');
     const stored = document.createElement('button');
@@ -10082,7 +10083,7 @@ try {
       accessChoices.hidden = false;
       personal.focus();
     });
-    fields.append(label, save, stored, google, back, status);
+    fields.append(label, save, stored, back, status);
     dialog.append(fields);
     fields.addEventListener('submit', async event => {
       event.preventDefault();
@@ -10093,7 +10094,6 @@ try {
       back.disabled = true;
       stored.disabled = true;
       status.textContent = english ? 'Checking API key…' : 'API-Key wird geprüft…';
-      google.disabled = true;
       personal.disabled = true;
       try {
         const result = await tmdb.testKey(candidate, english ? 'en' : 'de');
@@ -10112,7 +10112,6 @@ try {
         input.readOnly = false;
         back.disabled = false;
         stored.disabled = false;
-        google.disabled = false;
         personal.disabled = false;
       }
     });
@@ -10120,7 +10119,6 @@ try {
     document.body.append(dialog);
     dialog.showModal();
     tmdb.status().then(info => {
-      google.hidden = !info.googleKeyAvailable;
       central.disabled = !info.pilotAvailable;
       if (info.pilotAvailable) availability.textContent = info.pilotActive
         ? (english ? 'Local pilot is active.' : 'Lokaler Pilot ist aktiv.')
@@ -10128,7 +10126,7 @@ try {
     }).catch(() => {});
   }
   window.addEventListener('DOMContentLoaded',function(){
-    ['btnSharedKeyDock','skSetupSharedKey'].forEach(function(id){
+    ['btnSharedKeyDock','btnGoogleConnectionDock','skSetupSharedKey'].forEach(function(id){
       var button=document.getElementById(id);
       if(button)button.addEventListener('click',function(){
         if(id==='btnSharedKeyDock') showTmdbAccess(button);
