@@ -10029,24 +10029,74 @@ try {
       input.focus();
     });
     explain('Einen gespeicherten Key wählen oder einen anderen eingeben.', 'Choose a saved key or enter a different one.');
-    const central = action(english ? 'Use central SerKal access' : 'Zentralen SerKal-Zugang verwenden', async () => {
-      central.disabled = true;
-      availability.textContent = english ? 'Checking local pilot…' : 'Lokaler Pilot wird geprüft…';
-      try {
-        if (!(await tmdb.usePilot()).ok) throw new Error('Pilot unavailable');
-        dialog.close();
-      } catch {
-        availability.textContent = english ? 'Local pilot is unavailable.' : 'Der lokale Pilot ist nicht erreichbar oder TMDB hat den Key abgelehnt.';
-      } finally {
-        central.disabled = false;
+    let checkingPilot = false;
+    let pilotKeyRequired = true;
+    const central = action(english ? 'Use central SerKal access' : 'Zentralen SerKal-Zugang verwenden', () => {
+      if (!pilotKeyRequired) {
+        void activatePilot();
+        return;
       }
+      accessChoices.hidden = true;
+      pilotForm.hidden = false;
+      pilotInput.focus();
     });
     central.disabled = true;
-    explain('SerKal fragt TMDB über den lokalen Testdienst ab. Dein persönlicher Key bleibt gespeichert.', 'SerKal calls TMDB through the local test service. Your personal key stays saved.');
+    explain('Lokaler Test mit dem SerKal-Entwicklerschlüssel.', 'Local test using the SerKal developer key.');
     const availability = document.createElement('p');
-    availability.textContent = english ? 'Central SerKal access is not available yet.' : 'Der zentrale SerKal-Zugang ist noch nicht verfügbar.';
     availability.setAttribute('role', 'status');
     accessChoices.append(availability);
+    const pilotForm = document.createElement('form');
+    pilotForm.hidden = true;
+    const pilotLabel = document.createElement('label');
+    pilotLabel.textContent = english ? 'SerKal developer key (this session)' : 'SerKal-Entwicklerschlüssel (für diese Sitzung)';
+    const pilotInput = document.createElement('input');
+    pilotInput.type = 'password';
+    pilotInput.autocomplete = 'off';
+    pilotInput.required = true;
+    pilotLabel.append(document.createElement('br'), pilotInput);
+    const pilotSubmit = document.createElement('button');
+    pilotSubmit.type = 'submit';
+    pilotSubmit.textContent = english ? 'Check and activate' : 'Prüfen und aktivieren';
+    const pilotBack = document.createElement('button');
+    pilotBack.type = 'button';
+    pilotBack.textContent = english ? 'Back' : 'Zurück';
+    const pilotStatus = document.createElement('p');
+    pilotStatus.setAttribute('role', 'status');
+    pilotBack.addEventListener('click', () => {
+      pilotInput.value = '';
+      pilotStatus.textContent = '';
+      pilotForm.hidden = true;
+      accessChoices.hidden = false;
+      central.focus();
+    });
+    pilotForm.append(pilotLabel, pilotSubmit, pilotBack, pilotStatus);
+    dialog.append(pilotForm);
+    pilotForm.addEventListener('submit', event => {
+      event.preventDefault();
+      if (pilotInput.value.trim()) void activatePilot(pilotInput.value.trim());
+    });
+    dialog.addEventListener('cancel', event => {
+      if (checkingPilot) event.preventDefault();
+    });
+    async function activatePilot(key){
+      if (checkingPilot) return;
+      checkingPilot = true;
+      const feedback = pilotForm.hidden ? availability : pilotStatus;
+      const controls = dialog.querySelectorAll('button');
+      controls.forEach(item => { item.disabled = true; });
+      pilotInput.readOnly = true;
+      feedback.textContent = english ? 'Checking SerKal access…' : 'SerKal-Zugang wird geprüft…';
+      try {
+        if (!(await tmdb.usePilot(key))?.ok) throw new Error('Pilot unavailable');
+        dialog.close();
+      } catch {
+        feedback.textContent = english ? 'Could not verify SerKal access with TMDB.' : 'Der SerKal-Zugang konnte bei TMDB nicht geprüft werden.';
+      } finally {
+        checkingPilot = false;
+        pilotInput.readOnly = false;
+        controls.forEach(item => { item.disabled = false; });
+      }
+    }
 
     const fields = document.createElement('form');
     fields.hidden = true;
@@ -10115,14 +10165,13 @@ try {
         personal.disabled = false;
       }
     });
-    dialog.addEventListener('close', () => { input.value = ''; dialog.remove(); button.focus(); void refreshTmdbAccessLabel(); });
+    dialog.addEventListener('close', () => { input.value = ''; pilotInput.value = ''; dialog.remove(); button.focus(); void refreshTmdbAccessLabel(); });
     document.body.append(dialog);
     dialog.showModal();
     tmdb.status().then(info => {
       central.disabled = !info.pilotAvailable;
-      if (info.pilotAvailable) availability.textContent = info.pilotActive
-        ? (english ? 'Local pilot is active.' : 'Lokaler Pilot ist aktiv.')
-        : (english ? 'Local pilot is available for testing.' : 'Der lokale Pilot steht zum Testen bereit.');
+      pilotKeyRequired = info.pilotKeyRequired === true;
+      if (info.pilotActive) availability.textContent = english ? 'SerKal access is active.' : 'SerKal-Zugang ist aktiv.';
     }).catch(() => {});
   }
   window.addEventListener('DOMContentLoaded',function(){

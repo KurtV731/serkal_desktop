@@ -1091,15 +1091,17 @@ async function archiveSaveChanges_(dirtyMap) {
     }
 }
 
-const localTmdbPilot = process.env.SERKAL_LOCAL_TMDB_PILOT === "1";
+const legacyTmdbPilot = process.env.SERKAL_LOCAL_TMDB_PILOT === "1";
 let useLocalTmdbPilot = false;
+let sessionPilotKey = "";
 
 async function tmdbRequest_(pathname, params, apiKeyOverride, usePilot = useLocalTmdbPilot) {
     const throughPilot = usePilot && apiKeyOverride === undefined;
-    const apiKey = throughPilot ? "" : String(apiKeyOverride || readTmdbKey_()).trim();
-    if (!throughPilot && !apiKey) return { ok:false, code:"TMDB_KEY_MISSING", message:bt_("TMDB_NOT_CONFIGURED") };
+    const externalPilot = throughPilot && !sessionPilotKey && legacyTmdbPilot;
+    const apiKey = throughPilot ? sessionPilotKey : String(apiKeyOverride || readTmdbKey_()).trim();
+    if (!externalPilot && !apiKey) return { ok:false, code:"TMDB_KEY_MISSING", message:bt_("TMDB_NOT_CONFIGURED") };
 
-    const url = new URL((throughPilot ? "http://127.0.0.1:8787" : "https://api.themoviedb.org/3") + pathname);
+    const url = new URL((externalPilot ? "http://127.0.0.1:8787" : "https://api.themoviedb.org/3") + pathname);
     const tmdbHeaders = { accept:"application/json" };
     if (/^[a-fA-F0-9]{32}$/.test(apiKey)) url.searchParams.set("api_key", apiKey);
     else if (apiKey) tmdbHeaders.Authorization = "Bearer " + apiKey;
@@ -3839,16 +3841,20 @@ function installIpc_() {
         }
         return {
             configured: useLocalTmdbPilot || !!readTmdbKey_(),
-            pilotAvailable: localTmdbPilot,
+            pilotAvailable: true,
+            pilotKeyRequired: !sessionPilotKey && !legacyTmdbPilot,
             pilotActive: useLocalTmdbPilot,
             googleKeyAvailable,
         };
     });
-    ipcMain.handle("serkal:tmdb:usePilot", async () => {
-        if (!localTmdbPilot) return { ok:false };
-        const result = await tmdbRequest_("/configuration", {}, undefined, true);
-        if (result.ok) useLocalTmdbPilot = true;
-        return { ok:result.ok };
+    ipcMain.handle("serkal:tmdb:usePilot", async (_event, developerKey) => {
+        const candidate = typeof developerKey === "string" ? developerKey.trim() : "";
+        if (!candidate && !sessionPilotKey && !legacyTmdbPilot) return { ok:false, keyRequired:true };
+        const result = await tmdbRequest_("/configuration", {}, candidate || undefined, true);
+        if (!result.ok) return { ok:false, code:result.code };
+        if (candidate) sessionPilotKey = candidate;
+        useLocalTmdbPilot = true;
+        return { ok:true };
     });
     ipcMain.handle("serkal:tmdb:usePersonalKey", () => {
         if (!readTmdbKey_()) return { ok:false };
