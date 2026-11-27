@@ -359,3 +359,8 @@ Kurts Entscheidung: Die laufende Testerrunde läuft mit der bestehenden TMDB-Ein
 
 
 **27.11.2026 · TMDB-Quellenhinweis:** Android-Hilfe enthält im [Sammelzweig](https://github.com/KurtV731/serkal_desktop/commit/d89ce7517c86b24a722aec06b7e9b584ace03e70) den offiziellen englischen TMDB-Satz und die Quellenangabe in DE/EN. Das freigegebene TMDB-Logo sowie der entsprechende Hinweis für Desktop bleiben offen. Für den zentralen Zugang die konkreten Bedingungen des Entwickler-Keys prüfen. Vor einem bezahlten Tarif ein schriftliches Angebot für SerKal und die Betriebskosten klären; 149 US-Dollar/Monat sind kein verifizierter TMDB-Listenpreis.
+
+
+### Play Console – Prüferzugang in Kurts deutscher Oberfläche
+
+Auf dem Startbildschirm in der Zeile **SerKal** rechts den blauen Pfeil anklicken. In der App links **Überprüfen und optimieren** (Pulssymbol unter **Testen und veröffentlichen**) öffnen und über den Richtlinienbereich zu **App-Inhalte** gehen. Auf Kurts Bildschirm ist dort zunächst **Überprüfung erforderlich** aktiv und zeigt **Alles erledigt**. Zum Ändern einer bestehenden Erklärung oben zu **Abgeschlossen** wechseln und dort bei **Anmeldedaten** den Eintrag **Verwalten** suchen. Der Reiterwechsel ist auf Kurts Screenshot sichtbar; die Bezeichnung der Karte im Zielreiter ist bei ihm noch zu bestätigen. Googles Hilfe nennt die linke Hauptgruppe abweichend „Beobachten und verbessern“.
