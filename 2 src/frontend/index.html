@@ -9949,6 +9949,22 @@ try {
     if(code==='GOOGLE_HTTP_403') return t('SHAREDKEY_PERMISSION');
     return t('SHAREDKEY_FAILED')+(result?.message?'\n\n'+result.message:'');
   }
+  async function refreshTmdbAccessLabel(){
+    const button = document.getElementById('btnSharedKeyDock');
+    const tmdb = window.serkal?.tmdb;
+    if (!button || !tmdb?.status) return;
+    try {
+      const info = await tmdb.status();
+      const english = getLang_() === 'en';
+      const label = info.pilotActive ? 'SerKal'
+        : info.configured ? (english ? 'Personal' : 'Persönlich')
+        : (english ? 'Not configured' : 'Nicht eingerichtet');
+      button.textContent = 'TMDB (Google) · ' + label;
+    } catch {
+      button.textContent = 'TMDB (Google)';
+    }
+  }
+
   async function connect(button){
     if(!window.serkal || !window.serkal.tmdb.sharedKey) return;
     button.disabled=true;
@@ -9964,7 +9980,7 @@ try {
       }
       alert(message(result));
     } catch(e) { alert(message(null)); }
-    finally { button.disabled=false; }
+    finally { button.disabled=false; void refreshTmdbAccessLabel(); }
   }
   function showTmdbAccess(button){
     const tmdb = window.serkal?.tmdb;
@@ -10071,7 +10087,7 @@ try {
         personal.disabled = false;
       }
     });
-    dialog.addEventListener('close', () => { input.value = ''; dialog.remove(); button.focus(); });
+    dialog.addEventListener('close', () => { input.value = ''; dialog.remove(); button.focus(); void refreshTmdbAccessLabel(); });
     document.body.append(dialog);
     dialog.showModal();
     tmdb.status().then(info => {
@@ -10089,8 +10105,13 @@ try {
         else connect(button);
       });
     });
-    if(window.serkal && window.serkal.tmdb.sharedKey)
-      window.serkal.archive.syncStatus().then(function(info){if(!info.session)return window.serkal.tmdb.sharedKey(false);}).catch(function(){});
+    document.getElementById('btnAppMenu')?.addEventListener('click', refreshTmdbAccessLabel);
+    if (window.serkal?.tmdb.sharedKey) {
+      window.serkal.archive.syncStatus()
+        .then(info => { if (!info.session) return window.serkal.tmdb.sharedKey(false); })
+        .catch(() => {})
+        .finally(refreshTmdbAccessLabel);
+    }
   });
 })();
 </script>
