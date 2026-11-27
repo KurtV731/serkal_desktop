@@ -1,0 +1,74 @@
+name: Windows signing rehearsal
+on:
+  push:
+    branches: [installer3-windows-signing-rehearsal]
+permissions:
+  contents: read
+jobs:
+  rehearsal:
+    runs-on: windows-2025
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install dependencies and run release tests
+        shell: pwsh
+        run: |
+          npm.cmd ci
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          npm.cmd test
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+      - name: Package, sign, build setup and verify both layers
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $env:SERKAL_GOOGLE_OAUTH_FILE = Join-Path $env:RUNNER_TEMP google_oauth_client.json
+          '{"installed":{"client_id":"rehearsal.invalid","client_secret":"rehearsal"}}' | Set-Content $env:SERKAL_GOOGLE_OAUTH_FILE
+          $tool = Get-ChildItem "${env:ProgramFiles(x86)}\Windows Kits\10\bin\*\x64\signtool.exe" | Sort-Object { [version]$_.Directory.Parent.Name } -Descending | Select-Object -First 1
+          if (!$tool) { throw 'Windows SDK SignTool missing' }
+          $cert = New-SelfSignedCertificate -Type CodeSigningCert -Subject 'CN=SerKal Rehearsal Only' -CertStoreLocation Cert:\CurrentUser\My
+          $cer = Join-Path $env:RUNNER_TEMP rehearsal.cer
+          Export-Certificate -Cert $cert -FilePath $cer | Out-Null
+          Import-Certificate -FilePath $cer -CertStoreLocation Cert:\CurrentUser\Root | Out-Null
+          function Invoke-Checked($Program, [string[]]$Arguments) {
+            & $Program @Arguments
+            if ($LASTEXITCODE -ne 0) { throw "$Program exited $LASTEXITCODE" }
+          }
+          function Confirm-Signature($File) {
+            Invoke-Checked $tool.FullName @('verify','/pa','/all','/tw','/v',$File)
+            $signature = Get-AuthenticodeSignature -LiteralPath $File
+            if ($signature.Status -ne 'Valid' -or $signature.SignerCertificate.Thumbprint -ne $cert.Thumbprint -or !$signature.TimeStamperCertificate) {
+              throw "Invalid signature, signer or timestamp: $File"
+            }
+          }
+          function Sign-File($File) {
+            Invoke-Checked $tool.FullName @('sign','/sha1',$cert.Thumbprint,'/fd','SHA256','/tr','http://timestamp.digicert.com','/td','SHA256',$File)
+            Confirm-Signature $File
+          }
+          Invoke-Checked npm.cmd @('run','package','--','--platform=win32','--arch=x64')
+          $app = (Resolve-Path 'out\SerKal Desktop-win32-x64\SerKal Desktop.exe').Path
+          Sign-File $app
+          Invoke-Checked npm.cmd @('run','make','--','--skip-package','--platform=win32','--arch=x64')
+          $output = 'out\make\squirrel.windows\x64'
+          $setup = (Resolve-Path "$output\serkal-desktop-1-2-7-wartung-8-setup.exe").Path
+          Sign-File $setup
+          $package = @(Get-ChildItem $output -Filter '*-full.nupkg')
+          if ($package.Count -ne 1) { throw 'Expected one full Squirrel package' }
+          $unpacked = Join-Path $env:RUNNER_TEMP unpacked
+          [IO.Compression.ZipFile]::ExtractToDirectory($package[0].FullName, $unpacked)
+          $innerApp = @(Get-ChildItem $unpacked -Recurse -Filter 'SerKal Desktop.exe')
+          if ($innerApp.Count -ne 1) { throw 'Expected one SerKal Desktop.exe in Squirrel package' }
+          Confirm-Signature $innerApp[0].FullName
+          if ((Get-FileHash $app).Hash -ne (Get-FileHash $innerApp[0].FullName).Hash) { throw 'Packaged application differs from signed application' }
+          Get-FileHash $setup -Algorithm SHA256
+          Invoke-Checked $setup @('--silent')
+          $installed = $null
+          for ($i = 0; $i -lt 30 -and !$installed; $i++) {
+            $installed = Get-ChildItem "$env:LOCALAPPDATA\SerKalDesktop\app-*\SerKal Desktop.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
+            if (!$installed) { Start-Sleep -Seconds 2 }
+          }
+          if (!$installed) { throw 'Silent setup did not install the desktop executable' }
+          Confirm-Signature $installed.FullName
+          if ((Get-FileHash $app).Hash -ne (Get-FileHash $installed.FullName).Hash) { throw 'Installed application differs from signed application' }
