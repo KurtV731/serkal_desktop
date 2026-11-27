@@ -3827,11 +3827,23 @@ function installIpc_() {
     });
     ipcMain.handle("serkal:setup:commit", (_event, payload) => commitFirstSetup_(payload));
     ipcMain.handle("serkal:tmdb:sharedKey", (_event, interactive) => googleSharedKeySync_(interactive === true));
-    ipcMain.handle("serkal:tmdb:status", () => ({
-        configured: useLocalTmdbPilot || !!readTmdbKey_(),
-        pilotAvailable: localTmdbPilot,
-        pilotActive: useLocalTmdbPilot,
-    }));
+    ipcMain.handle("serkal:tmdb:status", () => {
+        let googleKeyAvailable = false;
+        if (!calendarLab_) {
+            try {
+                googleOauthClientConfig_();
+                googleKeyAvailable = true;
+            } catch {
+                // Local test installations may have no Google OAuth configuration.
+            }
+        }
+        return {
+            configured: useLocalTmdbPilot || !!readTmdbKey_(),
+            pilotAvailable: localTmdbPilot,
+            pilotActive: useLocalTmdbPilot,
+            googleKeyAvailable,
+        };
+    });
     ipcMain.handle("serkal:tmdb:usePilot", async () => {
         if (!localTmdbPilot) return { ok:false };
         const result = await tmdbRequest_("/configuration", {}, undefined, true);
