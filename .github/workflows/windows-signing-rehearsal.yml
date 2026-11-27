@@ -20,8 +20,9 @@ jobs:
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
           npm.cmd test
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
-      - name: Package, sign, build setup and verify both layers
+      - name: Create test certificate and package app
         shell: pwsh
+        timeout-minutes: 5
         run: |
           $ErrorActionPreference = 'Stop'
           $env:SERKAL_GOOGLE_OAUTH_FILE = Join-Path $env:RUNNER_TEMP google_oauth_client.json
@@ -32,6 +33,18 @@ jobs:
           $cer = Join-Path $env:RUNNER_TEMP rehearsal.cer
           Export-Certificate -Cert $cert -FilePath $cer | Out-Null
           Import-Certificate -FilePath $cer -CertStoreLocation Cert:\CurrentUser\Root | Out-Null
+          "REHEARSAL_CERT=$($cert.Thumbprint)" >> $env:GITHUB_ENV
+          "SERKAL_GOOGLE_OAUTH_FILE=$env:SERKAL_GOOGLE_OAUTH_FILE" >> $env:GITHUB_ENV
+          npm.cmd run package -- --platform=win32 --arch=x64
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+      - name: Sign app with timestamp
+        shell: pwsh
+        timeout-minutes: 5
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $tool = Get-ChildItem "${env:ProgramFiles(x86)}\Windows Kits\10\bin\*\x64\signtool.exe" | Sort-Object { [version]$_.Directory.Parent.Name } -Descending | Select-Object -First 1
+          if (!$tool) { throw 'Windows SDK SignTool missing' }
+          $cert = Get-Item "Cert:\CurrentUser\My\$env:REHEARSAL_CERT"
           function Invoke-Checked($Program, [string[]]$Arguments) {
             & $Program @Arguments
             if ($LASTEXITCODE -ne 0) { throw "$Program exited $LASTEXITCODE" }
@@ -47,10 +60,39 @@ jobs:
             Invoke-Checked $tool.FullName @('sign','/sha1',$cert.Thumbprint,'/fd','SHA256','/tr','http://timestamp.digicert.com','/td','SHA256',$File)
             Confirm-Signature $File
           }
-          Invoke-Checked npm.cmd @('run','package','--','--platform=win32','--arch=x64')
           $app = (Resolve-Path 'out\SerKal Desktop-win32-x64\SerKal Desktop.exe').Path
           Sign-File $app
-          Invoke-Checked npm.cmd @('run','make','--','--skip-package','--platform=win32','--arch=x64')
+      - name: Build Squirrel setup
+        shell: pwsh
+        timeout-minutes: 5
+        run: |
+          $ErrorActionPreference = 'Stop'
+          npm.cmd run make -- --skip-package --platform=win32 --arch=x64
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+      - name: Sign and verify setup and bundled executable
+        shell: pwsh
+        timeout-minutes: 5
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $tool = Get-ChildItem "${env:ProgramFiles(x86)}\Windows Kits\10\bin\*\x64\signtool.exe" | Sort-Object { [version]$_.Directory.Parent.Name } -Descending | Select-Object -First 1
+          if (!$tool) { throw 'Windows SDK SignTool missing' }
+          $cert = Get-Item "Cert:\CurrentUser\My\$env:REHEARSAL_CERT"
+          function Invoke-Checked($Program, [string[]]$Arguments) {
+            & $Program @Arguments
+            if ($LASTEXITCODE -ne 0) { throw "$Program exited $LASTEXITCODE" }
+          }
+          function Confirm-Signature($File) {
+            Invoke-Checked $tool.FullName @('verify','/pa','/all','/tw','/v',$File)
+            $signature = Get-AuthenticodeSignature -LiteralPath $File
+            if ($signature.Status -ne 'Valid' -or $signature.SignerCertificate.Thumbprint -ne $cert.Thumbprint -or !$signature.TimeStamperCertificate) {
+              throw "Invalid signature, signer or timestamp: $File"
+            }
+          }
+          function Sign-File($File) {
+            Invoke-Checked $tool.FullName @('sign','/sha1',$cert.Thumbprint,'/fd','SHA256','/tr','http://timestamp.digicert.com','/td','SHA256',$File)
+            Confirm-Signature $File
+          }
+          $app = (Resolve-Path 'out\SerKal Desktop-win32-x64\SerKal Desktop.exe').Path
           $output = 'out\make\squirrel.windows\x64'
           $setup = (Resolve-Path "$output\serkal-desktop-1-2-7-wartung-8-setup.exe").Path
           Sign-File $setup
@@ -63,7 +105,35 @@ jobs:
           Confirm-Signature $innerApp[0].FullName
           if ((Get-FileHash $app).Hash -ne (Get-FileHash $innerApp[0].FullName).Hash) { throw 'Packaged application differs from signed application' }
           Get-FileHash $setup -Algorithm SHA256
-          Invoke-Checked $setup @('--silent')
+      - name: Install and verify installed executable
+        shell: pwsh
+        timeout-minutes: 5
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $tool = Get-ChildItem "${env:ProgramFiles(x86)}\Windows Kits\10\bin\*\x64\signtool.exe" | Sort-Object { [version]$_.Directory.Parent.Name } -Descending | Select-Object -First 1
+          if (!$tool) { throw 'Windows SDK SignTool missing' }
+          $cert = Get-Item "Cert:\CurrentUser\My\$env:REHEARSAL_CERT"
+          function Invoke-Checked($Program, [string[]]$Arguments) {
+            & $Program @Arguments
+            if ($LASTEXITCODE -ne 0) { throw "$Program exited $LASTEXITCODE" }
+          }
+          function Confirm-Signature($File) {
+            Invoke-Checked $tool.FullName @('verify','/pa','/all','/tw','/v',$File)
+            $signature = Get-AuthenticodeSignature -LiteralPath $File
+            if ($signature.Status -ne 'Valid' -or $signature.SignerCertificate.Thumbprint -ne $cert.Thumbprint -or !$signature.TimeStamperCertificate) {
+              throw "Invalid signature, signer or timestamp: $File"
+            }
+          }
+          function Sign-File($File) {
+            Invoke-Checked $tool.FullName @('sign','/sha1',$cert.Thumbprint,'/fd','SHA256','/tr','http://timestamp.digicert.com','/td','SHA256',$File)
+            Confirm-Signature $File
+          }
+          $app = (Resolve-Path 'out\SerKal Desktop-win32-x64\SerKal Desktop.exe').Path
+          $output = 'out\make\squirrel.windows\x64'
+          $setup = (Resolve-Path "$output\serkal-desktop-1-2-7-wartung-8-setup.exe").Path
+          $process = Start-Process -FilePath $setup -ArgumentList '--silent' -PassThru
+          if (!$process.WaitForExit(90000)) { $process.Kill(); throw 'Setup did not exit after 90 seconds' }
+          if ($process.ExitCode -ne 0) { throw "Setup exited $($process.ExitCode)" }
           $installed = $null
           for ($i = 0; $i -lt 30 -and !$installed; $i++) {
             $installed = Get-ChildItem "$env:LOCALAPPDATA\SerKalDesktop\app-*\SerKal Desktop.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
