@@ -9992,6 +9992,8 @@ try {
     const heading = document.createElement('h2');
     heading.textContent = 'TMDB (Google)';
     dialog.append(heading);
+    const accessChoices = document.createElement('div');
+    dialog.append(accessChoices);
 
     function action(label, listener){
       const item = document.createElement('button');
@@ -10000,15 +10002,24 @@ try {
       item.style.cssText = 'display:block;width:100%;margin:.4rem 0';
       item.textContent = label;
       item.addEventListener('click', listener);
-      dialog.append(item);
+      accessChoices.append(item);
       return item;
     }
 
+    function explain(de, en){
+      const description = document.createElement('p');
+      description.style.cssText = 'margin:.15rem 0 .65rem;font-size:.9rem';
+      description.textContent = english ? en : de;
+      accessChoices.append(description);
+    }
     action(english ? 'Keep current access' : 'Vorhandenen Zugang beibehalten', () => dialog.close());
+    explain('Schließt dieses Fenster. Der aktive Zugang bleibt eingestellt.', 'Closes this window and keeps the active access method.');
     const personal = action(english ? 'Use personal API key' : 'Persönlichen API-Key verwenden', () => {
+      accessChoices.hidden = true;
       fields.hidden = false;
       input.focus();
     });
+    explain('Einen gespeicherten Key wählen, einen anderen eingeben oder aus Google übernehmen.', 'Use a saved key, enter a different one, or retrieve it from Google.');
     const central = action(english ? 'Use central SerKal access' : 'Zentralen SerKal-Zugang verwenden', async () => {
       central.disabled = true;
       availability.textContent = english ? 'Checking local pilot…' : 'Lokaler Pilot wird geprüft…';
@@ -10022,9 +10033,11 @@ try {
       }
     });
     central.disabled = true;
+    explain('SerKal fragt TMDB über den lokalen Testdienst ab. Dein persönlicher Key bleibt gespeichert.', 'SerKal calls TMDB through the local test service. Your personal key stays saved.');
     const availability = document.createElement('p');
     availability.textContent = english ? 'Central SerKal access is not available yet.' : 'Der zentrale SerKal-Zugang ist noch nicht verfügbar.';
-    dialog.append(availability);
+    availability.setAttribute('role', 'status');
+    accessChoices.append(availability);
 
     const fields = document.createElement('form');
     fields.hidden = true;
@@ -10058,7 +10071,17 @@ try {
         status.textContent = english ? 'Could not switch access.' : 'Der Zugang konnte nicht umgestellt werden.';
       }
     });
-    fields.append(label, save, stored, google, status);
+    const back = document.createElement('button');
+    back.type = 'button';
+    back.textContent = english ? 'Back' : 'Zurück';
+    back.addEventListener('click', () => {
+      input.value = '';
+      status.textContent = '';
+      fields.hidden = true;
+      accessChoices.hidden = false;
+      personal.focus();
+    });
+    fields.append(label, save, stored, google, back, status);
     dialog.append(fields);
     fields.addEventListener('submit', async event => {
       event.preventDefault();
@@ -10066,6 +10089,9 @@ try {
       if (!candidate || save.disabled) return;
       save.disabled = true;
       input.readOnly = true;
+      back.disabled = true;
+      stored.disabled = true;
+      status.textContent = english ? 'Checking API key…' : 'API-Key wird geprüft…';
       google.disabled = true;
       personal.disabled = true;
       try {
@@ -10083,6 +10109,8 @@ try {
       } finally {
         save.disabled = false;
         input.readOnly = false;
+        back.disabled = false;
+        stored.disabled = false;
         google.disabled = false;
         personal.disabled = false;
       }
