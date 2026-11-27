@@ -47,6 +47,8 @@ contextBridge.exposeInMainWorld("serkal", {
     tmdb:{
         sharedKey:(interactive)=>ipcRenderer.invoke("serkal:tmdb:sharedKey",interactive===true),
         status:()=>ipcRenderer.invoke("serkal:tmdb:status"),
+        usePilot:()=>ipcRenderer.invoke("serkal:tmdb:usePilot"),
+        usePersonalKey:()=>ipcRenderer.invoke("serkal:tmdb:usePersonalKey"),
         testKey:(apiKey,lang)=>ipcRenderer.invoke("serkal:tmdb:testKey",apiKey,lang||"de"),
         saveKey:(apiKey)=>ipcRenderer.invoke("serkal:tmdb:saveKey",apiKey),
         test:()=>ipcRenderer.invoke("serkal:tmdb:test"),
