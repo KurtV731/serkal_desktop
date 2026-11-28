@@ -10041,14 +10041,14 @@ try {
       pilotInput.focus();
     });
     central.disabled = true;
-    explain('Lokaler Test mit dem SerKal-Entwicklerschlüssel.', 'Local test using the SerKal developer key.');
+    explain('Testzugang über serkal.de.', 'Test access through serkal.de.');
     const availability = document.createElement('p');
     availability.setAttribute('role', 'status');
     accessChoices.append(availability);
     const pilotForm = document.createElement('form');
     pilotForm.hidden = true;
     const pilotLabel = document.createElement('label');
-    pilotLabel.textContent = english ? 'SerKal developer key (this session)' : 'SerKal-Entwicklerschlüssel (für diese Sitzung)';
+    pilotLabel.textContent = english ? 'SerKal pilot token (this session)' : 'SerKal-Pilottoken (für diese Sitzung)';
     const pilotInput = document.createElement('input');
     pilotInput.type = 'password';
     pilotInput.autocomplete = 'off';
