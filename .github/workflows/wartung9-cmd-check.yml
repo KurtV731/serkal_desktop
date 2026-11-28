@@ -1,0 +1,38 @@
+name: Wartung 9 CMD verification
+on:
+  push:
+    branches: [installer3-wartung9-cmd-check]
+permissions:
+  contents: read
+jobs:
+  windows:
+    runs-on: windows-2025
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '25.8.1'
+      - name: Run delivered CMD from another directory and verify installation
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $env:SERKAL_GOOGLE_OAUTH_FILE = Join-Path $env:RUNNER_TEMP google_oauth_client.json
+          '{"installed":{"client_id":"rehearsal.invalid","client_secret":"rehearsal"}}' | Set-Content $env:SERKAL_GOOGLE_OAUTH_FILE
+          $env:SERKAL_BUILD_NO_PAUSE = '1'
+          $destination = Join-Path $env:RUNNER_TEMP 'SerKal with spaces'
+          New-Item -ItemType Directory $destination | Out-Null
+          $cmd = Join-Path $destination 'SerKal-Desktop-Wartung-9-Bauen.cmd'
+          Copy-Item 'SerKal-Desktop-Wartung-9-Bauen.cmd' $cmd
+          Set-Location $env:RUNNER_TEMP
+          & $cmd
+          if ($LASTEXITCODE) { throw "Build CMD exited with $LASTEXITCODE" }
+          $setup = Join-Path $destination 'serkal-desktop-1-2-7-wartung-9-setup.exe'
+          $hash = (Get-FileHash -LiteralPath $setup).Hash
+          if ((Get-Content "$setup.sha256.txt" -Raw) -notmatch $hash) { throw 'Setup hash mismatch' }
+          $process = Start-Process -FilePath $setup -ArgumentList '--silent' -PassThru
+          if (!$process.WaitForExit(90000)) { $process.Kill(); throw 'Setup did not exit' }
+          if ($process.ExitCode -ne 0) { throw "Setup exited $($process.ExitCode)" }
+          $app = Get-ChildItem "$env:LOCALAPPDATA\SerKalDesktop\app-*\SerKal Desktop.exe" | Select-Object -First 1
+          if (!$app -or $app.Directory.Name -ne 'app-1.2.7-wartung.9') { throw "Unexpected installed app path: $app" }
+          if (!(Test-Path (Join-Path $app.Directory.FullName 'resources\google_oauth_client.json'))) { throw 'Packaged OAuth resource missing' }
