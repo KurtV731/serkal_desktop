@@ -34,5 +34,5 @@ jobs:
           if (!$process.WaitForExit(90000)) { $process.Kill(); throw 'Setup did not exit' }
           if ($process.ExitCode -ne 0) { throw "Setup exited $($process.ExitCode)" }
           $app = Get-ChildItem "$env:LOCALAPPDATA\SerKalDesktop\app-*\SerKal Desktop.exe" | Select-Object -First 1
-          if (!$app -or $app.Directory.Name -ne 'app-1.2.7-wartung.9') { throw "Unexpected installed app path: $app" }
+          if (!$app -or $app.Directory.Name -ne 'app-1.2.7-wartung9') { throw "Unexpected installed app path: $app" }
           if (!(Test-Path (Join-Path $app.Directory.FullName 'resources\google_oauth_client.json'))) { throw 'Packaged OAuth resource missing' }
